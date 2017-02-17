@@ -37,7 +37,7 @@ pred = tf.argmin(distance, 0)
 acc = 0.
 
 # 初始化所有 variables
-init = tf.initialize_all_variables()
+init = tf.global_variables_initializer()
 
 with tf.Session() as sess:
     sess.run(init)
