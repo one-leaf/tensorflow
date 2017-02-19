@@ -19,7 +19,7 @@ def batch(batch_size):
         x=np.binary_repr(x1, width=x_one_len)+np.binary_repr(x2, width=x_one_len)\
           +np.binary_repr(x1*x2, width=x_one_len)+np.binary_repr(x1*x1, width=x_one_len)\
           +np.binary_repr(x2*x2, width=x_one_len)
-        x_=map(int, x)
+        x_=list(map(int, x))
         train_x.append(x_)
         train_y.append(y)
     return np.array(train_x), np.array(train_y)
