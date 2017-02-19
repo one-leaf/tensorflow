@@ -69,7 +69,7 @@ init = tf.global_variables_initializer()
 # para
 batch_size = 10000
 with tf.Session() as sess:
-    write = tf.summary.FileWriter('logs/', sess.graph)
+#    write = tf.summary.FileWriter('logs/', sess.graph)
     sess.run(init)
     for step in range(100000):
         batch_x, batch_y = batch(batch_size)
