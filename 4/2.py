@@ -10,10 +10,6 @@ image_w=60
 image_size=image_h*image_w
 char_set="0123456789"
 char_size=len(char_set)
-train_data_x = []
-train_data_y = []
-test_data_x = []
-test_data_y = []
 
 #批量参数数据
 def get_batch(batch_size=128):
