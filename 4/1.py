@@ -1,5 +1,7 @@
 # coding=utf-8
-
+'''
+运行失败了，无法成功学习
+'''
 from generate_captcha import gen_captcha_text_and_image as captcha
 import numpy as np
 from utils import img2gray,img2vec,text2vec,vec2text
@@ -7,6 +9,7 @@ import tensorflow as tf
 
 image_h=80
 image_w=60
+image_size=image_h*image_w
 char_set="0123456789"
 char_size=len(char_set)
 train_data_x = []
@@ -16,7 +19,7 @@ test_data_y = []
 
 #批量参数数据
 def get_batch(batch_size=128):
-    batch_x = np.zeros([batch_size, image_h*image_w])
+    batch_x = np.zeros([batch_size, image_size])
     batch_y = np.zeros([batch_size, char_size])
     for i in range(batch_size):
         text, image = captcha(char_set=char_set,captcha_size=1,width=image_w, height=image_h)
@@ -25,11 +28,11 @@ def get_batch(batch_size=128):
     return batch_x, batch_y
 
 #输入
-x = tf.placeholder("float", shape=[None, image_h*image_w])
+x = tf.placeholder("float", shape=[None, image_size])
 #输出
 y_ = tf.placeholder("float", shape=[None, char_size])
 #权重
-W = tf.Variable(tf.zeros([image_h*image_w,char_size]))
+W = tf.Variable(tf.zeros([image_size,char_size]))
 #偏置
 b = tf.Variable(tf.zeros([char_size]))
 
