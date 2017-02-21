@@ -1,7 +1,5 @@
 # coding=utf-8
-'''
-运行失败了，无法成功学习
-'''
+
 from generate_captcha import gen_captcha_text_and_image as captcha
 import numpy as np
 from utils import img2gray,img2vec,text2vec,vec2text
@@ -44,16 +42,17 @@ y = tf.nn.softmax(tf.matmul(x,W) + b)
 #损失函数
 loss = -tf.reduce_sum(y_*tf.log(y))
 #训练模型
-optimizer = tf.train.GradientDescentOptimizer(0.01).minimize(loss)
+optimizer = tf.train.GradientDescentOptimizer(0.0001).minimize(loss)
+
+#检查正确度
+correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
 step=0
 for i in range(10000):
-    batch_x, batch_y = get_batch(128)
+    batch_x, batch_y = get_batch(50)
     _, loss_ = sess.run([optimizer, loss], feed_dict={x: batch_x, y_: batch_y})
     step+=1
-    print(step, loss_)
-    if step % 100 == 0:
-        correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
+    if step % 10 == 0:
         batch_x_test, batch_y_test = get_batch(100)
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-        print(accuracy.eval(feed_dict={x: batch_x_test, y_: batch_y_test}))
+        print(step,loss_,accuracy.eval(feed_dict={x: batch_x_test, y_: batch_y_test}))
