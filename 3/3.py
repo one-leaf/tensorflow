@@ -6,7 +6,7 @@ import numpy as np
 
 x_one_len = 20
 x_len=x_one_len*2
-
+x_len=8
 def batch(batch_size):
     train_x = []
     train_y = []
@@ -19,7 +19,8 @@ def batch(batch_size):
         x=np.binary_repr(x1, width=x_one_len)+np.binary_repr(x2, width=x_one_len) #\
         #  +np.binary_repr(x1*x2, width=x_one_len)+np.binary_repr(x1*x1, width=x_one_len)\
         #  +np.binary_repr(x2*x2, width=x_one_len)
-        x_=list(map(int, x))
+        #x_=list(map(int, x))
+        x_=[x for _ in range(8)]
         train_x.append(x_)
         train_y.append(y)
     return np.array(train_x), np.array(train_y)
@@ -27,9 +28,9 @@ def batch(batch_size):
 def add_layer(inputs, in_size, out_size, layer_name, activity_func=None):
     W = tf.Variable(tf.random_uniform([in_size, out_size], -1.0, 1.0), name="W")
     bias =  tf.Variable(tf.constant(0.1, shape=[out_size]), name="bias")
-    #Wx_Plus_b = tf.matmul(inputs, W) + bias
-    Wx_Plus_b = tf.nn.xw_plus_b(inputs, W, bias)
-    #Wx_Plus_b = tf.nn.dropout(Wx_Plus_b, keep_prob)
+    Wx_Plus_b = tf.matmul(inputs, W) + bias
+    #Wx_Plus_b = tf.nn.xw_plus_b(inputs, W, bias)
+    Wx_Plus_b = tf.nn.dropout(Wx_Plus_b, keep_prob)
     if activity_func is None:
         outputs = Wx_Plus_b
     else:
@@ -38,7 +39,6 @@ def add_layer(inputs, in_size, out_size, layer_name, activity_func=None):
     
 
 ## para
-hidden_layers = 2
 hidden_units = 8
 n_input = x_len
 n_classes = 2
@@ -54,8 +54,8 @@ l2 = add_layer(l1, hidden_units, hidden_units, 'hidden_layer_2', activity_func=t
 
 #prediction = add_layer(l1, hidden_units, n_classes, 'prediction_layer', activity_func=tf.nn.softmax)
 #prediction = add_layer(l2, hidden_units, n_classes, 'prediction_layer', activity_func=tf.nn.relu)
-prediction = add_layer(l2, hidden_units, n_classes, 'prediction_layer', activity_func=tf.nn.tanh)
-#prediction = add_layer(l2, hidden_units, n_classes, 'prediction_layer', activity_func=tf.nn.softmax)
+#prediction = add_layer(l2, hidden_units, n_classes, 'prediction_layer', activity_func=tf.nn.tanh)
+prediction = add_layer(l2, hidden_units, n_classes, 'prediction_layer', activity_func=tf.nn.softmax)
 ## coss and train step
 #cross_entropy = -tf.reduce_sum(y_ * tf.log(prediction))
 #cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(prediction)))
