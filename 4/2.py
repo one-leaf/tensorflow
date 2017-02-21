@@ -11,7 +11,7 @@ image_size=image_h*image_w
 char_set="0123456789"
 char_size=len(char_set)
 
-#批量参数数据
+# 批量验证码数据
 def get_batch(batch_size=128):
     batch_x = np.zeros([batch_size, image_size])
     batch_y = np.zeros([batch_size, char_size])
