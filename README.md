@@ -10,6 +10,10 @@
 
 3. 通过 pip install tensorflow 命令安装。
 
+Mac 下安装
+
+> sudo -H pip install -U --timeout 3600 --retries 9999 tensorflow --ignore-installed pyparsing
+
 ## 常用函数 ##
 
 1. tf.nn.conv2d() 通过输入规定的四维input和filter计算二维卷积.
