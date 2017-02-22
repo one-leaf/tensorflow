@@ -58,7 +58,7 @@ layer_2 = tf.nn.relu(layer_2)
 y = tf.matmul(layer_2, W['out']) + b['out']
 
 #损失函数
-loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits:y, labels:y_))
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=y_))
 #训练模型
 optimizer = tf.train.AdamOptimizer(0.0001).minimize(loss)
 
