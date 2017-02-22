@@ -3,7 +3,7 @@
 from PIL import Image
 import numpy as np
 
-# 图片转灰度 
+# 图片转灰度, img 参数是 np.array 类型
 def img2gray(img):
     if len(img.shape) > 2:
         gray = np.mean(img, -1)
@@ -14,7 +14,7 @@ def img2gray(img):
     else:
         return img
 
-# 图片转为向量
+# 图片转为向量, img 参数是 np.array 类型
 def img2vec(img,width=-1, height=-1):
     w=img.shape[0]
     h=img.shape[1]

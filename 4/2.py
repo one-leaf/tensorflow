@@ -31,7 +31,7 @@ def bias_variable(shape):
     initial = tf.constant(0.1, shape=shape)
     return tf.Variable(initial)
 
-# 卷积(Convolution) 滑动步长为1的窗口，使用0进行填充
+# 卷积(Convolution) 滑动步长为1的窗口，使用0进行填充, 边界处理(padding)参数可以设为两个值SAME，VALID；SAME矩阵大小相同不足补充0，VALID图片会缩小
 def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
