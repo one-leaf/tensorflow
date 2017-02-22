@@ -1,4 +1,5 @@
 # coding=utf-8
+# 多层验证码识别
 
 from generate_captcha import gen_captcha_text_and_image as captcha
 import numpy as np
@@ -56,9 +57,6 @@ layer_2 = tf.nn.relu(layer_2)
 #输出
 y = tf.matmul(layer_2, W['out']) + b['out']
 
-sess = tf.InteractiveSession()
-sess.run(tf.global_variables_initializer())
-
 #损失函数
 loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y, y_))
 #训练模型
@@ -68,6 +66,8 @@ optimizer = tf.train.AdamOptimizer(0.0001).minimize(loss)
 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
+sess = tf.InteractiveSession()
+sess.run(tf.global_variables_initializer())
 step=0
 for i in range(10000):
     batch_x, batch_y = get_batch(50)

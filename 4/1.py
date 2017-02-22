@@ -1,4 +1,5 @@
 # coding=utf-8
+# 单层验证码识别
 
 from generate_captcha import gen_captcha_text_and_image as captcha
 import numpy as np
@@ -30,9 +31,6 @@ W = tf.Variable(tf.zeros([image_size,char_size]))
 #偏置
 b = tf.Variable(tf.zeros([char_size]))
 
-sess = tf.InteractiveSession()
-sess.run(tf.global_variables_initializer())
-
 #类别预测
 y = tf.nn.softmax(tf.matmul(x,W) + b)
 #损失函数
@@ -44,6 +42,8 @@ optimizer = tf.train.GradientDescentOptimizer(0.0001).minimize(loss)
 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 
+sess = tf.InteractiveSession()
+sess.run(tf.global_variables_initializer())
 step=0
 for i in range(10000):
     batch_x, batch_y = get_batch(50)

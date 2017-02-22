@@ -1,4 +1,5 @@
 # coding=utf-8
+# 卷积多层多项验证码识别
 
 from generate_captcha import gen_captcha_text_and_image as captcha
 import numpy as np
@@ -39,8 +40,6 @@ def conv2d(x, W):
 # 池化(Pooling) 在2*2的窗口内采用最大池化技术(max-pooling) 图像尺寸将缩小1半
 def max_pool_2x2(x):
     return tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-
-sess = tf.InteractiveSession()
 
 # 第一层卷积层  计算出32个特征映射(feature map)，对每个3*3的patch 前两维是patch的大小，第三维时输入通道的数目，最后一维是输出通道的数目。
 W_conv1 = weight_varible([3, 3, 1, 32])
@@ -113,8 +112,8 @@ correct_prediction = tf.equal(tf.arg_max(y_conv, 1), tf.arg_max(y_, 1))
 # 统计准确率
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
-
 for i in range(20000):
     batch = get_batch(50)
     if i % 10 == 0:
