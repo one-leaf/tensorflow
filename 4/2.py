@@ -7,9 +7,9 @@ import tensorflow as tf
 
 image_h=80
 image_w=60
-image_size=image_h*image_w
+image_size=image_h*image_w #输入的个数
 char_set="0123456789"
-char_size=len(char_set)
+char_size=len(char_set)    #输出的个数
 
 # 批量验证码数据
 def get_batch(batch_size=128):
@@ -25,20 +25,44 @@ def get_batch(batch_size=128):
 x = tf.placeholder("float", shape=[None, image_size])
 #输入训练的正确结果
 y_ = tf.placeholder("float", shape=[None, char_size])
+
+#隐含层第一层 神经网络个数
+n_hidden_1 = 256 
+#隐含层第二层 神经网络个数
+n_hidden_2 = 256 
+
 #权重
-W = tf.Variable(tf.zeros([image_size,char_size]))
+W = {
+    'h1': tf.Variable(tf.random_normal([image_size, n_hidden_1])),
+    'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
+    'out': tf.Variable(tf.random_normal([n_hidden_2, char_size]))
+}
+
 #偏置
-b = tf.Variable(tf.zeros([char_size]))
+b = {
+    'b1': tf.Variable(tf.random_normal([n_hidden_1])),
+    'b2': tf.Variable(tf.random_normal([n_hidden_2])),
+    'out': tf.Variable(tf.random_normal([char_size]))
+}
+
+#第一层
+layer_1 = tf.add(tf.matmul(x, W['h1']), b['b1'])
+layer_1 = tf.nn.relu(layer_1)
+
+#第二层
+layer_2 = tf.add(tf.matmul(layer_1, W['h2']), b['b2'])
+layer_2 = tf.nn.relu(layer_2)
+
+#输出
+y = tf.matmul(layer_2, W['out']) + b['out']
 
 sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
 
-#类别预测
-y = tf.nn.softmax(tf.matmul(x,W) + b)
 #损失函数
-loss = -tf.reduce_sum(y_*tf.log(y))
+loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y, y_))
 #训练模型
-optimizer = tf.train.GradientDescentOptimizer(0.0001).minimize(loss)
+optimizer = tf.train.AdamOptimizer(0.0001).minimize(loss)
 
 #检查正确度
 correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
