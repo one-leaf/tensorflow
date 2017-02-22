@@ -55,7 +55,6 @@ x_image = tf.reshape(x, [-1, image_w, image_h, 1])
 h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
 h_pool1 = max_pool_2x2(h_conv1)
 
-
 # 第二层卷积层 为了使得网络有足够深度，我们重复堆积一些相同类型的层。第二层将会有64个特征，对应每个3*3的patch。
 W_conv2 = weight_varible([3, 3, 32, 64])
 b_conv2 = bias_variable([64])
@@ -71,30 +70,37 @@ b_fc1 = bias_variable([1024])
 h_pool2_flat = tf.reshape(h_pool2, [-1, image_h * image_w * 64 // 16])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
 
-W_fc2 = weight_varible([1024, 1024])
-b_fc2 = bias_variable([1024])
-h_pool3_flat = tf.reshape(h_fc1, [-1, 1024])
-h_fc2 = tf.nn.relu(tf.matmul(h_pool3_flat, W_fc2) + b_fc2)
+W_fc2_1 = weight_varible([1024, 1024])
+b_fc2_1 = bias_variable([1024])
+h_pool2_1_flat = tf.reshape(h_fc1, [-1, 1024])
+h_fc2_1 = tf.nn.relu(tf.matmul(h_pool2_1_flat, W_fc2_1) + b_fc2_1)
 
-W_fc3 = weight_varible([1024, 1024])
-b_fc3 = bias_variable([1024])
-h_pool4_flat = tf.reshape(h_fc2, [-1, 1024])
-h_fc3 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc3) + b_fc3)
+W_fc2_2 = weight_varible([1024, 1024])
+b_fc2_2 = bias_variable([1024])
+h_pool2_2_flat = tf.reshape(h_fc1, [-1, 1024])
+h_fc2_2 = tf.nn.relu(tf.matmul(h_pool2_2_flat, W_fc2_2) + b_fc2_2)
 
-W_fc4 = weight_varible([1024, 1024])
-b_fc4 = bias_variable([1024])
-h_pool5_flat = tf.reshape(h_fc3, [-1, 1024])
-h_fc4 = tf.nn.relu(tf.matmul(h_pool5_flat, W_fc4) + b_fc4)
+W_fc2_3 = weight_varible([1024, 1024])
+b_fc2_3 = bias_variable([1024])
+h_pool2_3_flat = tf.reshape(h_fc1, [-1, 1024])
+h_fc2_3 = tf.nn.relu(tf.matmul(h_pool2_3_flat, W_fc2_3) + b_fc2_3)
+
+W_fc2_4 = weight_varible([1024, 1024])
+b_fc2_4 = bias_variable([1024])
+h_pool2_4_flat = tf.reshape(h_fc1, [-1, 1024])
+h_fc2_4 = tf.nn.relu(tf.matmul(h_pool2_4_flat, W_fc2_4) + b_fc2_4)
+
+fc2 = tf.concat(1, [h_fc2_1,h_fc2_2,h_fc2_3,h_fc2_4])
 
 
 # 为了减少过拟合程度，在输出层之前应用dropout技术（即随机丢弃某些神经元的输出结果）
 keep_prob = tf.placeholder(tf.float32)
-h_fc_last_drop = tf.nn.dropout(h_fc4, keep_prob)
+#h_fc_last_drop = tf.nn.dropout(h_fc4, keep_prob)
 
 # 最终，我们用一个softmax层，得到类别上的概率分布。
-W_fc_last = weight_varible([1024, char_size*captcha_size])
+W_fc_last = weight_varible([1024*4, char_size*captcha_size])
 b_fc_last = bias_variable([char_size*captcha_size])
-y_conv = tf.nn.softmax(tf.matmul(h_fc_last_drop, W_fc_last) + b_fc_last)
+y_conv = tf.nn.softmax(tf.matmul(fc2, W_fc_last) + b_fc_last)
 y_ = tf.placeholder(tf.float32, [None, char_size*captcha_size])
 
 # 训练函数，采用了 AdamOptimizer 代替 之前的 GradientDescentOptimizer 
@@ -103,7 +109,8 @@ y_ = tf.placeholder(tf.float32, [None, char_size*captcha_size])
 # cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_conv, y_))
 # 多输入和多分类问题，必须采用 sigmoid_cross_entropy_with_logits 函数
 # 参考： http://weibo.com/ttarticle/p/show?id=2309404047468714166594
-cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y_conv, labels=y_))
+#cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y_conv, labels=y_))
+cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_conv, y_))
 
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
