@@ -90,17 +90,17 @@ b_fc2_4 = bias_variable([1024])
 h_pool2_4_flat = tf.reshape(h_fc1, [-1, 1024])
 h_fc2_4 = tf.nn.relu(tf.matmul(h_pool2_4_flat, W_fc2_4) + b_fc2_4)
 
-fc2 = tf.concat(1, [h_fc2_1,h_fc2_2,h_fc2_3,h_fc2_4])
-
+#fc2 = tf.concat(1, [h_fc2_1,h_fc2_2,h_fc2_3,h_fc2_4])
+fc2  = h_fc2_1 + h_fc2_2 + h_fc2_3 + h_fc2_4
 
 # 为了减少过拟合程度，在输出层之前应用dropout技术（即随机丢弃某些神经元的输出结果）
 keep_prob = tf.placeholder(tf.float32)
-#h_fc_last_drop = tf.nn.dropout(h_fc4, keep_prob)
+h_fc_last_drop = tf.nn.dropout(fc2, keep_prob)
 
 # 最终，我们用一个softmax层，得到类别上的概率分布。
-W_fc_last = weight_varible([1024*4, char_size*captcha_size])
+W_fc_last = weight_varible([1024, char_size*captcha_size])
 b_fc_last = bias_variable([char_size*captcha_size])
-y_conv = tf.nn.softmax(tf.matmul(fc2, W_fc_last) + b_fc_last)
+y_conv = tf.nn.softmax(tf.matmul(h_fc_last_drop, W_fc_last) + b_fc_last)
 y_ = tf.placeholder(tf.float32, [None, char_size*captcha_size])
 
 # 训练函数，采用了 AdamOptimizer 代替 之前的 GradientDescentOptimizer 
@@ -109,8 +109,7 @@ y_ = tf.placeholder(tf.float32, [None, char_size*captcha_size])
 # cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(y_conv, y_))
 # 多输入和多分类问题，必须采用 sigmoid_cross_entropy_with_logits 函数
 # 参考： http://weibo.com/ttarticle/p/show?id=2309404047468714166594
-#cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y_conv, labels=y_))
-cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(y_conv, y_))
+cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=y_conv, labels=y_))
 
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
