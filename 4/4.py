@@ -24,20 +24,6 @@ def get_batch(batch_size=128):
         batch_y[i,:] = text2vec(char_set,text)
     return batch_x, batch_y
 
-# 采用随机数初始化权重函数
-def weight_varible(shape):
-    initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial)
-
-# 采用随机数初始化偏置函数
-def bias_variable(shape):
-    initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial)
-
-# 卷积(Convolution) 滑动步长为1的窗口，使用0进行填充
-def conv2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
-
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
 # 第一维 -1 是不限个和 None 类似， 第2、3维对应图片的宽和高，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
 x = tf.placeholder(tf.float32, [batch_size, image_size])
@@ -59,10 +45,7 @@ for i in range(len(filter_sizes)):
     with tf.variable_scope('conv-pool-{}'.format(i)):    
         filter_shape=[filter_sizes[i],filter_sizes[i],int(input.get_shape()[-1]),filter_nums[i]]
         W = tf.get_variable("filter", filter_shape, initializer=tf.contrib.layers.xavier_initializer_conv2d())
-        #conv = tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID')
         b = tf.get_variable('bias', [filter_nums[i]], initializer=tf.constant_initializer(0.0))
-        #bias_conv = tf.nn.bias_add(conv, b)
-        #relu_conv = tf.nn.relu(bias_conv, name='relu')
         conv = tf.nn.relu(tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID') + b)  
         if pool_types[i]=='avg':  
             pool = tf.nn.avg_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='SAME') 
@@ -84,8 +67,6 @@ for i in range(len(hidden_sizes)):
             in_size = hidden_sizes[i-1]     
         W = tf.get_variable("weights", [in_size,hidden_sizes[i]], initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable("biases", [hidden_sizes[i]], initializer=tf.constant_initializer(0.0))
-        #weight_varible([in_size,hidden_sizes[i]])
-        #b = bias_variable([hidden_sizes[i]])
         full_connect = tf.nn.relu(tf.matmul(inputs, W) + b)
         full_connects.append(full_connect)
 
@@ -95,8 +76,6 @@ for i in range(captcha_size):
     with tf.variable_scope('output-part-{}'.format(i)):
         W = tf.get_variable("weights", [hidden_sizes[-1],char_size], initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable("biases", [char_size], initializer=tf.constant_initializer(0.0))
-        #W = weight_varible([hidden_sizes[-1],char_size])
-        #b = bias_variable([char_size])
         fc_part = tf.nn.relu(tf.matmul(full_connects[-1], W) + b)
         outputs.append(fc_part)
 
@@ -141,7 +120,8 @@ accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32)
 #global_step = tf.Variable(0, trainable=False)
 #learning_rate = tf.train.exponential_decay(1e-3, global_step, 3000, 0.96, staircase=True)
 
-train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
+train_step = tf.train.MomentumOptimizer(1e-4, momentum=0.9, use_nesterov=True).minimize(loss)
+#train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
 # 比较计算结果是否正确
 #correct_prediction = tf.equal(tf.arg_max(y_conv, 1), tf.arg_max(y_, 1))
