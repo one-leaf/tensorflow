@@ -119,18 +119,20 @@ loss = tf.reduce_mean(losses)
 
 predictions=[]
 for i in range(captcha_size):
-    outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
-    prediction_part = tf.argmax(outputs_part,axis=1)
-    prediction_part = tf.cast(prediction_part, tf.float32)
-    predictions.append(prediction_part)
+    with tf.variable_scope('predictions-part-{}'.format(i)):
+        outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
+        prediction_part = tf.argmax(outputs_part,axis=1)
+        prediction_part = tf.cast(prediction_part, tf.float32)
+        predictions.append(prediction_part)
 prediction = tf.stack(predictions, axis=1)
 
 predictions_y=[]
 for i in range(captcha_size):
-    outputs_part_y = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
-    prediction_part_y = tf.argmax(outputs_part_y,axis=1)
-    prediction_part_y = tf.cast(prediction_part_y, tf.float32)
-    predictions_y.append(prediction_part_y)
+    with tf.variable_scope('predictions-y-part-{}'.format(i)):
+        outputs_part_y = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
+        prediction_part_y = tf.argmax(outputs_part_y,axis=1)
+        prediction_part_y = tf.cast(prediction_part_y, tf.float32)
+        predictions_y.append(prediction_part_y)
 prediction_y = tf.stack(predictions_y, axis=1)
 
 correct_prediction = tf.cast(tf.equal(prediction,prediction_y), tf.float32)
