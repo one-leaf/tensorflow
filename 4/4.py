@@ -31,7 +31,7 @@ x_image = tf.reshape(x, [-1, image_w, image_h, 1])
 y_ = tf.placeholder(tf.float32, [batch_size, char_size*captcha_size])
 
 #卷积层
-filter_sizes=[5, 5, 3, 3]
+filter_sizes=[3, 3, 3, 3]
 filter_nums=[32,32,32,32]
 pool_types=['max','avg','avg','avg']
 pool_ksizes=[2,2,2,2]
@@ -117,10 +117,10 @@ prediction_y = tf.stack(predictions_y, axis=1)
 correct_prediction = tf.cast(tf.equal(prediction,prediction_y), tf.float32)
 correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
 accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
-#global_step = tf.Variable(0, trainable=False)
-#learning_rate = tf.train.exponential_decay(1e-3, global_step, 3000, 0.96, staircase=True)
+global_step = tf.Variable(0, trainable=False)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 3000, 0.96, staircase=True)
 
-train_step = tf.train.MomentumOptimizer(1e-4, momentum=0.9, use_nesterov=True).minimize(loss)
+train_step = tf.train.MomentumOptimizer(learning_rate, momentum=0.9, use_nesterov=True).minimize(loss,global_step=global_step)
 #train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
 # 比较计算结果是否正确
