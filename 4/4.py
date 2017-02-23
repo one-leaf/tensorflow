@@ -97,7 +97,7 @@ output =  tf.concat(outputs, 1)
 losses=[]
 for i in range(captcha_size):
     outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
-    targets_part = tf.slice(y_,begin=[0,i],size=[-1,char_size])
+    targets_part = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
     #print(y_.get_shape(),targets_part.get_shape())
     #targets_part = tf.reshape(targets_part, [-1])
     #print(i,outputs_part.get_shape(),targets_part.get_shape())
@@ -116,15 +116,14 @@ prediction = tf.stack(predictions, axis=1)
 
 predictions_y=[]
 for i in range(captcha_size):
-    outputs_part = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
-    prediction_part = tf.argmax(outputs_part,axis=1)
-    prediction_part = tf.cast(prediction_part, tf.float32)
-    predictions_y.append(prediction_part)
-prediction_y = tf.stack(predictions, axis=1)
-
+    outputs_part_y = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
+    prediction_part_y = tf.argmax(outputs_part_y,axis=1)
+    prediction_part_y = tf.cast(prediction_part_y, tf.float32)
+    predictions_y.append(prediction_part_y)
+prediction_y = tf.stack(predictions_y, axis=1)
 
 correct_prediction = tf.cast(tf.equal(prediction,prediction_y), tf.float32)
-correct_prediction = tf.reduce_mean(correct_prediction, reduction_indices=1)
+correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
 accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
 #global_step = tf.Variable(0, trainable=False)
 #learning_rate = tf.train.exponential_decay(1e-3, global_step, 3000, 0.96, staircase=True)
@@ -141,9 +140,12 @@ sess.run(tf.global_variables_initializer())
 for i in range(20000):
     batch = get_batch(batch_size)
     if i % 10 == 0:
-        train_accuacy = accuracy.eval(feed_dict={x: batch[0], y_: batch[1]})
-        print("step %d, training accuracy %g"%(i, train_accuacy))
-    train_step.run(feed_dict = {x: batch[0], y_: batch[1]})
+        train_accuacy,_loss = sess.run([accuracy,loss],feed_dict={x: batch[0], y_: batch[1]})
+        print("step %d, training accuracy %g, loss %g"%(i, train_accuacy, _loss))
+        #print("a:",_a)
+        #print("b:",_b)
+    else:    
+        train_step.run(feed_dict = {x: batch[0], y_: batch[1]})
 
 # 最后测试准确率
 batch_x_test, batch_y_test = get_batch(100)
