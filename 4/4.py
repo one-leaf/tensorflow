@@ -56,39 +56,49 @@ for i in range(len(filter_sizes)):
         input = x_image
     else:
         input = conv_pools[-1]
-    filter_shape=[filter_sizes[i],filter_sizes[i],int(input.get_shape()[-1]),filter_nums[i]]
-    W = weight_varible(filter_shape)
-    b = bias_variable([filter_nums[i]])
-    conv = tf.nn.relu(conv2d(input, W) + b)  
-    if pool_types[i]=='avg':  
-        pool = tf.nn.avg_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='SAME') 
-    else:
-        pool = tf.nn.max_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='SAME') 
-    conv_pools.append(pool)
+    with tf.variable_scope('conv-pool-{}'.format(i)):    
+        filter_shape=[filter_sizes[i],filter_sizes[i],int(input.get_shape()[-1]),filter_nums[i]]
+        W = tf.get_variable("filter", filter_shape, initializer=tf.contrib.layers.xavier_initializer_conv2d())
+        #conv = tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID')
+        b = tf.get_variable('bias', [filter_nums[i]], initializer=tf.constant_initializer(0.0))
+        #bias_conv = tf.nn.bias_add(conv, b)
+        #relu_conv = tf.nn.relu(bias_conv, name='relu')
+        conv = tf.nn.relu(tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID') + b)  
+        if pool_types[i]=='avg':  
+            pool = tf.nn.avg_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='SAME') 
+        else:
+            pool = tf.nn.max_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='SAME') 
+        conv_pools.append(pool)
 
 # 全连接层
 hidden_sizes = [256]
 full_connects = []
 for i in range(len(hidden_sizes)):
-    if i==0:
-        batch_size = int(x_image.get_shape()[0])
-        inputs = tf.reshape(conv_pools[-1],[batch_size,-1])
-        in_size = int(inputs.get_shape()[-1])
-    else:
-        inputs = full_connects[-1]
-        in_size = hidden_sizes[i-1]     
-    W = weight_varible([in_size,hidden_sizes[i]])
-    b = bias_variable([hidden_sizes[i]])
-    full_connect = tf.nn.relu(tf.matmul(inputs, W) + b)
-    full_connects.append(full_connect)
+    with tf.variable_scope('full-connect-{}'.format(i)):
+        if i==0:
+            batch_size = int(x_image.get_shape()[0])
+            inputs = tf.reshape(conv_pools[-1],[batch_size,-1])
+            in_size = int(inputs.get_shape()[-1])
+        else:
+            inputs = full_connects[-1]
+            in_size = hidden_sizes[i-1]     
+        W = tf.get_variable("weights", [in_size,hidden_sizes[i]], initializer=tf.contrib.layers.xavier_initializer())
+        b = tf.get_variable("biases", [hidden_sizes[i]], initializer=tf.constant_initializer(0.0))
+        #weight_varible([in_size,hidden_sizes[i]])
+        #b = bias_variable([hidden_sizes[i]])
+        full_connect = tf.nn.relu(tf.matmul(inputs, W) + b)
+        full_connects.append(full_connect)
 
 # 由于是多位验证码，继续添加每一位验证码的输出
 outputs=[]
 for i in range(captcha_size):
-    W = weight_varible([hidden_sizes[-1],char_size])
-    b = bias_variable([char_size])
-    fc_part = tf.nn.relu(tf.matmul(full_connects[-1], W) + b)
-    outputs.append(fc_part)
+    with tf.variable_scope('output-part-{}'.format(i)):
+        W = tf.get_variable("weights", [hidden_sizes[-1],char_size], initializer=tf.contrib.layers.xavier_initializer())
+        b = tf.get_variable("biases", [char_size], initializer=tf.constant_initializer(0.0))
+        #W = weight_varible([hidden_sizes[-1],char_size])
+        #b = bias_variable([char_size])
+        fc_part = tf.nn.relu(tf.matmul(full_connects[-1], W) + b)
+        outputs.append(fc_part)
 
 # 最终输出
 output =  tf.concat(outputs, 1)     
@@ -96,14 +106,15 @@ output =  tf.concat(outputs, 1)
 # 抛弃函数
 losses=[]
 for i in range(captcha_size):
-    outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
-    targets_part = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
-    #print(y_.get_shape(),targets_part.get_shape())
-    #targets_part = tf.reshape(targets_part, [-1])
-    #print(i,outputs_part.get_shape(),targets_part.get_shape())
-    loss_part = tf.nn.sigmoid_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
-    reduced_loss_part = tf.reduce_mean(loss_part)
-    losses.append(reduced_loss_part)
+    with tf.variable_scope('loss-part-{}'.format(i)):
+        outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
+        targets_part = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
+        #print(y_.get_shape(),targets_part.get_shape())
+        #targets_part = tf.reshape(targets_part, [-1])
+        #print(i,outputs_part.get_shape(),targets_part.get_shape())
+        loss_part = tf.nn.sigmoid_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
+        reduced_loss_part = tf.reduce_mean(loss_part)
+        losses.append(reduced_loss_part)
 loss = tf.reduce_mean(losses)
 
 predictions=[]
