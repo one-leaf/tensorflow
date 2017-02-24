@@ -17,21 +17,22 @@ batch_size = 50
 # 批量验证码数据
 def get_batch(batch_size=128):
     batch_x = np.zeros([batch_size, image_size])
-    batch_y = np.zeros([batch_size, char_size*captcha_size])
+    batch_y = np.zeros([batch_size, captcha_size])
     for i in range(batch_size):
         text, image = captcha(char_set=char_set,captcha_size=captcha_size,width=image_w, height=image_h)
         batch_x[i,:] = img2vec(img2gray(image))
-        batch_y[i,:] = text2vec(char_set,text)
+        batch_y[i,:] = list(text) #text2vec(char_set,text)
     return batch_x, batch_y
 
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
 # 第一维 -1 是不限个和 None 类似， 第2、3维对应图片的宽和高，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
 x = tf.placeholder(tf.float32, [None, image_size])
 x_ = tf.reshape(x, [batch_size, image_w, image_h, 1])
-y_ = tf.placeholder(tf.float32, [batch_size, char_size*captcha_size])
+#y_ = tf.placeholder(tf.float32, [batch_size, char_size*captcha_size])
+y_ = tf.placeholder(tf.int32, [batch_size, captcha_size])
 
 #卷积层
-filter_sizes=[3, 3, 3, 3]
+filter_sizes=[5, 5, 3, 3]
 filter_nums=[32,32,32,32]
 pool_types=['max','avg','avg','avg']
 pool_ksizes=[2,2,2,2]
@@ -89,8 +90,10 @@ losses=[]
 for i in range(captcha_size):
     with tf.variable_scope('loss-part-{}'.format(i)):
         outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
-        targets_part = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
-        loss_part = tf.nn.sigmoid_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
+        targets_part = tf.slice(y_,begin=[0,i],size=[-1,1])
+#        targets_part = tf.argmax(targets_part,axis=1)
+        targets_part = tf.reshape(targets_part, [-1])
+        loss_part = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
         reduced_loss_part = tf.reduce_mean(loss_part)
         losses.append(reduced_loss_part)
 loss = tf.reduce_mean(losses)
@@ -100,20 +103,20 @@ for i in range(captcha_size):
     with tf.variable_scope('predictions-part-{}'.format(i)):
         outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
         prediction_part = tf.argmax(outputs_part,axis=1)
-        prediction_part = tf.cast(prediction_part, tf.float32)
+        prediction_part = tf.cast(prediction_part, tf.int32)
         predictions.append(prediction_part)
 prediction = tf.stack(predictions, axis=1)
 
-predictions_y=[]
-for i in range(captcha_size):
-    with tf.variable_scope('predictions-y-part-{}'.format(i)):
-        outputs_part_y = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
-        prediction_part_y = tf.argmax(outputs_part_y,axis=1)
-        prediction_part_y = tf.cast(prediction_part_y, tf.float32)
-        predictions_y.append(prediction_part_y)
-prediction_y = tf.stack(predictions_y, axis=1)
+# predictions_y=[]
+# for i in range(captcha_size):
+#     with tf.variable_scope('predictions-y-part-{}'.format(i)):
+#         outputs_part_y = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
+#         prediction_part_y = tf.argmax(outputs_part_y,axis=1)
+#         prediction_part_y = tf.cast(prediction_part_y, tf.float32)
+#         predictions_y.append(prediction_part_y)
+# prediction_y = tf.stack(predictions_y, axis=1)
 
-correct_prediction = tf.cast(tf.equal(prediction,prediction_y), tf.float32)
+correct_prediction = tf.cast(tf.equal(prediction,y_), tf.float32)
 correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
 accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
 global_step = tf.Variable(0, trainable=False)
@@ -129,7 +132,7 @@ sess.run(tf.global_variables_initializer())
 for i in range(100000):
     batch = get_batch(batch_size)
 #    if i % 2 == 0:
-    _,train_accuacy,y1,y2 = sess.run([train_step,accuracy,prediction,prediction_y],feed_dict={x: batch[0], y_: batch[1]})
+    _,train_accuacy,y1,y2 = sess.run([train_step,accuracy,prediction,y_],feed_dict={x: batch[0], y_: batch[1]})
     print("step: %s, training accuracy: %s"%(i, train_accuacy))
     print(y1[:5])
     print(y2[:5])
