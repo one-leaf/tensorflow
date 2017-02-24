@@ -118,7 +118,7 @@ loss = tf.reduce_mean(losses)
 # correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
 # accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
 global_step = tf.Variable(0, trainable=False)
-learning_rate = tf.train.exponential_decay(1e-3, global_step, 1000, 0.96, staircase=True)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 200, 0.96, staircase=True)
 
 train_step = tf.train.MomentumOptimizer(learning_rate, momentum=0.9, use_nesterov=True).minimize(loss,global_step=global_step)
 # train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
