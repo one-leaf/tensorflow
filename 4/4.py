@@ -129,8 +129,11 @@ sess.run(tf.global_variables_initializer())
 for i in range(100000):
     batch = get_batch(batch_size)
 #    if i % 2 == 0:
-    train_accuacy,_step = sess.run([accuracy,train_step],feed_dict={x: batch[0], y_: batch[1]})
+    _,train_accuacy,y1,y2 = sess.run([train_step,accuracy,prediction,prediction_y],feed_dict={x: batch[0], y_: batch[1]})
     print("step: %s, training accuracy: %s"%(i, train_accuacy))
+    print(y1[:5])
+    print(y2[:5])
+
 #    else:    
 #        train_step.run(feed_dict = {x: batch[0], y_: batch[1]})
 
