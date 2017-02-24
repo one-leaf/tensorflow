@@ -5,6 +5,7 @@
 
 import random
 import matplotlib.pyplot as plt
+import math
 
 #数据，输入 x1,x2 ，如果 x2 大于 200 数据归为 1，否则为 -1
 def batch(batch_size):
@@ -21,21 +22,19 @@ def batch(batch_size):
         train_y.append(y)    
     return train_x,train_y
 
-#权重
-W = []
-#由于有输入有两项，初始化一个-1到1之间的随机浮点数给权重
-for _ in range(3):
-    W.append(random.uniform(-1, 1))
-
+#权重,为了避免计算为0，初始化一个随机值
+W = [0, 0]
+for i in range(len(W)):
+    W[i] = random.uniform(-1, 1)
 #偏置量
-b = 1
+b = 0
 
 #分类模型，根据这个模型来动态调整权重W的值
 def reduce(x):
     sum = 0.0
-    x1=x+[b]
-    for i in range(len(W)):
-        sum += x1[i] * W[i] 
+    for i in range(len(x)):
+        sum += x[i] * W[i] 
+    sum += b  
     if sum>0:
         return 1
     else:
@@ -43,11 +42,12 @@ def reduce(x):
 
 #学习算法
 def train_step(x,y,rate=0.01):
+    global W,b
     guess = reduce(x)
     error = y - guess
-    x1=x+[b]
-    for i in range(len(W)):
-        W[i] += rate*error*x1[i]
+    for i in range(len(x)):
+        W[i] += rate*x[i]*error
+    b += rate*error
 
 #学习一批长度
 batch_size=50000
@@ -57,7 +57,7 @@ def train():
         for i in range(batch_size):
             train_step(train_x[i],train_y[i])
         acc,test_x,test_r=test(100) 
-        print(step,acc,W)
+        print(step,acc,W,b)
         if step==0:
             plotbatch(train_x,train_y,100)   
         if (step+1)%20==0:   
@@ -110,6 +110,13 @@ def plottest(test_x,test_r):
     plt.plot(x1_data,y1_data,'g+')
     plt.plot(x2_data,y2_data,'rx')
     plt.axis([0, 500, 0, 500])
+
+    x1 = 0
+    y1 = - (W[0]*x1+b)/W[1]
+    x2 = 500
+    y2 = - (W[0]*x1+b)/W[1]
+    plt.plot([x1,x2],[y1,y2])
+
     plt.show()            
 
 if __name__ == '__main__':
