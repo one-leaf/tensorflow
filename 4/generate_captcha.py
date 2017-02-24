@@ -32,5 +32,6 @@ if __name__ == '__main__':
     text, image = gen_captcha_text_and_image(number+alphabet,4,160,80)
     
     print(text)
+    print(image.shape)
     plt.imshow(image)
     plt.show()

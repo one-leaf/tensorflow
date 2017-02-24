@@ -12,7 +12,6 @@ image_size=image_h*image_w
 char_set="0123456789"
 char_size=len(char_set)
 captcha_size = 4
-batch_size = 50
 
 # 批量验证码数据
 def get_batch(batch_size=128):
@@ -26,12 +25,14 @@ def get_batch(batch_size=128):
 
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
 # 第一维 -1 是不限个和 None 类似， 第2、3维对应图片的宽和高，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
-x = tf.placeholder(tf.float32, [batch_size, image_size])
-x_image = tf.reshape(x, [-1, image_w, image_h, 1])
-y_ = tf.placeholder(tf.float32, [batch_size, char_size*captcha_size])
+x = tf.placeholder(tf.float32, [None, image_size])
+size = tf.size(x)
+x_ = tf.reshape(x, [size, image_w, image_h, 1])
+y_ = tf.placeholder(tf.float32, [None, char_size*captcha_size])
 
+tf.Print(size)
 #卷积层
-filter_sizes=[3, 3, 3, 3]
+filter_sizes=[5, 5, 3, 3]
 filter_nums=[32,32,32,32]
 pool_types=['max','avg','avg','avg']
 pool_ksizes=[2,2,2,2]
@@ -39,18 +40,19 @@ pool_strides=[1,1,1,1]
 conv_pools=[]
 for i in range(len(filter_sizes)):
     if i==0: 
-        input = x_image
+        input = x_
     else:
         input = conv_pools[-1]
     with tf.variable_scope('conv-pool-{}'.format(i)):    
         filter_shape=[filter_sizes[i],filter_sizes[i],int(input.get_shape()[-1]),filter_nums[i]]
         W = tf.get_variable("filter", filter_shape, initializer=tf.contrib.layers.xavier_initializer_conv2d())
         b = tf.get_variable('bias', [filter_nums[i]], initializer=tf.constant_initializer(0.0))
-        conv = tf.nn.relu(tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID') + b)  
+        W_conv = tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID')
+        conv = tf.nn.relu(tf.nn.bias_add(W_conv, b))
         if pool_types[i]=='avg':  
-            pool = tf.nn.avg_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='SAME') 
+            pool = tf.nn.avg_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='VALID') 
         else:
-            pool = tf.nn.max_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='SAME') 
+            pool = tf.nn.max_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='VALID') 
         conv_pools.append(pool)
 
 # 全连接层
@@ -59,7 +61,7 @@ full_connects = []
 for i in range(len(hidden_sizes)):
     with tf.variable_scope('full-connect-{}'.format(i)):
         if i==0:
-            batch_size = int(x_image.get_shape()[0])
+            batch_size = int(x_.get_shape()[0])
             inputs = tf.reshape(conv_pools[-1],[batch_size,-1])
             in_size = int(inputs.get_shape()[-1])
         else:
@@ -130,6 +132,7 @@ train_step = tf.train.MomentumOptimizer(learning_rate, momentum=0.9, use_nestero
 
 sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
+batch_size = 50
 for i in range(20000):
     batch = get_batch(batch_size)
     if i % 10 == 0:
