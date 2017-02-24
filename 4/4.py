@@ -38,11 +38,11 @@ pool_ksizes=[2,2,2,2]
 pool_strides=[1,1,1,1]
 conv_pools=[]
 for i in range(len(filter_sizes)):
-    if i==0: 
-        input = x_
-    else:
-        input = conv_pools[-1]
     with tf.variable_scope('conv-pool-{}'.format(i)):    
+        if i==0: 
+            input = x_
+        else:
+            input = conv_pools[-1]
         filter_shape=[filter_sizes[i],filter_sizes[i],int(input.get_shape()[-1]),filter_nums[i]]
         W = tf.get_variable("filter", filter_shape, initializer=tf.contrib.layers.xavier_initializer_conv2d())
         b = tf.get_variable('bias', [filter_nums[i]], initializer=tf.constant_initializer(0.0))
@@ -135,7 +135,7 @@ for i in range(20000):
     if i % 10 == 0:
         #print(sess.run([x_],feed_dict={x: batch[0], y_: batch[1]}))
         train_accuacy,_loss = sess.run([accuracy,losses],feed_dict={x: batch[0], y_: batch[1]})
-        print("step %d, training accuracy %g, loss %g"%(i, train_accuacy, _loss))
+        print("step %d, training accuracy %g, loss %s"%(i, train_accuacy, _loss))
     else:    
         train_step.run(feed_dict = {x: batch[0], y_: batch[1]})
 
