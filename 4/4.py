@@ -77,7 +77,8 @@ for i in range(captcha_size):
     with tf.variable_scope('output-part-{}'.format(i)):
         W = tf.get_variable("weights", [hidden_sizes[-1],char_size], initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable("biases", [char_size], initializer=tf.constant_initializer(0.0))
-        fc_part = tf.nn.relu(tf.matmul(full_connects[-1], W) + b)
+        #fc_part = tf.nn.relu(tf.matmul(full_connects[-1], W) + b)
+        fc_part = tf.matmul(full_connects[-1], W) + b
         outputs.append(fc_part)
 
 # 最终输出
@@ -94,48 +95,42 @@ for i in range(captcha_size):
         losses.append(reduced_loss_part)
 loss = tf.reduce_mean(losses)
 
-# predictions=[]
-# for i in range(captcha_size):
-#     with tf.variable_scope('predictions-part-{}'.format(i)):
-#         outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
-#         prediction_part = tf.argmax(outputs_part,axis=1)
-#         prediction_part = tf.cast(prediction_part, tf.float32)
-#         predictions.append(prediction_part)
-# prediction = tf.stack(predictions, axis=1)
+predictions=[]
+for i in range(captcha_size):
+    with tf.variable_scope('predictions-part-{}'.format(i)):
+        outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
+        prediction_part = tf.argmax(outputs_part,axis=1)
+        prediction_part = tf.cast(prediction_part, tf.float32)
+        predictions.append(prediction_part)
+prediction = tf.stack(predictions, axis=1)
 
-# predictions_y=[]
-# for i in range(captcha_size):
-#     with tf.variable_scope('predictions-y-part-{}'.format(i)):
-#         outputs_part_y = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
-#         prediction_part_y = tf.argmax(outputs_part_y,axis=1)
-#         prediction_part_y = tf.cast(prediction_part_y, tf.float32)
-#         predictions_y.append(prediction_part_y)
-# prediction_y = tf.stack(predictions_y, axis=1)
+predictions_y=[]
+for i in range(captcha_size):
+    with tf.variable_scope('predictions-y-part-{}'.format(i)):
+        outputs_part_y = tf.slice(y_,begin=[0,i*char_size],size=[-1,char_size])
+        prediction_part_y = tf.argmax(outputs_part_y,axis=1)
+        prediction_part_y = tf.cast(prediction_part_y, tf.float32)
+        predictions_y.append(prediction_part_y)
+prediction_y = tf.stack(predictions_y, axis=1)
 
-# correct_prediction = tf.cast(tf.equal(prediction,prediction_y), tf.float32)
-# correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
-# accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
+correct_prediction = tf.cast(tf.equal(prediction,prediction_y), tf.float32)
+correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
+accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
 global_step = tf.Variable(0, trainable=False)
-learning_rate = tf.train.exponential_decay(1e-3, global_step, 200, 0.96, staircase=True)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 2000, 0.96, staircase=True)
 
 train_step = tf.train.MomentumOptimizer(learning_rate, momentum=0.9, use_nesterov=True).minimize(loss,global_step=global_step)
 # train_step = tf.train.AdamOptimizer(1e-4).minimize(loss)
 
-# 比较计算结果是否正确
-#correct_prediction = tf.equal(tf.arg_max(output, 1), tf.arg_max(y_, 1))
-correct_prediction = tf.equal(output, y_)
-# 统计准确率
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
 
-for i in range(20000):
+for i in range(100000):
     batch = get_batch(batch_size)
     if i % 10 == 0:
-        #print(sess.run([x_],feed_dict={x: batch[0], y_: batch[1]}))
-        train_accuacy,_loss = sess.run([accuracy,losses],feed_dict={x: batch[0], y_: batch[1]})
-        print("step %d, training accuracy %g, loss %s"%(i, train_accuacy, _loss))
+        step,train_accuacy,loss,rate = sess.run([global_step,accuracy,loss,learning_rate],feed_dict={x: batch[0], y_: batch[1]})
+        print("step: %d, training accuracy: %g, loss: %s, learning_rate: %s"%(step, train_accuacy, loss, rate))
     else:    
         train_step.run(feed_dict = {x: batch[0], y_: batch[1]})
 
