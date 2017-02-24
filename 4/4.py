@@ -27,8 +27,6 @@ def get_batch(batch_size=128):
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
 # 第一维 -1 是不限个和 None 类似， 第2、3维对应图片的宽和高，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
 x = tf.placeholder(tf.float32, [None, image_size])
-#batch_size = tf.foldl(lambda a, n: a + 1, x, initializer=0)
-#tf.assert_equal(batch_size,50)
 x_ = tf.reshape(x, [batch_size, image_w, image_h, 1])
 y_ = tf.placeholder(tf.float32, [batch_size, char_size*captcha_size])
 
@@ -136,7 +134,7 @@ for i in range(20000):
     batch = get_batch(batch_size)
     if i % 10 == 0:
         #print(sess.run([x_],feed_dict={x: batch[0], y_: batch[1]}))
-        train_accuacy,_loss = sess.run([accuracy,loss],feed_dict={x: batch[0], y_: batch[1]})
+        train_accuacy,_loss = sess.run([accuracy,losses],feed_dict={x: batch[0], y_: batch[1]})
         print("step %d, training accuracy %g, loss %g"%(i, train_accuacy, _loss))
     else:    
         train_step.run(feed_dict = {x: batch[0], y_: batch[1]})
