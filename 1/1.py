@@ -5,7 +5,6 @@
 
 import random
 import matplotlib.pyplot as plt
-import math
 
 #数据，输入 x1,x2 ，如果 x2 大于 200 数据归为 1，否则为 -1
 def batch(batch_size):
