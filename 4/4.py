@@ -12,7 +12,7 @@ image_size=image_h*image_w
 char_set="0123456789"
 char_size=len(char_set)
 captcha_size = 4
-batch_size = 50
+batch_size = 128
 
 # 批量验证码数据
 def get_batch(batch_size=128):
