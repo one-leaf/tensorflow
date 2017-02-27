@@ -18,9 +18,7 @@ def batch(batch_size):
         y = [0, 1]
         if (x1 < 200 and x2 < 200) or (x1 > 300 and x2 > 300):
             y = [1, 0]
-        x=np.binary_repr(x1, width=x_one_len)+np.binary_repr(x2, width=x_one_len) #\
-        #  +np.binary_repr(x1*x2, width=x_one_len)+np.binary_repr(x1*x1, width=x_one_len)\
-        #  +np.binary_repr(x2*x2, width=x_one_len)
+        x=np.binary_repr(x1, width=x_one_len)+np.binary_repr(x2, width=x_one_len) 
         x_=list(map(int, x))
         train_x.append(x_)
         train_y.append(y)
