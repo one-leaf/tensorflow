@@ -4,3 +4,5 @@
 *.npz
 .ideas/
 __pycache__/
+checkpoints/
+summaries/
