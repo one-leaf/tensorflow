@@ -1,12 +1,14 @@
-# coding=utf-8
+#! coding=utf-8
+'''
+采用多个隐藏层来解决两个不同分区的问题
+'''
+import random
+import math
 import tensorflow as tf
 import numpy as np
 
-import random
-
 x_one_len = 20
-x_len=x_one_len*5
-
+x_len=x_one_len*2
 def batch(batch_size):
     train_x = []
     train_y = []
@@ -16,65 +18,68 @@ def batch(batch_size):
         y = [0, 1]
         if (x1 < 200 and x2 < 200) or (x1 > 300 and x2 > 300):
             y = [1, 0]
-        x=np.binary_repr(x1, width=x_one_len)+np.binary_repr(x2, width=x_one_len)\
-          +np.binary_repr(x1*x2, width=x_one_len)+np.binary_repr(x1*x1, width=x_one_len)\
-          +np.binary_repr(x2*x2, width=x_one_len)
+        x=np.binary_repr(x1, width=x_one_len)+np.binary_repr(x2, width=x_one_len) #\
+        #  +np.binary_repr(x1*x2, width=x_one_len)+np.binary_repr(x1*x1, width=x_one_len)\
+        #  +np.binary_repr(x2*x2, width=x_one_len)
         x_=list(map(int, x))
         train_x.append(x_)
         train_y.append(y)
     return np.array(train_x), np.array(train_y)
 
+def add_layer(inputs, in_size, out_size, activity_func=None):
+    W = tf.Variable(tf.random_uniform([in_size, out_size], -1.0, 1.0))
+    b =  tf.Variable(tf.constant(0.1, shape=[out_size]))
+    Wx_Plus_b = tf.matmul(inputs, W) + b
+    Wx_Plus_b = tf.nn.dropout(Wx_Plus_b, keep_prob)
+    if activity_func is None:
+        outputs = Wx_Plus_b
+    else:
+        outputs = activity_func(Wx_Plus_b)
+    return outputs
+    
 
-def weight_variable(shape):
-    initial = tf.truncated_normal(shape, stddev=0.1)
-    return tf.Variable(initial)
+# 隐藏层
+hidden_units = 255
+# 输入维度
+n_input = x_len
+# 输出维度
+n_output = 2
+# 学习比例
+learning_rate = 0.0001
+x = tf.placeholder(tf.float32, [None, n_input])
+y_ = tf.placeholder(tf.float32, [None, n_output])
+# 随机抛弃率
+keep_prob = tf.placeholder(tf.float32)
 
-def bias_variable(shape):
-    initial = tf.constant(0.1, shape=shape)
-    return tf.Variable(initial)
+# 增加隐藏层
+l1 = add_layer(x, n_input, hidden_units, activity_func=tf.nn.tanh)
+l2 = add_layer(l1, hidden_units, hidden_units, activity_func=tf.nn.tanh)
+#l3 = add_layer(l2, hidden_units, hidden_units, activity_func=tf.nn.tanh)
+#l4 = add_layer(l3, hidden_units, hidden_units, activity_func=tf.nn.tanh)
 
-def conv2d(x, W):
-    return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+#prediction = add_layer(l1, hidden_units, n_output, activity_func=tf.nn.softmax)
+#prediction = add_layer(l2, hidden_units, n_output, activity_func=tf.nn.relu)
+#prediction = add_layer(l2, hidden_units, n_output, activity_func=tf.nn.tanh)
+prediction = add_layer(l2, hidden_units, n_output, activity_func=tf.nn.softmax)
+## coss and train step
+#cross_entropy = -tf.reduce_sum(y_ * tf.log(prediction))
+#cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(prediction)))
+cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=prediction, labels=y_))
+train_op = tf.train.GradientDescentOptimizer(learning_rate).minimize(cross_entropy)
 
-def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 1, 1, 1],
-                        strides=[1, 1, 1, 1], padding='SAME')
+# 正确率
+correct_prediction = tf.equal(tf.argmax(prediction, 1), tf.argmax(y_, 1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+init = tf.global_variables_initializer()
 
-x = tf.placeholder("float", shape=[None, x_len])
-y_ = tf.placeholder("float", shape=[None, 2])
-
-sess = tf.InteractiveSession()
-
-
-W_conv1 = weight_variable([5, 5, 1, 32])
-b_conv1 = bias_variable([32])
-x_image = tf.reshape(x, [-1,10,10,1])
-h_conv1 = tf.nn.relu(conv2d(x_image, W_conv1) + b_conv1)
-h_pool1 = max_pool_2x2(h_conv1)
-W_conv2 = weight_variable([5, 5, 32, 64])
-b_conv2 = bias_variable([64])
-h_conv2 = tf.nn.relu(conv2d(h_pool1, W_conv2) + b_conv2)
-h_pool2 = max_pool_2x2(h_conv2)
-W_fc1 = weight_variable([10 * 10 * 64, 1024])
-b_fc1 = bias_variable([1024])
-h_pool2_flat = tf.reshape(h_pool2, [-1, 10*10*64])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
-keep_prob = tf.placeholder("float")
-h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
-
-W_fc2 = weight_variable([1024, 2])
-b_fc2 = bias_variable([2])
-
-y_conv=tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
+# 每批执行数量
+batch_size = 10000
+with tf.Session() as sess:
+    sess.run(init)
+    for i in range(100000):
+        batch_x, batch_y = batch(batch_size)
+        _,loss,acc=sess.run([train_op,cross_entropy,accuracy], feed_dict={x: batch_x, y_: batch_y, keep_prob:0.5})           
+        print(i, acc, loss)
 
 
-cross_entropy = -tf.reduce_sum(y_*tf.log(y_conv))
-train_step = tf.train.AdamOptimizer(0.0001).minimize(cross_entropy)
-correct_prediction = tf.equal(tf.argmax(y_conv,1), tf.argmax(y_,1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-sess.run(tf.global_variables_initializer())
-for i in range(20000):
-    train_batch = batch(1000)
-    train_accuracy = accuracy.eval(feed_dict={x:train_batch[0], y_: train_batch[1], keep_prob: 1.0})
-    print("step %d, training accuracy %g"%(i, train_accuracy))
-    train_step.run(feed_dict={x: train_batch[0], y_: train_batch[1], keep_prob: 0.5})
+    
