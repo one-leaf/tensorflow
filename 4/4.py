@@ -133,8 +133,8 @@ if ckpt and ckpt.model_checkpoint_path:
     saver.restore(sess, ckpt.model_checkpoint_path)
 
 # 定义图表输出
-loss_summary = tf.summary.scalar("loss", loss)
-acc_summary = tf.summary.scalar("accuracy", accuracy)
+tf.summary.scalar("loss", loss)
+tf.summary.scalar("accuracy", accuracy)
 train_summary_op = tf.summary.merge_all()
 train_summary_dir = os.path.join(out_dir, "summaries")
 train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
@@ -159,3 +159,4 @@ try:
 finally:
     coord.request_stop()
 coord.join(threads)
+train_summary_writer.close()
