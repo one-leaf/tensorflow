@@ -155,7 +155,7 @@ try:
         train_summary_writer.add_summary(_train_summaries, _step)
         if _step % 10 == 0:
             path = saver.save(sess, checkpoints_dir, global_step=_step)
-            print("保存训练数据到"，path)
+            print("保存训练数据到", path)
 finally:
     coord.request_stop()
 coord.join(threads)
