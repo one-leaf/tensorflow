@@ -1,0 +1,6 @@
+*.zip
+*.pyc
+*.npy
+*.npz
+.ideas/
+__pycache__/
