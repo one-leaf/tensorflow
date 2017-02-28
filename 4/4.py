@@ -74,7 +74,15 @@ for i in range(len(hidden_sizes)):
         # tf.contrib.layers.xavier_initializer 按照 Xavier 方式初始化，好处是在所有层上保持大致相同的梯度，机器学习专用
         W = tf.get_variable("weights", [in_size,hidden_sizes[i]], initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable("biases", [hidden_sizes[i]], initializer=tf.constant_initializer(0.0))
+        # 激活函数
+        # sigmoid   能够把输入的连续实值“压缩”到0和1之间，容易过饱和和信息丢失，很少使用
+        # tanh      是 sigmoid 的变形，比 sigmoid 好
+        # relu      收敛快，但不能将 learning_rate 设置太大，会导致梯度直接为0，推荐    
+        # relu6     比 relu 的收敛更快 
+        # elu       减少了正常梯度与单位自然梯度之间的差距，从而加快了学习，在负的限制条件下能够更有鲁棒性。
         full_connect = tf.nn.relu(tf.matmul(inputs, W) + b)
+        # full_connect = tf.nn.sigmoid(tf.matmul(inputs, W) + b)
+        # full_connect = tf.nn.tanh(tf.matmul(inputs, W) + b)
         full_connects.append(full_connect)
 
 # 由于是多位验证码，继续添加每一位验证码的输出
@@ -96,6 +104,7 @@ for i in range(captcha_size):
         outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
         targets_part = tf.slice(y_,begin=[0,i],size=[-1,1])
         targets_part = tf.reshape(targets_part, [-1])
+        # 分类函数
         loss_part = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
         reduced_loss_part = tf.reduce_mean(loss_part)
         losses.append(reduced_loss_part)
@@ -115,14 +124,20 @@ correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
 accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
 global_step = tf.Variable(0, trainable=False)
 learning_rate = tf.train.exponential_decay(1e-3, global_step, 2000, 0.96, staircase=True)
-
+# 学习速率调整函数
+# MomentumOptimizer  动量算法，开始会震荡，后面随着动量的增加，震荡会减少，快速下降
+# AdagradOptimizer   利用梯度信息调整学习速率，适合比较稀疏的数据，比较稳定
+# RMSPropOptimizer   解决AdaGrad中学习速率趋向0的问题
+# AdadeltaOptimizer  也可以解决AdaGrad的问题，和RMSPropOptimizer类似，但更高级，不需要初始的学习速率
+# AdamOptimizer      利用了AdaGrad和RMSProp在稀疏数据上的优点，可以进行自适应调整 推荐  
+# FtrlOptimizer      在线最优化算法，计算量小，适合高纬度的稀疏数据     
 optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=0.9, use_nesterov=True)
 # optimizer = tf.train.GradientDescentOptimizer(learning_rate)
-# optimizer = tf.train.AdadeltaOptimizer(learning_rate)
 # optimizer = tf.train.AdagradOptimizer(learning_rate)
-# optimizer = tf.train.FtrlOptimizer(learning_rate)
 # optimizer = tf.train.RMSPropOptimizer(learning_rate)
+# optimizer = tf.train.AdadeltaOptimizer(learning_rate)
 # optimizer = tf.train.AdamOptimizer(learning_rate)
+# optimizer = tf.train.FtrlOptimizer(learning_rate)
 train_step = optimizer.minimize(loss,global_step=global_step)
 
 sess = tf.InteractiveSession()
