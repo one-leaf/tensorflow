@@ -134,6 +134,7 @@ global_step = tf.Variable(0, trainable=False)
 learning_rate = tf.train.exponential_decay(1e-3, global_step, 2000, 0.96, staircase=True)
 # 学习速率调整函数
 # MomentumOptimizer  动量算法，开始会震荡，后面随着动量的增加，震荡会减少，快速下降
+# GradientDescentOptimizer 梯度下降算法，速度较慢，稳定
 # AdagradOptimizer   利用梯度信息调整学习速率，适合比较稀疏的数据，比较稳定
 # RMSPropOptimizer   解决AdaGrad中学习速率趋向0的问题
 # AdadeltaOptimizer  也可以解决AdaGrad的问题，和RMSPropOptimizer类似，但更高级，不需要初始的学习速率
