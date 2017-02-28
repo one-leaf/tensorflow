@@ -126,7 +126,7 @@ sess.run(tf.global_variables_initializer())
 # 定义中断后的恢复和继续训练
 saver = tf.train.Saver()
 out_dir = os.path.dirname(__file__)
-checkpoints_dir = os.path.join(out_dir, "checkpoints")
+checkpoints_dir = os.path.join(out_dir, "checkpoints", "train")
 ckpt = tf.train.get_checkpoint_state(checkpoints_dir)
 if ckpt and ckpt.model_checkpoint_path:
     print("继续接着之前的进度进行训练")
