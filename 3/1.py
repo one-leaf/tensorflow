@@ -39,12 +39,18 @@ correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(y_,1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 init = tf.global_variables_initializer()
-sess = tf.Session()
+sess = tf.InteractiveSession()
 sess.run(init)
 
-for i in range(1000000):
+for i in range(100):
     batch_xs, batch_ys = batch(10000)
     _,acc,loss=sess.run([train_step,accuracy,cross_entropy], feed_dict={x: batch_xs, y_: batch_ys})
     print(i,acc,loss)
 
-
+test_x, test_y = batch(10)
+_y = y.eval(feed_dict={x: test_x})
+for i in range(len(test_x)):
+    m = ''.join(str(x) for x in test_x[i])
+    x1=int(m[:x_one_len], 2)
+    x2=int(m[x_one_len:], 2)
+    print(x1, x2, test_y[i], [1,0] if _y[i][0]>_y[i][1] else [0,1], _y[i])

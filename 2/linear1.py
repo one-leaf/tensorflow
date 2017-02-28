@@ -25,9 +25,9 @@ sess = tf.Session()
 sess.run(init)
 
 # 拟合平面
-for step in xrange(0, 201):
+for step in range(0, 201):
     sess.run(train)
     if step % 20 == 0:
-        print step, sess.run(W), sess.run(b)
+        print(step, sess.run(W), sess.run(b))
 
 # 得到最佳拟合结果 W: [[0.100  0.200]], b: [0.300]

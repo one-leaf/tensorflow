@@ -29,7 +29,7 @@ W = tf.Variable(np.random.randn())
 b = tf.Variable(np.random.randn())
 
 # 预测值
-y=tf.mul(W, x) + b
+y=tf.multiply(W, x) + b
 
 # 定义代价损失和优化方法
 #cost = tf.reduce_mean(tf.square(y - y_))
@@ -53,12 +53,12 @@ with tf.Session() as sess:
         # 每轮打印一些内容
         if (epoch + 1) % display_step == 0:
             c = sess.run(cost, feed_dict={x: train_X, y_: train_Y,n:_n})
-            print 'Epochs:', '%04d' % (epoch + 1), 'cost=', '{:.9f}'.format(c), 'W=', sess.run(W), 'b=', sess.run(b)
-    print 'optimizer finished'
+            print('Epochs:', '%04d' % (epoch + 1), 'cost=', '{:.9f}'.format(c), 'W=', sess.run(W), 'b=', sess.run(b))
+    print('optimizer finished')
     train_X,train_Y = batch(1000)
     _n=train_X.shape[0]    
     training_cost = sess.run(cost, feed_dict={x: train_X, y_: train_Y,n:_n})
-    print "Training cost=", training_cost, "W=", sess.run(W), "b=", sess.run(b), '\n'
+    print("Training cost=", training_cost, "W=", sess.run(W), "b=", sess.run(b), '\n')
    
     plt.plot(train_X, train_Y, 'ro', label='origin data')
     plt.plot(train_X, sess.run(W) * train_X + sess.run(b), label='Fitted line')

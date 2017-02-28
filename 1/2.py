@@ -2,11 +2,11 @@
 
 import tensorflow as tf
 import numpy as np
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 # x为随机100个小于1大于0的数
 x = np.random.rand(100).astype(np.float32)
-y = x * 0.1 + 0.3
+y = x * 0.2 + 0.3
 
 # 定义权重从 -1.0 到 1.0 随机初始化，
 W = tf.Variable(tf.random_uniform([1], -1.0, 1.0))
@@ -27,9 +27,9 @@ train = optimizer.minimize(loss)
 with tf.Session() as sess:
     # 初始化所有变量
     sess.run(tf.global_variables_initializer())
-    # plt.plot(x,y)
-    # plt.axis([0, 1, 0, 1])
-    # plt.show()            
+    plt.plot(x,y,"ro")
+    plt.axis([0, 1, 0, 1])
+    plt.show()            
     for step in range(101):
         # 进行训练
         sess.run(train)
