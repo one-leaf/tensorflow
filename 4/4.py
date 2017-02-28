@@ -124,12 +124,17 @@ sess = tf.InteractiveSession()
 sess.run(tf.global_variables_initializer())
 
 # 定义中断后的恢复和继续训练
-saver = tf.train.Saver()
+# max_to_keep 最多保留的检查点数量，下面是 5 个
+# keep_checkpoint_every_n_hours 每隔多少小时至少保留一个检查点，下面是每隔 1 小时
+saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
 out_dir = os.path.dirname(__file__)
-checkpoints_dir = os.path.join(out_dir, "checkpoints", "train")
+checkpoints_dir = os.path.join(out_dir, "checkpoints")
+if not os.path.exists(checkpoints_dir): os.mkdir(checkpoints_dir)
+checkpoint_prefix = os.path.join(checkpoints_dir, "model")
+
 ckpt = tf.train.get_checkpoint_state(checkpoints_dir)
 if ckpt and ckpt.model_checkpoint_path:
-    print("继续接着之前的进度进行训练")
+    print("restore checkpoint and continue train.")
     saver.restore(sess, ckpt.model_checkpoint_path)
 
 # 定义图表输出
@@ -154,8 +159,8 @@ try:
         print(time_str, _step, _acc, _loss)                    
         train_summary_writer.add_summary(_train_summaries, _step)
         if _step % 10 == 0:
-            path = saver.save(sess, checkpoints_dir, global_step=_step)
-            print("保存训练数据到", path)
+            path = saver.save(sess, checkpoint_prefix, global_step=_step)
+            print("save train model to" , path)
 finally:
     coord.request_stop()
 coord.join(threads)
