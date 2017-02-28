@@ -67,7 +67,8 @@ for i in range(len(hidden_sizes)):
             in_size = int(inputs.get_shape()[-1])
         else:
             inputs = full_connects[-1]
-            in_size = hidden_sizes[i-1]     
+            in_size = hidden_sizes[i-1]
+        # 初始化函数     
         # tf.constant_initializer(value) 初始化一切所提供的值
         # tf.random_uniform_initializer(a, b)从a到b均匀初始化
         # tf.random_normal_initializer(mean, stddev) 用所给平均值和标准差初始化均匀分布
@@ -104,8 +105,16 @@ for i in range(captcha_size):
         outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
         targets_part = tf.slice(y_,begin=[0,i],size=[-1,1])
         targets_part = tf.reshape(targets_part, [-1])
-        # 分类函数
+        # 损失函数
+        # sigmoid_cross_entropy_with_logits 二分类问题,不支持多分类
+        # softmax_cross_entropy_with_logits 只适合单目标的二分类或者多分类问题，多分类问题需要做成 onehot 
+        # sparse_softmax_cross_entropy_with_logits 同上，只是分类目标不需要 onehot
+        # weighted_cross_entropy_with_logits 基于 sigmoid_cross_entropy_with_logits ，多支持一个pos_weight参数，目的是可以增加或者减小正样本在算Cross Entropy时的Loss 
         loss_part = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
+        # loss_part = tf.nn.sigmoid_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
+        # loss_part = tf.nn.softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part) #这里不适用，需要 onehot 化才可以
+        # loss_part = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
+        # loss_part = tf.nn.weighted_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
         reduced_loss_part = tf.reduce_mean(loss_part)
         losses.append(reduced_loss_part)
 loss = tf.reduce_mean(losses)
