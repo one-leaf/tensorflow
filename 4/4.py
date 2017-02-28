@@ -68,19 +68,18 @@ for i in range(len(hidden_sizes)):
         else:
             inputs = full_connects[-1]
             in_size = hidden_sizes[i-1]
-        # 初始化函数     
+        # 常用初始化函数     
         # tf.constant_initializer(value) 初始化一切所提供的值
         # tf.random_uniform_initializer(a, b)从a到b均匀初始化
         # tf.random_normal_initializer(mean, stddev) 用所给平均值和标准差初始化均匀分布
         # tf.contrib.layers.xavier_initializer 按照 Xavier 方式初始化，好处是在所有层上保持大致相同的梯度，机器学习专用
         W = tf.get_variable("weights", [in_size,hidden_sizes[i]], initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable("biases", [hidden_sizes[i]], initializer=tf.constant_initializer(0.0))
-        # 激活函数
+        # 常用激活函数
         # sigmoid   能够把输入的连续实值“压缩”到0和1之间，容易过饱和和信息丢失，很少使用
         # tanh      是 sigmoid 的变形，比 sigmoid 好
         # relu      收敛快，但不能将 learning_rate 设置太大，会导致梯度直接为0，推荐    
         # relu6     比 relu 的收敛更快 
-        # elu       减少了正常梯度与单位自然梯度之间的差距，从而加快了学习，在负的限制条件下能够更有鲁棒性。
         full_connect = tf.nn.relu(tf.matmul(inputs, W) + b)
         # full_connect = tf.nn.sigmoid(tf.matmul(inputs, W) + b)
         # full_connect = tf.nn.tanh(tf.matmul(inputs, W) + b)
@@ -105,7 +104,7 @@ for i in range(captcha_size):
         outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
         targets_part = tf.slice(y_,begin=[0,i],size=[-1,1])
         targets_part = tf.reshape(targets_part, [-1])
-        # 损失函数
+        # 常用损失函数
         # sigmoid_cross_entropy_with_logits 二分类问题,不支持多分类
         # softmax_cross_entropy_with_logits 只适合单目标的二分类或者多分类问题，多分类问题需要做成 onehot 
         # sparse_softmax_cross_entropy_with_logits 同上，只是分类目标不需要 onehot
