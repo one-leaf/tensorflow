@@ -26,7 +26,7 @@ def get_batch(batch_size=128):
     return batch_x, batch_y
 
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
-# 第一维 -1 是不限个和 None 类似， 第2、3维对应图片的宽和高，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
+# 第一维是 batch_size 每次训练的样本数， 第2、3维对应图片的宽和高，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
 x = tf.placeholder(tf.float32, [None, image_size])
 x_ = tf.reshape(x, [batch_size, image_w, image_h, 1])
 y_ = tf.placeholder(tf.int32, [batch_size, captcha_size])
@@ -45,6 +45,7 @@ for i in range(len(filter_sizes)):
         else:
             input = conv_pools[-1]
         filter_shape=[filter_sizes[i],filter_sizes[i],int(input.get_shape()[-1]),filter_nums[i]]
+        # tf.contrib.layers.xavier_initializer_conv2d 按照 Xavier 方式初始化，好处是在所有层上保持大致相同的梯度，机器学习专用
         W = tf.get_variable("filter", filter_shape, initializer=tf.contrib.layers.xavier_initializer_conv2d())
         b = tf.get_variable('bias', [filter_nums[i]], initializer=tf.constant_initializer(0.0))
         W_conv = tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID')
@@ -67,6 +68,10 @@ for i in range(len(hidden_sizes)):
         else:
             inputs = full_connects[-1]
             in_size = hidden_sizes[i-1]     
+        # tf.constant_initializer(value) 初始化一切所提供的值
+        # tf.random_uniform_initializer(a, b)从a到b均匀初始化
+        # tf.random_normal_initializer(mean, stddev) 用所给平均值和标准差初始化均匀分布
+        # tf.contrib.layers.xavier_initializer 按照 Xavier 方式初始化，好处是在所有层上保持大致相同的梯度，机器学习专用
         W = tf.get_variable("weights", [in_size,hidden_sizes[i]], initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable("biases", [hidden_sizes[i]], initializer=tf.constant_initializer(0.0))
         full_connect = tf.nn.relu(tf.matmul(inputs, W) + b)
