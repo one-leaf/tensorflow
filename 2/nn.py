@@ -63,7 +63,7 @@ def conv2d(sess):
 # 池化, 将数据按大小球平均值缩小，降低计算复杂度
 def max_pool(sess):
     x = tf.ones([1,4,4,1])  # [数量，图片宽，图片高, 图片通道数]
-    y = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    y = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME') # 采样的大小应该和步长保持一致，都为2
     print(sess.run(y))
     # [[[[ 1.]   [ 1.]]  [[ 1.]   [ 1.]]]]    
     print(y.get_shape())
