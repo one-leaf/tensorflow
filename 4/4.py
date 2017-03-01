@@ -13,7 +13,10 @@ image_size=image_h*image_w
 char_set="0123456789"
 char_size=len(char_set)
 captcha_size = 4
-batch_size = 128
+batch_size = 100
+
+#是否开启调试 到程序目录执行 tensorboard --logdir=summaries ，访问 http://127.0.0.1:6006
+DEBUG = True
 
 # 批量验证码数据
 def get_batch(batch_size=128):
@@ -26,17 +29,16 @@ def get_batch(batch_size=128):
     return batch_x, batch_y
 
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
-# 第一维是 batch_size 每次训练的样本数， 第2、3维对应图片的宽和高，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
+# 第一维是 batch_size 每次训练的样本数， 第2、3维对应图片的高和宽，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
 x = tf.placeholder(tf.float32, [None, image_size])
-x_ = tf.reshape(x, [batch_size, image_w, image_h, 1])
+x_ = tf.reshape(x, [batch_size, image_h, image_w, 1])
 y_ = tf.placeholder(tf.int32, [batch_size, captcha_size])
 
 #卷积层
 filter_sizes=[5, 5, 3, 3]
 filter_nums=[32,32,32,32]
-pool_types=['max','avg','avg','avg']
-pool_ksizes=[2,2,2,2]
-pool_strides=[1,1,1,1]
+pool_types=['max','avg','max','avg']
+pool_scale=[2,2,2,2]
 conv_pools=[]
 for i in range(len(filter_sizes)):
     with tf.variable_scope('conv-pool-{}'.format(i)):    
@@ -48,13 +50,28 @@ for i in range(len(filter_sizes)):
         # tf.contrib.layers.xavier_initializer_conv2d 按照 Xavier 方式初始化，好处是在所有层上保持大致相同的梯度，机器学习专用
         W = tf.get_variable("filter", filter_shape, initializer=tf.contrib.layers.xavier_initializer_conv2d())
         b = tf.get_variable('bias', [filter_nums[i]], initializer=tf.constant_initializer(0.0))
-        W_conv = tf.nn.conv2d(input, W, strides=[1, pool_strides[i], pool_strides[i], 1],  padding='VALID')
+        W_conv = tf.nn.conv2d(input, W, strides=[1, 1, 1, 1],  padding='SAME')
         conv = tf.nn.relu(tf.nn.bias_add(W_conv, b))
         if pool_types[i]=='avg':  
-            pool = tf.nn.avg_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='VALID') 
+            pool = tf.nn.avg_pool(conv, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME') 
         else:
-            pool = tf.nn.max_pool(conv, ksize=[1, pool_ksizes[i], pool_ksizes[i], 1], strides=[1, pool_strides[i], pool_strides[i], 1], padding='VALID') 
+            pool = tf.nn.max_pool(conv, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME') 
         conv_pools.append(pool)
+        
+        
+        if DEBUG:
+            # 没有必要看 conv 层，直接看 pool 层足够了
+            # filter_map = conv[-1]
+            # filter_map = tf.transpose(filter_map, perm=[2, 0, 1])
+            # filter_map = tf.reshape(filter_map, (filter_nums[i],int(conv.get_shape()[1]),int(conv.get_shape()[2]),1))
+            # tf.summary.image('conv', tensor=filter_map, max_outputs=filter_nums[i])
+            filter_map = pool[-1]
+            filter_map = tf.transpose(filter_map, perm=[2, 0, 1])
+            filter_map = tf.reshape(filter_map, (filter_nums[i],int(pool.get_shape()[1]),int(pool.get_shape()[2]),1))
+            tf.summary.image('conv-pool', tensor=filter_map, max_outputs=filter_nums[i])
+            # 输出 W，b 到 tensorboard 实际训练时，关闭这个
+            tf.summary.histogram('w'.format(i),W)
+            tf.summary.histogram('b'.format(i),b)
 
 # 全连接层
 hidden_sizes = [256]
@@ -85,6 +102,10 @@ for i in range(len(hidden_sizes)):
         # full_connect = tf.nn.tanh(tf.matmul(inputs, W) + b)
         full_connects.append(full_connect)
 
+        if DEBUG:
+            tf.summary.histogram('W',W)
+            tf.summary.histogram('b',b)
+
 # 由于是多位验证码，继续添加每一位验证码的输出
 outputs=[]
 for i in range(captcha_size):
@@ -93,6 +114,10 @@ for i in range(captcha_size):
         b = tf.get_variable("biases", [char_size], initializer=tf.constant_initializer(0.0))
         fc_part = tf.matmul(full_connects[-1], W) + b
         outputs.append(fc_part)
+
+        if DEBUG:
+            tf.summary.histogram('W',W)
+            tf.summary.histogram('b',b)
 
 # 最终输出
 output =  tf.concat(outputs, 1)     
@@ -118,18 +143,22 @@ for i in range(captcha_size):
         losses.append(reduced_loss_part)
 loss = tf.reduce_mean(losses)
 
+# 得到最终的验证码
 predictions=[]
 for i in range(captcha_size):
     with tf.variable_scope('predictions-part-{}'.format(i)):
         outputs_part = tf.slice(output,begin=[0,i*char_size],size=[-1,char_size])
         prediction_part = tf.argmax(outputs_part,axis=1)
         prediction_part = tf.cast(prediction_part, tf.int32)
-        predictions.append(prediction_part)
+        predictions.append(prediction_part)                
 prediction = tf.stack(predictions, axis=1)
 
+# 计算正确率
 correct_prediction = tf.cast(tf.equal(prediction,y_), tf.float32)
 correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
 accuracy = tf.reduce_mean(tf.cast(tf.equal(correct_prediction, 1.0), tf.float32))
+
+# 定义学习速率和优化方法
 global_step = tf.Variable(0, trainable=False)
 learning_rate = tf.train.exponential_decay(1e-3, global_step, 2000, 0.96, staircase=True)
 # 学习速率调整函数
@@ -140,12 +169,12 @@ learning_rate = tf.train.exponential_decay(1e-3, global_step, 2000, 0.96, stairc
 # AdadeltaOptimizer  也可以解决AdaGrad的问题，和RMSPropOptimizer类似，但更高级，不需要初始的学习速率
 # AdamOptimizer      利用了AdaGrad和RMSProp在稀疏数据上的优点，可以进行自适应调整 推荐  
 # FtrlOptimizer      在线最优化算法，计算量小，适合高纬度的稀疏数据     
-optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=0.9, use_nesterov=True)
+# optimizer = tf.train.MomentumOptimizer(learning_rate, momentum=0.9, use_nesterov=True)
 # optimizer = tf.train.GradientDescentOptimizer(learning_rate)
 # optimizer = tf.train.AdagradOptimizer(learning_rate)
 # optimizer = tf.train.RMSPropOptimizer(learning_rate)
 # optimizer = tf.train.AdadeltaOptimizer(learning_rate)
-# optimizer = tf.train.AdamOptimizer(learning_rate)
+optimizer = tf.train.AdamOptimizer(learning_rate)
 # optimizer = tf.train.FtrlOptimizer(learning_rate)
 train_step = optimizer.minimize(loss,global_step=global_step)
 
@@ -160,7 +189,7 @@ out_dir = os.path.dirname(__file__)
 checkpoints_dir = os.path.join(out_dir, "checkpoints")
 if not os.path.exists(checkpoints_dir): os.mkdir(checkpoints_dir)
 checkpoint_prefix = os.path.join(checkpoints_dir, "model")
-
+# 检查到如果存在检查点，就装载继续运行
 ckpt = tf.train.get_checkpoint_state(checkpoints_dir)
 if ckpt and ckpt.model_checkpoint_path:
     print("restore checkpoint and continue train.")
@@ -193,4 +222,7 @@ try:
 finally:
     coord.request_stop()
 coord.join(threads)
+
+# 结束学习，关闭日志和会话
 train_summary_writer.close()
+sess.close()
