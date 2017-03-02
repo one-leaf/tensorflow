@@ -40,7 +40,7 @@ y_ = tf.placeholder(tf.int32, [batch_size, captcha_size])
 # 卷积层
 filter_sizes = [5, 5, 3, 3]
 filter_nums = [32, 32, 32, 32]
-pool_types = ['avg', 'avg', 'max', 'max']
+pool_types = ['max', 'max', 'avg', 'avg']
 pool_scale = [2, 2, 2, 2]
 conv_pools = []
 for i in range(len(filter_sizes)):
