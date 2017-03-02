@@ -80,7 +80,7 @@ for i in range(len(filter_sizes)):
             tf.summary.image('conv-pool', tensor=filter_map,
                              max_outputs=filter_nums[i])
             # 输出 W，b 到 tensorboard 实际训练时，关闭这个
-            tf.summary.histogram('w'.format(i), W)
+            tf.summary.histogram('W'.format(i), W)
             tf.summary.histogram('b'.format(i), b)
 
 # 全连接层
