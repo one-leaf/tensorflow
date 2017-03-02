@@ -9,7 +9,7 @@ import os
 import datetime
 
 image_h = 80                    # 图片高
-image_w = 200                   # 图片宽    
+image_w = 200                   # 图片宽
 image_size = image_h * image_w  # 图片大小
 char_set = "0123456789"         # 验证码组成
 char_size = len(char_set)       # 验证码组成种类长度
@@ -31,8 +31,8 @@ def get_batch(batch_size=128):
     return batch_x, batch_y
 
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
-# 第一维是 batch_size 每次训练的样本数， 第2、3维对应图片的高和宽，最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为
-# RGB 则为3 。
+# 第一维是 batch_size 每次训练的样本数， 第2、3维对应图片的高和宽，
+# 最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
 x = tf.placeholder(tf.float32, [None, image_size])
 x_ = tf.reshape(x, [batch_size, image_h, image_w, 1])
 y_ = tf.placeholder(tf.int32, [batch_size, captcha_size])
@@ -40,7 +40,7 @@ y_ = tf.placeholder(tf.int32, [batch_size, captcha_size])
 # 卷积层
 filter_sizes = [5, 5, 3, 3]
 filter_nums = [32, 32, 32, 32]
-pool_types = ['max', 'max', 'avg', 'avg']
+pool_types = ['max', 'avg', 'avg', 'avg']
 pool_scale = [2, 2, 2, 2]
 conv_pools = []
 for i in range(len(filter_sizes)):
@@ -68,17 +68,17 @@ for i in range(len(filter_sizes)):
         conv_pools.append(pool)
 
         if DEBUG:
-            # 没有必要看 conv 层，直接看 pool 层足够了
-            # filter_map = conv[-1]
-            # filter_map = tf.transpose(filter_map, perm=[2, 0, 1])
-            # filter_map = tf.reshape(filter_map, (filter_nums[i],int(conv.get_shape()[1]),int(conv.get_shape()[2]),1))
-            # tf.summary.image('conv', tensor=filter_map, max_outputs=filter_nums[i])
-            filter_map = pool[-1]
-            filter_map = tf.transpose(filter_map, perm=[2, 0, 1])
-            filter_map = tf.reshape(filter_map, (filter_nums[i], int(
-                pool.get_shape()[1]), int(pool.get_shape()[2]), 1))
-            tf.summary.image('conv-pool', tensor=filter_map,
+            filter_map = conv[-1]       # shape: [h, w, filter_nums]
+            filter_map = tf.transpose(filter_map, perm=[2, 0, 1])   # shape: [filter_nums, h, w]
+            filter_map = tf.reshape(filter_map, (filter_nums[i], int(filter_map.get_shape()[
+                                    1]), int(filter_map.get_shape()[2]), 1))  # [filter_nums, h, w, c:1]
+            tf.summary.image('conv', tensor=filter_map,
                              max_outputs=filter_nums[i])
+            # 没有必要看 pool 层，直接看 conv 层足够了
+            # filter_map = pool[-1]
+            # filter_map = tf.transpose(filter_map, perm=[2, 0, 1])
+            # filter_map = tf.reshape(filter_map, (filter_nums[i], int( filter_map.get_shape()[1]), int(filter_map.get_shape()[2]), 1))
+            # tf.summary.image('conv-pool', tensor=filter_map,  max_outputs=filter_nums[i])
             # 输出 W，b 到 tensorboard 实际训练时，关闭这个
             tf.summary.histogram('W'.format(i), W)
             tf.summary.histogram('b'.format(i), b)
@@ -149,9 +149,8 @@ for i in range(captcha_size):
         # sigmoid_cross_entropy_with_logits 二分类问题,不支持多分类
         # softmax_cross_entropy_with_logits 只适合单目标的二分类或者多分类问题，多分类问题需要做成 onehot
         # sparse_softmax_cross_entropy_with_logits 同上，只是分类目标不需要 onehot
-        # weighted_cross_entropy_with_logits 基于
-        # sigmoid_cross_entropy_with_logits
-        # ，多支持一个pos_weight参数，目的是可以增加或者减小正样本在算Cross Entropy时的Loss
+        # weighted_cross_entropy_with_logits 基于 sigmoid_cross_entropy_with_logits ，
+        #   多支持一个pos_weight参数，目的是可以增加或者减小正样本在算Cross Entropy时的Loss
         loss_part = tf.nn.sparse_softmax_cross_entropy_with_logits(
             logits=outputs_part, labels=targets_part)
         # loss_part = tf.nn.sigmoid_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
