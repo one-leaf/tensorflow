@@ -37,10 +37,15 @@ x = tf.placeholder(tf.float32, [None, image_size])
 x_ = tf.reshape(x, [batch_size, image_h, image_w, 1])
 y_ = tf.placeholder(tf.int32, [batch_size, captcha_size])
 
+# 输出原始图片
+if DEBUG:
+    img = tf.expand_dims(x_[-1], 0)  # (h,w,c) => (1,h,w,c)      
+    tf.summary.image('x', tensor=img,  max_outputs=1)
+
 # 卷积层
 filter_sizes = [5, 5, 3, 3]
 filter_nums = [32, 32, 32, 32]
-pool_types = ['max', 'avg', 'avg', 'avg']
+pool_types = ['avg', 'max', 'max', 'max']
 pool_scale = [2, 2, 2, 2]
 conv_pools = []
 for i in range(len(filter_sizes)):
