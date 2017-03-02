@@ -212,12 +212,12 @@ sess.run(tf.global_variables_initializer())
 # keep_checkpoint_every_n_hours 每隔多少小时至少保留一个检查点，下面是每隔 1 小时
 saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
 out_dir = os.path.dirname(__file__)
-checkpoints_dir = os.path.join(out_dir, "checkpoints")
-if not os.path.exists(checkpoints_dir):
-    os.mkdir(checkpoints_dir)
-checkpoint_prefix = os.path.join(checkpoints_dir, "model")
+log_dir = os.path.join(out_dir, "logs")
+if not os.path.exists(log_dir):
+    os.mkdir(log_dir)
+checkpoint_prefix = os.path.join(log_dir, "model.ckpt")
 # 检查到如果存在检查点，就装载继续运行
-ckpt = tf.train.get_checkpoint_state(checkpoints_dir)
+ckpt = tf.train.get_checkpoint_state(log_dir)
 if ckpt and ckpt.model_checkpoint_path:
     print("restore checkpoint and continue train.")
     saver.restore(sess, ckpt.model_checkpoint_path)
@@ -226,8 +226,7 @@ if ckpt and ckpt.model_checkpoint_path:
 tf.summary.scalar("loss", loss)
 tf.summary.scalar("accuracy", accuracy)
 train_summary_op = tf.summary.merge_all()
-train_summary_dir = os.path.join(out_dir, "summaries")
-train_summary_writer = tf.summary.FileWriter(train_summary_dir, sess.graph)
+train_summary_writer = tf.summary.FileWriter(log_dir, sess.graph)
 
 # 定义运行协调
 coord = tf.train.Coordinator()
