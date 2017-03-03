@@ -43,6 +43,10 @@ text, image = captcha(char_set="0123456789", captcha_size=4, width=200, height=8
 # 如果图片不符合训练的大小，需要调整图片大小    
 image = img2vec(img2gray(image)) #tf.image.resize_images(image, (200, 80))
 #imagedata = tf.reshape(image, (1, 200, 80, 1))
+
+for tensor in tf.get_default_graph().as_graph_def().node:
+    print tensor.name
+
 x = tf.get_default_graph().get_tensor_by_name('x:0')
 prediction = tf.get_default_graph().get_tensor_by_name('stack:0')
 #imagedata = image.eval(session=sess)
