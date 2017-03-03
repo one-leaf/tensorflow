@@ -42,6 +42,8 @@ sess,prediction,x = init()
 def crack(file):
     return "OK"
 
+app = Flask(__name__)
+
 @app.route('/')
 def index():
 	return '''<!DOCTYPE html><html>
@@ -61,6 +63,5 @@ def single_digit():
     if file :
     	return crack(file)
 
-app = Flask(__name__)
 if __name__ == '__main__':
 	app.run()
