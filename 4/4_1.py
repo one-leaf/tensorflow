@@ -36,19 +36,11 @@ else:
 
 text, image = captcha(char_set="0123456789", captcha_size=4, width=200, height=80)
 
-# 如果是彩色照片，直接转灰度
-#if image.shape[2] != 1:
-#    image = tf.image.rgb_to_grayscale(image)
-
-# 如果图片不符合训练的大小，需要调整图片大小    
-image = img2vec(img2gray(image)) #tf.image.resize_images(image, (200, 80))
-#imagedata = tf.reshape(image, (1, 200, 80, 1))
-
-for tensor in tf.get_default_graph().as_graph_def().node:
-    print tensor.name
+image = img2vec(img2gray(image)) 
 
 x = tf.get_default_graph().get_tensor_by_name('x:0')
-prediction = tf.get_default_graph().get_tensor_by_name('stack:0')
-#imagedata = image.eval(session=sess)
-#print(imagedata.shape)
-sess.run([prediction], feed_dict={x: image})
+prediction = tf.get_default_graph().get_tensor_by_name('prediction:0')
+
+y_ = sess.run([prediction], feed_dict={x: image})
+
+print("input: %s , get: %s"%(text,y_))
