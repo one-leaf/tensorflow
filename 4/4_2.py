@@ -2,7 +2,7 @@
 '''
 集成WEB服务
 '''
-from flask import Flask, request
+from flask import Flask, request, Response
 import numpy as np
 import tensorflow as tf
 import os
@@ -63,24 +63,25 @@ def index():
                 <button type="submit" class="btn btn-default">Submit</button>
             </form><br/><br/>
             Demo Image : <br/><br/>
-            <img src="%s">
+            <img src="/demo.png">
         </body>
         </html>
-    '''%embedimage()
+    '''
 
-def embedimage():
+@app.route('/demo.png')
+def demo():
     img = captcha(char_set="0123456789", captcha_size=4, width=200, height=80)
     string_buf = StringIO.StringIO()
     img.save(string_buf, format='png')
-    data = string_buf.getvalue().encode('base64').replace('\n', '')
-    return 'data:image/png;base64,' + data
+    return Response(response=string_buf.getvalue(), mimetype='image/png')
 
 @app.route('/crack', methods=['POST'])
 def single_digit():
     file = request.files['file']
     if file :
     	return crack(file)
-
+    else:
+        return 'No file upload'
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0')
