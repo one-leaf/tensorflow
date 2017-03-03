@@ -33,9 +33,9 @@ def get_batch(batch_size=128):
 # 为了使得图片与计算层匹配，我们首先reshape输入图像x为4维的tensor，
 # 第一维是 batch_size 每次训练的样本数， 第2、3维对应图片的高和宽，
 # 最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
-x = tf.placeholder(tf.float32, [None, image_size], name="x"))
+x = tf.placeholder(tf.float32, [None, image_size], name='x')
 x_ = tf.reshape(x, [batch_size, image_h, image_w, 1])
-y_ = tf.placeholder(tf.int32, [batch_size, captcha_size], name="y_")
+y_ = tf.placeholder(tf.int32, [batch_size, captcha_size], name='y_')
 
 # 输出原始图片
 if DEBUG:
