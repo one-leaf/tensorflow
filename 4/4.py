@@ -14,7 +14,6 @@ image_size = image_h * image_w  # 图片大小
 char_set = "0123456789"         # 验证码组成
 char_size = len(char_set)       # 验证码组成种类长度
 captcha_size = 4                # 验证码长度
-batch_size = 100                # 每一批学习的验证码个数
 
 # 是否开启调试 到程序目录执行 tensorboard --logdir=summaries ，访问 http://127.0.0.1:6006
 DEBUG = True
@@ -34,8 +33,8 @@ def get_batch(batch_size=128):
 # 第一维是 batch_size 每次训练的样本数， 第2、3维对应图片的高和宽，
 # 最后一维对应颜色通道的数目，这里是黑白，所以为 1 ，如果图片为 RGB 则为3 。
 x = tf.placeholder(tf.float32, [None, image_size], name='x')
-x_ = tf.reshape(x, [batch_size, image_h, image_w, 1])
-y_ = tf.placeholder(tf.int32, [batch_size, captcha_size], name='y_')
+x_ = tf.reshape(x, [-1, image_h, image_w, 1])
+y_ = tf.placeholder(tf.int32, [None, captcha_size], name='y_')
 
 # 输出原始图片
 if DEBUG:
@@ -94,9 +93,8 @@ full_connects = []
 for i in range(len(hidden_sizes)):
     with tf.variable_scope('full-connect-{}'.format(i)):
         if i == 0:
-            batch_size = int(x_.get_shape()[0])
-            inputs = tf.reshape(conv_pools[-1], [batch_size, -1])
-            in_size = int(inputs.get_shape()[-1])
+            in_size = int(conv_pools[-1].get_shape()[1]) * int(conv_pools[-1].get_shape()[2]) * int(conv_pools[-1].get_shape()[3])
+            inputs = tf.reshape(conv_pools[-1], [-1, in_size])
         else:
             inputs = full_connects[-1]
             in_size = hidden_sizes[i - 1]
@@ -235,7 +233,7 @@ threads = tf.train.start_queue_runners(coord=coord, sess=sess)
 # 运行
 try:
     while not coord.should_stop():
-        batch = get_batch(batch_size)
+        batch = get_batch(100)
         _, _train_summaries, _loss, _preds, _acc, _step = sess.run(
             [train_step, train_summary_op, loss,
                 predictions, accuracy, global_step],
