@@ -3,7 +3,7 @@
 这个是从训练模型中加载数据
 '''
 from generate_captcha import gen_captcha_text_and_image as captcha
-from utils import img2gray, img2vec, text2vec, vec2text
+from utils import img2gray, img2vec
 import numpy as np
 import tensorflow as tf
 import os
@@ -41,6 +41,6 @@ image = img2vec(img2gray(image))
 x = tf.get_default_graph().get_tensor_by_name('x:0')
 prediction = tf.get_default_graph().get_tensor_by_name('prediction:0')
 
-y_ = sess.run([prediction], feed_dict={x: image})
-
-print("input: %s , get: %s"%(text,y_))
+y_ = sess.run([prediction], feed_dict={x: [image]})
+result = "".join([str(x) for x in y_[0][0]])
+print("input: %s , get: %s"%(text,result))
