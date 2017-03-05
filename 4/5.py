@@ -1,6 +1,6 @@
 # coding=utf-8
 '''
-利用RNN进行机器学习，结果不理想，需要去查原因
+利用RNN进行机器学习
 '''
 
 from generate_captcha import gen_captcha_text_and_image as captcha
@@ -48,7 +48,7 @@ def train_neural_network():
     accuracy = tf.reduce_mean(tf.cast(correct,'float'))
     with tf.Session() as session:
         session.run(tf.global_variables_initializer())
-        for step in range(1000):
+        for step in range(100000):
             batch_x, batch_y = get_batch(100)
             _, acc, loss = session.run([optimizer, accuracy, cost_func], feed_dict={x:batch_x,y_:batch_y})
             print(step, acc, loss)
