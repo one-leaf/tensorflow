@@ -25,7 +25,7 @@ def get_batch(batch_size=128):
     return batch_x, batch_y
 
 
-rnn_size = 256 * 4
+rnn_size = 256
 
 x = tf.placeholder('float', [None, image_h, image_w]) 
 y_ = tf.placeholder('float')
@@ -43,7 +43,9 @@ def recurrent_neural_network(data):
 # 使用数据训练神经网络
 def train_neural_network():
     predict = recurrent_neural_network(x)
-    cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=y_))
+#    cost_part = tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=y_)  #无效，算不出
+    cost_part = tf.nn.sigmoid_cross_entropy_with_logits(logits=predict, labels=y_)
+    cost_func = tf.reduce_mean(cost_part)
     optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost_func)
     correct = tf.equal(tf.argmax(predict,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct,'float'))
