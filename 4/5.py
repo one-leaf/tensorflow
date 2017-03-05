@@ -33,10 +33,12 @@ y_ = tf.placeholder('float')
 def recurrent_neural_network(data):
     layer = {'w_':tf.Variable(tf.random_normal([rnn_size, char_size])), 'b_':tf.Variable(tf.random_normal([char_size]))}
     lstm_cell = tf.contrib.rnn.BasicLSTMCell(rnn_size)
+    # lstm_cell = tf.contrib.rnn.DropoutWrapper(lstm_cell, input_keep_prob=0.5, output_keep_prob=0.5)
     data = tf.split(data, 1, axis=0)
     outputs, status = tf.contrib.rnn.static_rnn(lstm_cell, data, dtype=tf.float32)
-    ouput = tf.add(tf.matmul(outputs[-1], layer['w_']), layer['b_'])
-    return ouput
+    output = tf.add(tf.matmul(outputs[-1], layer['w_']), layer['b_'])
+    return output
+
 
 # 使用数据训练神经网络
 def train_neural_network():
