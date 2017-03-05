@@ -32,10 +32,9 @@ y_ = tf.placeholder('float')
 # 定义待训练的神经网络
 def recurrent_neural_network(data):
     layer = {'w_':tf.Variable(tf.random_normal([rnn_size, char_size])), 'b_':tf.Variable(tf.random_normal([char_size]))}
-    lstm_cell = tf.contrib.rnn.core_rnn_cell.BasicLSTMCell(rnn_size)
-    data = tf.transpose(data, [1,0,2])
-    data = tf.reshape(data, [-1, image_h])
-    data = tf.split(data, image_w, axis=0)
+    lstm_cell = tf.contrib.rnn.BasicLSTMCell(rnn_size)
+    data = tf.reshape(data, [-1, image_w])
+    data = tf.split(data, image_h, axis=0)
     outputs, status = tf.contrib.rnn.static_rnn(lstm_cell, data, dtype=tf.float32)
     ouput = tf.add(tf.matmul(outputs[-1], layer['w_']), layer['b_'])
     return ouput
@@ -43,13 +42,11 @@ def recurrent_neural_network(data):
 # 使用数据训练神经网络
 def train_neural_network():
     predict = recurrent_neural_network(x)
-#    cost_part = tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=y_)  #无效，算不出
-    cost_part = tf.nn.sigmoid_cross_entropy_with_logits(logits=predict, labels=y_)
+    cost_part = tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=y_) 
     cost_func = tf.reduce_mean(cost_part)
     optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost_func)
     correct = tf.equal(tf.argmax(predict,1), tf.argmax(y_,1))
     accuracy = tf.reduce_mean(tf.cast(correct,'float'))
-
     with tf.Session() as session:
         session.run(tf.global_variables_initializer())
         for step in range(1000):
