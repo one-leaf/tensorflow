@@ -13,23 +13,32 @@ alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q',
 ALPHABET = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
 
 # 生成字符对应的验证码
-def gen_captcha_text_and_image(char_set=number+alphabet+ALPHABET,captcha_size=4,width=160, height=80):
+def gen_captcha_text_and_image(char_set=number+alphabet+ALPHABET,captcha_size=4,width=160, height=80, saveToFile=None):
     image = ImageCaptcha(width=width,height=height)
 
     captcha_text = random.sample(list(char_set),captcha_size)
     captcha_text = ''.join(captcha_text)
 
     captcha = image.generate(captcha_text)
-    #image.write(captcha_text, captcha_text + '.jpg')  # 写到文件
+
+    if saveToFile!=None:
+        image.write(captcha_text, saveToFile)  # 写到文件
 
     captcha_image = Image.open(captcha)
     #输出就是图片的矢量
     captcha_image = np.array(captcha_image)
     return captcha_text, captcha_image
 
+def gen_captcha_image(char_set=number+alphabet+ALPHABET,captcha_size=4,width=160, height=80):
+    image = ImageCaptcha(width=width,height=height)
+    captcha_text = random.sample(list(char_set),captcha_size)
+    captcha_text = ''.join(captcha_text)
+    captcha = image.generate(captcha_text) 
+    return Image.open(captcha)
+
 if __name__ == '__main__':
     # 测试
-    text, image = gen_captcha_text_and_image(number+alphabet,4,160,80)
+    text, image = gen_captcha_text_and_image(number,4,200,80,"out.png")
     
     print(text)
     print(image.shape)

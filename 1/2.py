@@ -1,4 +1,4 @@
-# coding = utf-8
+# coding=utf-8
 
 import tensorflow as tf
 import numpy as np
@@ -27,18 +27,17 @@ train = optimizer.minimize(loss)
 with tf.Session() as sess:
     # 初始化所有变量
     sess.run(tf.global_variables_initializer())
-    plt.plot(x,y,"ro")
+    plt.plot(x, y, "ro")
     plt.axis([0, 1, 0, 1])
-    plt.show()            
+    plt.show()
     for step in range(101):
         # 进行训练
         sess.run(train)
         if step % 20 == 0:
-            _W=sess.run(W)
-            _b=sess.run(b)
+            _W = sess.run(W)
+            _b = sess.run(b)
             print(step, _W, _b)
+            # 最后的结果 _W _b 接近 上面定义的方程
             # plt.plot([0,1],[_W*0+_b,_W*1+_b])
-            # plt.axis([0, 1, 0, 1])    
+            # plt.axis([0, 1, 0, 1])
             # plt.show()
-
-
