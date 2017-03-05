@@ -27,14 +27,13 @@ def get_batch(batch_size=128):
 
 rnn_size = 256
 
-x = tf.placeholder('float', [None, image_h, image_w]) 
+x = tf.placeholder('float', [None, image_size]) 
 y_ = tf.placeholder('float')
 # 定义待训练的神经网络
 def recurrent_neural_network(data):
     layer = {'w_':tf.Variable(tf.random_normal([rnn_size, char_size])), 'b_':tf.Variable(tf.random_normal([char_size]))}
     lstm_cell = tf.contrib.rnn.BasicLSTMCell(rnn_size)
-    data = tf.reshape(data, [-1, image_w])
-    data = tf.split(data, image_h, axis=0)
+    data = tf.split(data, 1, axis=0)
     outputs, status = tf.contrib.rnn.static_rnn(lstm_cell, data, dtype=tf.float32)
     ouput = tf.add(tf.matmul(outputs[-1], layer['w_']), layer['b_'])
     return ouput
@@ -51,7 +50,6 @@ def train_neural_network():
         session.run(tf.global_variables_initializer())
         for step in range(1000):
             batch_x, batch_y = get_batch(100)
-            batch_x = batch_x.reshape([-1, image_h, image_w])
             _, acc, loss = session.run([optimizer, accuracy, cost_func], feed_dict={x:batch_x,y_:batch_y})
             print(step, acc, loss)
       
