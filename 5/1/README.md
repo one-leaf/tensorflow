@@ -2,9 +2,20 @@
 
 http://blog.topspeedsnail.com/archives/10399
 
-数据来源：
+需要先安装 nltk ，并下载数据
 
-~~豆瓣，被禁止~~
+```
+pip install nltk
+```
+
+安装完毕后，需要下载数据
+
+```
+>>> import nltk
+>>> nltk.download()
+```
+
+~~本来计划想从豆瓣抓数据，被禁止~~
 
 ~~抓取200个电影的评论和打分，建立评价和打分对应模型~~
 
