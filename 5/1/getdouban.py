@@ -17,7 +17,7 @@ def openurl(url):
     time.sleep(5) # 抓取太快会被封IP   
     return r.text
 
-# 获得前2000个电影列表，如果之前已经下载过了，就直接加载
+# 获得前100页热门电影列表，如果之前已经下载过了，就直接加载
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
 if not os.path.exists(data_dir): os.mkdir(data_dir)
@@ -30,15 +30,19 @@ else:
         url="https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&sort=rank&page_limit=20&page_start={}".format(page*20)
         html = openurl(url)
         j = json.loads(html)
+        # 如果没有数据了，后面不下了
+        if len(j['subjects'])==0: break
         for x in j['subjects']:        
             movies.append((x["title"],float(x["rate"]),x["url"]))
     # 保存电影数据
     codecs.open(os.path.join(data_dir,"movies.json"),encoding='utf-8',mode="w").write(json.dumps(movies))
 
 # 下载电源评论和打星表
-for movie in movies:
+count = len(movies)
+for i, movie in enumerate(movies):
+    print(i,'of',count)
     movie_name, movie_rate, movie_url =  movie
-    moviefilename = os.path.join(data_dir,u"{}.txt".format(movie_name))
+    moviefilename = os.path.join(data_dir,u"{}.json".format(movie_name))
     if os.path.exists(moviefilename): continue
     html = openurl(movie_url)
     match_votes = re.search(r'<span property="v:votes">(.*?)</span>',html)
