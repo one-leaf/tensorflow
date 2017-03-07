@@ -7,6 +7,7 @@ import pickle
 from collections import Counter
 import os
 import json
+import gzip
 
 # 使用结巴分词
 # pip install jieba
@@ -14,17 +15,17 @@ import jieba
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
-lex_file = os.path.join(curr_dir, "lex.pickle")
-dataset_file = os.path.join(curr_dir, "dataset.pickle")
+lex_file = os.path.join(curr_dir, "lex.pklz")
+dataset_file = os.path.join(curr_dir, "dataset.pklz")
 
 #所有的打星
 stars={"allstar10":[1,0,0,0,0],"allstar20":[0,1,0,0,0],"allstar30":[0,0,1,0,0],"allstar40":[0,0,0,1,0],"allstar50":[0,0,0,0,1]}
 
 if os.path.exists(lex_file) and os.path.exists(dataset_file):
     print("loading lex ...")
-    lex = pickle.load(open(lex_file,"rb"))
+    lex = pickle.load(gzip.open(lex_file,"rb"))
     print("loading dataset ...")
-    dataset = pickle.load(open(dataset_file,"rb"))
+    dataset = pickle.load(gzip.open(dataset_file,"rb"))
 else:
     movies_file = os.path.join(data_dir,"movies.json")
     movies = json.loads(open(movies_file).read())
@@ -81,9 +82,9 @@ else:
     dataset = normalize_dataset(lex)
     random.shuffle(dataset)
 
-    with open(lex_file, 'wb') as f:
+    with gzip.open(lex_file, 'wb') as f:
         pickle.dump(lex, f)
-    with open(dataset_file, 'wb') as f:
+    with gzip.open(dataset_file, 'wb') as f:
         pickle.dump(dataset, f)
 
 
