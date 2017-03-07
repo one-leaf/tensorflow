@@ -16,9 +16,15 @@ curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
 lex_file = os.path.join(curr_dir, "lex.pickle")
 dataset_file = os.path.join(curr_dir, "dataset.pickle")
+
+#所有的打星
+stars={"allstar10":[1,0,0,0,0],"allstar20":[0,1,0,0,0],"allstar30":[0,0,1,0,0],"allstar40":[0,0,0,1,0],"allstar50":[0,0,0,0,1]}
+
 if os.path.exists(lex_file) and os.path.exists(dataset_file):
-    lex = pickle.load(open(lex_file))
-    dataset = pickle.load(open(dataset_file))
+    print("loading lex ...")
+    lex = pickle.load(open(lex_file,"rb"))
+    print("loading dataset ...")
+    dataset = pickle.load(open(dataset_file,"rb"))
 else:
     movies_file = os.path.join(data_dir,"movies.json")
     movies = json.loads(open(movies_file).read())
@@ -41,16 +47,17 @@ else:
     print(len(lex),"words")
     #lex里保存了文本中出现过的单词。
 
-    #所有的打星
-    stars={"allstar10":[1,0,0,0,0],"allstar20":[0,1,0,0,0],"allstar30":[0,0,1,0,0],"allstar40":[0,0,0,1,0],"allstar50":[0,0,0,0,1]}
-
     # lex:词汇表； comment:评论； star:评论对应的打分 
     def comment_to_vector(lex, comment, star):
         words = jieba.cut(comment)
         features = np.zeros(len(lex))
+        isBlank = True  
         for word in words:
             if word in lex:
+                isBlank = False
                 features[lex.index(word)] += 1  #可能有重复
+        if isBlank:
+            return None        
         return [features, stars[star]]
 
     # 把每条评论转换为向量, 转换原理：
@@ -66,7 +73,8 @@ else:
             movie_comments = json.loads(open(movie_file).read())
             for star,comment in movie_comments:
                 one = comment_to_vector(lex,comment,star)
-                dataset.append(one)   
+                if one!=None:
+                    dataset.append(one)   
         print(len(dataset),"records")
         return dataset
 
@@ -94,7 +102,7 @@ n_input_layer = len(lex)  # 输入层
 n_layer_1 = 1000    # hide layer
 n_layer_2 = 1000    # hide layer(隐藏层)听着很神秘，其实就是除输入输出层外的中间层
 
-n_output_layer = 2       # 输出层
+n_output_layer = len(stars)       # 输出层
 
 # 定义待训练的神经网络
 def neural_network(data):
@@ -123,19 +131,18 @@ Y = tf.placeholder('float')
 # 使用数据训练神经网络
 def train_neural_network(X, Y):
     predict = neural_network(X)
-    cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(predict, Y))
+    cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=Y))
     optimizer = tf.train.AdamOptimizer().minimize(cost_func)  # learning rate 默认 0.001 
 
-    epochs = 13
+    epochs = 15
     with tf.Session() as session:
-        session.run(tf.initialize_all_variables())
-        epoch_loss = 0
-
-        i = 0
+        session.run(tf.global_variables_initializer())
         random.shuffle(train_dataset)
         train_x = dataset[:, 0]
         train_y = dataset[:, 1]
         for epoch in range(epochs):
+            epoch_loss = 0
+            i = 0
             while i < len(train_x):
                 start = i
                 end = i + batch_size
