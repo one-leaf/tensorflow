@@ -128,13 +128,14 @@ batch_size = 50
 X = tf.placeholder('float', [None, len(train_dataset[0][0])]) 
 #[None, len(train_x)]代表数据数据的高和宽（矩阵），好处是如果数据不符合宽高，tensorflow会报错，不指定也可以。
 Y = tf.placeholder('float')
+
 # 使用数据训练神经网络
-def train_neural_network(X, Y):
+def train_neural_network():
     predict = neural_network(X)
     cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=Y))
     optimizer = tf.train.AdamOptimizer().minimize(cost_func)  # learning rate 默认 0.001 
 
-    epochs = 15
+    epochs = 10
     with tf.Session() as session:
         session.run(tf.global_variables_initializer())
         random.shuffle(train_dataset)
@@ -146,20 +147,17 @@ def train_neural_network(X, Y):
             while i < len(train_x):
                 start = i
                 end = i + batch_size
-
                 batch_x = train_x[start:end]
                 batch_y = train_y[start:end]
-
                 _, c = session.run([optimizer, cost_func], feed_dict={X:list(batch_x),Y:list(batch_y)})
                 epoch_loss += c
                 i += batch_size
+            print(epoch, epoch_loss)
 
-            print(epoch, ' : ', epoch_loss)
-
-        text_x = test_dataset[: ,0]
+        text_x = test_dataset[:, 0]
         text_y = test_dataset[:, 1]
         correct = tf.equal(tf.argmax(predict,1), tf.argmax(Y,1))
         accuracy = tf.reduce_mean(tf.cast(correct,'float'))
-        print('准确率: ', accuracy.eval({X:list(text_x) , Y:list(text_y)}))
+        print(u'准确率: ', accuracy.eval({X:list(text_x) , Y:list(text_y)}))
 
-train_neural_network(X,Y)
+train_neural_network()
