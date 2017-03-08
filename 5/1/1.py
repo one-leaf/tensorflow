@@ -146,7 +146,7 @@ cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predic
 optimizer = tf.train.AdamOptimizer().minimize(cost_func)  # learning rate 默认 0.001 
 
 # 使用数据训练神经网络
-def train_neural_network():
+def train_neural_network(session):
     dataset = load_dataset()
     # 取样本中的10%做为测试数据
     test_size = int(len(dataset) * 0.1)
@@ -155,40 +155,38 @@ def train_neural_network():
     test_dataset = dataset[-test_size:]
 
     epochs = 20
-    with tf.Session() as session:
-        session.run(tf.global_variables_initializer())
-        random.shuffle(train_dataset)
-        train_x = dataset[:, 0]
-        train_y = dataset[:, 1]
-        for epoch in range(epochs):
-            epoch_loss = 0
-            i = 0
-            while i < len(train_x):
-                start = i
-                end = i + batch_size
-                batch_x = train_x[start:end]
-                batch_y = train_y[start:end]
-                _, c = session.run([optimizer, cost_func], feed_dict={X:list(batch_x),Y:list(batch_y)})
-                epoch_loss += c
-                i += batch_size
-            print(epoch, epoch_loss)
+    random.shuffle(train_dataset)
+    train_x = dataset[:, 0]
+    train_y = dataset[:, 1]
+    for epoch in range(epochs):
+        epoch_loss = 0
+        i = 0
+        while i < len(train_x):
+            start = i
+            end = i + batch_size
+            batch_x = train_x[start:end]
+            batch_y = train_y[start:end]
+            _, c = session.run([optimizer, cost_func], feed_dict={X:list(batch_x),Y:list(batch_y)})
+            epoch_loss += c
+            i += batch_size
+        print(epoch, epoch_loss)
 
-        text_x = test_dataset[:, 0]
-        text_y = test_dataset[:, 1]
-        correct = tf.equal(tf.argmax(predict,1), tf.argmax(Y,1))
-        accuracy = tf.reduce_mean(tf.cast(correct,'float'))
-        print(u'准确率: ', accuracy.eval({X:list(text_x) , Y:list(text_y)}))
+    text_x = test_dataset[:, 0]
+    text_y = test_dataset[:, 1]
+    correct = tf.equal(tf.argmax(predict,1), tf.argmax(Y,1))
+    accuracy = tf.reduce_mean(tf.cast(correct,'float'))
+    print(u'准确率: ', accuracy.eval({X:list(text_x) , Y:list(text_y)}))
 
-        saver = tf.train.Saver(max_to_keep=1)
-        saver_prefix = os.path.join(data_dir, "model.ckpt")
-        saver.save(session, saver_prefix)
+    saver = tf.train.Saver(max_to_keep=1)
+    saver_prefix = os.path.join(data_dir, "model.ckpt")
+    saver.save(session, saver_prefix)
 
-def test_neural_network(sess):
+def test_neural_network(session):
     comment = raw_input("input comment:")        
     while len(comment)>0:
         x = comment_to_vector(lex, comment)
         if x!=None:
-            y = sess.run([predict],feed_dict={X:x})
+            y = session.run([predict],feed_dict={X:x})
             print(vector_to_star(y[0][0]))
         else:
             print(u"关键词不足，无法识别")    
@@ -204,5 +202,5 @@ if __name__ == '__main__':
         saver.restore(sess, ckpt.model_checkpoint_path)
     else:
         print("start train ...")    
-        train_neural_network()
+        train_neural_network(sess)
     test_neural_network(sess)
