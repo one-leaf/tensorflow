@@ -28,7 +28,7 @@ def star_to_vector(star):
     return v_star
 # 向量转打星
 def vector_to_star(vec):
-    char_pos = vec.nonzero()[0][0] 
+    char_pos = np.where(vec==np.max(vec))[-1][-1] 
     return stars[char_pos]
 
 # lex:词汇表； comment:评论； star:评论对应的打分 
@@ -154,7 +154,7 @@ def train_neural_network():
     train_dataset = dataset[:-test_size]
     test_dataset = dataset[-test_size:]
 
-    epochs = 15
+    epochs = 20
     with tf.Session() as session:
         session.run(tf.global_variables_initializer())
         random.shuffle(train_dataset)
@@ -183,24 +183,26 @@ def train_neural_network():
         saver_prefix = os.path.join(data_dir, "model.ckpt")
         saver.save(session, saver_prefix)
 
-def test_neural_network():
-    sess = tf.InteractiveSession()
-    sess.run(tf.global_variables_initializer())
-    saver = tf.train.Saver(max_to_keep=1)
-    saver_prefix = os.path.join(data_dir, "model.ckpt")
-    saver.save(sess, saver_prefix)
-
+def test_neural_network(sess):
     comment = raw_input("input comment:")        
     while len(comment)>0:
-        x = comment_to_vector(comment)
+        x = comment_to_vector(lex, comment)
         if x!=None:
-            v_star = session.run([predict],feed_dict={X:x})
-            print(vector_to_star(v_star))
+            y = sess.run([predict],feed_dict={X:x})
+            print(vector_to_star(y[0][0]))
         else:
             print(u"关键词不足，无法识别")    
         comment = raw_input("input comment:")
 
-
 if __name__ == '__main__':
-    train_neural_network()
-    # test_neural_network()
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    ckpt = tf.train.get_checkpoint_state(data_dir)
+    saver = tf.train.Saver(max_to_keep=1)
+    if ckpt and ckpt.model_checkpoint_path:
+        print("restore model ...")
+        saver.restore(sess, ckpt.model_checkpoint_path)
+    else:
+        print("start train ...")    
+        train_neural_network()
+    test_neural_network(sess)
