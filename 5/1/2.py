@@ -162,7 +162,7 @@ optimizer = optimizer_nn.apply_gradients(grads_and_vars)
 def train_neural_network(session):
     dataset = load_dataset()
     # 取样本中的10%做为测试数据
-    taddest_size = int(len(dataset) * 0.1)
+    test_size = int(len(dataset) * 0.1)
     dataset = np.array(dataset)
     train_dataset = dataset[:-test_size]
     test_dataset = dataset[-test_size:]
