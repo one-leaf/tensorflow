@@ -1,4 +1,4 @@
-# coding=utf-8
+#coding=utf-8
 
 import numpy as np
 import tensorflow as tf
@@ -12,93 +12,105 @@ import gzip
 # 使用结巴分词
 # pip install jieba
 import jieba
+import jieba.analyse
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
 lex_file = os.path.join(curr_dir, "lex.pklz")
 dataset_file = os.path.join(curr_dir, "dataset.pklz")
 
-#所有的打星
-stars={"allstar10":[1,0,0,0,0],"allstar20":[0,1,0,0,0],"allstar30":[0,0,1,0,0],"allstar40":[0,0,0,1,0],"allstar50":[0,0,0,0,1]}
+# 所有的打星
+stars=["allstar10","allstar20","allstar30","allstar40","allstar50"]
+# 打星转向量
+def star_to_vector(star):
+    v_star = np.zeros(len(stars))
+    v_star[stars.index(star)] = 1
+    return v_star
+# 向量转打星
+def vector_to_star(vec):
+    char_pos = vec.nonzero()[0][0] 
+    return stars[char_pos]
 
-if os.path.exists(lex_file) and os.path.exists(dataset_file):
-    print("loading lex ...")
-    lex = pickle.load(gzip.open(lex_file,"rb"))
-    print("loading dataset ...")
-    dataset = pickle.load(gzip.open(dataset_file,"rb"))
-else:
-    movies_file = os.path.join(data_dir,"movies.json")
-    movies = json.loads(open(movies_file).read())
+# lex:词汇表； comment:评论； star:评论对应的打分 
+def comment_to_vector(lex, comment, star=None):
+    words = jieba.cut(comment)
+    features = np.zeros(len(lex))
+    isBlank = True  #是否是无意义的评论，一个关键词都没有
+    for word in words:
+        if word in lex:
+            isBlank = False
+            features[lex.index(word)] = 1  # += 1 重复计数貌似没有多大的意义，反而是一个干扰项，因为算法中并没有考虑这个权重
+    if isBlank:
+        return None
+    if star==None:
+        return [features]
+    return [features, star_to_vector(star)]
 
-    # 创建词汇表
-    def create_lexicon():    
-        lex = []
-        for title,_,_ in movies:
-            movie_file =os.path.join(data_dir,u"{}.json".format(title))
-            movie = json.loads(open(movie_file).read())
-            for _,comment in movie:
-                lex += jieba.cut(comment)
-        word_count = Counter(lex)
-        # 直接按词频排序，取 20%~80% 的区间
-        words = sorted(word_count, key=word_count.get)
-        count = len(words)
-        return words[int(count*0.2):int(count*0.8)]
+# 创建词汇表
+# lex里保存了文本中出现过的单词。
+def load_lex():
+    if os.path.exists(lex_file):
+        print("loading lex ...")
+        lex = pickle.load(gzip.open(lex_file,"rb"))
+    else:
+        movies_file = os.path.join(data_dir,"movies.json")
+        movies = json.loads(open(movies_file).read())
+        def create_lexicon():    
+            comments=""
+            for title,_,_ in movies:
+                movie_file =os.path.join(data_dir,u"{}.json".format(title))
+                movie = json.loads(open(movie_file).read())                
+                for _,comment in movie:
+                    comments += comment
+                    comments += '\n'
+            # 获得权重最大的30000个单词
+            return jieba.analyse.extract_tags(comments,topK=30000)
+        lex = create_lexicon()
+        with gzip.open(lex_file, 'wb') as f:
+            pickle.dump(lex, f)
+    print("lex",len(lex))
+    return lex
 
-    lex = create_lexicon()
-    print(len(lex),"words")
-    #lex里保存了文本中出现过的单词。
+lex = load_lex()
 
-    # lex:词汇表； comment:评论； star:评论对应的打分 
-    def comment_to_vector(lex, comment, star):
-        words = jieba.cut(comment)
-        features = np.zeros(len(lex))
-        isBlank = True  
-        for word in words:
-            if word in lex:
-                isBlank = False
-                features[lex.index(word)] += 1  #可能有重复
-        if isBlank:
-            return None        
-        return [features, stars[star]]
+def load_dataset():
+    if os.path.exists(dataset_file):
+        print("loading dataset ...")
+        dataset = pickle.load(gzip.open(dataset_file,"rb"))
+    else:
+        movies_file = os.path.join(data_dir,"movies.json")
+        movies = json.loads(open(movies_file).read())
 
-    # 把每条评论转换为向量, 转换原理：
-    # 假设 lex 为 ['好', '赞', '太差', '不好看', '垃圾'] 当然实际上要大的多
-    # 评论 '我认为这个电影太差了，不好看' 转换为 [0,0,1,1,0], 把评论中出现的字在lex中标记，出现过的标记为1，其余标记为0
-    def normalize_dataset(lex):
-        dataset = []
-        count = len(movies)
-        for i, movie in enumerate(movies):
-            print(i,"of",count)
-            title, _, _ = movie
-            movie_file =os.path.join(data_dir,u"{}.json".format(title))
-            movie_comments = json.loads(open(movie_file).read())
-            for star,comment in movie_comments:
-                one = comment_to_vector(lex,comment,star)
-                if one!=None:
-                    dataset.append(one)   
-        print(len(dataset),"records")
-        return dataset
+        # 把每条评论转换为向量, 转换原理：
+        # 假设 lex 为 ['好', '赞', '太差', '不好看', '垃圾'] 当然实际上要大的多
+        # 评论 '我认为这个电影太差了，不好看' 转换为 [0,0,1,1,0], 把评论中出现的字在lex中标记，出现过的标记为1，其余标记为0
+        def normalize_dataset(lex):
+            dataset = []
+            count = len(movies)
+            for i, movie in enumerate(movies):
+                print(i,"of",count)
+                title, _, _ = movie
+                movie_file =os.path.join(data_dir,u"{}.json".format(title))
+                movie_comments = json.loads(open(movie_file).read())
+                for star,comment in movie_comments:
+                    one = comment_to_vector(lex,comment,star)
+                    if one!=None:
+                        dataset.append(one)   
+            return dataset
+        dataset = normalize_dataset(lex)
+        random.shuffle(dataset)
 
-    dataset = normalize_dataset(lex)
-    random.shuffle(dataset)
+        with gzip.open(dataset_file, 'wb') as f:
+            pickle.dump(dataset, f)
 
-    with gzip.open(lex_file, 'wb') as f:
-        pickle.dump(lex, f)
-    with gzip.open(dataset_file, 'wb') as f:
-        pickle.dump(dataset, f)
+    print("dataset",len(dataset))
+    return dataset
 
-
-# 取样本中的10%做为测试数据
-test_size = int(len(dataset) * 0.1)
-
-dataset = np.array(dataset)
-
-train_dataset = dataset[:-test_size]
-test_dataset = dataset[-test_size:]
 
 # Feed-Forward Neural Network
 # 定义每个层有多少'神经元''
-n_input_layer = len(lex)  # 输入层
+lex_length = len(lex)
+n_input_layer = lex_length  # 输入层
 
 n_layer_1 = 1000    # hide layer
 n_layer_2 = 1000    # hide layer(隐藏层)听着很神秘，其实就是除输入输出层外的中间层
@@ -126,17 +138,23 @@ def neural_network(data):
 # 每次使用50条数据进行训练
 batch_size = 50
 
-X = tf.placeholder('float', [None, len(train_dataset[0][0])]) 
+X = tf.placeholder('float', [None, lex_length]) 
 #[None, len(train_x)]代表数据数据的高和宽（矩阵），好处是如果数据不符合宽高，tensorflow会报错，不指定也可以。
 Y = tf.placeholder('float')
+predict = neural_network(X)
+cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=Y))
+optimizer = tf.train.AdamOptimizer().minimize(cost_func)  # learning rate 默认 0.001 
 
 # 使用数据训练神经网络
 def train_neural_network():
-    predict = neural_network(X)
-    cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=Y))
-    optimizer = tf.train.AdamOptimizer().minimize(cost_func)  # learning rate 默认 0.001 
+    dataset = load_dataset()
+    # 取样本中的10%做为测试数据
+    test_size = int(len(dataset) * 0.1)
+    dataset = np.array(dataset)
+    train_dataset = dataset[:-test_size]
+    test_dataset = dataset[-test_size:]
 
-    epochs = 10
+    epochs = 15
     with tf.Session() as session:
         session.run(tf.global_variables_initializer())
         random.shuffle(train_dataset)
@@ -161,4 +179,28 @@ def train_neural_network():
         accuracy = tf.reduce_mean(tf.cast(correct,'float'))
         print(u'准确率: ', accuracy.eval({X:list(text_x) , Y:list(text_y)}))
 
-train_neural_network()
+        saver = tf.train.Saver(max_to_keep=1)
+        saver_prefix = os.path.join(data_dir, "model.ckpt")
+        saver.save(session, saver_prefix)
+
+def test_neural_network():
+    sess = tf.InteractiveSession()
+    sess.run(tf.global_variables_initializer())
+    saver = tf.train.Saver(max_to_keep=1)
+    saver_prefix = os.path.join(data_dir, "model.ckpt")
+    saver.save(sess, saver_prefix)
+
+    comment = raw_input("input comment:")        
+    while len(comment)>0:
+        x = comment_to_vector(comment)
+        if x!=None:
+            v_star = session.run([predict],feed_dict={X:x})
+            print(vector_to_star(v_star))
+        else:
+            print(u"关键词不足，无法识别")    
+        comment = raw_input("input comment:")
+
+
+if __name__ == '__main__':
+    train_neural_network()
+    # test_neural_network()
