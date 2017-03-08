@@ -9,4 +9,4 @@
 
 http://blog.topspeedsnail.com/archives/10399
 
-经过20轮的学习，可以预测的准确率 97%
+经过20轮的学习，准确率为 97%
