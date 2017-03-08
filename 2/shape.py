@@ -9,7 +9,7 @@ def shape(sess):
     # ('x', array([[ 1.,  1.,  1.],  [ 1.,  1.,  1.]], dtype=float32), 'y', array([2, 3], dtype=int32))
 
 def expand_dims(sess):
-    x = tf.ones([2, 3])
+    x = tf.ones([2, 3])   # [[1. 1.] [1. 1.] [1. 1.]]
     y = tf.expand_dims(x, 0)
     print(sess.run(y))    # [[[ 1.  1.  1.]  [ 1.  1.  1.]]]
     y = tf.expand_dims(x, 1)
