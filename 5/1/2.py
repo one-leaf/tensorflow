@@ -121,27 +121,26 @@ dropout_keep_prob = tf.placeholder(tf.float32)
 # 定义待训练的神经网络
 def neural_network():
     embedding_size = 128
-    W = tf.Variable(tf.random_uniform([lex_length, embedding_size], -1.0, 1.0))
-    embedded_chars = tf.nn.embedding_lookup(W, X)
-    embedded_chars_expanded = tf.expand_dims(embedded_chars, -1)
-
+    W = tf.Variable(tf.random_uniform([lex_length, embedding_size], -1.0, 1.0))  # (30000, 128)
+    embedded_chars = tf.nn.embedding_lookup(W, X)   # (?, 30000) ==> (?, 30000, 128)
+    embedded_chars_expanded = tf.expand_dims(embedded_chars, -1)    # (?, 30000, 128, 1)
     num_filters = 128
     filter_sizes = [3,4,5]
     pooled_outputs = []
 
     for i, filter_size in enumerate(filter_sizes):
         with tf.name_scope("conv-maxpool-%s" % filter_size):
-            filter_shape = [filter_size, embedding_size, 1, num_filters]
+            filter_shape = [filter_size, embedding_size, 1, num_filters]    # (3, 128, 1, 128)
             W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1))
             b = tf.Variable(tf.constant(0.1, shape=[num_filters]))
-            conv = tf.nn.conv2d(embedded_chars_expanded, W, strides=[1, 1, 1, 1], padding="VALID")
+            conv = tf.nn.conv2d(embedded_chars_expanded, W, strides=[1, 1, 1, 1], padding="VALID")  # (?, 29998, 1, 128)
             h = tf.nn.relu(tf.nn.bias_add(conv, b))
-            pooled = tf.nn.max_pool(h, ksize=[1, lex_length - filter_size + 1, 1, 1], strides=[1, 1, 1, 1], padding='VALID')
+            pooled = tf.nn.max_pool(h, ksize=[1, lex_length - filter_size + 1, 1, 1], strides=[1, 1, 1, 1], padding='VALID')    # (?, 1, 1, 128)
             pooled_outputs.append(pooled)
 
-    num_filters_total = num_filters * len(filter_sizes)
-    h_pool = tf.stack(pooled_outputs,axis=3)
-    h_pool_flat = tf.reshape(h_pool, [-1, num_filters_total])
+    num_filters_total = num_filters * len(filter_sizes)         # 128 * 3 = 384
+    h_pool = tf.stack(pooled_outputs,axis=3)                    # (?, 1, 1, 3, 128)
+    h_pool_flat = tf.reshape(h_pool, [-1, num_filters_total])   # (?, 384)
     # dropout 繁殖过度拟合，可以不加 训练的时候选 0.5 测试的时候选 1
     with tf.name_scope("dropout"):
         h_drop = tf.nn.dropout(h_pool_flat, dropout_keep_prob)
