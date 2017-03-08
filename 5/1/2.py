@@ -1,5 +1,5 @@
 # coding=utf-8
-# 本例中采用的是 feedfroward neural network 模型，FNN 
+# 本例中采用的是 convolutional neural network 模型，CNN 
 import numpy as np
 import tensorflow as tf
 import random
@@ -16,7 +16,7 @@ import jieba.analyse
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
-model_dir = os.path.join(curr_dir, "fnn_model")
+model_dir = os.path.join(curr_dir, "cnn_model")
 if not os.path.exists(model_dir):
     os.mkdir(model_dir)
 lex_file = os.path.join(curr_dir, "lex.pklz")
@@ -112,47 +112,61 @@ def load_dataset():
 
 # 定义每个层有多少'神经元''
 lex_length = len(lex)
-n_input_layer = lex_length  # 输入层
-
-n_layer_1 = 1000    # hide layer
-n_layer_2 = 1000    # hide layer(隐藏层)听着很神秘，其实就是除输入输出层外的中间层
-
 n_output_layer = len(stars)       # 输出层
 
-X = tf.placeholder('float', [None, lex_length]) # 输入值
+X = tf.placeholder('int32', [None, lex_length]) # 输入值
 Y = tf.placeholder('float')                     # 训练结果输入
+dropout_keep_prob = tf.placeholder(tf.float32)
 
 # 定义待训练的神经网络
 def neural_network():
-    # 定义第一层"神经元"的权重和biases
-    layer_1_w_b = {'w_':tf.Variable(tf.random_normal([n_input_layer, n_layer_1])), 'b_':tf.Variable(tf.random_normal([n_layer_1]))}
-    # 定义第二层"神经元"的权重和biases
-    layer_2_w_b = {'w_':tf.Variable(tf.random_normal([n_layer_1, n_layer_2])), 'b_':tf.Variable(tf.random_normal([n_layer_2]))}
-    # 定义输出层"神经元"的权重和biases
-    layer_output_w_b = {'w_':tf.Variable(tf.random_normal([n_layer_2, n_output_layer])), 'b_':tf.Variable(tf.random_normal([n_output_layer]))}
+    embedding_size = 128
+    W = tf.Variable(tf.random_uniform([lex_length, embedding_size], -1.0, 1.0))
+    embedded_chars = tf.nn.embedding_lookup(W, X)
+    embedded_chars_expanded = tf.expand_dims(embedded_chars, -1)
 
-    # w·x+b
-    layer_1 = tf.add(tf.matmul(X, layer_1_w_b['w_']), layer_1_w_b['b_'])
-    layer_1 = tf.nn.relu(layer_1)  # 激活函数
-    layer_2 = tf.add(tf.matmul(layer_1, layer_2_w_b['w_']), layer_2_w_b['b_'])
-    layer_2 = tf.nn.relu(layer_2 ) # 激活函数
-    layer_output = tf.add(tf.matmul(layer_2, layer_output_w_b['w_']), layer_output_w_b['b_'])
+    num_filters = 128
+    filter_sizes = [3,4,5]
+    pooled_outputs = []
 
-    return layer_output
+    for i, filter_size in enumerate(filter_sizes):
+        with tf.name_scope("conv-maxpool-%s" % filter_size):
+            filter_shape = [filter_size, embedding_size, 1, num_filters]
+            W = tf.Variable(tf.truncated_normal(filter_shape, stddev=0.1))
+            b = tf.Variable(tf.constant(0.1, shape=[num_filters]))
+            conv = tf.nn.conv2d(embedded_chars_expanded, W, strides=[1, 1, 1, 1], padding="VALID")
+            h = tf.nn.relu(tf.nn.bias_add(conv, b))
+            pooled = tf.nn.max_pool(h, ksize=[1, lex_length - filter_size + 1, 1, 1], strides=[1, 1, 1, 1], padding='VALID')
+            pooled_outputs.append(pooled)
+
+    num_filters_total = num_filters * len(filter_sizes)
+    h_pool = tf.stack(pooled_outputs,axis=3)
+    h_pool_flat = tf.reshape(h_pool, [-1, num_filters_total])
+    # dropout 繁殖过度拟合，可以不加 训练的时候选 0.5 测试的时候选 1
+    with tf.name_scope("dropout"):
+        h_drop = tf.nn.dropout(h_pool_flat, dropout_keep_prob)
+    # output
+    with tf.name_scope("output"):
+        W = tf.get_variable("W", shape=[num_filters_total, n_output_layer], initializer=tf.contrib.layers.xavier_initializer())
+        b = tf.Variable(tf.constant(0.1, shape=[n_output_layer]))
+        output = tf.nn.xw_plus_b(h_drop, W, b)		
+    return output
 
 predict = neural_network()  # 计算出来的输出结果
 cost_func = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=predict, labels=Y))   # 损失函数
-optimizer = tf.train.AdamOptimizer().minimize(cost_func)  # 学习速率 默认 0.001 
+optimizer_nn = tf.train.AdamOptimizer(1e-3) # 优化器
+grads_and_vars = optimizer_nn.compute_gradients(cost_func)
+optimizer = optimizer_nn.apply_gradients(grads_and_vars)
 
 # 使用数据训练神经网络
 def train_neural_network(session):
     dataset = load_dataset()
-    # 取样本中的 10% 做为测试数据
+    # 取样本中的10%做为测试数据
     test_size = int(len(dataset) * 0.1)
     dataset = np.array(dataset)
     train_dataset = dataset[:-test_size]
     test_dataset = dataset[-test_size:]
-    
+
     batch_size = 50     # 每次使用 50 条数据进行训练
     epochs = 20         # 训练 20 轮
     random.shuffle(train_dataset)
@@ -166,7 +180,7 @@ def train_neural_network(session):
             end = i + batch_size
             batch_x = train_x[start:end]
             batch_y = train_y[start:end]
-            _, c = session.run([optimizer, cost_func], feed_dict={X:list(batch_x),Y:list(batch_y)})
+            _, c = session.run([optimizer, cost_func], feed_dict={X:list(batch_x), Y:list(batch_y), dropout_keep_prob:0.5})
             epoch_loss += c
             i += batch_size
         print(epoch, epoch_loss)
@@ -175,7 +189,7 @@ def train_neural_network(session):
     text_y = test_dataset[:, 1]
     correct = tf.equal(tf.argmax(predict,1), tf.argmax(Y,1))
     accuracy = tf.reduce_mean(tf.cast(correct,'float'))
-    print(u'准确率: ', accuracy.eval({X:list(text_x) , Y:list(text_y)}))
+    print(u'准确率: ', accuracy.eval({X:list(text_x) , Y:list(text_y) , dropout_keep_prob:1.0}))
 
     saver = tf.train.Saver(max_to_keep=1)
     saver_prefix = os.path.join(model_dir, "model.ckpt")

@@ -10,3 +10,4 @@ checkpoints/
 summaries/
 logs/
 data/
+*_model/
