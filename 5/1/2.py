@@ -162,12 +162,12 @@ optimizer = optimizer_nn.apply_gradients(grads_and_vars)
 def train_neural_network(session):
     dataset = load_dataset()
     # 取样本中的10%做为测试数据
-    test_size = int(len(dataset) * 0.1)
+    taddest_size = int(len(dataset) * 0.1)
     dataset = np.array(dataset)
     train_dataset = dataset[:-test_size]
     test_dataset = dataset[-test_size:]
 
-    batch_size = 50     # 每次使用 50 条数据进行训练
+    batch_size = 5     # 每次使用 5 条数据进行训练，模型太大，系统跑不动
     epochs = 20         # 训练 20 轮
     random.shuffle(train_dataset)
     train_x = dataset[:, 0]
@@ -183,6 +183,7 @@ def train_neural_network(session):
             _, c = session.run([optimizer, cost_func], feed_dict={X:list(batch_x), Y:list(batch_y), dropout_keep_prob:0.5})
             epoch_loss += c
             i += batch_size
+            print(i, c)
         print(epoch, epoch_loss)
 
     text_x = test_dataset[:, 0]
