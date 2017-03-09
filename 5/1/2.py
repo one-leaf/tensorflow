@@ -167,7 +167,7 @@ def train_neural_network(session):
     test_dataset = dataset[-test_size:]
 
     batch_size = 20     # 每次使用 20 条数据进行训练，模型太大，系统跑不动
-    epochs = 10         # 训练 10 轮
+    epochs = 20         # 训练 10 轮
     random.shuffle(train_dataset)
     train_x = dataset[:, 0]
     train_y = dataset[:, 1]
