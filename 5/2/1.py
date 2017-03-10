@@ -160,7 +160,7 @@ def train_neural_network(input_image):
         if ckpt and ckpt.model_checkpoint_path:
             print("restore model ...")
             saver.restore(sess, ckpt.model_checkpoint_path)
-            n = global_step.eval()
+            # n = global_step.eval()
 
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)            
