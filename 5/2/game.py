@@ -55,8 +55,7 @@ class Game(object):
 					bar_move_right = True
 				elif (event.type == pygame.MOUSEBUTTONUP and event.button == 3) or \
                         (event.type == pygame.KEYUP and event.key == pygame.K_RIGHT) :
-					bar_move_right = False
-                
+					bar_move_right = False                
  
 			if bar_move_left == True and bar_move_right == False:
 				self.bar_move_left()

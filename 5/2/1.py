@@ -114,14 +114,19 @@ def convolutional_neural_network(input_image):
               'b_conv3':tf.Variable(tf.zeros([64])),
               'b_fc4':tf.Variable(tf.zeros([784])),
               'b_out':tf.Variable(tf.zeros([output]))}
- 
+    # input_image : (?, 80, 100, 4)
     conv1 = tf.nn.relu(tf.nn.conv2d(input_image, weights['w_conv1'], strides = [1, 4, 4, 1], padding = "VALID") + biases['b_conv1'])
+    # conv1 : （？， 19， 24， 32）
     conv2 = tf.nn.relu(tf.nn.conv2d(conv1, weights['w_conv2'], strides = [1, 2, 2, 1], padding = "VALID") + biases['b_conv2'])
+    # conv2 :  (?, 8, 11, 64)
     conv3 = tf.nn.relu(tf.nn.conv2d(conv2, weights['w_conv3'], strides = [1, 1, 1, 1], padding = "VALID") + biases['b_conv3'])
+    # conv3 :  (?, 6, 9, 64)
     conv3_flat = tf.reshape(conv3, [-1, 3456])
+    # conv3_flat : (?, 3456)
     fc4 = tf.nn.relu(tf.matmul(conv3_flat, weights['w_fc4']) + biases['b_fc4'])
- 
+    # fc4 : (?, 784)
     output_layer = tf.matmul(fc4, weights['w_out']) + biases['b_out']
+    # output_layer : (?, 3)
     return output_layer
  
 # 深度强化学习入门: https://www.nervanasys.com/demystifying-deep-reinforcement-learning/
@@ -148,7 +153,7 @@ def train_neural_network(input_image):
     input_image_data = np.stack((image, image, image, image), axis = 2)
     
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
                 
         saver_prefix = os.path.join(model_dir, "model.ckpt")        
         ckpt = tf.train.get_checkpoint_state(model_dir)

@@ -11,6 +11,10 @@ def reduce_sum(sess):
     y = tf.reduce_sum(x, 0) 
     print('x',sess.run(x),'y',sess.run(y))
     # x [[1 1 1] [1 1 1]] y [2 2 2]
+    x = tf.constant([[1, 2],[3, 4]])
+    y = tf.reduce_sum(x,reduction_indices = 1)
+    print('x',sess.run(x),'y',sess.run(y))
+    # x [[1 2] [3 4]] y [3, 7]
 
 # *(x)
 def reduce_prod(sess):
@@ -77,7 +81,7 @@ def accumulate_n(sess):
 
 if __name__ == '__main__':
     with tf.Session() as sess:    
-        # reduce_sum(sess)
+        reduce_sum(sess)
         # reduce_prod(sess)
         # reduce_min(sess)
         # reduce_max(sess)
@@ -86,4 +90,4 @@ if __name__ == '__main__':
         # reduce_any(sess)
         # reduce_logsumexp(sess)
         # count_nonzero(sess)
-        accumulate_n(sess)
+        # accumulate_n(sess)
