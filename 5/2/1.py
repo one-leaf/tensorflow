@@ -132,8 +132,8 @@ def convolutional_neural_network(input_image):
 # 深度强化学习入门: https://www.nervanasys.com/demystifying-deep-reinforcement-learning/
 # 训练神经网络
 def train_neural_network(input_image):
-    predict_action = convolutional_neural_network(input_image)
- 
+    predict_action = convolutional_neural_network(input_image)  # (?, 3)
+
     argmax = tf.placeholder("float", [None, output])
     gt = tf.placeholder("float", [None])
  
@@ -149,9 +149,8 @@ def train_neural_network(input_image):
     # 转换为灰度值
     image = cv2.cvtColor(cv2.resize(image, (100, 80)), cv2.COLOR_BGR2GRAY)
     # 转换为二值
-    ret, image = cv2.threshold(image, 1, 255, cv2.THRESH_BINARY)
-    input_image_data = np.stack((image, image, image, image), axis = 2)
-    
+    ret, image = cv2.threshold(image, 1, 255, cv2.THRESH_BINARY)    # image shape: (80, 100)
+    input_image_data = np.stack((image, image, image, image), axis = 2) # shape: (80, 100, 4)
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
                 
