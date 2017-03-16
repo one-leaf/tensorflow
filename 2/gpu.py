@@ -56,4 +56,4 @@ for d in ['/gpu:0', '/gpu:1']:
     with tf.device('/cpu:0'):
         with tf.Session(config=tf.ConfigProto(log_device_placement=True)) as sess:
             sum = tf.add_n(c)
-            print (sess.run(sum/20000.0)*4.0)
+            print(sess.run(sum/20000.0)*4.0)
