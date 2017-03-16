@@ -140,9 +140,13 @@ def train_neural_network(input_image):
  
     action = tf.reduce_sum(tf.multiply(predict_action, argmax), reduction_indices = 1)
     cost = tf.reduce_mean(tf.square(action - gt))
-    global_step = tf.Variable(0, name='global_step', trainable=False)
-    optimizer = tf.train.AdamOptimizer(1e-6).minimize(cost, global_step=global_step)
  
+    # 定义学习速率和优化方法
+    global_step = tf.Variable(0, trainable=False)
+    learning_rate = tf.train.exponential_decay(0.1, global_step, 1000, 0.96, staircase=True)
+
+    optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
+
     game = Game()
     D = deque()
  
@@ -160,8 +164,8 @@ def train_neural_network(input_image):
         ckpt = tf.train.get_checkpoint_state(model_dir)
         saver = tf.train.Saver(max_to_keep=1)
 
-        n = 0
-        epsilon = INITIAL_EPSILON
+        # n = 0
+        # epsilon = INITIAL_EPSILON
 
         if ckpt and ckpt.model_checkpoint_path:
             print("restore model ...")
@@ -172,56 +176,67 @@ def train_neural_network(input_image):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)            
         while not coord.should_stop():
+            
+            # 获得预测的步骤
             action_t = predict_action.eval(feed_dict = {input_image : [input_image_data]})[0]
- 
             argmax_t = np.zeros([output], dtype=np.int)
-            if(random.random() <= INITIAL_EPSILON):
-                maxIndex = random.randrange(output)
-            else:
-                maxIndex = np.argmax(action_t)
+            # if(random.random() <= INITIAL_EPSILON):
+            #     maxIndex = random.randrange(output)
+            # else:
+            #     maxIndex = np.argmax(action_t)
+            maxIndex = np.argmax(action_t)
             argmax_t[maxIndex] = 1
-            if epsilon > FINAL_EPSILON:
-                epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
+
+
+            # if epsilon > FINAL_EPSILON:
+            #     epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
  
+            # 游戏按预测的下一步
             for event in pygame.event.get():  # macOS需要事件循环，否则白屏
             	if event.type == QUIT:
             		pygame.quit()
-            		sys.exit()
-            reward, image = game.step(list(argmax_t))
+            		sys.exit()                    
+            reward, image = game.step(list(argmax_t))           
  
+            # 获得游戏截图
             image = cv2.cvtColor(cv2.resize(image, (100, 80)), cv2.COLOR_BGR2GRAY)
             ret, image = cv2.threshold(image, 1, 255, cv2.THRESH_BINARY)
             image = np.reshape(image, (80, 100, 1))
             input_image_data1 = np.append(image, input_image_data[:, :, 0:3], axis = 2)
  
+            # 添加到list中
             D.append((input_image_data, argmax_t, reward, input_image_data1))
  
-            if len(D) > REPLAY_MEMORY:
-                D.popleft()
+            # 如果list太长，删除最早的
+            if len(D) > REPLAY_MEMORY: D.popleft()
  
-            if n > OBSERVE:
+            # if n > OBSERVE:
+            if len(D) >= BATCH:
+                # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
                 input_image_data_batch = [d[0] for d in minibatch]
                 argmax_batch = [d[1] for d in minibatch]
                 reward_batch = [d[2] for d in minibatch]
                 input_image_data1_batch = [d[3] for d in minibatch]
  
-                gt_batch = []
- 
+                # 获得预测的步骤
                 out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch})
  
+                # 对结果进行评价
+                gt_batch = []
                 for i in range(0, len(minibatch)):
-                    gt_batch.append(reward_batch[i] + LEARNING_RATE * np.max(out_batch[i]))
+                    gt_batch.append(reward_batch[i] + learning_rate * np.max(out_batch[i]))
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
+                # 将评价的结果重新输入到系统进行学习
                 _, _step=sess.run([optimizer,global_step],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
+                if _step % 10 == 0:                
+                    saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
+                    print(_step, " " ,"action:", maxIndex, " " ,"reward:", reward)
            
             input_image_data = input_image_data1
-            n = n+1
-            if n % 100 == 0 and n > OBSERVE:                
-                saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
- 
-            print(n, "epsilon:", epsilon, " " ,"action:", maxIndex, " " ,"reward:", reward)
+
+            
 
         coord.request_stop()
         coord.join(threads)
