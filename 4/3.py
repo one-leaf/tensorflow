@@ -91,7 +91,7 @@ correct_prediction = tf.equal(tf.arg_max(y_conv, 1), tf.arg_max(y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
 
-sess = tf.InteractiveSession()
+sess = tf.InteractiveSession(config=tf.ConfigProto(log_device_placement=True))
 sess.run(tf.global_variables_initializer())
 for i in range(20000):
     batch = get_batch(50)
