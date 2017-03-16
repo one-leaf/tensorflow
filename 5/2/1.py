@@ -7,7 +7,8 @@ import numpy as np
 from collections import deque
 import tensorflow as tf  # http://blog.topspeedsnail.com/archives/10116
 import cv2               # http://blog.topspeedsnail.com/archives/4755
-import os
+import os 
+import sys
  
 BLACK     = (0  ,0  ,0  )
 WHITE     = (255,255,255)
@@ -165,6 +166,7 @@ def train_neural_network(input_image):
         if ckpt and ckpt.model_checkpoint_path:
             print("restore model ...")
             saver.restore(sess, ckpt.model_checkpoint_path)
+            # epsilon = 
             # n = global_step.eval()
 
         coord = tf.train.Coordinator()
@@ -181,10 +183,10 @@ def train_neural_network(input_image):
             if epsilon > FINAL_EPSILON:
                 epsilon -= (INITIAL_EPSILON - FINAL_EPSILON) / EXPLORE
  
-            #for event in pygame.event.get():  macOS需要事件循环，否则白屏
-            #	if event.type == QUIT:
-            #		pygame.quit()
-            #		sys.exit()
+            for event in pygame.event.get():  # macOS需要事件循环，否则白屏
+            	if event.type == QUIT:
+            		pygame.quit()
+            		sys.exit()
             reward, image = game.step(list(argmax_t))
  
             image = cv2.cvtColor(cv2.resize(image, (100, 80)), cv2.COLOR_BGR2GRAY)
