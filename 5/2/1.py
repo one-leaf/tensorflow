@@ -85,10 +85,10 @@ LEARNING_RATE = 0.99
 INITIAL_EPSILON = 1.0
 FINAL_EPSILON = 0.05
 # 测试观测次数
-EXPLORE = 500000 
-OBSERVE = 50000
+EXPLORE = 10000 
+OBSERVE = 1000
 # 存储过往经验大小
-REPLAY_MEMORY = 500000
+REPLAY_MEMORY = 10000
  
 BATCH = 100
 
@@ -141,9 +141,12 @@ def train_neural_network(input_image):
     action = tf.reduce_sum(tf.multiply(predict_action, argmax), reduction_indices = 1)
     cost = tf.reduce_mean(tf.square(action - gt))
  
+
     # 定义学习速率和优化方法
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(0.1, global_step, 1000, 0.96, staircase=True)
+    learning_rate = tf.train.exponential_decay(1e-3, global_step, 1000, 0.96, staircase=True)
+
+#    optimizer = tf.train.AdamOptimizer(1e-6).minimize(cost)
 
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
@@ -156,6 +159,7 @@ def train_neural_network(input_image):
     # 转换为二值
     ret, image = cv2.threshold(image, 1, 255, cv2.THRESH_BINARY)    # image shape: (80, 100)
     input_image_data = np.stack((image, image, image, image), axis = 2) # shape: (80, 100, 4)
+
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
                 
@@ -169,21 +173,21 @@ def train_neural_network(input_image):
         if ckpt and ckpt.model_checkpoint_path:
             print("restore model ...")
             saver.restore(sess, ckpt.model_checkpoint_path)
-            # epsilon = 
-            # n = global_step.eval()
 
         coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord=coord, sess=sess)            
+        threads = tf.train.start_queue_runners(coord=coord, sess=sess)         
+        # n = 0   
         while not coord.should_stop():
+        # while True:
             
             # 获得预测的步骤
             action_t = predict_action.eval(feed_dict = {input_image : [input_image_data]})[0]
             argmax_t = np.zeros([output], dtype=np.int)
             # if(random.random() <= INITIAL_EPSILON):
-            #     maxIndex = random.randrange(output)
+            # 随机动一下
+            maxIndex = random.randrange(output)
             # else:
-            #     maxIndex = np.argmax(action_t)
-            maxIndex = np.argmax(action_t)
+                # maxIndex = np.argmax(action_t)
             argmax_t[maxIndex] = 1
 
 
@@ -192,9 +196,9 @@ def train_neural_network(input_image):
  
             # 游戏按预测的下一步
             for event in pygame.event.get():  # macOS需要事件循环，否则白屏
-            	if event.type == QUIT:
-            		pygame.quit()
-            		sys.exit()                    
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()                    
             reward, image = game.step(list(argmax_t))           
  
             # 获得游戏截图
@@ -207,7 +211,8 @@ def train_neural_network(input_image):
             D.append((input_image_data, argmax_t, reward, input_image_data1))
  
             # 如果list太长，删除最早的
-            if len(D) > REPLAY_MEMORY: D.popleft()
+            if len(D) > REPLAY_MEMORY:
+                D.popleft()
  
             # if n > OBSERVE:
             if len(D) >= BATCH:
@@ -218,26 +223,27 @@ def train_neural_network(input_image):
                 reward_batch = [d[2] for d in minibatch]
                 input_image_data1_batch = [d[3] for d in minibatch]
  
-                # 获得预测的步骤
-                out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch})
- 
                 # 对结果进行评价
                 gt_batch = []
+                
+                # 获得预测的步骤
+                out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch})
+
                 for i in range(0, len(minibatch)):
-                    gt_batch.append(reward_batch[i] + learning_rate * np.max(out_batch[i]))
+                    gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习
                 _, _step=sess.run([optimizer,global_step],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 if _step % 10 == 0:                
-                    saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
-                    print(_step, " " ,"action:", maxIndex, " " ,"reward:", reward)
+                   saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
+                   print(_step, " " ,"action:", maxIndex, " " ,"reward:", reward)
            
             input_image_data = input_image_data1
+            # n = n+1           
+            # print(n, " " ,"action:", maxIndex, " " ,"reward:", reward)
 
-            
-
-        coord.request_stop()
-        coord.join(threads)
+        # coord.request_stop()
+        # coord.join(threads)
 
 train_neural_network(input_image)
