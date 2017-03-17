@@ -208,11 +208,12 @@ def train_neural_network(input_image):
             D.append((input_image_data, argmax_t, reward, input_image_data1))
  
             # 如果list太长，删除最早的
-            if len(D) > REPLAY_MEMORY:
+            D_size = len(D)
+            if D_size > REPLAY_MEMORY:
                 D.popleft()
- 
+                
             # if n > OBSERVE:
-            if len(D) == REPLAY_MEMORY:
+            if D_size >= REPLAY_MEMORY:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
                 input_image_data_batch = [d[0] for d in minibatch] 
@@ -237,7 +238,8 @@ def train_neural_network(input_image):
                 if _step % 10 == 0:                
                     saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
                     print(_step,"action:", maxIndex, "reward:", reward, "random_rate:", _rate,"cost:",_cost,"next_action:",_next_action)
-           
+            else:
+                print(D_size)
             input_image_data = input_image_data1
             # n = n+1           
             # print(n, " " ,"action:", maxIndex, " " ,"reward:", reward)
