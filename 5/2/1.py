@@ -212,7 +212,7 @@ def train_neural_network(input_image):
             if D_size > REPLAY_MEMORY:
                 D.popleft()
                 
-            if D_size >= REPLAY_MEMORY:
+            if D_size >= BATCH:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
                 input_image_data_batch = [d[0] for d in minibatch] 
