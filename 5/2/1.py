@@ -9,6 +9,7 @@ import tensorflow as tf  # http://blog.topspeedsnail.com/archives/10116
 import cv2               # http://blog.topspeedsnail.com/archives/4755
 import os 
 import sys
+import platform
  
 BLACK     = (0  ,0  ,0  )
 WHITE     = (255,255,255)
@@ -167,7 +168,7 @@ def train_neural_network(input_image):
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)   
 
         # 动态调整是否采用预测的值作为一下步的概率
-        ACTION_RATE = 0.0     
+        ACTION_RATE = 0.0
         while not coord.should_stop():            
             argmax_t = np.zeros([output], dtype=np.int)
             
@@ -184,17 +185,16 @@ def train_neural_network(input_image):
             reward, image = game.step(list(argmax_t))           
 
             # 如果预测成功，采用随机概率增加
-            if reward == 1:
-                ACTION_RATE += 1 / REPLAY_MEMORY                
-            elif reward == -1:
-                ACTION_RATE -= 1 / REPLAY_MEMORY    
-            if  ACTION_RATE <0 : ACTION_RATE = 0.0
-            if  ACTION_RATE >1 : ACTION_RATE = 1.0
+            if reward == -1:
+                ACTION_RATE -= ACTION_RATE * 0.5
+            elif reward == 1:            
+                ACTION_RATE = 1.0 
 
-            # for event in pygame.event.get():  # macOS需要事件循环，否则白屏
-            #     if event.type == QUIT:
-            #         pygame.quit()
-            #         sys.exit()   
+            if platform.system()=="Darwin":
+                for event in pygame.event.get():  # macOS需要事件循环，否则白屏
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()   
 
             # 获得游戏截图
             image = cv2.cvtColor(cv2.resize(image, (100, 80)), cv2.COLOR_BGR2GRAY)
