@@ -186,7 +186,7 @@ def train_neural_network(input_image):
             # 如果预测成功，采用随机概率增加
             if reward == 1:
                 ACTION_RATE += 1 / REPLAY_MEMORY                
-            else:
+            elif reward == -1:
                 ACTION_RATE -= 1 / REPLAY_MEMORY    
             if  ACTION_RATE <0 : ACTION_RATE = 0.0
             if  ACTION_RATE >1 : ACTION_RATE = 1.0
