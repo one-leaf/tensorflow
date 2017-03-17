@@ -83,8 +83,6 @@ class Game(object):
 REPLAY_MEMORY = 10000
 # 每一批的大小 
 BATCH = 100
-# 动态调整是否采用预测的值作为一下步的概率
-ACTION_RATE = 0
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
@@ -166,8 +164,10 @@ def train_neural_network(input_image):
             saver.restore(sess, ckpt.model_checkpoint_path)
 
         coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord=coord, sess=sess)    
-        ACTION_RATE = 0     
+        threads = tf.train.start_queue_runners(coord=coord, sess=sess)   
+
+        # 动态调整是否采用预测的值作为一下步的概率
+        ACTION_RATE = 0.0     
         while not coord.should_stop():            
             argmax_t = np.zeros([output], dtype=np.int)
             
@@ -188,8 +188,8 @@ def train_neural_network(input_image):
                 ACTION_RATE += 1 / REPLAY_MEMORY                
             else:
                 ACTION_RATE -= 1 / REPLAY_MEMORY    
-            if  ACTION_RATE <0 : ACTION_RATE = 0
-            if  ACTION_RATE >1 : ACTION_RATE = 1
+            if  ACTION_RATE <0 : ACTION_RATE = 0.0
+            if  ACTION_RATE >1 : ACTION_RATE = 1.0
 
             # for event in pygame.event.get():  # macOS需要事件循环，否则白屏
             #     if event.type == QUIT:
