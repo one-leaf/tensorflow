@@ -220,7 +220,7 @@ def train_neural_network(input_image):
             elif reward == 1:            
                 ACTION_RATE = 1.0 
 
-            if DEBUG or platform.system()=="Darwin":
+            if platform.system()!="Linux":
                 for event in pygame.event.get():  # macOS需要事件循环，否则白屏
                     if event.type == QUIT:
                         pygame.quit()
