@@ -183,10 +183,10 @@ def train_neural_network(input_image):
             # 游戏按预测的下一步                
             reward, image = game.step(list(argmax_t))           
  
-            for event in pygame.event.get():  # macOS需要事件循环，否则白屏
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()   
+            # for event in pygame.event.get():  # macOS需要事件循环，否则白屏
+            #     if event.type == QUIT:
+            #         pygame.quit()
+            #         sys.exit()   
 
             # 获得游戏截图
             image = cv2.cvtColor(cv2.resize(image, (100, 80)), cv2.COLOR_BGR2GRAY)
