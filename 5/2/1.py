@@ -152,7 +152,7 @@ def train_neural_network(input_image):
     game = Game()
     D = deque()
 
-    random_rate = tf.train.exponential_decay(0.99, global_step, 1000, 0.99, staircase=True)
+    random_rate = tf.train.exponential_decay(0.99, global_step, 1000, 0.99., staircase=True)
 
     _, image = game.step(MOVE_STAY)
     # 转换为灰度值
@@ -235,7 +235,7 @@ def train_neural_network(input_image):
                 _, _step,cost=sess.run([optimizer,global_step,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 if _step % 10 == 0:                
                    saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
-                   print(_step,"action:", maxIndex, "reward:", reward,"cost:", cost)
+                   print(_step,"action:", maxIndex, "reward:", reward,"cost:", cost, "random_rate", random_rate)
            
             input_image_data = input_image_data1
             # n = n+1           
