@@ -141,11 +141,11 @@ def train_neural_network(input_image):
     # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]
     action = tf.reduce_sum(tf.multiply(predict_action, argmax), reduction_indices = 1)
     # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
-    cost = tf.reduce_mean(tf.square(action - gt))
+    cost = tf.reduce_mean(tf.square(action - gt), name='cost')
  
-    # 定义学习速率和优化方法
+    # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(1e-3, global_step, 1000, 0.96, staircase=True)
+    learning_rate = tf.train.exponential_decay(1e-6, global_step, 1000, 0.96, staircase=True)
 
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
@@ -232,10 +232,10 @@ def train_neural_network(input_image):
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
-                _, _step,cost=sess.run([optimizer,global_step,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
+                _step,_rate,_,_cost =sess.run([global_step,random_rate,optimizer,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 if _step % 10 == 0:                
-                   saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
-                   print(_step,"action:", maxIndex, "reward:", reward,"cost:", cost, "random_rate", random_rate)
+                    saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
+                    print(_step,"action:", maxIndex, "reward:", reward, "random_rate:", _rate,"cost:",_cost)
            
             input_image_data = input_image_data1
             # n = n+1           
