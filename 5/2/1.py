@@ -22,7 +22,9 @@ BALL_SIZE = [15, 15]
 MOVE_STAY = [1, 0, 0]
 MOVE_LEFT = [0, 1, 0]
 MOVE_RIGHT = [0, 0, 1]
- 
+
+DEBUG = True
+
 class Game(object):
     def __init__(self):
         pygame.init()
@@ -93,15 +95,19 @@ if not os.path.exists(model_dir):
 
 output = 3  # 输出层神经元数。代表3种操作-MOVE_STAY:[1, 0, 0]  MOVE_LEFT:[0, 1, 0]  MOVE_RIGHT:[0, 0, 1]
 input_image = tf.placeholder("float", [None, 80, 100, 4])  # 游戏像素
+
+if DEBUG:
+    tf.summary.image('input_image', tensor=input_image,  max_outputs=1)
+
 action = tf.placeholder("float", [None, output])     # 操作
  
 # 定义CNN-卷积神经网络 参考:http://blog.topspeedsnail.com/archives/10451
 def convolutional_neural_network(input_image):
-    weights = {'w_conv1':tf.Variable(tf.zeros([8, 8, 4, 32])),
-               'w_conv2':tf.Variable(tf.zeros([4, 4, 32, 64])),
-               'w_conv3':tf.Variable(tf.zeros([3, 3, 64, 64])),
-               'w_fc4':tf.Variable(tf.zeros([3456, 784])),
-               'w_out':tf.Variable(tf.zeros([784, output]))}
+    weights = {'w_conv1':tf.Variable(tf.truncated_normal([8, 8, 4, 32], stddev=0.1)),
+               'w_conv2':tf.Variable(tf.truncated_normal([4, 4, 32, 64], stddev=0.1)),
+               'w_conv3':tf.Variable(tf.truncated_normal([3, 3, 64, 64], stddev=0.1)),
+               'w_fc4':tf.Variable(tf.truncated_normal([3456, 784], stddev=0.1)),
+               'w_out':tf.Variable(tf.truncated_normal([784, output], stddev=0.1))}
  
     biases = {'b_conv1':tf.Variable(tf.zeros([32])),
               'b_conv2':tf.Variable(tf.zeros([64])),
@@ -110,17 +116,33 @@ def convolutional_neural_network(input_image):
               'b_out':tf.Variable(tf.zeros([output]))}
     # input_image : (?, 80, 100, 4)
     conv1 = tf.nn.relu(tf.nn.conv2d(input_image, weights['w_conv1'], strides = [1, 4, 4, 1], padding = "VALID") + biases['b_conv1'])
+
     # conv1 : （？， 19， 24， 32）
     conv2 = tf.nn.relu(tf.nn.conv2d(conv1, weights['w_conv2'], strides = [1, 2, 2, 1], padding = "VALID") + biases['b_conv2'])
+
     # conv2 :  (?, 8, 11, 64)
     conv3 = tf.nn.relu(tf.nn.conv2d(conv2, weights['w_conv3'], strides = [1, 1, 1, 1], padding = "VALID") + biases['b_conv3'])
+
     # conv3 :  (?, 6, 9, 64)
     conv3_flat = tf.reshape(conv3, [-1, 3456])
+
     # conv3_flat : (?, 3456)
     fc4 = tf.nn.relu(tf.matmul(conv3_flat, weights['w_fc4']) + biases['b_fc4'])
     # fc4 : (?, 784)
     output_layer = tf.matmul(fc4, weights['w_out']) + biases['b_out']
     # output_layer : (?, 3)
+    if DEBUG:
+        tf.summary.histogram('w_conv1', weights['w_conv1'])    
+        tf.summary.histogram('b_conv1', biases['b_conv1'])    
+        tf.summary.histogram('w_conv2', weights['w_conv2'])    
+        tf.summary.histogram('b_conv2', biases['b_conv2'])    
+        tf.summary.histogram('w_conv3', weights['w_conv3'])    
+        tf.summary.histogram('b_conv3', biases['b_conv3'])    
+        tf.summary.histogram('w_fc4', weights['w_fc4'])    
+        tf.summary.histogram('b_fc4', biases['b_fc4'])    
+        tf.summary.histogram('w_out', weights['w_out'])    
+        tf.summary.histogram('b_out', biases['b_out'])    
+
     return output_layer
  
 # 深度强化学习入门: https://www.nervanasys.com/demystifying-deep-reinforcement-learning/
@@ -154,8 +176,16 @@ def train_neural_network(input_image):
     input_image_data = np.stack((image, image, image, image), axis = 2) # shape: (80, 100, 4)
 
     with tf.Session() as sess:
+       
         sess.run(tf.global_variables_initializer())
-                
+
+        if DEBUG:
+            tf.summary.scalar("cost", cost)
+            tf.summary.scalar("learning_rate", learning_rate)
+        train_summary_op = tf.summary.merge_all()
+        train_summary_writer = tf.summary.FileWriter(model_dir, sess.graph)
+
+
         saver_prefix = os.path.join(model_dir, "model.ckpt")        
         ckpt = tf.train.get_checkpoint_state(model_dir)
         saver = tf.train.Saver(max_to_keep=1)
@@ -190,7 +220,7 @@ def train_neural_network(input_image):
             elif reward == 1:            
                 ACTION_RATE = 1.0 
 
-            if platform.system()=="Darwin":
+            if DEBUG or platform.system()=="Darwin":
                 for event in pygame.event.get():  # macOS需要事件循环，否则白屏
                     if event.type == QUIT:
                         pygame.quit()
@@ -232,7 +262,10 @@ def train_neural_network(input_image):
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
-                _step,_,_cost =sess.run([global_step,optimizer,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
+
+                _step,_train_summary_op,_,_cost =sess.run([global_step,train_summary_op,optimizer,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
+
+                train_summary_writer.add_summary(_train_summary_op, _step)
 
                 if _step % 10 == 0:                
                     saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
@@ -243,5 +276,6 @@ def train_neural_network(input_image):
 
         coord.request_stop()
         coord.join(threads)
+        train_summary_writer.close()
 
 train_neural_network(input_image)

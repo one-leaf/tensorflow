@@ -51,7 +51,7 @@ def dropout(sess):
 def conv2d(sess):
     x = tf.ones([1,4,4,1])  # [数量，图片宽，图片高, 图片通道数]
     f = tf.ones([2,2,1,3])  # [采样块宽，采样块高, 采样通道数, 输出通道数]
-    y = tf.nn.conv2d(x,f,[1,1,1,1],padding='SAME')  # 步长都为1
+    y = tf.nn.conv2d(x,f,strides=[1,1,1,1],padding='SAME')  # strides：卷积时在图像每一维的步长，这是一个一维的向量，长度4
     print(sess.run(y))
     # [[[[ 4.  4.  4.]   [ 4.  4.  4.]   [ 4.  4.  4.]   [ 2.  2.  2.]]
     #   [[ 4.  4.  4.]   [ 4.  4.  4.]   [ 4.  4.  4.]   [ 2.  2.  2.]]
