@@ -79,18 +79,10 @@ class Game(object):
         # 返回游戏界面像素和对应的奖励
         return reward, screen_image
  
-# learning_rate
-LEARNING_RATE = 0.99
-# 更新梯度
-INITIAL_EPSILON = 1.0
-FINAL_EPSILON = 0.05
-# 测试观测次数
-EXPLORE = 10000 
-OBSERVE = 1000
 # 存储过往经验大小
 REPLAY_MEMORY = 10000
  
-BATCH = 1000
+BATCH = 100
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
@@ -212,7 +204,6 @@ def train_neural_network(input_image):
             if D_size > REPLAY_MEMORY:
                 D.popleft()
                 
-            # if n > OBSERVE:
             if D_size >= REPLAY_MEMORY:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
@@ -226,7 +217,7 @@ def train_neural_network(input_image):
                 
                 # 获得下一次的预测步骤
                 out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch})
-                next_action = np.argmax(out_batch)
+                next_action = np.average(out_batch,axis=0)
 
                 # 最后一次的评价 + 0.99 * 最可能的概率 范围： -1 ~ 1.99 按照下一次的概率给评价加分
                 for i in range(0, len(minibatch)):
@@ -234,10 +225,10 @@ def train_neural_network(input_image):
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
-                _step,_rate,_,_cost,_next_action =sess.run([global_step,random_rate,optimizer,cost,next_action],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
+                _step,_rate,_,_cost =sess.run([global_step,random_rate,optimizer,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 if _step % 10 == 0:                
                     saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
-                    print(_step,"action:", maxIndex, "reward:", reward, "random_rate:", _rate,"cost:",_cost,"next_action:",_next_action)
+                    print(_step,"action:", maxIndex, "reward:", reward, "random_rate:", _rate,"cost:",_cost,"next_action:",next_action)
             else:
                 print(D_size)
             input_image_data = input_image_data1
