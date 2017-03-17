@@ -81,8 +81,10 @@ class Game(object):
  
 # 存储过往经验大小
 REPLAY_MEMORY = 10000
- 
+# 每一批的大小 
 BATCH = 100
+# 动态调整是否采用预测的值作为一下步的概率
+ACTION_RATE = 0
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
@@ -144,8 +146,6 @@ def train_neural_network(input_image):
     game = Game()
     D = deque()
 
-    random_rate = tf.train.exponential_decay(0.99, global_step, 1000, 0.99, staircase=True)
-
     _, image = game.step(MOVE_STAY)
     # 转换为灰度值
     image = cv2.cvtColor(cv2.resize(image, (100, 80)), cv2.COLOR_BGR2GRAY)
@@ -166,23 +166,31 @@ def train_neural_network(input_image):
             saver.restore(sess, ckpt.model_checkpoint_path)
 
         coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord=coord, sess=sess)         
+        threads = tf.train.start_queue_runners(coord=coord, sess=sess)    
+        ACTION_RATE = 0     
         while not coord.should_stop():            
             argmax_t = np.zeros([output], dtype=np.int)
             
-            # 按照时间的推移，逐步切换到机器预测，最初随机动一下
-            random_action = random_rate.eval()
-            if random.random() > random_action:
+            # 按照成功率，逐步切换到机器预测，最初随机动一下
+            if random.random() > ACTION_RATE:
+                maxIndex = random.randrange(output)
+            else:
                 action_t = predict_action.eval(feed_dict = {input_image : [input_image_data]})[0]
                 maxIndex = np.argmax(action_t)
-            else:
-                maxIndex = random.randrange(output)
 
             argmax_t[maxIndex] = 1
 
             # 游戏按预测的下一步                
             reward, image = game.step(list(argmax_t))           
- 
+
+            # 如果预测成功，采用随机概率增加
+            if reward == 1:
+                ACTION_RATE += 1 / REPLAY_MEMORY                
+            else:
+                ACTION_RATE -= 1 / REPLAY_MEMORY    
+            if  ACTION_RATE <0 : ACTION_RATE = 0
+            if  ACTION_RATE >1 : ACTION_RATE = 1
+
             # for event in pygame.event.get():  # macOS需要事件循环，否则白屏
             #     if event.type == QUIT:
             #         pygame.quit()
@@ -225,10 +233,10 @@ def train_neural_network(input_image):
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
-                _step,_rate,_,_cost =sess.run([global_step,random_rate,optimizer,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
+                _step,_,_cost =sess.run([global_step,optimizer,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 if _step % 10 == 0:                
                     saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
-                    print(_step,"action:", maxIndex, "reward:", reward, "random_rate:", _rate,"cost:",_cost,"next_action:",next_action)
+                    print(_step,"action:", maxIndex, "reward:", reward, "action_rate:", ACTION_RATE,"cost:",_cost,"next_action:",next_action)
             else:
                 print(D_size)
             input_image_data = input_image_data1
