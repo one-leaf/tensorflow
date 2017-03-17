@@ -45,8 +45,19 @@ def stack2():
     print(np.stack((x,y,z),axis=2).shape)   # (2, 2, 3)
     print(np.stack((x,y,z),axis=2))     # [[[ 1  2  3]  [ 4  5  6]] [[ 7  8  9]  [10 11 12]]]
 
-    
+def append():
+    x = np.array([[1,2,3],[4,5,6]]) # (2, 3)
+    y = np.stack((x, x, x, x), axis = 2)    # (2, 3, 4) [[[1 1 1 1]  [2 2 2 2]  [3 3 3 3]] [[4 4 4 4]  [5 5 5 5]  [6 6 6 6]]]
+    z = np.array( [[[10],[20],[30]],[[40],[50],[60]]] ) # (2, 3, 1)  
+    o = np.append(z, y[:,:,0:3 ], axis = 2 )    # [[[10  1  1  1]  [20  2  2  2]  [30  3  3  3]] [[40  4  4  4]  [50  5  5  5]  [60  6  6  6]]]
+    p = np.append(z, o[:,:,0:3 ], axis = 2 )    # [[[10 10  1  1]  [20 20  2  2]  [30 30  3  3]] [[40 40  4  4]  [50 50  5  5]  [60 60  6  6]]]
+    print(p)
+
+def max():
+    x = [1,5,3]
+    print(np.max(x))    # 5
+
 if __name__ == '__main__':
     with tf.Session() as sess:
         # stack(sess)
-        stack2()
+        max()
