@@ -252,7 +252,8 @@ def train_neural_network(input_image):
                 
                 # 获得下一次的预测步骤
                 out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch})
-                next_action = np.average(out_batch,axis=0)
+                next_action = np.bincount(np.argmax(out_batch,axis=1))
+
 
                 # 对结果进行评价
                 gt_batch = []
