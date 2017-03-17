@@ -187,7 +187,7 @@ def train_neural_network(input_image):
             # 随机动一下
             maxIndex = random.randrange(output)
             # else:
-                # maxIndex = np.argmax(action_t)
+            # maxIndex = np.argmax(action_t)
             argmax_t[maxIndex] = 1
 
 
@@ -215,7 +215,7 @@ def train_neural_network(input_image):
                 D.popleft()
  
             # if n > OBSERVE:
-            if len(D) >= BATCH:
+            if len(D) == REPLAY_MEMORY:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
                 input_image_data_batch = [d[0] for d in minibatch]
