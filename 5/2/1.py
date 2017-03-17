@@ -152,7 +152,7 @@ def train_neural_network(input_image):
     game = Game()
     D = deque()
 
-    random_rate = tf.train.exponential_decay(0.99, global_step, 1000, 0.99., staircase=True)
+    random_rate = tf.train.exponential_decay(0.99, global_step, 1000, 0.99, staircase=True)
 
     _, image = game.step(MOVE_STAY)
     # 转换为灰度值
