@@ -161,7 +161,7 @@ def train_neural_network(input_image):
  
     # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(1e-6, global_step, 10000, 0.98, staircase=True)
+    learning_rate = tf.train.exponential_decay(1e-6, global_step, 10000, 0.98。, staircase=True)
 
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
@@ -198,13 +198,13 @@ def train_neural_network(input_image):
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)   
 
-        # 动态调整是否采用预测的值作为一下步的概率
-        ACTION_RATE = 0.0
+        # 动态调整是否采用预测的值作为一下步
+        SUCCESS_COUNT  = 0
         while not coord.should_stop():            
             argmax_t = np.zeros([output], dtype=np.int)
             
-            # 按照成功率，逐步切换到机器预测，最初随机动一下
-            if random.random() > ACTION_RATE:
+            # 如果累计有10次成功就尝试机器走
+            if SUCCESS_COUNT < 10:
                 maxIndex = random.randrange(output)
             else:
                 action_t = predict_action.eval(feed_dict = {input_image : [input_image_data]})[0]
@@ -215,11 +215,11 @@ def train_neural_network(input_image):
             # 游戏按预测的下一步                
             reward, image = game.step(list(argmax_t))           
 
-            # 如果预测成功，采用随机概率增加
-            if reward == -1:
-                ACTION_RATE -= ACTION_RATE * 0.5
+            # 如果有1次失败，清除成功率
+            if reward == -1 and SUCCESS_COUNT >10 :
+                SUCCESS_COUNT = 0
             elif reward == 1:            
-                ACTION_RATE = 1.0 
+                SUCCESS_COUNT += 1 
 
             if platform.system()!="Linux":
                 for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
