@@ -19,8 +19,8 @@ BAR_SIZE = [50, 5]
 BALL_SIZE = [15, 15]
  
 # 神经网络的输出
-MOVE_STAY = [1, 0, 0]
-MOVE_LEFT = [0, 1, 0]
+MOVE_STAY = [0, 1, 0]
+MOVE_LEFT = [1, 0, 0]
 MOVE_RIGHT = [0, 0, 1]
 
 DEBUG = True
