@@ -157,7 +157,7 @@ def train_neural_network(input_image):
     action = tf.reduce_sum(tf.multiply(predict_action, argmax), reduction_indices = 1)
     # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
     # 当评价为0的时候，距离为当前概率，当评价为1的时候，距离为移动正确的概率-1，距离最小，当前为-1时，距离最大
-    cost = tf.reduce_sum(tf.square(action*tf.abs(gt) - gt), name='cost')
+    cost = tf.reduce_sum(tf.square(action - gt))
  
     # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
