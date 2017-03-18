@@ -269,7 +269,7 @@ def train_neural_network(input_image):
                     # 获得下一次的预测步骤
                     train_summary_writer.add_summary(_train_summary_op, _step)
                     next_action = np.bincount(np.argmax(out_batch,axis=1))
-                    print(_step,"action:", argmax_t, "reward:", reward, "action_rate:", ACTION_RATE,"cost:",_cost,"next_action:",next_action)
+                    print(_step,"action:", argmax_t, "reward:", reward, "success_count:", SUCCESS_COUNT,"cost:",_cost,"next_action:",next_action)
             else:
                 print(D_size)
             input_image_data = input_image_data1
