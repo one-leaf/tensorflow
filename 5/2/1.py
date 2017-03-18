@@ -85,7 +85,7 @@ class Game(object):
 # 存储过往经验大小
 REPLAY_MEMORY = 100000
 # 每一批的大小 
-BATCH = 100
+BATCH = 1000
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
