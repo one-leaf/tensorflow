@@ -85,7 +85,7 @@ class Game(object):
 # 存储过往经验大小
 REPLAY_MEMORY = 10000
 # 每一批的大小 
-BATCH = 100
+BATCH = 1000
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
@@ -156,11 +156,12 @@ def train_neural_network(input_image):
     # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]  得到当前移动的概率
     action = tf.reduce_sum(tf.multiply(predict_action, argmax), reduction_indices = 1)
     # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
-    cost = tf.reduce_mean(tf.square(action - gt), name='cost')
+    # 当评价为0的时候，距离为当前概率，当评价为1的时候，距离为移动正确的概率-1，距离最小，当前为-1时，距离最大
+    cost = tf.reduce_sum(tf.square(action*tf.abs(gt) - gt), name='cost')
  
     # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(1e-4, global_step, 1000, 0.96, staircase=True)
+    learning_rate = tf.train.exponential_decay(1e-6, global_step, 1000, 0.96, staircase=True)
 
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
@@ -234,7 +235,7 @@ def train_neural_network(input_image):
             input_image_data1 = np.append(image, input_image_data[:, :, 0:3], axis = 2)
  
             # 添加到list中
-            # input_image_data ：移动前的4张图片，本次移动方向，本次移动的得分，移动后的图片
+            # input_image_data ：移动前的4张图片，本次移动方向，本次移动的得分，移动后的1张图片和前3张
             D.append((input_image_data, argmax_t, reward, input_image_data1))
  
             # 如果list太长，删除最早的
@@ -245,31 +246,30 @@ def train_neural_network(input_image):
             if D_size >= BATCH:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
-                input_image_data_batch = [d[0] for d in minibatch] 
+                input_image_data_batch = [d[0] for d in minibatch] # 移动前的4张
                 argmax_batch = [d[1] for d in minibatch]
                 reward_batch = [d[2] for d in minibatch]
-                input_image_data1_batch = [d[3] for d in minibatch]                
+                input_image_data1_batch = [d[3] for d in minibatch] # 移动后的1张+前3张               
+                out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch}) # 得到一下步的预测
 
                 # 对结果进行评价
                 gt_batch = []
                  # 最后一次的评价 + 0.99 * 最可能的概率 范围： -1 ~ 1.99 按照下一次的概率给评价加分
                 for i in range(0, len(minibatch)):
-                    #gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
-                    gt_batch.append(reward_batch[i])
+                    gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
+                    # gt_batch.append(reward_batch[i])
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
 
                 _step,_train_summary_op,_,_cost =sess.run([global_step,train_summary_op,optimizer,cost],feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
 
-                train_summary_writer.add_summary(_train_summary_op, _step)
-
                 if _step % 10 == 0:                
                     saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
                     # 获得下一次的预测步骤
-                    out_batch = predict_action.eval(feed_dict = {input_image : [input_image_data1]})[0]
-                    #next_action = np.bincount(np.argmax(out_batch,axis=1))
-                    print(_step,"action:", argmax_t, "reward:", reward, "action_rate:", ACTION_RATE,"cost:",_cost,"next_action:",out_batch)
+                    train_summary_writer.add_summary(_train_summary_op, _step)
+                    next_action = np.bincount(np.argmax(out_batch,axis=1))
+                    print(_step,"action:", argmax_t, "reward:", reward, "action_rate:", ACTION_RATE,"cost:",_cost,"next_action:",next_action)
             else:
                 print(D_size)
             input_image_data = input_image_data1
