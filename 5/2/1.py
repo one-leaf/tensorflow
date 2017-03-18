@@ -83,9 +83,9 @@ class Game(object):
         return reward, screen_image
  
 # 存储过往经验大小
-REPLAY_MEMORY = 10000
+REPLAY_MEMORY = 100000
 # 每一批的大小 
-BATCH = 100
+BATCH = 10000
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
@@ -94,7 +94,7 @@ if not os.path.exists(model_dir):
     os.mkdir(model_dir)
 
 output = 3  # 输出层神经元数。代表3种操作-MOVE_STAY:[1, 0, 0]  MOVE_LEFT:[0, 1, 0]  MOVE_RIGHT:[0, 0, 1]
-input_image = tf.placeholder("float", [None, 80, 100, 4])  # 游戏像素
+input_image = tf.placeholder("float", [None, 80, 100, 4])  # 游戏图像，每次都是连续4张图像一组，这里借用了cmyk的4色通道，最大为4张
 
 if DEBUG:
     tf.summary.image('input_image', tensor=input_image,  max_outputs=1)
@@ -109,11 +109,11 @@ def convolutional_neural_network(input_image):
                'w_fc4':tf.Variable(tf.truncated_normal([3456, 784], stddev=0.1)),
                'w_out':tf.Variable(tf.truncated_normal([784, output], stddev=0.1))}
  
-    biases = {'b_conv1':tf.Variable(tf.zeros([32])),
-              'b_conv2':tf.Variable(tf.zeros([64])),
-              'b_conv3':tf.Variable(tf.zeros([64])),
-              'b_fc4':tf.Variable(tf.zeros([784])),
-              'b_out':tf.Variable(tf.zeros([output]))}
+    biases = {'b_conv1':tf.Variable(tf.constant(0.1, shape=[32])),
+              'b_conv2':tf.Variable(tf.constant(0.1, shape=[64])),
+              'b_conv3':tf.Variable(tf.constant(0.1, shape=[64])),
+              'b_fc4':tf.Variable(tf.constant(0.1, shape=[784])),
+              'b_out':tf.Variable(tf.constant(0.1, shape=[output]))}
     # input_image : (?, 80, 100, 4)
     conv1 = tf.nn.relu(tf.nn.conv2d(input_image, weights['w_conv1'], strides = [1, 4, 4, 1], padding = "VALID") + biases['b_conv1'])
 
@@ -160,7 +160,7 @@ def train_neural_network(input_image):
  
     # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(1e-6, global_step, 1000, 0.96, staircase=True)
+    learning_rate = tf.train.exponential_decay(1e-4, global_step, 1000, 0.96, staircase=True)
 
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
