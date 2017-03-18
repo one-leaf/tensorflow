@@ -83,7 +83,7 @@ class Game(object):
         return reward, screen_image
  
 # 存储过往经验大小
-REPLAY_MEMORY = 100000
+REPLAY_MEMORY = 10000
 # 每一批的大小 
 BATCH = 1000
 
