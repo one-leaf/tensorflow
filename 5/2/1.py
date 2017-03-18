@@ -85,7 +85,7 @@ class Game(object):
 # 存储过往经验大小
 REPLAY_MEMORY = 10000
 # 每一批的大小 
-BATCH = 1000
+BATCH = 100
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
@@ -103,11 +103,11 @@ action = tf.placeholder("float", [None, output])     # 操作
  
 # 定义CNN-卷积神经网络 参考:http://blog.topspeedsnail.com/archives/10451
 def convolutional_neural_network(input_image):
-    weights = {'w_conv1':tf.Variable(tf.truncated_normal([8, 8, 4, 32], stddev=0.1)),
-               'w_conv2':tf.Variable(tf.truncated_normal([4, 4, 32, 64], stddev=0.1)),
-               'w_conv3':tf.Variable(tf.truncated_normal([3, 3, 64, 64], stddev=0.1)),
-               'w_fc4':tf.Variable(tf.truncated_normal([3456, 784], stddev=0.1)),
-               'w_out':tf.Variable(tf.truncated_normal([784, output], stddev=0.1))}
+    weights = {'w_conv1':tf.Variable(tf.random_normal([8, 8, 4, 32], mean=0.0, stddev=1.0)),
+               'w_conv2':tf.Variable(tf.random_normal([4, 4, 32, 64], mean=0.0, stddev=1.0)),
+               'w_conv3':tf.Variable(tf.random_normal([3, 3, 64, 64], mean=0.0, stddev=1.0)),
+               'w_fc4':tf.Variable(tf.random_normal([3456, 784], mean=0.0, stddev=1.0)),
+               'w_out':tf.Variable(tf.random_normal([784, output], mean=0.0, stddev=1.0))}
  
     biases = {'b_conv1':tf.Variable(tf.constant(0.1, shape=[32])),
               'b_conv2':tf.Variable(tf.constant(0.1, shape=[64])),
@@ -129,7 +129,7 @@ def convolutional_neural_network(input_image):
     # conv3_flat : (?, 3456)
     fc4 = tf.nn.relu(tf.matmul(conv3_flat, weights['w_fc4']) + biases['b_fc4'])
     # fc4 : (?, 784)
-    output_layer = tf.matmul(fc4, weights['w_out']) + biases['b_out']
+    output_layer = tf.nn.softmax(tf.matmul(fc4, weights['w_out']) + biases['b_out'])
     # output_layer : (?, 3)
     if DEBUG:
         tf.summary.histogram('w_conv1', weights['w_conv1'])    
@@ -153,7 +153,7 @@ def train_neural_network(input_image):
     argmax = tf.placeholder("float", [None, output])    # 移动的方向
     gt = tf.placeholder("float", [None])                # 得分
  
-    # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]
+    # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]  得到当前移动的概率
     action = tf.reduce_sum(tf.multiply(predict_action, argmax), reduction_indices = 1)
     # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
     cost = tf.reduce_mean(tf.square(action - gt), name='cost')
@@ -221,7 +221,7 @@ def train_neural_network(input_image):
                 ACTION_RATE = 1.0 
 
             if platform.system()!="Linux":
-                for event in pygame.event.get():  # macOS需要事件循环，否则白屏
+                for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
                     if event.type == QUIT:
                         pygame.quit()
                         sys.exit()   
@@ -248,18 +248,14 @@ def train_neural_network(input_image):
                 input_image_data_batch = [d[0] for d in minibatch] 
                 argmax_batch = [d[1] for d in minibatch]
                 reward_batch = [d[2] for d in minibatch]
-                input_image_data1_batch = [d[3] for d in minibatch]
-                
-                # 获得下一次的预测步骤
-                out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch})
-                next_action = np.bincount(np.argmax(out_batch,axis=1))
-
+                input_image_data1_batch = [d[3] for d in minibatch]                
 
                 # 对结果进行评价
                 gt_batch = []
                  # 最后一次的评价 + 0.99 * 最可能的概率 范围： -1 ~ 1.99 按照下一次的概率给评价加分
                 for i in range(0, len(minibatch)):
-                    gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
+                    #gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
+                    gt_batch.append(reward_batch[i])
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
@@ -270,7 +266,10 @@ def train_neural_network(input_image):
 
                 if _step % 10 == 0:                
                     saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
-                    print(_step,"action:", maxIndex, "reward:", reward, "action_rate:", ACTION_RATE,"cost:",_cost,"next_action:",next_action)
+                    # 获得下一次的预测步骤
+                    out_batch = predict_action.eval(feed_dict = {input_image : [input_image_data1]})[0]
+                    #next_action = np.bincount(np.argmax(out_batch,axis=1))
+                    print(_step,"action:", argmax_t, "reward:", reward, "action_rate:", ACTION_RATE,"cost:",_cost,"next_action:",out_batch)
             else:
                 print(D_size)
             input_image_data = input_image_data1
