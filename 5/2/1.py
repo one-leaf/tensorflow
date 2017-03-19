@@ -161,7 +161,7 @@ def train_neural_network(input_image):
  
     # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(1e-6, global_step, 10000, 0.98, staircase=True)
+    learning_rate = tf.train.exponential_decay(1e-4, global_step, 10000, 0.98, staircase=True)
 
     optimizer = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
@@ -259,14 +259,14 @@ def train_neural_network(input_image):
                 argmax_batch = [d[1] for d in minibatch]
                 reward_batch = [d[2] for d in minibatch]
                 input_image_data1_batch = [d[3] for d in minibatch] # 移动后的1张+前3张               
-                out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch}) # 得到一下步的预测
+                # out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch}) # 得到一下步的预测
 
                 # 对结果进行评价
                 gt_batch = []
                  # 最后一次的评价 + 0.99 * 最可能的概率 范围： -1 ~ 1.99 按照下一次的概率给评价加分
                 for i in range(0, len(minibatch)):
-                    gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
-                    # gt_batch.append(reward_batch[i])
+                    #gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
+                    gt_batch.append(reward_batch[i])
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
@@ -277,6 +277,7 @@ def train_neural_network(input_image):
                     saver.save(sess, saver_prefix, global_step=_step)  # 保存模型
                     # 获得下一次的预测步骤
                     train_summary_writer.add_summary(_train_summary_op, _step)
+                    out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch}) # 得到一下步的预测
                     next_action = np.bincount(np.argmax(out_batch,axis=1))
                     print(_step,"action:", argmax_t, "reward:", reward, "success_count:", SUCCESS_COUNT,"cost:",_cost,"next_action:",next_action)
             else:
