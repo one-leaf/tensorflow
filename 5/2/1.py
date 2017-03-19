@@ -217,7 +217,7 @@ def train_neural_network(input_image):
             reward, image = game.step(list(argmax_t))           
 
             # 如果有1次失败，清除成功率
-            if reward == -1 and SUCCESS_COUNT > 10 :
+            if reward == -1 and SUCCESS_COUNT >= 10 :
                 SUCCESS_COUNT = 0
             elif reward == 1:            
                 SUCCESS_COUNT += 1 
@@ -227,7 +227,7 @@ def train_neural_network(input_image):
                 continue
 
             if reward != 0 and IGNORE_COUNT == 0:
-                IGNORE_COUNT = 120
+                IGNORE_COUNT = 140
 
             if platform.system()!="Linux":
                 for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
