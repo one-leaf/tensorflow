@@ -101,24 +101,26 @@ if DEBUG:
 
 action = tf.placeholder("float", [None, output])     # 操作
  
+def get_w_b(w_shape,b_shape,w_name,b_name):
+    w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
+    b = tf.get_variable(b_name, b_shape, initializer=tf.constant_initializer(0.0))
+    return w,b
+
 # 定义CNN-卷积神经网络 参考:http://blog.topspeedsnail.com/archives/10451
 def convolutional_neural_network(input_image):
     # input_image : (?, 80, 100, 4)
-    w_conv1 = tf.Variable(tf.random_normal([4, 4, 4, 32], mean=0.0, stddev=0.5))
-    b_conv1 = tf.Variable(tf.constant(0.1, shape=[32]))
+    w_conv1, b_conv1 = get_w_b([4, 4, 4, 32],[32],"w_conv1","b_conv1")
     conv1 = tf.nn.relu(tf.nn.conv2d(input_image, w_conv1, strides = [1, 2, 2, 1], padding = "SAME") +b_conv1)
     pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
     # (?, 20, 25 , 32)
 
-    w_conv2 = tf.Variable(tf.random_normal([3, 3, 32, 32], mean=0.0, stddev=0.5))
-    b_conv2 = tf.Variable(tf.constant(0.1, shape=[32]))
+    w_conv2, b_conv2 = get_w_b([3, 3, 32, 32],[32],"w_conv2","b_conv2")
     conv2 = tf.nn.relu(tf.nn.conv2d(pool1, w_conv2, strides = [1, 1, 1, 1], padding = "SAME") +b_conv2)
     pool2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
     # (?, 10, 13, 32)
 
+    w_fc, b_fc = get_w_b([10 * 13 * 32, output],[output],"w_fc","b_fc")
     conv_flat = tf.reshape(pool2, [-1, 10 * 13 * 32 ])
-    w_fc = tf.Variable(tf.random_normal([ 10 * 13 * 32, output], mean=0.0, stddev=0.5)) 
-    b_fc = tf.Variable(tf.constant(0.1, shape=[output]))
     output_layer = tf.nn.softmax(tf.matmul(conv_flat, w_fc) + b_fc)
 
     if DEBUG:
@@ -214,12 +216,12 @@ def train_neural_network(input_image):
             elif reward == 1:            
                 SUCCESS_COUNT += 1 
 
-            if reward == 0 and IGNORE_COUNT >0 :
-                IGNORE_COUNT -= 1
-                continue
+            # if reward == 0 and IGNORE_COUNT >0 :
+            #     IGNORE_COUNT -= 1
+            #     continue
 
-            if reward != 0 and IGNORE_COUNT == 0:
-                IGNORE_COUNT = 140
+            # if reward != 0 and IGNORE_COUNT == 0:
+            #     IGNORE_COUNT = 140
 
             if platform.system()!="Linux":
                 for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
@@ -251,14 +253,14 @@ def train_neural_network(input_image):
                 argmax_batch = [d[1] for d in minibatch]
                 reward_batch = [d[2] for d in minibatch]
                 input_image_data1_batch = [d[3] for d in minibatch] # 移动后的1张+前3张               
-                # out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch}) # 得到一下步的预测
+                out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch}) # 得到一下步的预测
 
                 # 对结果进行评价
                 gt_batch = []
-                 # 最后一次的评价 + 0.99 * 最可能的概率 范围： -1 ~ 1.99 按照下一次的概率给评价加分
+                 # 最后一次的评价 + 0.99 * 最可能的概率 范围： -1 ~ 1.99 按照下一次的概率给评价加分， 将下一次的概率压低
                 for i in range(0, len(minibatch)):
-                    #gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
-                    gt_batch.append(reward_batch[i])
+                    gt_batch.append(reward_batch[i] + 0.99 * np.max(out_batch[i]))
+                    # gt_batch.append(reward_batch[i])
  
                 # optimizer.run(feed_dict = {gt : gt_batch, argmax : argmax_batch, input_image : input_image_data_batch})
                 # 将评价的结果重新输入到系统进行学习                         结果评价        移动的方向               移动前的照片
