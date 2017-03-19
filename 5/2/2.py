@@ -109,15 +109,15 @@ def convolutional_neural_network(input_image):
     conv1 = tf.nn.relu(tf.nn.conv2d(input_image, w_conv1, strides = [1, 2, 2, 1], padding = "SAME") +b_conv1)
     pool1 = tf.nn.max_pool(conv1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
     # (?, 20, 25 , 32)
-    print(pool1.get_shape())
+
     w_conv2 = tf.Variable(tf.random_normal([3, 3, 32, 32], mean=0.0, stddev=0.5))
     b_conv2 = tf.Variable(tf.constant(0.1, shape=[32]))
     conv2 = tf.nn.relu(tf.nn.conv2d(pool1, w_conv2, strides = [1, 1, 1, 1], padding = "SAME") +b_conv2)
-    pool2 = tf.nn.max_pool(w_conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    # (3, 2, 16, 32)
+    pool2 = tf.nn.max_pool(conv2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    # (?, 10, 13, 32)
 
-    conv_flat = tf.reshape(pool2, [-1, 3 * 2 * 16 * 32 ])
-    w_fc = tf.Variable(tf.random_normal([ 3 * 2 * 16 * 32, output], mean=0.0, stddev=0.5)) 
+    conv_flat = tf.reshape(pool2, [-1, 10 * 13 * 32 ])
+    w_fc = tf.Variable(tf.random_normal([ 10 * 13 * 32, output], mean=0.0, stddev=0.5)) 
     b_fc = tf.Variable(tf.constant(0.1, shape=[output]))
     output_layer = tf.nn.softmax(tf.matmul(conv_flat, w_fc) + b_fc)
 
