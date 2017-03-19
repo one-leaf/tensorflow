@@ -199,7 +199,8 @@ def train_neural_network(input_image):
         threads = tf.train.start_queue_runners(coord=coord, sess=sess)   
 
         # 动态调整是否采用预测的值作为一下步
-        SUCCESS_COUNT  = 0
+        SUCCESS_COUNT = 0
+        IGNORE_COUNT = 0  # 为了加快运算，计分成功后的100张不需要考虑
         while not coord.should_stop():            
             argmax_t = np.zeros([output], dtype=np.int)
             
@@ -220,6 +221,13 @@ def train_neural_network(input_image):
                 SUCCESS_COUNT = 0
             elif reward == 1:            
                 SUCCESS_COUNT += 1 
+
+            if reward == 0 and IGNORE_COUNT >0 :
+                IGNORE_COUNT -= 1
+                continue
+
+            if reward != 0 and IGNORE_COUNT == 0:
+                IGNORE_COUNT = 120
 
             if platform.system()!="Linux":
                 for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
@@ -242,7 +250,8 @@ def train_neural_network(input_image):
             D_size = len(D)
             if D_size > REPLAY_MEMORY:
                 D.popleft()
-                
+
+            # 计分成功后的100张图片全部不用计算
             if D_size >= BATCH:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
