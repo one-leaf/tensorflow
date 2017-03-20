@@ -195,11 +195,13 @@ def train_neural_network(input_image):
         # 动态调整是否采用预测的值作为一下步
         SUCCESS_COUNT = 0
         IGNORE_COUNT = 0  # 为了加快运算，计分成功后的100张不需要考虑
+        SUCCESS_LIST = [0 for x in range(100)]
+        SUCCESS_RATE = 0.0
         while not coord.should_stop():            
             argmax_t = np.zeros([output], dtype=np.int)
             
-            # 如果累计有10次成功就尝试机器走
-            if SUCCESS_COUNT < 10:
+            # 按成功率自动分配是否采用预测值来进行下一步
+            if random.random() > SUCCESS_RATE:
                 maxIndex = random.randrange(output)
             else:
                 action_t = predict_action.eval(feed_dict = {input_image : [input_image_data]})[0]
@@ -210,12 +212,15 @@ def train_neural_network(input_image):
             # 游戏按预测的下一步                
             reward, image = game.step(list(argmax_t))           
 
-            # 如果有1次失败，清除成功率
-            if reward == -1 and SUCCESS_COUNT >= 10 :
-                SUCCESS_COUNT = 0
-            elif reward == 1:            
-                SUCCESS_COUNT += 1 
-
+            if reward == -1:    
+                SUCCESS_LIST.insert(0,0)
+                SUCCESS_LIST.pop()
+                SUCCESS_RATE = np.mean(SUCCESS_LIST)
+            elif reward == 1:
+                SUCCESS_LIST.insert(0,1)    
+                SUCCESS_LIST.pop()
+                SUCCESS_RATE = np.mean(SUCCESS_LIST)
+            
             # if reward == 0 and IGNORE_COUNT >0 :
             #     IGNORE_COUNT -= 1
             #     continue
@@ -246,7 +251,7 @@ def train_neural_network(input_image):
                 D.popleft()
 
             # 计分成功后的100张图片全部不用计算
-            if D_size >= BATCH:
+            if D_size >= REPLAY_MEMORY:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
                 input_image_data_batch = [d[0] for d in minibatch] # 移动前的4张
@@ -272,8 +277,8 @@ def train_neural_network(input_image):
                     # 获得下一次的预测步骤
                     train_summary_writer.add_summary(_train_summary_op, _step)
                     # out_batch = predict_action.eval(feed_dict = {input_image : input_image_data1_batch}) # 得到一下步的预测
-                    next_action = np.bincount(np.argmax(_y,axis=1))
-                    print(_step,"action:", argmax_t, "reward:", reward, "success_count:", SUCCESS_COUNT,"cost:",_cost,"next_action:",next_action)
+                    action = np.bincount(np.argmax(_y,axis=1))
+                    print(_step, "SUCCESS_RATE:", SUCCESS_RATE, "cost:",_cost, "action:",action)
             else:
                 print(D_size)
             input_image_data = input_image_data1
