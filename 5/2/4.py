@@ -119,7 +119,7 @@ def get_network():
     w1, b1 = get_w_b([8, 8, STATE_FRAMES, 32],"w1","b1")
     w2, b2 = get_w_b([4, 4, 32, 64],"w2","b2")
     w3, b3 = get_w_b([3, 3, 64, 64],"w3","b3")
-    fw1, fb1 = get_w_b([256, 256],"fw1","fb1")
+    fw1, fb1 = get_w_b([3 * 4 * 64, 256],"fw1","fb1")
     fw2, fb2 = get_w_b([256, ACTIONS_COUNT],"fw2","fb2")
     hidden_layer_1  = tf.nn.relu(tf.nn.conv2d(x, w1, strides=[1, 4, 4, 1], padding="SAME") + b1)
     hidden_pool_1   = tf.nn.max_pool(hidden_layer_1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
@@ -127,7 +127,7 @@ def get_network():
     hidden_pool_2   = tf.nn.max_pool(hidden_layer_2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
     hidden_layer_3  = tf.nn.relu(tf.nn.conv2d(hidden_layer_2, w3, strides=[1, 1, 1, 1], padding="SAME") + b3)
     hidden_pool_3   = tf.nn.max_pool(hidden_layer_3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
-    hidden_pool_3_flat = tf.reshape(hidden_pool_3, [-1, 256])
+    hidden_pool_3_flat = tf.reshape(hidden_pool_3, [-1, 3 * 4 * 64])
     final_hidden_activations = tf.nn.relu(tf.matmul(hidden_pool_3_flat, fw1) + fb1)
     y = tf.matmul(final_hidden_activations, fw2) + fb2
     return x, y
@@ -135,7 +135,7 @@ def get_network():
 # 学习
 def train():    
     _input_layer , _output_layer = get_network()
-  
+    
     _action = tf.placeholder("float", [None, ACTIONS_COUNT])    # 移动的方向
     _target = tf.placeholder("float", [None])                   # 得分
 
