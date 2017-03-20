@@ -246,7 +246,7 @@ def train_neural_network(input_image):
                 D.popleft()
 
             # 计分成功后的100张图片全部不用计算
-            if D_size >= BATCH:
+            if D_size >= REPLAY_MEMORY:
                 # 从列表中抓出一批照片
                 minibatch = random.sample(D, BATCH)
                 input_image_data_batch = [d[0] for d in minibatch] # 移动前的4张
