@@ -73,7 +73,7 @@ class Game(object):
         # 获得游戏界面像素
         screen_image = pygame.surfarray.array3d(pygame.display.get_surface())
         # 坑：交换高宽数据
-        screen_image = np.swapaxes(screen_image, 0, 1)
+        # screen_image = np.swapaxes(screen_image, 0, 1)
         pygame.display.update()
         # 返回游戏界面像素和对应的奖励
         return reward, screen_image
@@ -167,7 +167,8 @@ def train():
         # 将游戏抓图缩小并扁平化
 #        plt.imshow(image)
 #        plt.show()
-        image = cv2.resize(image,(RESIZED_SCREEN_X, RESIZED_SCREEN_Y))
+        image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
+
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
         if reward != 0.0:
@@ -179,7 +180,7 @@ def train():
             # 填充第一次的4张图片
             _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
 
-        screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_Y, RESIZED_SCREEN_X, 1))
+        screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
         _observations.append((_last_state, _last_action, reward, current_state))
