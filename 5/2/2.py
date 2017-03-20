@@ -215,11 +215,11 @@ def train_neural_network(input_image):
             if reward == -1:    
                 SUCCESS_LIST.insert(0,0)
                 SUCCESS_LIST.pop()
-                SUCCESS_RATE = np.mean(SUCCESS_RATE)
+                SUCCESS_RATE = np.mean(SUCCESS_LIST)
             elif reward == 1:
                 SUCCESS_LIST.insert(0,1)    
                 SUCCESS_LIST.pop()
-                SUCCESS_RATE = np.mean(SUCCESS_RATE)
+                SUCCESS_RATE = np.mean(SUCCESS_LIST)
             
             # if reward == 0 and IGNORE_COUNT >0 :
             #     IGNORE_COUNT -= 1
