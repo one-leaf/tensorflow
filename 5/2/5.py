@@ -93,7 +93,7 @@ MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
 RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_MAX_PROBABILITY_INDEX = range(5)
-SAVE_EVERY_X_STEPS = 10000  # 每学习多少轮后保存
+SAVE_EVERY_X_STEPS = 100  # 每学习多少轮后保存
 LEARN_RATE = 1e-6           # 学习的速率
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 
@@ -108,7 +108,7 @@ def restore(sess):
     if ckpt and ckpt.model_checkpoint_path:
         print("restore model ...")
         saver.restore(sess, ckpt.model_checkpoint_path)
-    return saver, saver_prefix
+    return saver, model_dir, saver_prefix
 
 # 神经网络定义
 def get_network():
@@ -163,7 +163,12 @@ def train():
     _session = tf.Session()       
     _session.run(tf.global_variables_initializer())
 
-    _saver,_checkpoint_path = restore(_session)
+    _saver,_model_dir,_checkpoint_path = restore(_session)
+
+    if DEBUG:
+        tf.summary.scalar("cost", cost)
+        _train_summary_op = tf.summary.merge_all()
+        _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
 
     while True:
         reward, image = game.step(list(_last_action))
@@ -223,12 +228,18 @@ def train():
                 else:    
                     agents_expected_reward.append(rewards[i] * STATE_FRAMES + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
                 agents_before_action_probability.append(np.sum(before_action_probability[i]))
-                    
-            _session.run(_train_operation, feed_dict={_input_layer: previous_states,_action: actions,
+
+            if DEBUG:
+                _, train_summary_op =  _session.run([_train_operation,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
+                        _target: agents_expected_reward,_probability:agents_before_action_probability})
+            else:            
+                _session.run(_train_operation, feed_dict={_input_layer: previous_states,_action: actions,
                         _target: agents_expected_reward,_probability:agents_before_action_probability})
 
             if _time % SAVE_EVERY_X_STEPS == 0:
                 _saver.save(_session, _checkpoint_path, global_step=_time)
+                if DEBUG:
+                    _train_summary_writer.add_summary(train_summary_op, _time)
 
             _time += 1
 

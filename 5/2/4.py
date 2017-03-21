@@ -161,7 +161,6 @@ def train():
 
     _session = tf.Session()       
     _session.run(tf.global_variables_initializer())
-
     _saver,_checkpoint_path = restore(_session)
 
     while True:
@@ -203,10 +202,12 @@ def train():
                     agents_expected_reward.append(rewards[i])
                 else:    
                     agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
+         
             _session.run(_train_operation, feed_dict={_input_layer: previous_states,_action: actions,_target: agents_expected_reward})
 
             if _time % SAVE_EVERY_X_STEPS == 0:
                 _saver.save(_session, _checkpoint_path, global_step=_time)
+
 
             _time += 1
 
