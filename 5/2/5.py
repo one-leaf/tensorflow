@@ -84,7 +84,7 @@ class Game(object):
 DEBUG = True
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 不动 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率
-OBSERVATION_STEPS = 50000.  # 在学习前观察的次数
+OBSERVATION_STEPS = 5000.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
@@ -92,7 +92,7 @@ MEMORY_SIZE = 500000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
 RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
-OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_MAX_PROBABILITY_INDEX = range(5)
+OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX = range(4)
 SAVE_EVERY_X_STEPS = 100  # 每学习多少轮后保存
 LEARN_RATE = 1e-6           # 学习的速率
 STORE_SCORES_LEN = 200.     # 分数保留的长度
@@ -139,12 +139,11 @@ def train():
     
     _action = tf.placeholder("float", [None, ACTIONS_COUNT])    # 移动的方向
     _target = tf.placeholder("float", [None])                   # 得分
-    _probability = tf.placeholder("float", [None])              # 概率
 
     # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]  得到当前移动的概率
     readout_action = tf.reduce_sum(tf.multiply(_output_layer, _action), reduction_indices=1)
     # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
-    cost = tf.reduce_mean(tf.square(_target - readout_action - _probability))
+    cost = tf.reduce_mean(tf.square(_target - readout_action))
     # 学习函数
     _train_operation = tf.train.AdamOptimizer(LEARN_RATE).minimize(cost)
 
@@ -155,7 +154,6 @@ def train():
     _last_action = MOVE_STAY
     _last_state = None          #4次的截图
     _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
-    _last_probability = None    #4次的概率
 
     _time = 0
     game = Game()
@@ -194,19 +192,10 @@ def train():
         if _last_state is None:  # 填充第一次的4张图片            
             _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
 
-        if _last_probability is None:  # 填充概率
-            _last_probability = np.zeros([STATE_FRAMES])
-        
-        #上一次步数的最大概率预测
-        before_action = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})
-        before_action_probability_max = np.max(before_action)
-        before_action_probability = np.append(_last_probability[1:], before_action_probability_max)
-
         screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
         
-
-        _observations.append((_last_state, _last_action, reward, current_state, before_action_probability))
+        _observations.append((_last_state, _last_action, reward, current_state))
         if len(_observations) > MEMORY_SIZE:
             _observations.popleft()
         
@@ -216,25 +205,18 @@ def train():
             actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
             rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
             current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
-            before_action_probability = [d[OBS_MAX_PROBABILITY_INDEX] for d in mini_batch]
 
             agents_expected_reward = []
             agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
-            agents_before_action_probability = []
             for i in range(len(mini_batch)):
-                # 如果是扣分，没有未来的奖励
-                if rewards[i]==-1:
-                    agents_expected_reward.append(rewards[i] * STATE_FRAMES)
-                else:    
-                    agents_expected_reward.append(rewards[i] * STATE_FRAMES + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
-                agents_before_action_probability.append(np.sum(before_action_probability[i]))
+                agents_expected_reward.append(rewards[i]  + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
 
             if DEBUG:
                 _, train_summary_op =  _session.run([_train_operation,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
-                        _target: agents_expected_reward,_probability:agents_before_action_probability})
+                        _target: agents_expected_reward})
             else:            
                 _session.run(_train_operation, feed_dict={_input_layer: previous_states,_action: actions,
-                        _target: agents_expected_reward,_probability:agents_before_action_probability})
+                        _target: agents_expected_reward})
 
             if _time % SAVE_EVERY_X_STEPS == 0:
                 _saver.save(_session, _checkpoint_path, global_step=_time)
