@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # This is heavily based off https://github.com/asrivat1/DeepLearningVideoGames
 import os
 import random
@@ -196,7 +198,11 @@ def train():
             agents_expected_reward = []
             agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
             for i in range(len(mini_batch)):
-                agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
+                # 如果是扣分，没有未来的奖励
+                if rewards[i]==-1:
+                    agents_expected_reward.append(rewards[i])
+                else:    
+                    agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
             _session.run(_train_operation, feed_dict={_input_layer: previous_states,_action: actions,_target: agents_expected_reward})
 
             if _time % SAVE_EVERY_X_STEPS == 0:
