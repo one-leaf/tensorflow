@@ -133,6 +133,7 @@ if __name__ == '__main__':
         _last_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
         _last_action = np.zeros([3],dtype=np.int)
-        readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
+        with tf.device('/gpu:1'):
+            readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
         action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
