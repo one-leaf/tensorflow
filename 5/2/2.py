@@ -105,8 +105,8 @@ if __name__ == '__main__':
     # for name in names:
         # print(name)
     # 这里后续最好在变量定义时就指定名字，不然不好找
-        _input_layer = tf.get_default_graph().get_tensor_by_name('Placeholder:0')
-        _output_layer = tf.get_default_graph().get_tensor_by_name('MatMul_1:0')
+    _input_layer = tf.get_default_graph().get_tensor_by_name('Placeholder:0')
+    _output_layer = tf.get_default_graph().get_tensor_by_name('MatMul_1:0')
   
     _last_state = None          #4次的截图
     _last_action = MOVE_STAY    
