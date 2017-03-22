@@ -81,7 +81,7 @@ class Game(object):
 DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 不动 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率
-OBSERVATION_STEPS = 50000.  # 在学习前观察的次数
+OBSERVATION_STEPS = 500.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
@@ -108,7 +108,7 @@ def restore(sess):
 
 # 神经网络定义
 def get_network():
-    x = tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='_input_layer')   # 输入的图片，是每4张一组
+    x = tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   # 输入的图片，是每4张一组
     def get_w_b(w_shape,w_name,b_name):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
@@ -126,7 +126,7 @@ def get_network():
     hidden_pool_3   = tf.nn.max_pool(hidden_layer_3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
     hidden_pool_3_flat = tf.reshape(hidden_pool_3, [-1, 3 * 4 * 64])
     final_hidden_activations = tf.nn.relu(tf.matmul(hidden_pool_3_flat, fw1) + fb1)
-    y = tf.matmul(final_hidden_activations, fw2) + fb2
+    y = tf.add(tf.matmul(final_hidden_activations, fw2) , fb2, name="output_layer")
     if DEBUG:
         tf.summary.histogram('w1', w1)    
         tf.summary.histogram('b1', b1)    

@@ -104,9 +104,9 @@ if __name__ == '__main__':
     # names = [n.name for n in tf.get_default_graph().as_graph_def().node]
     # for name in names:
         # print(name)
-    # 这里后续最好在变量定义时就指定名字，不然不好找
-    _input_layer = tf.get_default_graph().get_tensor_by_name('Placeholder:0')
-    _output_layer = tf.get_default_graph().get_tensor_by_name('add_4:0')
+    # 这里在变量定义输入和输出时最好指定名字，不然不好找
+    _input_layer = tf.get_default_graph().get_tensor_by_name('input_layer:0')
+    _output_layer = tf.get_default_graph().get_tensor_by_name('output_layer:0')
   
     _last_state = None          #4次的截图
     _last_action = MOVE_STAY    
