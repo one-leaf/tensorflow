@@ -9,7 +9,6 @@ import numpy as np
 import cv2
 import pygame
 from pygame.locals import *
-import matplotlib.pyplot as plt
 import platform,sys
 
 BLACK     = (0  ,0  ,0  )
@@ -74,17 +73,15 @@ class Game(object):
  
         # 获得游戏界面像素
         screen_image = pygame.surfarray.array3d(pygame.display.get_surface())
-        # 坑：交换高宽数据
-        # screen_image = np.swapaxes(screen_image, 0, 1)
         pygame.display.update()
         # 返回游戏界面像素和对应的奖励
         return reward, screen_image
 
 # 参数设置
-DEBUG = True
+DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 不动 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率
-OBSERVATION_STEPS = 5000.  # 在学习前观察的次数
+OBSERVATION_STEPS = 50000.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
@@ -94,7 +91,6 @@ STATE_FRAMES = 4  # 每次保存的状态数
 RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX = range(4)
 SAVE_EVERY_X_STEPS = 100  # 每学习多少轮后保存
-LEARN_RATE = 1e-6           # 学习的速率
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 
 # 初始化保存对象，如果有数据，就恢复
@@ -131,6 +127,26 @@ def get_network():
     hidden_pool_3_flat = tf.reshape(hidden_pool_3, [-1, 3 * 4 * 64])
     final_hidden_activations = tf.nn.relu(tf.matmul(hidden_pool_3_flat, fw1) + fb1)
     y = tf.matmul(final_hidden_activations, fw2) + fb2
+    if DEBUG:
+        tf.summary.histogram('w1', w1)    
+        tf.summary.histogram('b1', b1)    
+        tf.summary.histogram('w2', w2)    
+        tf.summary.histogram('b2', b2)   
+        tf.summary.histogram('w3', w3)    
+        tf.summary.histogram('b3', b3)            
+        tf.summary.histogram('fw1', fw1)    
+        tf.summary.histogram('fb1', fb1)  
+        tf.summary.histogram('fw2', fw2)    
+        tf.summary.histogram('fb2', fb2)  
+        filter_map1 = tf.transpose(hidden_pool_1[-1], perm=[2, 0, 1])   
+        filter_map1 = tf.reshape(filter_map1, (32, int(filter_map1.get_shape()[1]), int(filter_map1.get_shape()[2]), 1)) 
+        tf.summary.image('hidden_pool_1', tensor=filter_map1,  max_outputs=32)      
+        filter_map2 = tf.transpose(hidden_pool_2[-1], perm=[2, 0, 1])   
+        filter_map2 = tf.reshape(filter_map2, (64, int(filter_map2.get_shape()[1]), int(filter_map2.get_shape()[2]), 1)) 
+        tf.summary.image('hidden_pool_2', tensor=filter_map2,  max_outputs=64)     
+        filter_map3 = tf.transpose(hidden_pool_3[-1], perm=[2, 0, 1])   
+        filter_map3 = tf.reshape(filter_map3, (64, int(filter_map3.get_shape()[1]), int(filter_map3.get_shape()[2]), 1)) 
+        tf.summary.image('hidden_pool_3', tensor=filter_map3,  max_outputs=64)     
     return x, y
 
 # 学习
@@ -144,8 +160,12 @@ def train():
     readout_action = tf.reduce_sum(tf.multiply(_output_layer, _action), reduction_indices=1)
     # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
     cost = tf.reduce_mean(tf.square(_target - readout_action))
+
+    # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
+    global_step = tf.Variable(0, trainable=False)
+    learning_rate = tf.train.exponential_decay(1e-6, global_step, 10000, 0.98, staircase=True)
     # 学习函数
-    _train_operation = tf.train.AdamOptimizer(LEARN_RATE).minimize(cost)
+    _train_operation = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
     _observations = deque()
     _last_scores = deque()
@@ -155,7 +175,6 @@ def train():
     _last_state = None          #4次的截图
     _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
 
-    _time = 0
     game = Game()
 
     _session = tf.Session()       
@@ -165,14 +184,12 @@ def train():
 
     if DEBUG:
         tf.summary.scalar("cost", cost)
+        tf.summary.scalar("learning_rate", learning_rate)        
         _train_summary_op = tf.summary.merge_all()
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
 
     while True:
         reward, image = game.step(list(_last_action))
-        # 将游戏抓图缩小并扁平化
-#        plt.imshow(image)
-#        plt.show()
 
         if platform.system()!="Linux":
             for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
@@ -212,36 +229,34 @@ def train():
                 agents_expected_reward.append(rewards[i]  + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
 
             if DEBUG:
-                _, train_summary_op =  _session.run([_train_operation,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
+                _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
                         _target: agents_expected_reward})
             else:            
-                _session.run(_train_operation, feed_dict={_input_layer: previous_states,_action: actions,
+                _, _step = _session.run([_train_operation,global_step], feed_dict={_input_layer: previous_states,_action: actions,
                         _target: agents_expected_reward})
 
-            if _time % SAVE_EVERY_X_STEPS == 0:
-                _saver.save(_session, _checkpoint_path, global_step=_time)
+            if _step % SAVE_EVERY_X_STEPS == 0:
+                _saver.save(_session, _checkpoint_path, global_step=_step)
                 if DEBUG:
-                    _train_summary_writer.add_summary(train_summary_op, _time)
-
-            _time += 1
+                    _train_summary_writer.add_summary(train_summary_op, _step)
+                print("step: %s random_action_prob: %s reward %s scores differential %s" %
+                  (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN))
 
         _last_state = current_state
 
-        # 下一步
+        # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
         if random.random() <= _probability_of_random_action:
             action_index = random.randrange(ACTIONS_COUNT)
         else:
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
-            print("Action Q-Values are %s" % readout_t)
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
 
+        # 随机移动的概率逐步降低
         if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
             _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
-            print("Time: %s random_action_prob: %s reward %s scores differential %s" %
-                  (_time, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN))
-
+            
 
 if __name__ == '__main__':
     train()
