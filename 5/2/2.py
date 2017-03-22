@@ -100,8 +100,7 @@ def restore():
 
 
 if __name__ == '__main__':
-    with tf.device('/gpu:1'):
-        _session = restore()
+    _session = restore()
     # names = [n.name for n in tf.get_default_graph().as_graph_def().node]
     # for name in names:
         # print(name)
@@ -134,7 +133,6 @@ if __name__ == '__main__':
         _last_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
         _last_action = np.zeros([3],dtype=np.int)
-        with tf.device('/gpu:1'):
-            readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
+        readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
         action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
