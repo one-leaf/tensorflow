@@ -1,3 +1,5 @@
+本例需要最少跑1天以上，需要2M步数才有个比较好看的结果。
+
 MAC 安装 opencv v2
 
 ```
@@ -14,4 +16,8 @@ sudo ln -s /usr/local/Cellar/opencv/2.4.13.2/lib/python2.7/site-packages/cv2.so 
 ```
 
 
-参考来源： http://blog.topspeedsnail.com/archives/10459
+参考来源： 
+
+1. http://blog.topspeedsnail.com/archives/10459
+
+2. https://github.com/DanielSlater/PyGamePlayer/tree/master/examples
