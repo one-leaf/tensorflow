@@ -356,17 +356,6 @@ class Tetromino(object):
     
         self.drawpiece(piece,pixelx = winx-120,pixely = 100)
 
-    def main(self):        
-        self.showtextscreen('Tetromino')       
-        while True:
-            # if random.randint(0,1) == 0:
-            #     pygame.mixer.music.load('tetrisb.mid')
-            # else:
-            #     pygame.mixer.music.load('tetrisc.mid')
-            # pygame.mixer.music.play(-1,0.0)
-            self.rungame()
-            # pygame.mixer.music.stop()
-            self.showtextscreen('Game Over')
 
 if __name__ == '__main__':
     tetromino = Tetromino()
