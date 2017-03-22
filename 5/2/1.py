@@ -108,7 +108,7 @@ def restore(sess):
 
 # 神经网络定义
 def get_network():
-    x = tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES])   # 输入的图片，是每4张一组
+    x = tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='_input_layer')   # 输入的图片，是每4张一组
     def get_w_b(w_shape,w_name,b_name):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
