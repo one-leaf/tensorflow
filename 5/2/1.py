@@ -163,7 +163,7 @@ def train():
 
     # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(1e-6, global_step, 10000, 0.98, staircase=True)
+    learning_rate = tf.train.exponential_decay(1e-6, global_step, 100000, 0.98, staircase=True)
     # 学习函数
     _train_operation = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
 
