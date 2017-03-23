@@ -196,8 +196,9 @@ class Tetromino(object):
 
         if not self.validposition(self.board,self.fallpiece,ay = 1):
             self.addtoboard(self.board,self.fallpiece)
-            reward = self.removecompleteline(self.board) + self.calcreward(self.board)
+            reward = self.removecompleteline(self.board)             
             self.score += reward
+            reward += self.calcreward(self.board)
             level = self.calculate(self.score)   
             self.fallpiece = None
         else:
