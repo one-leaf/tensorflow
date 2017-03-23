@@ -196,7 +196,7 @@ class Tetromino(object):
 
         if not self.validposition(self.board,self.fallpiece,ay = 1):
             self.addtoboard(self.board,self.fallpiece)
-            reward = self.removecompleteline(self.board)
+            reward = self.removecompleteline(self.board) + self.calcreward(self.board)
             self.score += reward
             level = self.calculate(self.score)   
             self.fallpiece = None
@@ -296,7 +296,17 @@ class Tetromino(object):
                     return False
         return True
     
-    
+    def calcreward(self,board):
+        boxcount=0.
+        boxheight=boardheight
+        for x in range(boardwidth):
+            for y in range(boardheight):
+                if board[x][y]!=blank:
+                    boxcount += 1
+                    if y < boxheight:
+                        boxheight = y 
+        return boxcount/(boardwidth*(boardheight-boxheight))
+
     def completeline(self,board,y):
         for x in range(boardwidth):
             if board[x][y]==blank:
