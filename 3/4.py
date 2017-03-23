@@ -41,8 +41,8 @@ def conv2d(x, W):
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 
 def max_pool_2x2(x):
-    return tf.nn.max_pool(x, ksize=[1, 1, 1, 1],
-                        strides=[1, 1, 1, 1], padding='SAME')
+    return tf.nn.max_pool(x, ksize=[1, 2, 2, 1],
+                        strides=[1, 2, 2, 1], padding='SAME')
 with tf.name_scope('input'):
     x = tf.placeholder("float", shape=[None, x_len])
     y_ = tf.placeholder("float", shape=[None, 2])
@@ -67,9 +67,9 @@ with tf.name_scope('conv-pool-2'):
     tf.summary.histogram('b_conv2',b_conv2)
 
 with tf.name_scope('full-connect-1'):
-    W_fc1 = weight_variable([10 * 10 * 64, 1024])
+    W_fc1 = weight_variable([3 * 3 * 64, 1024])
     b_fc1 = bias_variable([1024])
-    h_pool2_flat = tf.reshape(h_pool2, [-1, 10*10*64])
+    h_pool2_flat = tf.reshape(h_pool2, [-1, 3*3*64])
     h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
     keep_prob = tf.placeholder("float")
     h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)

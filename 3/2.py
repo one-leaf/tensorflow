@@ -50,8 +50,8 @@ y_ = tf.placeholder(tf.float32, [None, n_output])
 keep_prob = tf.placeholder(tf.float32)
 
 # 增加隐藏层
-l1 = add_layer(x, n_input, hidden_units, activity_func=tf.nn.tanh)
-l2 = add_layer(l1, hidden_units, hidden_units, activity_func=tf.nn.tanh)
+l1 = add_layer(x, n_input, hidden_units, activity_func=tf.nn.relu)
+l2 = add_layer(l1, hidden_units, hidden_units, activity_func=tf.nn.relu)
 #l3 = add_layer(l2, hidden_units, hidden_units, activity_func=tf.nn.tanh)
 #l4 = add_layer(l3, hidden_units, hidden_units, activity_func=tf.nn.tanh)
 
