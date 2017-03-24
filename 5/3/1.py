@@ -378,7 +378,7 @@ class Tetromino(object):
 DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率
-OBSERVATION_STEPS = 50000.  # 在学习前观察的次数
+OBSERVATION_STEPS = 500.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
@@ -386,7 +386,7 @@ MEMORY_SIZE = 500000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
 RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
-OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
+OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_PROB_INDEX = range(5)
 SAVE_EVERY_X_STEPS = 100  # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 
@@ -467,7 +467,8 @@ def train():
 
     _observations = deque()
     _last_scores = deque()
-    
+    _prob_per_ations = []
+
     # 设置最后一步是固定
     _last_action = KEY_LEFT
     _last_state = None          #4次的截图
@@ -495,10 +496,6 @@ def train():
                     pygame.quit()
                     sys.exit()   
 
-        terminal = False
-        if reward==-1:
-            terminal = True
-
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
 
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -512,8 +509,18 @@ def train():
 
         screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
-        
-        _observations.append((_last_state, _last_action, reward, current_state, terminal))
+
+        if reward == -1:
+            _prob_per_ations=[]
+        elif reward > 0:   
+            _prob_one_ation = _session.run(_output_layer, feed_dict={_input_layer: [current_state]})  
+            _prob_per_ations.append(np.max(_prob_one_ation))
+        if len(_prob_per_ations)>0:
+            reward_pre_actions = np.average(_prob_per_ations)
+        else:
+            reward_pre_actions = 0    
+
+        _observations.append((_last_state, _last_action, reward, current_state, reward_pre_actions))
         if len(_observations) > MEMORY_SIZE:
             _observations.popleft()
         
@@ -523,15 +530,12 @@ def train():
             actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
             rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
             current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
+            prob_per_ations = [d[OBS_PROB_INDEX] for d in mini_batch]
 
             agents_expected_reward = []
-            agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
+            # agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
             for i in range(len(mini_batch)):
-                if mini_batch[OBS_TERMINAL_INDEX]:
-                    # 游戏结束了，对下一步没有奖励
-                    agents_expected_reward.append(rewards[i])
-                else:
-                    agents_expected_reward.append(rewards[i]  + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
+                  agents_expected_reward.append(rewards[i]  + FUTURE_REWARD_DISCOUNT * prob_per_ations[i])
 
             if DEBUG:
                 _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
