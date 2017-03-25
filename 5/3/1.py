@@ -490,7 +490,6 @@ def train():
 
     while True:
         reward, image = game.step(list(_last_action))
-        print(reward)
         if platform.system()!="Linux":
             for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
                 if event.type == QUIT:
