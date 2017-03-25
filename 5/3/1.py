@@ -535,7 +535,7 @@ def train():
             agents_expected_reward = []
             # agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
             for i in range(len(mini_batch)):
-                  agents_expected_reward.append(rewards[i]  + FUTURE_REWARD_DISCOUNT * prob_per_ations[i])
+                  agents_expected_reward.append(rewards[i] - FUTURE_REWARD_DISCOUNT * prob_per_ations[i])
 
             if DEBUG:
                 _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
