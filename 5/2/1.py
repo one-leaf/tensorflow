@@ -191,11 +191,10 @@ def train():
     while True:
         reward, image = game.step(list(_last_action))
 
-        if platform.system()!="Linux":
-            for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()   
+        for event in pygame.event.get():  # 事件循环，否则白屏
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()   
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
 

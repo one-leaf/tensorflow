@@ -299,16 +299,26 @@ class Tetromino(object):
                     return False
         return True
     
+    def softmax(self,x):
+        e_x = np.exp(x - np.max(x))
+        return e_x / e_x.sum(axis=0)
+    
+    # 修改了价值评估，越底下分值越高
     def calcreward(self,board):
-        boxcount=0.
-        boxheight=boardheight
-        for x in range(boardwidth):
-            for y in range(boardheight):
+        weightLines=[]
+        rewardLines=[]
+        for y in reversed(range(boardheight)):
+            isBlankLine=True
+            boxCount = 0.0
+            for x in range(boardwidth):
                 if board[x][y]!=blank:
-                    boxcount += 1
-                    if y < boxheight:
-                        boxheight = y 
-        return boxcount/(boardwidth*(boardheight-boxheight))
+                    boxCount += 1
+                    isBlankLine = False                                
+            if isBlankLine:
+                break
+            rewardLines.append(boxCount/boardwidth)    
+            weightLines.append(y)
+        return np.sum(np.multiply(self.softmax(weightLines),rewardLines))
 
     def completeline(self,board,y):
         for x in range(boardwidth):
@@ -490,14 +500,13 @@ def train():
 
     while True:
         reward, image = game.step(list(_last_action))
-        if platform.system()!="Linux":
-            for event in pygame.event.get():  # Linux不需要事件循环，其余需要否则白屏
-                if event.type == QUIT:
-                    pygame.quit()
-                    sys.exit()   
 
+        for event in pygame.event.get():  # 需要事件循环，否则白屏
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()   
+        
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
-
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
         if reward != 0.0:
