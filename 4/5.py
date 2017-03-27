@@ -186,14 +186,11 @@ for i in range(captcha_size):
             y_, begin=[0, i * char_size], size=[-1, char_size])
         prediction_part = tf.argmax(outputs_part, axis=1)
         predictions_y.append(prediction_part)
-prediction_y = tf.stack(predictions, axis=1, name='prediction_y')
-
+prediction_y = tf.stack(predictions_y, axis=1, name='prediction_y')
 
 # 计算正确率
 correct_prediction = tf.cast(tf.equal(prediction, prediction_y), tf.float32)
-correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
-accuracy = tf.reduce_mean(
-    tf.cast(tf.equal(correct_prediction, 1.0), tf.float32), name='accuracy')
+accuracy = tf.reduce_mean(correct_prediction, name='accuracy')
 
 # 定义学习速率和优化方法
 global_step = tf.Variable(0, trainable=False)
