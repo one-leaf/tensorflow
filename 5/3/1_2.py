@@ -193,9 +193,9 @@ class Tetromino(object):
             self.addtoboard(self.board,self.fallpiece)
             reward = self.removecompleteline(self.board)             
             self.score += reward            
+            reward += self.calcreward(self.board)
+            self.calc_reward = reward            
             level = self.calculate(self.score)   
-
-            reward = self.calcreward(self.board, self.fallpiece, reward)
             self.fallpiece = None
         else:
             self.fallpiece['y'] +=1
@@ -216,9 +216,9 @@ class Tetromino(object):
             if not self.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
                 self.reset()
-                return reward, screen_image, is_terminal   # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
+                return -1, screen_image
 
-        return reward, screen_image, is_terminal
+        return self.calc_reward, screen_image
 
     def calculate(self,score):
         level = int(score/10)+1
@@ -303,120 +303,22 @@ class Tetromino(object):
         e_x = np.exp(x - np.max(x))
         return e_x / e_x.sum(axis=0)
     
-    # 下落高度
-    def landingHeight(self,board,piece):
-        shape=pieces[piece['shape']][piece['rotation']]
-        for y in range(templatenum):
-            for x in range(templatenum):
-                if shape[x][y] != blank:
-                    return boardheight - (piece['y'] + y)
-
-    # 行变化次数
-    def rowTransitions(self,board):
-        totalTransNum = 0
-        for y in range(boardheight):
-            nowTransNum = 0
-            currisBlank = False
+    # 修改了价值评估，越底下分值越高
+    def calcreward(self,board):
+        weightLines=[]
+        rewardLines=[]
+        for y in reversed(range(boardheight)):
+            isBlankLine=True
+            boxCount = 0.0
             for x in range(boardwidth):
-                isBlank = board[x][y] == blank
-                if currisBlank != isBlank:
-                    nowTransNum += 1
-                    currisBlank = isBlank
-            if currisBlank:   
-                nowTransNum += 1
-            totalTransNum += nowTransNum
-        return totalTransNum  
-
-    # 列变化次数
-    def colTransitions(self,board):
-        totalTransNum = 0
-        for x in range(boardwidth):
-            nowTransNum = 0
-            currisBlank = False
-            for y in range(boardheight):
-                isBlank = board[x][y] == blank
-                if currisBlank != isBlank:
-                    nowTransNum += 1
-                    currisBlank = isBlank
-            if  currisBlank:   
-                nowTransNum += 1
-            totalTransNum += nowTransNum
-        return totalTransNum   
-
-    # 空洞个数
-    def emptyHoles(self, board):
-        totalEmptyHoles = 0
-        for x in range(boardwidth):
-            y = 0
-            emptyHoles = 0
-            while y < boardheight:
-                # print(board[x][y])
                 if board[x][y]!=blank:
-                    y += 1
-                    break
-                y += 1 
-            while y < boardheight:
-                # print(board[x][y])                
-                if board[x][y]==blank:
-                    emptyHoles += 1
-                y += 1
-            totalEmptyHoles += emptyHoles
-        return totalEmptyHoles
-
-    # 井的个数
-    def wellNums(self, board):
-        totalWellDepth  = 0.
-        wellDepth = 0.
-        tDepth = 0.
-        # 获取左边的井数
-        for y in range(boardheight):
-            if board[0][y] == blank and board[1][y] != blank:
-                tDepth += 1
-            else:
-                wellDepth += tDepth * (tDepth+1) / 2    
-                tDepth = 0.
-        wellDepth += tDepth * (tDepth+1) / 2  
-        totalWellDepth += wellDepth
-        # 获取中间的井数
-        wellDepth = 0.
-        for x in range(1,boardwidth-1):
-            tDepth = 0.
-            for y in range(boardheight):
-                if board[x][y]==blank and board[x-1][y]!=blank and board[x+1][y]!=blank:
-                    tDepth += 1
-                else:
-                    wellDepth += tDepth * (tDepth+1) / 2
-                    tDepth = 0.
-            wellDepth += tDepth * (tDepth+1) / 2
-        totalWellDepth += wellDepth
-        # 获取最右边的井数
-        wellDepth = 0.
-        tDepth = 0.
-        for y in range(boardheight):
-            if board[boardwidth-1][y] == blank and board[boardwidth-2][y] != blank:
-                tDepth += 1
-            else:
-                wellDepth += tDepth * (tDepth +1 )/2
-                tDepth = 0.
-        wellDepth += tDepth * (tDepth +1 )/2
-        totalWellDepth += wellDepth
-        return totalWellDepth        
-
-
-    # 修改了价值评估 下落高度 消行个数 行变化次数 列变化次数 空洞个数 井的个数
-    def calcreward(self,board,shape,completelines):
-        _landingHeight = self.landingHeight(board, shape)
-        _rowsEliminated = completelines * boardwidth
-        _rowTransitions  = self.rowTransitions(board)
-        _colTransitions = self.colTransitions(board)
-        _emptyHoles = self.emptyHoles(board)
-        _wellNums = self.wellNums(board)
-        return -4.500158825082766 * _landingHeight \
-                    + 3.4181268101392694 * _rowsEliminated \
-                    + -3.2178882868487753 * _rowTransitions \
-                    + -9.348695305445199 * _colTransitions \
-                    + -7.899265427351652 * _emptyHoles \
-                    + -3.3855972247263626 * _wellNums;                 
+                    boxCount += 1
+                    isBlankLine = False                                
+            if isBlankLine:
+                break
+            rewardLines.append(boxCount/boardwidth)    
+            weightLines.append(y)
+        return np.sum(np.multiply(self.softmax(weightLines),rewardLines))
 
     def completeline(self,board,y):
         for x in range(boardwidth):
@@ -488,15 +390,15 @@ class Tetromino(object):
 DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率
-OBSERVATION_STEPS = 50000.  # 在学习前观察的次数
+OBSERVATION_STEPS = 500.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
 MEMORY_SIZE = 500000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
-RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸 
-OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
+RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
+OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX = range(4)
 SAVE_EVERY_X_STEPS = 100  # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 
@@ -595,25 +497,15 @@ def train():
         tf.summary.scalar("learning_rate", learning_rate)        
         _train_summary_op = tf.summary.merge_all()
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
-    _min_reward = 20000.
-    _max_reward = -20000.
-    while True:
-        reward, image, terminal = game.step(list(_last_action))
 
-        #将奖励分数归一化
-        if reward!=0:
-            print(reward,_min_reward,_max_reward)
-            if reward < _min_reward:
-                _min_reward = reward
-            elif reward > _max_reward:
-                _max_reward = reward
-            reward = (reward - _min_reward) / (_max_reward - _min_reward);  
+    while True:
+        reward, image = game.step(list(_last_action))
 
         for event in pygame.event.get():  # 需要事件循环，否则白屏
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit() 
-
+                sys.exit()   
+        
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
@@ -627,7 +519,7 @@ def train():
         screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
-        _observations.append((_last_state, _last_action, reward, current_state, terminal))
+        _observations.append((_last_state, _last_action, reward, current_state))
         if len(_observations) > MEMORY_SIZE:
             _observations.popleft()
         
@@ -637,12 +529,11 @@ def train():
             actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
             rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
             current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
-            terminals = [d[OBS_TERMINAL_INDEX] for d in mini_batch]
 
             agents_expected_reward = []
             agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
             for i in range(len(mini_batch)):
-                if terminals[i]:    # 如果是游戏结束没有下一步奖励
+                if rewards[i]==-1:
                     agents_expected_reward.append(rewards[i])
                 else:
                     agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
