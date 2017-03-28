@@ -1,4 +1,24 @@
 # coding=utf-8
+'''
+Pierre Dellacherie算法
+1.尝试着对当前落子的每一种旋转变换、从左到右地落子，产生所有落法。
+
+2.对每一种落法进行评价。评价函数为：
+
+rating = (-1.0) * landingHeight          + ( 1.0) * erodedPieceCellsMetric
+         + (-1.0) * boardRowTransitions + (-1.0) * boardColTransitions
+         + (-4.0) * boardBuriedHoles 　  + (-1.0) * boardWells;
+其中，landingHeight指当前落子落下去之后，落子中点距底部的方格数；erodedPieceCellsMetric = 消去行 * 当前落子被消去的格子数；boardRowTransitions指各行的“变换次数”之和，一行中从有方块到无方块、无方块到有方块被视为一次“变换”，游戏区域左右边界也视作有方块；boardColTransitions指各列的“变换次数”之和；boardBuriedHoles指各列中间的“空洞”方格个数之和；boardWells指各“井”的深度的连加到1的和之和，“井”指两边皆有方块的空列。
+
+评价还包括优先度。优先度在两个局面的评分相同时发挥作用，取评分相同但优先度高者。优先度的计算方法为：
+
+若落子落于左侧:priority = 100 * 落子水平平移格子数 + 10 + 落子旋转次数;
+
+若落子落于右侧:priority = 100 * 落子水平平移格子数 + 落子旋转次数;
+
+3.比较每一种落法的评分与优先度。在同为最高评分的落法中，取优先度最高者。
+'''
+
 
 import pygame,sys,time,random
 from pygame.locals import *
