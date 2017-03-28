@@ -602,7 +602,6 @@ def train():
 
         #将奖励分数归一化
         if reward!=0:
-            print(reward,_min_reward,_max_reward)
             if reward < _min_reward:
                 _min_reward = reward
             elif reward > _max_reward:
