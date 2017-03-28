@@ -595,13 +595,7 @@ def train():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit() 
-
-        print(reward, terminal)
-        if terminal:
-            time.sleep(10)
-        else:    
-            time.sleep(0.2)
-
+                
         #将奖励分数归一化
         if reward!=0:
             if reward < _min_reward:
