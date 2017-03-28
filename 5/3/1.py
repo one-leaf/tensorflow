@@ -1,9 +1,7 @@
 # coding=utf-8
 '''
 Pierre Dellacherie算法
-1.尝试着对当前落子的每一种旋转变换、从左到右地落子，产生所有落法。
-
-2.对每一种落法进行评价。评价函数为：
+V（s）= -（Landing height）+（Eroded piece cells）–（Row transitions）–（Column transitions）- 4（Holes）–（Cumulative wells） 
 
 rating = (-1.0) * landingHeight          + ( 1.0) * erodedPieceCellsMetric
          + (-1.0) * boardRowTransitions + (-1.0) * boardColTransitions
@@ -16,7 +14,7 @@ rating = (-1.0) * landingHeight          + ( 1.0) * erodedPieceCellsMetric
 
 若落子落于右侧:priority = 100 * 落子水平平移格子数 + 落子旋转次数;
 
-3.比较每一种落法的评分与优先度。在同为最高评分的落法中，取优先度最高者。
+比较每一种落法的评分与优先度。在同为最高评分的落法中，取优先度最高者。
 '''
 
 
