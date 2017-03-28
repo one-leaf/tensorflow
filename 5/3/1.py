@@ -1,22 +1,4 @@
 # coding=utf-8
-'''
-Pierre Dellacherie算法
-V（s）= -（Landing height）+（Eroded piece cells）–（Row transitions）–（Column transitions）- 4（Holes）–（Cumulative wells） 
-
-rating = (-1.0) * landingHeight          + ( 1.0) * erodedPieceCellsMetric
-         + (-1.0) * boardRowTransitions + (-1.0) * boardColTransitions
-         + (-4.0) * boardBuriedHoles 　  + (-1.0) * boardWells;
-其中，landingHeight指当前落子落下去之后，落子中点距底部的方格数；erodedPieceCellsMetric = 消去行 * 当前落子被消去的格子数；boardRowTransitions指各行的“变换次数”之和，一行中从有方块到无方块、无方块到有方块被视为一次“变换”，游戏区域左右边界也视作有方块；boardColTransitions指各列的“变换次数”之和；boardBuriedHoles指各列中间的“空洞”方格个数之和；boardWells指各“井”的深度的连加到1的和之和，“井”指两边皆有方块的空列。
-
-评价还包括优先度。优先度在两个局面的评分相同时发挥作用，取评分相同但优先度高者。优先度的计算方法为：
-
-若落子落于左侧:priority = 100 * 落子水平平移格子数 + 10 + 落子旋转次数;
-
-若落子落于右侧:priority = 100 * 落子水平平移格子数 + 落子旋转次数;
-
-比较每一种落法的评分与优先度。在同为最高评分的落法中，取优先度最高者。
-'''
-
 
 import pygame,sys,time,random
 from pygame.locals import *
@@ -27,7 +9,6 @@ import platform, sys, os
 from collections import deque
 import tensorflow as tf
 import cv2
-
 
 winx = 400
 winy = 500
@@ -190,22 +171,15 @@ class Tetromino(object):
         if action == KEY_LEFT and self.validposition(self.board,self.fallpiece,ax = -1):
             self.fallpiece['x']-=1
             moveleft = True
+
         if action == KEY_RIGHT and self.validposition(self.board,self.fallpiece,ax = 1):
             self.fallpiece['x']+=1  
             moveright = True 
+
         if action == KEY_ROTATION:
             self.fallpiece['rotation'] =  (self.fallpiece['rotation'] + 1) % len(pieces[self.fallpiece['shape']])
             if not self.validposition(self.board,self.fallpiece):
                 self.fallpiece['rotation'] = (self.fallpiece['rotation'] - 1) % len(pieces[self.fallpiece['shape']])
-                
-        if self.validposition(self.board,self.fallpiece, ay = 1):
-            self.fallpiece['y']+=1
-        
-        if moveleft or moveright:
-            if moveleft and self.validposition(self.board,self.fallpiece,ax = -1):
-                self.fallpiece['x']-=1
-            if moveright and self.validposition(self.board,self.fallpiece,ax = 1):
-                self.fallpiece['x']+=1
 
         if not self.validposition(self.board,self.fallpiece,ay = 1):
             self.addtoboard(self.board,self.fallpiece)
@@ -383,16 +357,16 @@ class Tetromino(object):
 
     # 井的个数
     def wellNums(self, board):
-        totalWellDepth  = 0.
-        wellDepth = 0.
-        tDepth = 0.
+        totalWellDepth  = 0
+        wellDepth = 0
+        tDepth = 0
         # 获取左边的井数
-        for y in range(boardheight):
+        for y in range(boardheight):            
             if board[0][y] == blank and board[1][y] != blank:
                 tDepth += 1
             else:
                 wellDepth += tDepth * (tDepth+1) / 2    
-                tDepth = 0.
+                tDepth = 0
         wellDepth += tDepth * (tDepth+1) / 2  
         totalWellDepth += wellDepth
         # 获取中间的井数
@@ -404,18 +378,18 @@ class Tetromino(object):
                     tDepth += 1
                 else:
                     wellDepth += tDepth * (tDepth+1) / 2
-                    tDepth = 0.
+                    tDepth = 0
             wellDepth += tDepth * (tDepth+1) / 2
         totalWellDepth += wellDepth
         # 获取最右边的井数
-        wellDepth = 0.
-        tDepth = 0.
+        wellDepth = 0
+        tDepth = 0
         for y in range(boardheight):
             if board[boardwidth-1][y] == blank and board[boardwidth-2][y] != blank:
                 tDepth += 1
             else:
                 wellDepth += tDepth * (tDepth +1 )/2
-                tDepth = 0.
+                tDepth = 0
         wellDepth += tDepth * (tDepth +1 )/2
         totalWellDepth += wellDepth
         return totalWellDepth        
@@ -617,6 +591,16 @@ def train():
     _max_reward = -20000.
     while True:
         reward, image, terminal = game.step(list(_last_action))
+        for event in pygame.event.get():  # 需要事件循环，否则白屏
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit() 
+
+        print(reward, terminal)
+        if terminal:
+            time.sleep(10)
+        else:    
+            time.sleep(0.2)
 
         #将奖励分数归一化
         if reward!=0:
@@ -625,11 +609,6 @@ def train():
             elif reward > _max_reward:
                 _max_reward = reward
             reward = (reward - _min_reward) / (_max_reward - _min_reward);  
-
-        for event in pygame.event.get():  # 需要事件循环，否则白屏
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit() 
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
