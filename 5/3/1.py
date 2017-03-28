@@ -480,17 +480,17 @@ class Tetromino(object):
 DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率
-OBSERVATION_STEPS = 50000.  # 在学习前观察的次数
+OBSERVATION_STEPS = 5000.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
-MEMORY_SIZE = 500000  # 记住的观察队列
+MEMORY_SIZE = 10000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
 RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸 
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
 SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
-STORE_SCORES_LEN = 200.     # 分数保留的长度
+STORE_SCORES_LEN = 100.     # 分数保留的长度
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
