@@ -489,7 +489,7 @@ MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
 RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸 
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
-SAVE_EVERY_X_STEPS = 10  # 每学习多少轮后保存
+SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
 STORE_SCORES_LEN = 100.     # 分数保留的长度
 
 # 初始化保存对象，如果有数据，就恢复
@@ -505,51 +505,53 @@ def restore(sess):
         saver.restore(sess, ckpt.model_checkpoint_path)
     return saver, model_dir, saver_prefix
 
-# CNN网络
-def get_network(x, output_size, filter_size=[3,3,3,3], filter_nums=[32,32,64,64], pool_scale=[2,2,2,2], full_nums=128, output_name="output_layer"):
-    def get_w_b(w_shape,w_name="w",b_name="b"):
+
+# 神经网络定义
+def get_network():
+    x = tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   # 输入的图片，是每4张一组
+    def get_w_b(w_shape,w_name,b_name):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
-        if DEBUG:
-            tf.summary.histogram('w'.format(i), w)
-            tf.summary.histogram('b'.format(i), b)
-        return w,b    
-
-    filter_layers=[]
-    for i in range(len(filter_size)):         
-        with tf.variable_scope('filter-layer-{}'.format(i)):
-            if i == 0:
-                input = x
-            else:
-                input = filter_layers[-1]
-            w,b = get_w_b([filter_size[i],filter_size[i],int(input.get_shape()[-1]),filter_nums[i]])
-            filter_layer = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input, w, strides=[1, 1, 1, 1], padding="SAME"), b))
-            pool_layer = tf.nn.max_pool(filter_layer, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME')
-            filter_layers.append(pool_layer)
-            if DEBUG:
-                filter_map = tf.transpose(filter_layer[-1], perm=[2, 0, 1])
-                filter_map = tf.reshape(filter_map, (filter_nums[i], int(filter_map.get_shape()[1]), int(filter_map.get_shape()[2]), 1))
-                tf.summary.image('filterlayer', tensor=filter_map, max_outputs=filter_nums[i])
-
-    full_connects=[]
-    with tf.variable_scope('full-connect'):
-        _out = filter_layers[-1]
-        in_size = int(_out.get_shape()[1]) * int(_out.get_shape()[2]) * int(_out.get_shape()[3])
-        input = tf.reshape(_out, [-1, in_size])
-        w,  b = get_w_b([in_size,full_nums])
-        full_connect = tf.nn.relu(tf.matmul(input, w) + b)
-        full_connects.append(full_connect)
-
-    with tf.variable_scope('output'):
-        w, b = get_w_b([full_nums, output_size])
-        output = tf.nn.bias_add(tf.matmul(full_connects[-1], w) , b, name=output_name)
-        return output
+        return w,b
+    w1, b1 = get_w_b([8, 8, STATE_FRAMES, 32],"w1","b1")
+    w2, b2 = get_w_b([4, 4, 32, 64],"w2","b2")
+    w3, b3 = get_w_b([3, 3, 64, 64],"w3","b3")
+    fw1, fb1 = get_w_b([3 * 4 * 64, 256],"fw1","fb1")
+    fw2, fb2 = get_w_b([256, ACTIONS_COUNT],"fw2","fb2")
+    hidden_layer_1  = tf.nn.relu(tf.nn.conv2d(x, w1, strides=[1, 4, 4, 1], padding="SAME") + b1)
+    hidden_pool_1   = tf.nn.max_pool(hidden_layer_1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
+    hidden_layer_2  = tf.nn.relu(tf.nn.conv2d(hidden_pool_1, w2, strides=[1, 2, 2, 1], padding="SAME") + b2)
+    hidden_pool_2   = tf.nn.max_pool(hidden_layer_2, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
+    hidden_layer_3  = tf.nn.relu(tf.nn.conv2d(hidden_layer_2, w3, strides=[1, 1, 1, 1], padding="SAME") + b3)
+    hidden_pool_3   = tf.nn.max_pool(hidden_layer_3, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding="SAME")
+    hidden_pool_3_flat = tf.reshape(hidden_pool_3, [-1, 3 * 4 * 64])
+    final_hidden_activations = tf.nn.relu(tf.matmul(hidden_pool_3_flat, fw1) + fb1)
+    y = tf.add(tf.matmul(final_hidden_activations, fw2) , fb2, name="output_layer")
+    if DEBUG:
+        tf.summary.histogram('w1', w1)    
+        tf.summary.histogram('b1', b1)    
+        tf.summary.histogram('w2', w2)    
+        tf.summary.histogram('b2', b2)   
+        tf.summary.histogram('w3', w3)    
+        tf.summary.histogram('b3', b3)            
+        tf.summary.histogram('fw1', fw1)    
+        tf.summary.histogram('fb1', fb1)  
+        tf.summary.histogram('fw2', fw2)    
+        tf.summary.histogram('fb2', fb2)  
+        filter_map1 = tf.transpose(hidden_pool_1[-1], perm=[2, 0, 1])   
+        filter_map1 = tf.reshape(filter_map1, (32, int(filter_map1.get_shape()[1]), int(filter_map1.get_shape()[2]), 1)) 
+        tf.summary.image('hidden_pool_1', tensor=filter_map1,  max_outputs=32)      
+        filter_map2 = tf.transpose(hidden_pool_2[-1], perm=[2, 0, 1])   
+        filter_map2 = tf.reshape(filter_map2, (64, int(filter_map2.get_shape()[1]), int(filter_map2.get_shape()[2]), 1)) 
+        tf.summary.image('hidden_pool_2', tensor=filter_map2,  max_outputs=64)     
+        filter_map3 = tf.transpose(hidden_pool_3[-1], perm=[2, 0, 1])   
+        filter_map3 = tf.reshape(filter_map3, (64, int(filter_map3.get_shape()[1]), int(filter_map3.get_shape()[2]), 1)) 
+        tf.summary.image('hidden_pool_3', tensor=filter_map3,  max_outputs=64)     
+    return x, y
 
 # 学习
 def train():    
-    # 输入的图片，是每4张一组
-    _input_layer =  tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   
-    _output_layer = get_network(_input_layer, ACTIONS_COUNT)
+    _input_layer , _output_layer = get_network()
     
     _action = tf.placeholder("float", [None, ACTIONS_COUNT])    # 移动的方向
     _target = tf.placeholder("float", [None])                   # 得分
@@ -605,7 +607,6 @@ def train():
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
-       
         if reward != 0.0:
             _last_scores.append(reward)
             if len(_last_scores) > STORE_SCORES_LEN:
