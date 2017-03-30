@@ -603,6 +603,8 @@ def train():
                 _min_reward = reward
             elif reward > _max_reward:
                 _max_reward = reward
+            if _max_reward == _min_reward:
+                continue
             reward = (reward - _min_reward) / (_max_reward - _min_reward);  
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
