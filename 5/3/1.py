@@ -608,6 +608,7 @@ def train():
             if _avg_reward == 0:
                 continue
             reward = (reward - _avg_reward) / _avg_reward  
+            _game_step += 1
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -661,7 +662,7 @@ def train():
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-        if random.random() <= _probability_of_random_action:
+        if random.random() <= _probability_of_random_action and _game_step == TRAIN_GAME_MAX_STEP :
             action_index = random.randrange(ACTIONS_COUNT)
         else:
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
@@ -672,8 +673,7 @@ def train():
         if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
             _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
  
-        if reward != 0:
-            _game_step += 1
+
         if  _game_step >= TRAIN_GAME_MAX_STEP:
             _game_step = 0
             game.reset()
