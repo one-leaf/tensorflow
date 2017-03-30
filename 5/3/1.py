@@ -673,7 +673,6 @@ def train():
         if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
             _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
  
-
         if  _game_step >= TRAIN_GAME_MAX_STEP:
             _game_step = 0
             game.reset()
