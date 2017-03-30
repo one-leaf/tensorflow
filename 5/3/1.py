@@ -491,6 +491,7 @@ RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
 SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
 STORE_SCORES_LEN = 100.     # 分数保留的长度
+TRAIN_GAME_MAX_STEP = 5     #学习的方块数
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -587,13 +588,15 @@ def train():
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
     _min_reward = 20000.
     _max_reward = -20000.
+    _game_step  = 0
     while True:
         reward, image, terminal = game.step(list(_last_action))
+
         for event in pygame.event.get():  # 需要事件循环，否则白屏
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit() 
-                
+                sys.exit()         
+
         #将奖励分数归一化
         if reward!=0:
             if reward < _min_reward:
@@ -665,7 +668,11 @@ def train():
         if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
             _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
  
-
+        if reward != 0:
+            _game_step += 1
+        if  _game_step > TRAIN_GAME_MAX_STEP:
+            _game_step = 0
+            game.reset()
 
 if __name__ == '__main__':
     train()
