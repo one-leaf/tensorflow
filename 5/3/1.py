@@ -491,7 +491,8 @@ RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
 SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
 STORE_SCORES_LEN = 100.     # 分数保留的长度
-TRAIN_GAME_MAX_STEP = 5     #学习的方块数
+TRAIN_GAME_MAX_STEP = 1     # 学习的方块数
+LEARNING_RATE = 1e-6        # 学习速率
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -562,9 +563,9 @@ def train():
 
     # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(1e-6, global_step, 100000, 0.98, staircase=True)
+    # learning_rate = tf.train.exponential_decay(1e-6, global_step, 100000, 0.98, staircase=True)
     # 学习函数
-    _train_operation = tf.train.AdamOptimizer(learning_rate).minimize(cost, global_step=global_step)
+    _train_operation = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cost, global_step=global_step)
 
     _observations = deque()
     _last_scores = deque()
@@ -583,7 +584,7 @@ def train():
 
     if DEBUG:
         tf.summary.scalar("cost", cost)
-        tf.summary.scalar("learning_rate", learning_rate)        
+        # tf.summary.scalar("learning_rate", learning_rate)        
         _train_summary_op = tf.summary.merge_all()
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
     _min_reward = 20000.
