@@ -479,10 +479,10 @@ class Tetromino(object):
 # 参数设置
 DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
-FUTURE_REWARD_DISCOUNT = 0.05  # 下一次奖励的衰变率 0.99
+FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 5000.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
-INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率
+INITIAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最大概率 1.0
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
 MEMORY_SIZE = 10000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
