@@ -482,7 +482,7 @@ ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 5000.  # 在学习前观察的次数
 EXPLORE_STEPS = 500000.  # 每次机器自动参与的概率的除数
-INITIAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最大概率 1.0
+INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率 1.0
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
 MEMORY_SIZE = 10000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
@@ -673,7 +673,7 @@ def train():
  
         if reward != 0:
             _game_step += 1
-        if  _game_step > TRAIN_GAME_MAX_STEP:
+        if  _game_step >= TRAIN_GAME_MAX_STEP:
             _game_step = 0
             game.reset()
 
