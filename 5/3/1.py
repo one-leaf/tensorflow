@@ -603,9 +603,10 @@ def train():
                 _min_reward = reward
             elif reward > _max_reward:
                 _max_reward = reward
-            if _max_reward == _min_reward:
+            _avg_reward =  (_max_reward+_min_reward)/2
+            if _avg_reward == 0:
                 continue
-            reward = (reward - _min_reward) / (_max_reward - _min_reward);  
+            reward = (reward - _avg_reward) / _avg_reward  
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
