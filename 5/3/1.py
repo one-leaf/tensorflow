@@ -601,9 +601,9 @@ def train():
 
         #将奖励分数归一化
         if reward!=0:
-            if not _min_reward.has_key(shape):
+            if shape not in _min_reward:
                 _min_reward[shape] = 20000
-            if not _max_reward.has_key(shape):
+            if shape not in _max_reward:
                 _max_reward[shape] = -20000
             if reward < _min_reward[shape]:
                 _min_reward[shape] = reward - 0.1
@@ -611,7 +611,7 @@ def train():
                 _max_reward[shape] = reward
             reward = (reward - _min_reward[shape]) * 2 / (_max_reward[shape] - _min_reward[shape]) - 1.0
             _game_step += 1
-            
+
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
