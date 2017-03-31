@@ -166,6 +166,7 @@ class Tetromino(object):
         moveleft = False
         moveright = False
         is_terminal = False
+        shape  = self.fallpiece['shape']
         level = self.calculate(self.score)
 
         if action == KEY_LEFT and self.validposition(self.board,self.fallpiece,ax = -1):
@@ -207,10 +208,10 @@ class Tetromino(object):
             self.nextpiece = self.getnewpiece()
             if not self.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
-                self.reset()
-                return reward, screen_image, is_terminal   # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
+                self.reset()                
+                return reward, screen_image, is_terminal, shape  # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
 
-        return reward, screen_image, is_terminal
+        return reward, screen_image, is_terminal, shape
 
     def calculate(self,score):
         level = int(score/10)+1
@@ -587,12 +588,12 @@ def train():
         # tf.summary.scalar("learning_rate", learning_rate)        
         _train_summary_op = tf.summary.merge_all()
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
-    _min_reward = 20000.
-    _max_reward = -20000.
+    _min_reward = {}
+    _max_reward = {}
     _game_step  = 0
     while True:
-        reward, image, terminal = game.step(list(_last_action))
-
+        reward, image, terminal, shape = game.step(list(_last_action))
+        
         for event in pygame.event.get():  # 需要事件循环，否则白屏
             if event.type == QUIT:
                 pygame.quit()
@@ -600,16 +601,17 @@ def train():
 
         #将奖励分数归一化
         if reward!=0:
-            if reward < _min_reward:
-                _min_reward = reward
-            elif reward > _max_reward:
-                _max_reward = reward
-            _avg_reward =  (_max_reward+_min_reward)/2
-            if _avg_reward == 0:
-                continue
-            reward = (reward - _avg_reward) / _avg_reward  
+            if not _min_reward.has_key(shape):
+                _min_reward[shape] = 20000
+            if not _max_reward.has_key(shape):
+                _max_reward[shape] = -20000
+            if reward < _min_reward[shape]:
+                _min_reward[shape] = reward - 0.1
+            elif reward > _max_reward[shape]:
+                _max_reward[shape] = reward
+            reward = (reward - _min_reward[shape]) * 2 / (_max_reward[shape] - _min_reward[shape]) - 1.0
             _game_step += 1
-
+            
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
