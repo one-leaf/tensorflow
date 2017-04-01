@@ -492,7 +492,6 @@ RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
 SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
 STORE_SCORES_LEN = 100.     # 分数保留的长度
-TRAIN_GAME_MAX_STEP = 1     # 学习的方块数
 LEARNING_RATE = 1e-6        # 学习速率
 
 # 初始化保存对象，如果有数据，就恢复
@@ -550,7 +549,6 @@ def get_network(x, output_size, filter_size=[3,3,3,3], filter_nums=[32,32,64,64]
 
 # 学习
 def train():    
-    global TRAIN_GAME_MAX_STEP
     # 输入的图片，是每4张一组
     _input_layer =  tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   
     _output_layer = get_network(_input_layer, ACTIONS_COUNT)
@@ -582,7 +580,11 @@ def train():
     _session = tf.Session()       
     _session.run(tf.global_variables_initializer())
 
+    # 恢复游戏进度
     _saver,_model_dir,_checkpoint_path = restore(_session)
+
+    # 游戏最大进行步数
+    _game_max_step=_session.run(global_step)//10000000 +1    
 
     if DEBUG:
         tf.summary.scalar("cost", cost)
@@ -592,6 +594,7 @@ def train():
     _min_reward = {}
     _max_reward = {}
     _game_step  = 0
+    
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
         
@@ -660,16 +663,21 @@ def train():
                     _train_summary_writer.add_summary(train_summary_op, _step)
                 print("step: %s random_prob: %s reward %s scores %s max_step %s" %
                   (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN, TRAIN_GAME_MAX_STEP))
-
-            TRAIN_GAME_MAX_STEP = _step / 10000000 + 1
-            if _step % 10000000 == 0:                
+                
+            if _step % 10000000 == 0:     
+                _game_max_step = _step // 10000000 + 1           
                 _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
 
         _last_state = current_state
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
+        # 如果是最后一步，按照当前概率进行，否则按最小概率进行
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-        if random.random() <= _probability_of_random_action and _game_step == TRAIN_GAME_MAX_STEP :
+        if _game_step == _game_max_step：
+            _max_probability_of_random_action = _probability_of_random_action
+        else:
+            _max_probability_of_random_action = FINAL_RANDOM_ACTION_PROB
+        if random.random() <= _max_probability_of_random_action :
             action_index = random.randrange(ACTIONS_COUNT)
         else:
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
@@ -680,7 +688,7 @@ def train():
         if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
             _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
  
-        if  _game_step >= TRAIN_GAME_MAX_STEP:
+        if  _game_step >= _game_max_step:
             _game_step = 0
             game.reset()
 
