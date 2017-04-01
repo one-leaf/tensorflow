@@ -585,7 +585,7 @@ def train():
 
     # 游戏最大进行步数
     _step = _session.run(global_step)
-    _game_max_step = _step//10000000 +1    
+    _game_max_step = _step//1000000 +1    
     print("global step: %s game max step: %s"%(_step, _game_max_step ))
     if DEBUG:
         tf.summary.scalar("cost", cost)
@@ -662,14 +662,14 @@ def train():
                 _saver.save(_session, _checkpoint_path, global_step=_step)
                 if DEBUG:
                     _train_summary_writer.add_summary(train_summary_op, _step)
-                print("step: %s random_prob: %s reward %s scores %s max_step %s" %
-                  (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN, TRAIN_GAME_MAX_STEP))
+                print("step: %s random_prob: %s scores: %s max_step: %s reward: %s" %
+                  (_step, _probability_of_random_action, sum(_last_scores) / STORE_SCORES_LEN, _game_max_step, reward))
 
-                # 最大游戏步数
-                _game_max_step = _step // 10000000 + 1           
+                # 最大游戏步数,按100万次多学习一步
+                _game_max_step = _step // 1000000 + 1           
             
                 # 经过 EXPLORE_STEPS 次学习后概率降低到 FINAL_RANDOM_ACTION_PROB
-                if _step % 10000000.0 > EXPLORE_STEPS:
+                if _step % 1000000.0 > EXPLORE_STEPS:
                     _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
                 else:    
                     _probability_of_random_action = 1 - (_step % EXPLORE_STEPS) / EXPLORE_STEPS
