@@ -604,7 +604,7 @@ def train():
                 sys.exit()         
 
         #将奖励分数归一化
-        if reward!=0:
+        if reward != 0.0:
             if shape not in _min_reward:
                 _min_reward[shape] = 20000
             if shape not in _max_reward:
