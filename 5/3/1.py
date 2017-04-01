@@ -664,10 +664,15 @@ def train():
                     _train_summary_writer.add_summary(train_summary_op, _step)
                 print("step: %s random_prob: %s reward %s scores %s max_step %s" %
                   (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN, TRAIN_GAME_MAX_STEP))
-                
-            if _step % 10000000 == 0:     
+
+                # 最大游戏步数
                 _game_max_step = _step // 10000000 + 1           
-                _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
+            
+                # 经过 EXPLORE_STEPS 次学习后概率降低到 FINAL_RANDOM_ACTION_PROB
+                if _step % 10000000.0 > EXPLORE_STEPS:
+                    _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
+                else:    
+                    _probability_of_random_action = 1 - (_step % EXPLORE_STEPS) / EXPLORE_STEPS
 
         _last_state = current_state
 
@@ -686,8 +691,8 @@ def train():
         _last_action[action_index] = 1
 
         # 随机移动的概率逐步降低
-        if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
-            _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
+        # if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
+        #     _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
  
         if  _game_step >= _game_max_step:
             _game_step = 0
