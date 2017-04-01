@@ -658,8 +658,8 @@ def train():
                 _saver.save(_session, _checkpoint_path, global_step=_step)
                 if DEBUG:
                     _train_summary_writer.add_summary(train_summary_op, _step)
-                print("step: %s random_action_prob: %s reward %s scores differential %s" %
-                  (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN))
+                print("step: %s random_prob: %s reward %s scores %s max_step %s" %
+                  (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN, TRAIN_GAME_MAX_STEP))
 
             TRAIN_GAME_MAX_STEP = _step / 10000000 + 1
             if _step % 10000000 == 0:                
