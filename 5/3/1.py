@@ -683,7 +683,7 @@ def train():
         if _game_step == _game_max_step:
             _max_probability_of_random_action = _probability_of_random_action
         else:
-            _max_probability_of_random_action = FINAL_RANDOM_ACTION_PROB
+            _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
         if random.random() <= _max_probability_of_random_action :
             action_index = random.randrange(ACTIONS_COUNT)
         else:
