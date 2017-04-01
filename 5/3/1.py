@@ -584,8 +584,9 @@ def train():
     _saver,_model_dir,_checkpoint_path = restore(_session)
 
     # 游戏最大进行步数
-    _game_max_step=_session.run(global_step)//10000000 +1    
-
+    _step = _session.run(global_step)
+    _game_max_step = _step//10000000 +1    
+    print("global step: %s game max step: %s"%(_step, _game_max_step ))
     if DEBUG:
         tf.summary.scalar("cost", cost)
         tf.summary.scalar("reward", tf.reduce_mean(_target))        
@@ -673,7 +674,7 @@ def train():
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         # 如果是最后一步，按照当前概率进行，否则按最小概率进行
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-        if _game_step == _game_max_step：
+        if _game_step == _game_max_step:
             _max_probability_of_random_action = _probability_of_random_action
         else:
             _max_probability_of_random_action = FINAL_RANDOM_ACTION_PROB
