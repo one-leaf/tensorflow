@@ -586,6 +586,7 @@ def train():
 
     if DEBUG:
         tf.summary.scalar("cost", cost)
+        tf.summary.scalar("reward", tf.reduce_mean(_target))        
         _train_summary_op = tf.summary.merge_all()
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
     _min_reward = {}
