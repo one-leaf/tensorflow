@@ -550,6 +550,7 @@ def get_network(x, output_size, filter_size=[3,3,3,3], filter_nums=[32,32,64,64]
 
 # 学习
 def train():    
+    global TRAIN_GAME_MAX_STEP
     # 输入的图片，是每4张一组
     _input_layer =  tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   
     _output_layer = get_network(_input_layer, ACTIONS_COUNT)
@@ -585,7 +586,7 @@ def train():
 
     if DEBUG:
         tf.summary.scalar("cost", cost)
-        # tf.summary.scalar("learning_rate", learning_rate)        
+        tf.summary.scalar("reward", tf.reduce_mean(_target))        
         _train_summary_op = tf.summary.merge_all()
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
     _min_reward = {}
@@ -659,6 +660,7 @@ def train():
                     _train_summary_writer.add_summary(train_summary_op, _step)
                 print("step: %s random_action_prob: %s reward %s scores differential %s" %
                   (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN))
+
             if _step % 10000000 == 0:
                 TRAIN_GAME_MAX_STEP = _step / 10000000 + 1
                 _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
