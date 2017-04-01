@@ -672,7 +672,7 @@ def train():
                 if _step % 1000000.0 > EXPLORE_STEPS:
                     _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
                 else:    
-                    _probability_of_random_action = 1 - (_step % EXPLORE_STEPS) / EXPLORE_STEPS
+                    _probability_of_random_action = 1 - (_step % EXPLORE_STEPS) / EXPLORE_STEPS * (1 - FINAL_RANDOM_ACTION_PROB )
 
         _last_state = current_state
 
