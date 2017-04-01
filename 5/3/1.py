@@ -659,6 +659,9 @@ def train():
                     _train_summary_writer.add_summary(train_summary_op, _step)
                 print("step: %s random_action_prob: %s reward %s scores differential %s" %
                   (_step, _probability_of_random_action, reward, sum(_last_scores) / STORE_SCORES_LEN))
+            if _step % 10000000 == 0:
+                TRAIN_GAME_MAX_STEP = _step / 10000000 + 1
+                _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
 
         _last_state = current_state
 
