@@ -689,10 +689,6 @@ def train():
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
-
-        # 随机移动的概率逐步降低
-        # if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB and len(_observations) > OBSERVATION_STEPS:
-        #     _probability_of_random_action -= (INITIAL_RANDOM_ACTION_PROB - FINAL_RANDOM_ACTION_PROB) / EXPLORE_STEPS
  
         if  _game_step >= _game_max_step:
             _game_step = 0
