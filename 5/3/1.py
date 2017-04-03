@@ -494,6 +494,7 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
+LEARNING_START_STEP = 5     # 一开始学习的方块数
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -509,7 +510,7 @@ def restore(sess):
     return saver, model_dir, saver_prefix
 
 # CNN网络
-def get_network(x, output_size, filter_size=[3,3,3,3], filter_nums=[32,32,64,64], pool_scale=[2,2,2,2], full_nums=128, output_name="output_layer"):
+def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3], filter_nums=[64,64,64,64,64,64,64,64,64,64], pool_scale=[1,2,1,2,1,2,1,2,1,2], full_nums=256, output_name="output_layer"):
     def get_w_b(w_shape,w_name="w",b_name="b"):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
@@ -667,7 +668,10 @@ def train():
                   (_step, _probability_of_random_action, sum(_last_scores) / STORE_SCORES_LEN, _game_max_step, reward))
 
                 # 最大游戏步数,按100万次多学习一步
-                _game_max_step = _step // GAME_ADD_ONE_STEPS + 1           
+                if _step > GAME_ADD_ONE_STEPS * LEARNING_START_STEP:
+                    _game_max_step = _step // GAME_ADD_ONE_STEPS + LEARNING_START_STEP           
+                else:
+                    _game_max_step = LEARNING_START_STEP    
             
                 # 经过 EXPLORE_STEPS 次学习后概率降低到 FINAL_RANDOM_ACTION_PROB
                 if _step % GAME_ADD_ONE_STEPS > EXPLORE_STEPS:
@@ -680,7 +684,7 @@ def train():
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         # 如果是最后一步，按照当前概率进行，否则按最小概率进行
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-        if _game_step == _game_max_step:
+        if _game_step == _game_max_step or _game_max_step == LEARNING_START_STEP:
             _max_probability_of_random_action = _probability_of_random_action
         else:
             _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
