@@ -587,7 +587,10 @@ def train():
 
     # 游戏最大进行步数
     _step = _session.run(global_step)
-    _game_max_step = _step//1000000 +1    
+    if _step > GAME_ADD_ONE_STEPS * LEARNING_START_STEP:
+        _game_max_step = _step//GAME_ADD_ONE_STEPS + 1
+    else:          
+        _game_max_step = LEARNING_START_STEP
     print("global step: %s game max step: %s"%(_step, _game_max_step ))
     if DEBUG:
         tf.summary.scalar("cost", cost)
@@ -669,7 +672,7 @@ def train():
 
                 # 最大游戏步数,按100万次多学习一步
                 if _step > GAME_ADD_ONE_STEPS * LEARNING_START_STEP:
-                    _game_max_step = _step // GAME_ADD_ONE_STEPS + LEARNING_START_STEP           
+                    _game_max_step = _step // GAME_ADD_ONE_STEPS + 1           
                 else:
                     _game_max_step = LEARNING_START_STEP    
             
