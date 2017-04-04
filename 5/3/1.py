@@ -671,16 +671,18 @@ def train():
                   (_step, _probability_of_random_action, sum(_last_scores) / STORE_SCORES_LEN, _game_max_step, reward))
 
                 # 最大游戏步数,按100万次多学习一步
+                # 如果超过前5步则最大步数加1
                 if _step > GAME_ADD_ONE_STEPS * LEARNING_START_STEP:
-                    _game_max_step = _step // GAME_ADD_ONE_STEPS + 1           
+                    _game_max_step = _step // GAME_ADD_ONE_STEPS + 1 
+                    # 经过 EXPLORE_STEPS 次学习后概率降低到 FINAL_RANDOM_ACTION_PROB                
+                    if _step % GAME_ADD_ONE_STEPS > EXPLORE_STEPS:
+                        _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
+                    else:    
+                        _probability_of_random_action = 1 - (_step % EXPLORE_STEPS) / EXPLORE_STEPS * (1 - FINAL_RANDOM_ACTION_PROB )
                 else:
                     _game_max_step = LEARNING_START_STEP    
+                    _probability_of_random_action = 1 - (_step % (EXPLORE_STEPS * LEARNING_START_STEP)) / (EXPLORE_STEPS * LEARNING_START_STEP) * (1 - FINAL_RANDOM_ACTION_PROB )
             
-                # 经过 EXPLORE_STEPS 次学习后概率降低到 FINAL_RANDOM_ACTION_PROB
-                if _step % GAME_ADD_ONE_STEPS > EXPLORE_STEPS:
-                    _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
-                else:    
-                    _probability_of_random_action = 1 - (_step % EXPLORE_STEPS) / EXPLORE_STEPS * (1 - FINAL_RANDOM_ACTION_PROB )
 
         _last_state = current_state
 
