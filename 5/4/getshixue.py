@@ -15,7 +15,7 @@ def openurl(url,params):
                'Referer':'http://www.4qx.net/Poetry_Index.php/'}
     r = requests.get(url, headers=headers, params=params) 
     r.encoding = 'utf-8'   
-    time.sleep(5) # 抓取太快会被封IP   
+    time.sleep(3) # 抓取太快会被封IP   
     return r.text
 
 
