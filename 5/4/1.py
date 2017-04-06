@@ -110,33 +110,45 @@ def neural_network(model='lstm', rnn_size=128, num_layers=2):
     probs = tf.nn.softmax(logits)
     return logits, last_state, probs, cell, initial_state
 
+def restore(sess):
+    if not os.path.exists(model_dir): os.mkdir(model_dir)
+    saver_prefix = os.path.join(model_dir, "model.ckpt")        
+    ckpt = tf.train.get_checkpoint_state(model_dir)
+    saver = tf.train.Saver(max_to_keep=1)
+    if ckpt and ckpt.model_checkpoint_path:
+        print("restore model ...")
+        saver.restore(sess, ckpt.model_checkpoint_path)
+    return saver, saver_prefix
+
 #训练
 def train_neural_network():
     logits, last_state, _, _, _ = neural_network()
     targets = tf.reshape(output_targets, [-1])
     loss = tf.contrib.legacy_seq2seq.sequence_loss_by_example([logits], [targets], [tf.ones_like(targets, dtype=tf.float32)], len(words))
     cost = tf.reduce_mean(loss)
-    learning_rate = tf.Variable(0.0, trainable=False)
+    # learning_rate = tf.Variable(0.0, trainable=False)
+    global_step = tf.Variable(0, trainable=False)
+    learning_rate = tf.train.exponential_decay(0.002, global_step, 20000, 0.97, staircase=True)
     tvars = tf.trainable_variables()
     grads, _ = tf.clip_by_global_norm(tf.gradients(cost, tvars), 5)
     optimizer = tf.train.AdamOptimizer(learning_rate)
-    train_op = optimizer.apply_gradients(zip(grads, tvars))
- 
+    train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=global_step)
+
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
  
-        saver = tf.train.Saver(tf.all_variables())
- 
-        for epoch in range(50):
-            sess.run(tf.assign(learning_rate, 0.002 * (0.97 ** epoch)))
+        saver,checkpoint_path = restore(sess)
+        # epoch = sess.run(global_step)
+        # for epoch in range(50):
+        while True:
+            # sess.run(tf.assign(learning_rate, 0.002 * (0.97 ** epoch)))
             n = 0
-            for x in range(100000):
+            for x in range(20000):
                 x_batch, y_batch = get_batch()
-                train_loss, _ , _ = sess.run([cost, last_state, train_op], feed_dict={input_data: x_batch, output_targets: y_batch})
+                train_loss, epoch, _ , _ = sess.run([cost, global_step, last_state, train_op], feed_dict={input_data: x_batch, output_targets: y_batch})
                 n += 1
                 print(epoch,x, train_loss)
-            if epoch % 7 == 0:
-                saver.save(sess, 'poetry.module', global_step=epoch)
+            saver.save(sess, checkpoint_path, global_step=epoch)
 
 if __name__ == '__main__':
     train_neural_network()
