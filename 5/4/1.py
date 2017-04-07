@@ -142,13 +142,11 @@ def train_neural_network():
         # for epoch in range(50):
         while True:
             # sess.run(tf.assign(learning_rate, 0.002 * (0.97 ** epoch)))
-            n = 0
-            for x in range(20000):
-                x_batch, y_batch = get_batch()
-                train_loss, epoch, _ , _ = sess.run([cost, global_step, last_state, train_op], feed_dict={input_data: x_batch, output_targets: y_batch})
-                n += 1
-                print(epoch,x, train_loss)
-            saver.save(sess, checkpoint_path, global_step=epoch)
+            x_batch, y_batch = get_batch()
+            train_loss, epoch, _ , _ = sess.run([cost, global_step, last_state, train_op], feed_dict={input_data: x_batch, output_targets: y_batch})
+            if epoch % 100 == 0:
+                print(epoch, train_loss)
+                saver.save(sess, checkpoint_path, global_step=epoch)
 
 if __name__ == '__main__':
     train_neural_network()
