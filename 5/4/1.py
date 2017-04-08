@@ -157,7 +157,7 @@ def to_word(weights):
 
 def gen_poetry():
     batch_size = 1
-    _, _, _, last_state, probs, cell, initial_state = neural_network(batch_size=batch_size)
+    input_data, output_targets, _, last_state, probs, cell, initial_state = neural_network(batch_size=batch_size)
  
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -181,7 +181,7 @@ def gen_poetry():
  
 def gen_poetry_with_head(head):
     batch_size = 1
-    _, _, _, last_state, probs, cell, initial_state = neural_network(batch_size=batch_size)
+    input_data, output_targets, _, last_state, probs, cell, initial_state = neural_network(batch_size=batch_size)
  
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
