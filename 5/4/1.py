@@ -36,7 +36,7 @@ def load_poetrys():
                     line = line.replace(" ","")
                     for poetry in line.split(";"):
                         if len(poetry)==5 or len(poetry)==7:
-                            poetrys.append(poetry)
+                            poetrys.append('['+poetry+']')
         with gzip.open(poetrys_file, 'wb') as f:
             pickle.dump(poetrys, f)
     print("poetrys",len(poetrys))
@@ -61,18 +61,18 @@ def load_words():
         with gzip.open(words_file, 'wb') as f:
             pickle.dump(words, f)
     print("words",len(words))
-    return words  
+    return words,list(words.keys())  
 
-words=load_words()
-to_num = lambda word: words.get(word, len(words))
+words_map, words=load_words()
+to_num = lambda word: words_map.get(word, len(words))
 poetrys_vector = [ list(map(to_num, poetry)) for poetry in poetrys]
 
-batch_size = 128
+batch_size = 1
 # 随机获得一批训练数据
 def get_batch():
     batches=random.sample(poetrys_vector, batch_size)
     length = max(map(len,batches))
-    xdata = np.full((batch_size,length), words[' '], np.int32)   # 先全部填充空格
+    xdata = np.full((batch_size,length), words_map[' '], np.int32)   # 先全部填充空格
     for row in range(batch_size):
         xdata[row,:len(batches[row])] = batches[row]
     ydata = np.copy(xdata)
@@ -97,10 +97,10 @@ def neural_network(model='lstm', rnn_size=128, num_layers=2):
     initial_state = cell.zero_state(batch_size, tf.float32)
  
     with tf.variable_scope('rnnlm'):
-        softmax_w = tf.get_variable("softmax_w", [rnn_size, len(words)+1])
-        softmax_b = tf.get_variable("softmax_b", [len(words)+1])
+        softmax_w = tf.get_variable("softmax_w", [rnn_size, len(words_map)+1])
+        softmax_b = tf.get_variable("softmax_b", [len(words_map)+1])
         with tf.device("/cpu:0"):
-            embedding = tf.get_variable("embedding", [len(words)+1, rnn_size])
+            embedding = tf.get_variable("embedding", [len(words_map)+1, rnn_size])
             inputs = tf.nn.embedding_lookup(embedding, input_data)
  
     outputs, last_state = tf.nn.dynamic_rnn(cell, inputs, initial_state=initial_state, scope='rnnlm')
@@ -152,7 +152,7 @@ def to_word(weights):
     t = np.cumsum(weights)
     s = np.sum(weights)
     sample = int(np.searchsorted(t, np.random.rand(1)*s))
-    return words.keys()[sample]
+    return words[sample]
 
 def gen_poetry():
 
@@ -164,7 +164,7 @@ def gen_poetry():
         saver,checkpoint_path = restore(sess)
         state_ = sess.run(cell.zero_state(1, tf.float32))
  
-        x = np.array([list(map(words.get, '['))])
+        x = np.array([list(map(words_map.get, '['))])
         [probs_, state_] = sess.run([probs, last_state], feed_dict={input_data: x, initial_state: state_})
         word = to_word(probs_)
         #word = words[np.argmax(probs_)]
@@ -172,7 +172,7 @@ def gen_poetry():
         while word != ']':
             poem += word
             x = np.zeros((1,1))
-            x[0,0] = words[word]
+            x[0,0] = words_map[word]
             [probs_, state_] = sess.run([probs, last_state], feed_dict={input_data: x, initial_state: state_})
             word = to_word(probs_)
             #word = words[np.argmax(probs_)]
@@ -193,7 +193,7 @@ def gen_poetry_with_head(head):
         for word in head:
             while word != '，' and word != '。':
                 poem += word
-                x = np.array([list(map(words.get, word))])
+                x = np.array([list(map(words_map.get, word))])
                 [probs_, state_] = sess.run([probs, last_state], feed_dict={input_data: x, initial_state: state_})
                 word = to_word(probs_)
                 time.sleep(1)
@@ -206,8 +206,8 @@ def gen_poetry_with_head(head):
  
 
 if __name__ == '__main__':
-    train_neural_network()
-    # print(gen_poetry())
-    # print(gen_poetry_with_head('一二三四')) 
+    #train_neural_network()
+    print(gen_poetry().encode("GB18030").decode('GB18030'))
+   # print(gen_poetry_with_head('一二三四')) 
     
     
