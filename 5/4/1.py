@@ -67,9 +67,8 @@ words_map, words=load_words()
 to_num = lambda word: words_map.get(word, len(words))
 poetrys_vector = [ list(map(to_num, poetry)) for poetry in poetrys]
 
-batch_size = 1
 # 随机获得一批训练数据
-def get_batch():
+def get_batch(batch_size):
     batches=random.sample(poetrys_vector, batch_size)
     length = max(map(len,batches))
     xdata = np.full((batch_size,length), words_map[' '], np.int32)   # 先全部填充空格
@@ -79,11 +78,12 @@ def get_batch():
     ydata[:,:-1] = xdata[:,1:]  # ？ydata 的前面有X的第一列开始覆写，最终重复了最后一列
     return xdata, ydata
 
-input_data = tf.placeholder(tf.int32, [batch_size, None])
-output_targets = tf.placeholder(tf.int32, [batch_size, None])
 
 # 定义RNN
-def neural_network(model='lstm', rnn_size=128, num_layers=2):
+def neural_network(model='lstm', rnn_size=128, num_layers=2, batch_size=128):
+    input_data = tf.placeholder(tf.int32, [batch_size, None])
+    output_targets = tf.placeholder(tf.int32, [batch_size, None])
+
     if model == 'rnn':
         cell_fun = tf.contrib.rnn.BasicRNNCell
     elif model == 'gru':
@@ -108,7 +108,7 @@ def neural_network(model='lstm', rnn_size=128, num_layers=2):
  
     logits = tf.matmul(output, softmax_w) + softmax_b
     probs = tf.nn.softmax(logits)
-    return logits, last_state, probs, cell, initial_state
+    return input_data, output_targets, logits, last_state, probs, cell, initial_state
 
 def restore(sess):
     if not os.path.exists(model_dir): os.mkdir(model_dir)
@@ -122,7 +122,8 @@ def restore(sess):
 
 #训练
 def train_neural_network():
-    logits, last_state, _, _, _ = neural_network()
+    batch_size = 128
+    input_data, output_targets, logits, last_state, _, _, _ = neural_network(batch_size=batch_size)
     targets = tf.reshape(output_targets, [-1])
     loss = tf.contrib.legacy_seq2seq.sequence_loss_by_example([logits], [targets], [tf.ones_like(targets, dtype=tf.float32)], len(words))
     cost = tf.reduce_mean(loss)
@@ -142,7 +143,7 @@ def train_neural_network():
         # for epoch in range(50):
         while True:
             # sess.run(tf.assign(learning_rate, 0.002 * (0.97 ** epoch)))
-            x_batch, y_batch = get_batch()
+            x_batch, y_batch = get_batch(batch_size)
             train_loss, epoch, _ , _ = sess.run([cost, global_step, last_state, train_op], feed_dict={input_data: x_batch, output_targets: y_batch})
             if epoch % 100 == 0:
                 print(epoch, train_loss)
@@ -155,8 +156,8 @@ def to_word(weights):
     return words[sample]
 
 def gen_poetry():
-
-    _, last_state, probs, cell, initial_state = neural_network()
+    batch_size = 1
+    _, _, _, last_state, probs, cell, initial_state = neural_network(batch_size=batch_size)
  
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -179,8 +180,8 @@ def gen_poetry():
         return poem
  
 def gen_poetry_with_head(head):
- 
-    _, last_state, probs, cell, initial_state = neural_network()
+    batch_size = 1
+    _, _, _, last_state, probs, cell, initial_state = neural_network(batch_size=batch_size)
  
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
@@ -206,7 +207,7 @@ def gen_poetry_with_head(head):
  
 
 if __name__ == '__main__':
-    #train_neural_network()
+    train_neural_network()
     print(gen_poetry().encode("GB18030").decode('GB18030'))
    # print(gen_poetry_with_head('一二三四')) 
     
