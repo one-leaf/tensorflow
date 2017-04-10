@@ -483,7 +483,7 @@ ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 5000.  # 在学习前观察的次数
 EXPLORE_STEPS = 700000.  # 每次机器自动参与的概率的除数
-GAME_ADD_ONE_STEPS = 1000000. # 游戏增加一步的学习步数
+GAME_ADD_ONE_STEPS = 3000000. # 游戏增加一步的学习步数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率 1.0
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
 MEMORY_SIZE = 10000  # 记住的观察队列
@@ -494,7 +494,7 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
-LEARNING_START_STEP = 5     # 一开始学习的方块数
+LEARNING_START_STEP = 1     # 一开始学习的方块数
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
