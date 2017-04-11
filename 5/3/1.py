@@ -640,7 +640,6 @@ def train():
         if len(_observations) > MEMORY_SIZE:
             _observations.popleft()
         
-        if len(_observations) > OBSERVATION_STEPS:
             mini_batch = random.sample(_observations, MINI_BATCH_SIZE)
             previous_states = [d[OBS_LAST_STATE_INDEX] for d in mini_batch]
             actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
