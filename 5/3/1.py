@@ -599,7 +599,7 @@ def train():
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
     _min_reward = {}
     _max_reward = {}
-    _game_step  = 0
+    _game_step  = 1
     _game_random_step = True
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
@@ -705,7 +705,7 @@ def train():
         _last_action[action_index] = 1
 
         if  _game_step >= _game_max_step:
-            _game_step = 0
+            _game_step = 1
             game.reset()
 
 if __name__ == '__main__':
