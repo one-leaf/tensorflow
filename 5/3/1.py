@@ -704,7 +704,7 @@ def train():
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
 
-        if  _game_step >= _game_max_step:
+        if  _game_step > _game_max_step:
             _game_step = 1
             game.reset()
 
