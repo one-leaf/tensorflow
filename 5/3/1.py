@@ -482,7 +482,7 @@ DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
-EXPLORE_STEPS = 1500000.  # 每次机器自动参与的概率的除数
+EXPLORE_STEPS = 1800000.  # 每次机器自动参与的概率的除数
 GAME_ADD_ONE_STEPS = 2000000. # 游戏增加一步的学习步数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率 1.0
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
@@ -692,7 +692,7 @@ def train():
             else:
                 _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
             _game_random_step = random.random() <= _max_probability_of_random_action 
-            print(_game_random_step,_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step,LEARNING_START_STEP)
+            # print(_game_random_step,_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step,LEARNING_START_STEP)
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
