@@ -639,7 +639,8 @@ def train():
         if _last_state is None:  # 填充第一次的4张图片            
             _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
 
-        if _game_step == _game_max_step or random.random() <= 0.2:
+        # 如果是游戏的最后一步，全部进行学习，否则按 0.3 的概率进行学习
+        if _game_step == _game_max_step or random.random() <= 0.3:
             screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
             current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
             _observations.append((_last_state, _last_action, reward, current_state, terminal))
