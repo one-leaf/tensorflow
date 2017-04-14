@@ -600,7 +600,7 @@ def train():
     _min_reward = {}
     _max_reward = {}
     _game_step  = 0
-    
+    _game_random_step = True
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
         
@@ -682,26 +682,28 @@ def train():
                     _game_max_step = LEARNING_START_STEP    
                     _probability_of_random_action = 1 - (_step % (EXPLORE_STEPS * LEARNING_START_STEP)) / (EXPLORE_STEPS * LEARNING_START_STEP) * (1 - FINAL_RANDOM_ACTION_PROB )
             
-
         _last_state = current_state
 
+        if  _game_step >= _game_max_step:
+            _game_step = 0
+            game.reset()
+
+            # 如果是最后一步，按照当前概率进行，否则按最小概率进行
+            if _game_step == _game_max_step or _game_max_step == LEARNING_START_STEP:
+                _max_probability_of_random_action = _probability_of_random_action
+            else:
+                _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
+            _game_random_step = random.random() <= _max_probability_of_random_action 
+
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
-        # 如果是最后一步，按照当前概率进行，否则按最小概率进行
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-        if _game_step == _game_max_step or _game_max_step == LEARNING_START_STEP:
-            _max_probability_of_random_action = _probability_of_random_action
-        else:
-            _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
-        if random.random() <= _max_probability_of_random_action :
+     
+        if _game_random_step:
             action_index = random.randrange(ACTIONS_COUNT)
         else:
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
- 
-        if  _game_step >= _game_max_step:
-            _game_step = 0
-            game.reset()
 
 if __name__ == '__main__':
     train()
