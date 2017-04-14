@@ -79,7 +79,7 @@ def get_batch(batch_size):
         xdata[row,:len(batches[row])] = batches[row]
     ydata = np.copy(xdata)
     ydata[:,:-1] = xdata[:,1:]  # ？ydata 的前面有X的第一列开始覆写，最终重复了最后一列
-    print(xdata[0],ydata[0])
+    # print(xdata[0],ydata[0])
     return xdata, ydata
 
 # 定义RNN
