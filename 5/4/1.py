@@ -66,9 +66,7 @@ def load_words():
     return words, sorted(words, key=words.get)  
 
 words_map, words=load_words()
-for i in range(10):
-    print(words[i])
-
+print(" ".join(words[:10]))
 to_num = lambda word: words_map.get(word, len(words))
 poetrys_vector = [ list(map(to_num, poetry)) for poetry in poetrys]
 
@@ -213,7 +211,7 @@ def gen_poetry_with_head(head):
 
 if __name__ == '__main__':
     train_neural_network()
-    print(gen_poetry().encode("GB18030").decode('GB18030'))
+    print(gen_poetry())
    # print(gen_poetry_with_head('一二三四')) 
     
     
