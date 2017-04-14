@@ -695,6 +695,7 @@ def train():
                 _max_probability_of_random_action = _probability_of_random_action
             else:
                 _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
+            print(_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step)
             _game_random_step = random.random() <= _max_probability_of_random_action 
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
