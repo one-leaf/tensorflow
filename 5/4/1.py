@@ -132,7 +132,7 @@ def train_neural_network():
     cost = tf.reduce_mean(loss)
     # learning_rate = tf.Variable(0.0, trainable=False)
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(0.002, global_step, 20000, 0.97, staircase=True)
+    learning_rate = tf.train.exponential_decay(0.0001, global_step, 10000, 0.97, staircase=True)
     tvars = tf.trainable_variables()
     grads, _ = tf.clip_by_global_norm(tf.gradients(cost, tvars), 5)
     optimizer = tf.train.AdamOptimizer(learning_rate)
