@@ -626,7 +626,7 @@ def train():
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
        
-        if reward != 0.0:
+        if reward != 0.0 and not _game_random_step:
             _last_scores.append(reward)
             if len(_last_scores) > STORE_SCORES_LEN:
                 _last_scores.popleft()
@@ -697,7 +697,7 @@ def train():
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-     
+
         if _game_random_step:
             action_index = random.randrange(ACTIONS_COUNT)
         else:
