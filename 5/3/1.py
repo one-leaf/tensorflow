@@ -691,8 +691,8 @@ def train():
                 _max_probability_of_random_action = _probability_of_random_action
             else:
                 _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
-            print(_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step,LEARNING_START_STEP)
             _game_random_step = random.random() <= _max_probability_of_random_action 
+            print(_game_random_step,_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step,LEARNING_START_STEP)
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
