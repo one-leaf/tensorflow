@@ -624,9 +624,9 @@ def train():
             elif reward > _max_reward[shape][_game_step]:
                 _max_reward[shape][_game_step] = reward
             reward = (reward - _min_reward[shape][_game_step]) * 2 / (_max_reward[shape][_game_step] - _min_reward[shape][_game_step]) - 1.0
-            _game_step += 1
             if not _game_random_step:
                 print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])
+            _game_step += 1
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
