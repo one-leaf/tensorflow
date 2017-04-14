@@ -670,13 +670,14 @@ def train():
                     _train_summary_writer.add_summary(train_summary_op, _step)
                 print("step: %s random_prob: %s scores: %s max_step: %s reward: %s" %
                   (_step, _probability_of_random_action, sum(_last_scores) / STORE_SCORES_LEN, _game_max_step, reward))
-
-
             
         _last_state = current_state
 
         if  _game_step >= _game_max_step:
+            _game_step = 0
+            game.reset()
 
+        if reward != 0.0:
             # 最大游戏步数,按 GAME_ADD_ONE_STEPS 次多学习一步
             if _step > GAME_ADD_ONE_STEPS * LEARNING_START_STEP:
                 _game_max_step = _step // GAME_ADD_ONE_STEPS + 1 
@@ -695,9 +696,6 @@ def train():
             else:
                 _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
             _game_random_step = random.random() <= _max_probability_of_random_action 
-
-            _game_step = 0
-            game.reset()
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
