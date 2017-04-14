@@ -43,6 +43,8 @@ def load_poetrys():
     return poetrys                            
 
 poetrys=load_poetrys()    
+for i in range(10):
+    print(poetrys[i])
 
 # 获得诗歌字符和序号的map
 def load_words():
@@ -61,9 +63,12 @@ def load_words():
         with gzip.open(words_file, 'wb') as f:
             pickle.dump(words, f)
     print("words",len(words))
-    return words,list(words.keys())  
+    return words, sorted(words, key=words.get)  
 
 words_map, words=load_words()
+for i in range(10):
+    print(words[i])
+
 to_num = lambda word: words_map.get(word, len(words))
 poetrys_vector = [ list(map(to_num, poetry)) for poetry in poetrys]
 
@@ -76,8 +81,8 @@ def get_batch(batch_size):
         xdata[row,:len(batches[row])] = batches[row]
     ydata = np.copy(xdata)
     ydata[:,:-1] = xdata[:,1:]  # ？ydata 的前面有X的第一列开始覆写，最终重复了最后一列
+    print(xdata[0],ydata[0])
     return xdata, ydata
-
 
 # 定义RNN
 def neural_network(model='lstm', rnn_size=128, num_layers=2, batch_size=128):
