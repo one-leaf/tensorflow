@@ -618,7 +618,7 @@ def train():
             if shape not in _max_reward:
                 _max_reward[shape] = {}
             if  _game_step not in _max_reward[shape]:                   
-                _max_reward[shape][_game_step]=20000
+                _max_reward[shape][_game_step]=-20000
             if reward < _min_reward[shape][_game_step]:
                 _min_reward[shape][_game_step] = reward - 0.1
             elif reward > _max_reward[shape][_game_step]:
