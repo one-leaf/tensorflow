@@ -612,17 +612,21 @@ def train():
         #将奖励分数归一化
         if reward != 0.0:
             if shape not in _min_reward:
-                _min_reward[shape] = 20000
+                _min_reward[shape] = {}
+            if _game_step not in _min_reward[shape]:
+                _min_reward[shape][_game_step]=20000
             if shape not in _max_reward:
-                _max_reward[shape] = -20000
-            if reward < _min_reward[shape]:
-                _min_reward[shape] = reward - 0.1
-            elif reward > _max_reward[shape]:
-                _max_reward[shape] = reward
-            reward = (reward - _min_reward[shape]) * 2 / (_max_reward[shape] - _min_reward[shape]) - 1.0
+                _max_reward[shape] = {}
+            if  _game_step not in _max_reward[shape]:                   
+                _max_reward[shape][_game_step]=20000
+            if reward < _min_reward[shape][_game_step]:
+                _min_reward[shape][_game_step] = reward - 0.1
+            elif reward > _max_reward[shape][_game_step]:
+                _max_reward[shape][_game_step] = reward
+            reward = (reward - _min_reward[shape][_game_step]) * 2 / (_max_reward[shape][_game_step] - _min_reward[shape][_game_step]) - 1.0
             _game_step += 1
             if not _game_random_step:
-                print(shape,reward,_min_reward[shape],_max_reward[shape])
+                print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
