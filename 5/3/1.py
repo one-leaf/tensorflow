@@ -693,7 +693,7 @@ def train():
                 _probability_of_random_action = 1 - (_step % (EXPLORE_STEPS * LEARNING_START_STEP)) / (EXPLORE_STEPS * LEARNING_START_STEP) * (1 - FINAL_RANDOM_ACTION_PROB )
 
             # 如果是最后一步，按照当前概率进行，否则按最小概率进行
-            if _game_step = _game_max_step:
+            if _game_step == _game_max_step:
                 _max_probability_of_random_action = _probability_of_random_action
             else:
                 _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
