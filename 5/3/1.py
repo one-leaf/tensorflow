@@ -494,7 +494,6 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
-LEARNING_START_STEP = 1     # 一开始学习的方块数
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -587,10 +586,7 @@ def train():
 
     # 游戏最大进行步数
     _step = _session.run(global_step)
-    if _step > GAME_ADD_ONE_STEPS * LEARNING_START_STEP:
-        _game_max_step = _step//GAME_ADD_ONE_STEPS + 1
-    else:          
-        _game_max_step = LEARNING_START_STEP
+    _game_max_step = _step//GAME_ADD_ONE_STEPS + 1
     print("global step: %s game max step: %s"%(_step, _game_max_step ))
     if DEBUG:
         tf.summary.scalar("cost", cost)
@@ -680,18 +676,13 @@ def train():
         _last_state = current_state
 
         if reward != 0.0:
-            # 最大游戏步数,按 GAME_ADD_ONE_STEPS 次多学习一步
-            if _step > GAME_ADD_ONE_STEPS * LEARNING_START_STEP:
-                _game_max_step = _step // GAME_ADD_ONE_STEPS + 1 
-                # 经过 EXPLORE_STEPS 次学习后概率降低到 FINAL_RANDOM_ACTION_PROB                
-                if _step % GAME_ADD_ONE_STEPS > EXPLORE_STEPS:
-                    _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
-                else:    
-                    _probability_of_random_action = 1 - (_step % EXPLORE_STEPS) / EXPLORE_STEPS * (1 - FINAL_RANDOM_ACTION_PROB )
-            else:
-                _game_max_step = LEARNING_START_STEP    
-                _probability_of_random_action = 1 - (_step % (EXPLORE_STEPS * LEARNING_START_STEP)) / (EXPLORE_STEPS * LEARNING_START_STEP) * (1 - FINAL_RANDOM_ACTION_PROB )
-
+            _game_max_step = _step // GAME_ADD_ONE_STEPS + 1
+            _step_rem = _step % GAME_ADD_ONE_STEPS  # 余数
+            if _step_rem > EXPLORE_STEPS: 
+                _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
+            else:    
+                _probability_of_random_action = 1.0 - _step_rem / EXPLORE_STEPS * (1 - FINAL_RANDOM_ACTION_PROB )
+ 
             # 如果下一步是最后一步，按照当前概率进行，否则按最小概率进行
             if _game_step == _game_max_step -1 :
                 _max_probability_of_random_action = _probability_of_random_action
@@ -699,7 +690,7 @@ def train():
                 _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
             _game_random_step = random.random() <= _max_probability_of_random_action 
             _game_step += 1
-            # print(_game_random_step,_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step,LEARNING_START_STEP)
+            # print(_game_random_step,_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step)
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
