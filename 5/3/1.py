@@ -625,8 +625,7 @@ def train():
                 _max_reward[shape][_game_step] = reward
             reward = (reward - _min_reward[shape][_game_step]) * 2 / (_max_reward[shape][_game_step] - _min_reward[shape][_game_step]) - 1.0
             if not _game_random_step:
-                print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])
-            _game_step += 1
+                print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])            
 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -694,12 +693,13 @@ def train():
                 _probability_of_random_action = 1 - (_step % (EXPLORE_STEPS * LEARNING_START_STEP)) / (EXPLORE_STEPS * LEARNING_START_STEP) * (1 - FINAL_RANDOM_ACTION_PROB )
 
             # 如果是最后一步，按照当前概率进行，否则按最小概率进行
-            if _game_step == _game_max_step or _game_max_step == LEARNING_START_STEP:
+            if _game_step = _game_max_step:
                 _max_probability_of_random_action = _probability_of_random_action
             else:
                 _max_probability_of_random_action = 0 # FINAL_RANDOM_ACTION_PROB
             _game_random_step = random.random() <= _max_probability_of_random_action 
             # print(_game_random_step,_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step,LEARNING_START_STEP)
+            _game_step += 1
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
