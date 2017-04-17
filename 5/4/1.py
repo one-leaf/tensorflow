@@ -130,7 +130,7 @@ def restore(sess):
 
 #训练
 def train_neural_network():
-    batch_size = 64
+    batch_size = 20
     input_data, output_targets, logits, last_state, _, _, _ = neural_network(batch_size=batch_size)
     targets = tf.reshape(output_targets, [-1])
     loss = tf.contrib.legacy_seq2seq.sequence_loss_by_example([logits], [targets], [tf.ones_like(targets, dtype=tf.float32)], len(words))
