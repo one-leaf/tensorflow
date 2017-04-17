@@ -18,6 +18,7 @@ poetrys_file = os.path.join(curr_dir, "poetrys.pklz")
 words_file = os.path.join(curr_dir, "words.pklz")
 
 # 装载诗句
+# 取4句5言或7言作为一首
 def load_poetrys():
     if os.path.exists(poetrys_file):
         print("loading poetrys ...")
@@ -34,17 +35,21 @@ def load_poetrys():
                     line = line.replace("！",";")
                     line = line.replace("：",";")
                     line = line.replace(" ","")
-                    for poetry in line.split(";"):
-                        if len(poetry)==5 or len(poetry)==7:
-                            poetrys.append('['+poetry+']')
+                    p_lines = line.split(";")
+                    c = len(p_lines)//4
+                    for i in range(c):
+                        l1 = len(p_lines[0+4*i])
+                        l2 = len(p_lines[1+4*i])
+                        l3 = len(p_lines[2+4*i])
+                        l4 = len(p_lines[3+4*i])
+                        if (l1==l2==l3==l4) and ((l1==5) or (l1==7)):
+                            poetrys.append('[%s，%s。%s，%s。]'%(p_lines[0+4*i],p_lines[1+4*i],p_lines[2+4*i],p_lines[3+4*i]))
         with gzip.open(poetrys_file, 'wb') as f:
             pickle.dump(poetrys, f)
     print("poetrys",len(poetrys))
     return poetrys                            
 
 poetrys=load_poetrys()    
-for i in range(10):
-    print(poetrys[i])
 
 # 获得诗歌字符和序号的map
 def load_words():
@@ -66,7 +71,7 @@ def load_words():
     return words, sorted(words, key=words.get)  
 
 words_map, words=load_words()
-print(" ".join(words[:10]))
+#print(" ".join(words[:10]))
 to_num = lambda word: words_map.get(word, len(words))
 poetrys_vector = [ list(map(to_num, poetry)) for poetry in poetrys]
 
@@ -211,7 +216,7 @@ def gen_poetry_with_head(head):
 
 if __name__ == '__main__':
     train_neural_network()
-    print(gen_poetry())
+    # print(gen_poetry())
    # print(gen_poetry_with_head('一二三四')) 
     
     
