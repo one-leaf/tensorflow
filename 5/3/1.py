@@ -502,7 +502,7 @@ def restore(sess):
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
     ckpt = tf.train.get_checkpoint_state(model_dir)
-    saver = tf.train.Saver(max_to_keep=1)
+    saver = tf.train.Saver(max_to_keep=5)
     if ckpt and ckpt.model_checkpoint_path:
         print("restore model ...")
         saver.restore(sess, ckpt.model_checkpoint_path)
