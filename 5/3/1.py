@@ -564,6 +564,7 @@ def get_random_action_prob(step):
             allStep = allStep + i/n * GAME_ADD_ONE_STEPS  
         if step<allStep:
             return INITIAL_RANDOM_ACTION_PROB - step/allStep*(1.0-FINAL_RANDOM_ACTION_PROB)    
+        n = n+1
 # 学习
 def train():    
     # 输入的图片，是每4张一组
