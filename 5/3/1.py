@@ -550,18 +550,14 @@ def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3], filter_nums=[
 def get_max_step(step):
     n=1
     while True:
-        allStep = GAME_ADD_ONE_STEPS
-        for i in range(n):
-            allStep = allStep + i/n * GAME_ADD_ONE_STEPS  
+        allStep = GAME_ADD_ONE_STEPS * n
         if step < allStep: return n
         n = n+1
 
 def get_random_action_prob(step):
     n=1
     while True:
-        allStep = GAME_ADD_ONE_STEPS
-        for i in range(n):
-            allStep = allStep + i/n * GAME_ADD_ONE_STEPS  
+        allStep = GAME_ADD_ONE_STEPS * n
         if step<allStep:
             return INITIAL_RANDOM_ACTION_PROB - step/allStep*(1.0-FINAL_RANDOM_ACTION_PROB)    
         n = n+1
