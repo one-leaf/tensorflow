@@ -482,7 +482,6 @@ DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=
 ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
-EXPLORE_STEPS = 1800000.  # 每次机器自动参与的概率的除数
 GAME_ADD_ONE_STEPS = 2000000. # 游戏增加一步的学习步数
 INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率 1.0
 FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
@@ -548,6 +547,23 @@ def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3], filter_nums=[
         output = tf.nn.bias_add(tf.matmul(full_connects[-1], w) , b, name=output_name)
         return output
 
+def get_max_step(step):
+    n=1
+    while True:
+        allStep = GAME_ADD_ONE_STEPS
+        for i in range(n):
+            allStep = allStep + i/n * GAME_ADD_ONE_STEPS  
+        if step < allStep: return n
+        n = n+1
+
+def get_random_action_prob(step):
+    n=1
+    while True:
+        allStep = GAME_ADD_ONE_STEPS
+        for i in range(n):
+            allStep = allStep + i/n * GAME_ADD_ONE_STEPS  
+        if step<allStep:
+            return INITIAL_RANDOM_ACTION_PROB - step/allStep*(1.0-FINAL_RANDOM_ACTION_PROB)    
 # 学习
 def train():    
     # 输入的图片，是每4张一组
@@ -574,7 +590,6 @@ def train():
     # 设置最后一步是固定
     _last_action = KEY_LEFT
     _last_state = None          #4次的截图
-    _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
 
     game = Tetromino()
 
@@ -586,8 +601,9 @@ def train():
 
     # 游戏最大进行步数
     _step = _session.run(global_step)
-    _game_max_step = _step//GAME_ADD_ONE_STEPS + 1
-    print("global step: %s game max step: %s"%(_step, _game_max_step ))
+    _game_max_step = get_max_step(_step)
+    _probability_of_random_action = get_random_action_prob(_step)
+    print("global step: %s game max step: %s random action prob: %s"%(_step, _game_max_step, _probability_of_random_action ))
     if DEBUG:
         tf.summary.scalar("cost", cost)
         tf.summary.scalar("reward", tf.reduce_mean(_target))        
@@ -676,12 +692,9 @@ def train():
         _last_state = current_state
 
         if reward != 0.0:
-            _game_max_step = _step // GAME_ADD_ONE_STEPS + 1
+            _game_max_step = get_max_step(_step)
             _step_rem = _step % GAME_ADD_ONE_STEPS  # 余数
-            if _step_rem > EXPLORE_STEPS: 
-                _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
-            else:    
-                _probability_of_random_action = 1.0 - _step_rem / EXPLORE_STEPS * (1 - FINAL_RANDOM_ACTION_PROB )
+            _probability_of_random_action = get_random_action_prob(_step)
  
             # 如果下一步是最后一步，按照当前概率进行，否则按最小概率进行
             if _game_step == _game_max_step -1 :

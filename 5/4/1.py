@@ -158,8 +158,8 @@ def train_neural_network():
                 saver.save(sess, checkpoint_path, global_step=epoch)
 
 def to_word(weights):
-    t = np.cumsum(weights)
-    s = np.sum(weights)
+    t = np.cumsum(weights)  # 按梯形累计求和
+    s = np.sum(weights)     # 求和
     sample = int(np.searchsorted(t, np.random.rand(1)*s))
     return words[sample]
 
