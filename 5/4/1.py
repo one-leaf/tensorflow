@@ -183,8 +183,10 @@ def gen_poetry():
             x = np.zeros((1,1))
             x[0,0] = words_map[word]
             [probs_, state_] = sess.run([probs, last_state], feed_dict={input_data: x, initial_state: state_})
-            word = to_word(probs_)
-            #word = words[np.argmax(probs_)]
+            if len(poem)%2!=0:  # 第一个字随机
+                word = to_word(probs_)
+            else:               # 第二个字预测
+                word = words[np.argmax(probs_)]
         return poem
  
 def gen_poetry_with_head(head):
