@@ -202,16 +202,19 @@ def gen_poetry_with_head(head):
         poem = ''
         i = 0
         for word in head:
-            while word != '，' and word != '。':
-                poem += word
+            line = word
+            while True:
                 x = np.array([list(map(words_map.get, word))])
                 [probs_, state_] = sess.run([probs, last_state], feed_dict={input_data: x, initial_state: state_})
                 word = to_word(probs_)
+                if word != '，' and word != '。'
+                    line += word
+                    if len(line) % 7 == 0 : break    
                 time.sleep(1)
             if i % 2 == 0:
-                poem += '，'
+                poem += line+'，'
             else:
-                poem += '。'
+                poem += line+'。'
             i += 1
         return poem
  
@@ -219,6 +222,6 @@ def gen_poetry_with_head(head):
 if __name__ == '__main__':
     train_neural_network()
     # print(gen_poetry())
-   # print(gen_poetry_with_head('一二三四')) 
+    # print(gen_poetry_with_head('春风得意')) 
     
     
