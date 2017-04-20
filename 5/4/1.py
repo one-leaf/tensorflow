@@ -6,7 +6,7 @@ import collections
 import random
 import numpy as np
 import tensorflow as tf
-
+import time
 
 curr_dir = os.path.dirname(__file__)
 data_dir = os.path.join(curr_dir, "data")
@@ -157,7 +157,7 @@ def train_neural_network():
                 print(epoch, train_loss)
                 saver.save(sess, checkpoint_path, global_step=epoch)
 
-def to_word(weights):
+def to_word(weights):                
     t = np.cumsum(weights)  # 按梯形累计求和
     s = np.sum(weights)     # 求和
     sample = int(np.searchsorted(t, np.random.rand(1)*s))
@@ -202,15 +202,22 @@ def gen_poetry_with_head(head):
         poem = ''
         i = 0
         for word in head:
-            line = word
             while True:
-                x = np.array([list(map(words_map.get, word))])
-                [probs_, state_] = sess.run([probs, last_state], feed_dict={input_data: x, initial_state: state_})
-                word = to_word(probs_)
-                if word != '，' and word != '。'
-                    line += word
-                    if len(line) % 7 == 0 : break    
-                time.sleep(1)
+                line = word
+                j=0
+                while True:
+                    x = np.array([list(map(words_map.get, word))])
+                    [probs_, state_] = sess.run([probs, last_state], feed_dict={input_data: x, initial_state: state_})
+                    if len(line)%2==0:
+                        word = words[np.argmax(probs_)]
+                    else:    
+                        word = to_word(probs_)
+                    if word != '，' and word != '。' and word != ']' and word !=' ':
+                        line += word
+                        if len(line) % 7 == 0 : break
+                    if j>100: break
+                    j= j+1
+                if len(line)==7: break
             if i % 2 == 0:
                 poem += line+'，'
             else:
