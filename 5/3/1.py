@@ -361,6 +361,7 @@ class Tetromino(object):
         rewards.append(reward)
         rewards=list(set(rewards))
         rewards.sort()
+        # print(reward, rewards)
         i=rewards.index(reward)
         return i*2.0/(len(rewards)-1) - 1.0
         # print(reward,rewards)
