@@ -273,6 +273,7 @@ class Tetromino(object):
         for x in range(templatenum):
             for y in range(templatenum):
                 if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
+                    print(x+piece['x'],y + piece['y'])
                     board[x + piece['x']][y + piece['y']] = piece['color']
                 
     def onboard(self,x,y):
@@ -367,6 +368,14 @@ class Tetromino(object):
         # _reward = (reward - min(rewards)) * 2 / (max(rewards) - min(rewards)) - 1.0
         # return _reward
     
+    # 本次下落的方块中点地板的距离
+    def landingHeight(self,board,piece):
+        shape=pieces[piece['shape']][piece['rotation']]
+        for y in range(templatenum):
+            for x in range(templatenum):
+                if shape[x][y] != blank:
+                    return boardheight - (piece['y'] - y)
+
     # 本次下落后此方块贡献（参与完整行组成的个数）*完整行的行数
     def rowsEliminated(self,board,piece):
         eliminatedNum = 0
@@ -385,14 +394,6 @@ class Tetromino(object):
                         if shape[y-piece['y']][s] != blank:
                              eliminatedGridNum += 1
         return eliminatedNum * eliminatedGridNum
-
-    # 本次下落的方块中点地板的距离
-    def landingHeight(self,board,piece):
-        shape=pieces[piece['shape']][piece['rotation']]
-        for y in range(templatenum):
-            for x in range(templatenum):
-                if shape[x][y] != blank:
-                    return boardheight - (piece['y'] + y)
 
     # 在同一行，方块 从无到有 或 从有到无 算一次（边界算有方块）
     def rowTransitions(self,board):
@@ -491,6 +492,11 @@ class Tetromino(object):
         _colTransitions = self.colTransitions(board)
         _emptyHoles = self.emptyHoles(board)
         _wellNums = self.wellNums(board)
+        print("shape",piece['shape'],"rotation",piece['rotation'],"x",piece['x'],"y",piece["y"])
+        print("_landingHeight",_landingHeight,"_rowsEliminated",_rowsEliminated)
+        print("_rowTransitions",_rowTransitions,"_colTransitions",_colTransitions)
+        print("_emptyHoles",_emptyHoles,"_wellNums",_wellNums)
+        print("===============================")
         return -4.500158825082766 * _landingHeight \
                     + 3.4181268101392694 * _rowsEliminated \
                     + -3.2178882868487753 * _rowTransitions \
@@ -506,15 +512,30 @@ class Tetromino(object):
         x_reward=0
         r_reward=0
         for r in range(rotationCount):
-            m_piece = copy.deepcopy(piece)  
+            m_piece = copy.deepcopy(piece) # piece # 
             m_piece['rotation']=r
             for x in range(boardwidth+5):
-                m_board =  copy.deepcopy(board)
+                # board= self.getblankboard()
+                m_board =  copy.deepcopy(board) #board #
                 m_piece['x']=x-2
                 if not self.validposition(m_board, m_piece):
                     continue
                 for y in range(boardheight+4):
-                    m_piece['y']=y-1  
+                    m_piece['y']=y-1
+
+                    # self.disp.fill(black)
+                    # self.drawboard(self.board)
+                    # self.drawstatus(self.score,0)
+                    # self.drawnextpiece(self.nextpiece)
+                    # if self.fallpiece !=None:
+                    #     self.drawpiece(self.fallpiece)
+                    # pygame.display.update()
+                    # for event in pygame.event.get():  # 需要事件循环，否则白屏
+                    #     if event.type == QUIT:
+                    #         pygame.quit()
+                    #         sys.exit()                          
+                    # # time.sleep(0.2)    
+
                     if not self.validposition(m_board, m_piece, ay = 1):
                         self.addtoboard(m_board,m_piece)
                         reward = self.calcReward(m_board, m_piece)
@@ -524,250 +545,31 @@ class Tetromino(object):
                             r_reward=r
                         rewards.append(reward)
                         break
+
+
+
+        print(rewards,r_reward,x_reward )                        
         return rewards,r_reward,x_reward
 
-# 参数设置
-DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
-ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
-FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
-OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
-GAME_ADD_ONE_STEPS = 2000000. # 游戏增加一步的学习步数
-INITIAL_RANDOM_ACTION_PROB = 1.0  # 随机移动的最大概率 1.0
-FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
-MEMORY_SIZE = 10000  # 记住的观察队列
-MINI_BATCH_SIZE = 100  # 每次学习的批次
-STATE_FRAMES = 4  # 每次保存的状态数
-RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸 
-OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
-SAVE_EVERY_X_STEPS = 1000  # 每学习多少轮后保存
-STORE_SCORES_LEN = 200.     # 分数保留的长度
-LEARNING_RATE = 1e-6        # 学习速率
-
-# 初始化保存对象，如果有数据，就恢复
-def restore(sess):
-    curr_dir = os.path.dirname(__file__)
-    model_dir = os.path.join(curr_dir, "game_model")
-    if not os.path.exists(model_dir): os.mkdir(model_dir)
-    saver_prefix = os.path.join(model_dir, "model.ckpt")        
-    ckpt = tf.train.get_checkpoint_state(model_dir)
-    saver = tf.train.Saver(max_to_keep=5)
-    if ckpt and ckpt.model_checkpoint_path:
-        print("restore model ...")
-        saver.restore(sess, ckpt.model_checkpoint_path)
-    return saver, model_dir, saver_prefix
-
-# CNN网络
-def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3], filter_nums=[64,64,64,64,64,64,64,64,64,64], pool_scale=[1,2,1,2,1,2,1,2,1,2], full_nums=256, output_name="output_layer"):
-    def get_w_b(w_shape,w_name="w",b_name="b"):
-        w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
-        b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
-        if DEBUG:
-            tf.summary.histogram('w'.format(i), w)
-            tf.summary.histogram('b'.format(i), b)
-        return w,b    
-
-    filter_layers=[]
-    for i in range(len(filter_size)):         
-        with tf.variable_scope('filter-layer-{}'.format(i)):
-            if i == 0:
-                input = x
-            else:
-                input = filter_layers[-1]
-            w,b = get_w_b([filter_size[i],filter_size[i],int(input.get_shape()[-1]),filter_nums[i]])
-            filter_layer = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input, w, strides=[1, 1, 1, 1], padding="SAME"), b))
-            pool_layer = tf.nn.max_pool(filter_layer, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME')
-            filter_layers.append(pool_layer)
-            if DEBUG:
-                filter_map = tf.transpose(filter_layer[-1], perm=[2, 0, 1])
-                filter_map = tf.reshape(filter_map, (filter_nums[i], int(filter_map.get_shape()[1]), int(filter_map.get_shape()[2]), 1))
-                tf.summary.image('filterlayer', tensor=filter_map, max_outputs=filter_nums[i])
-
-    full_connects=[]
-    with tf.variable_scope('full-connect'):
-        _out = filter_layers[-1]
-        in_size = int(_out.get_shape()[1]) * int(_out.get_shape()[2]) * int(_out.get_shape()[3])
-        input = tf.reshape(_out, [-1, in_size])
-        w,  b = get_w_b([in_size,full_nums])
-        full_connect = tf.nn.relu(tf.matmul(input, w) + b)
-        full_connects.append(full_connect)
-
-    with tf.variable_scope('output'):
-        w, b = get_w_b([full_nums, output_size])
-        output = tf.nn.bias_add(tf.matmul(full_connects[-1], w) , b, name=output_name)
-        return output
-
-def get_max_step(step):
-    return step // GAME_ADD_ONE_STEPS +1
-
-def get_random_action_prob(step):
-    return INITIAL_RANDOM_ACTION_PROB - (step%GAME_ADD_ONE_STEPS)/GAME_ADD_ONE_STEPS*(1.0-FINAL_RANDOM_ACTION_PROB) 
-
-# 学习
-def train():    
-    # 输入的图片，是每4张一组
-    _input_layer =  tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   
-    _output_layer = get_network(_input_layer, ACTIONS_COUNT)
-    
-    _action = tf.placeholder("float", [None, ACTIONS_COUNT])    # 移动的方向
-    _target = tf.placeholder("float", [None])                   # 得分
-
-    # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]  得到当前移动的概率
-    readout_action = tf.reduce_sum(tf.multiply(_output_layer, _action), reduction_indices=1)
-    # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
-    cost = tf.reduce_mean(tf.square(_target - readout_action))
-
-    # 定义学习速率和优化方法,因为大部分匹配都是0，所以学习速率必需订的非常小
-    global_step = tf.Variable(0, trainable=False)
-    # learning_rate = tf.train.exponential_decay(1e-6, global_step, 100000, 0.98, staircase=True)
-    # 学习函数
-    _train_operation = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cost, global_step=global_step)
-
-    _observations = deque()
-    _last_scores = deque()
-
-    # 设置最后一步是固定
-    _last_action = KEY_LEFT
-    _last_state = None          #4次的截图
-
-    game = Tetromino()
-
-    _session = tf.Session()       
-    _session.run(tf.global_variables_initializer())
-
-    # 恢复游戏进度
-    _saver,_model_dir,_checkpoint_path = restore(_session)
-
-    # 游戏最大进行步数
-    _step = _session.run(global_step)
-    _game_max_step = get_max_step(_step)
-    _probability_of_random_action = get_random_action_prob(_step)
-    print("global step: %s game max step: %s random action prob: %s"%(_step, _game_max_step, _probability_of_random_action ))
-    if DEBUG:
-        tf.summary.scalar("cost", cost)
-        tf.summary.scalar("reward", tf.reduce_mean(_target))        
-        _train_summary_op = tf.summary.merge_all()
-        _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
-    # _min_reward = {}
-    # _max_reward = {}
-    _game_step  = 1
-    _game_random_step = True
-    while True:
-        reward, image, terminal, shape, rewards = game.step(list(_last_action))
-        
-        for event in pygame.event.get():  # 需要事件循环，否则白屏
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()         
-
-        #将奖励分数归一化
-        if reward != 0.0:            
-            # if shape not in _min_reward:
-            #     _min_reward[shape] = {}
-            # if _game_step not in _min_reward[shape]:
-            #     _min_reward[shape][_game_step]=20000
-            # if shape not in _max_reward:
-            #     _max_reward[shape] = {}
-            # if  _game_step not in _max_reward[shape]:                   
-            #     _max_reward[shape][_game_step]=-20000
-            # if reward < _min_reward[shape][_game_step]:
-            #     _min_reward[shape][_game_step] = reward - 0.1
-            # elif reward > _max_reward[shape][_game_step]:
-            #     _max_reward[shape][_game_step] = reward
-            # reward = (reward - _min_reward[shape][_game_step]) * 2 / (_max_reward[shape][_game_step] - _min_reward[shape][_game_step]) - 1.0
-            # if not _game_random_step:
-            #     print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
-            # else:
-            #     print('*',shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
-            rewards.append(reward)
-            rewards=list(set(rewards))
-            rewards.sort()
-            print(reward,rewards)
-            i=rewards.index(reward)
-            reward = i*2.0/(len(rewards)-1) - 1.0                      
-            if not _game_random_step:
-                print(shape,reward) 
-            else:
-                print(shape,reward,'*') 
-            
-        image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
-        screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
-        _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
-       
-        if reward != 0.0 and not _game_random_step:
-            _last_scores.append(reward)
-            if len(_last_scores) > STORE_SCORES_LEN:
-                _last_scores.popleft()
-        if _last_state is None:  # 填充第一次的4张图片            
-            _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
-
-        screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
-        current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
-
-        # 优先按照后面的学习
-        if random.random() <= _game_step / _game_max_step :
-            _observations.append((_last_state, _last_action, reward, current_state, terminal))
-
-        if len(_observations) > MEMORY_SIZE:
-            _observations.popleft()
-        
-            mini_batch = random.sample(_observations, MINI_BATCH_SIZE)
-            previous_states = [d[OBS_LAST_STATE_INDEX] for d in mini_batch]
-            actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
-            rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
-            current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
-            terminals = [d[OBS_TERMINAL_INDEX] for d in mini_batch]
-
-            agents_expected_reward = []
-            agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
-            for i in range(len(mini_batch)):
-                if terminals[i]:    # 如果是游戏结束没有下一步奖励
-                    agents_expected_reward.append(rewards[i])
-                else:
-                    agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
-
-            if DEBUG:
-                _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
-                        _target: agents_expected_reward})
-            else:            
-                _, _step = _session.run([_train_operation,global_step], feed_dict={_input_layer: previous_states,_action: actions,
-                        _target: agents_expected_reward})
-
-            if _step % SAVE_EVERY_X_STEPS == 0:
-                _saver.save(_session, _checkpoint_path, global_step=_step)
-                if DEBUG:
-                    _train_summary_writer.add_summary(train_summary_op, _step)
-                print("step: %s random_prob: %s scores: %s max_step: %s reward: %s" %
-                  (_step, _probability_of_random_action, sum(_last_scores) / STORE_SCORES_LEN, _game_max_step, reward))
-            
-        _last_state = current_state
-
-        if reward != 0.0:
-            _game_max_step = get_max_step(_step)
-            _step_rem = _step % GAME_ADD_ONE_STEPS  # 余数
-            _probability_of_random_action = get_random_action_prob(_step)
- 
-            # 如果下一步是最后一步，按照当前概率进行，否则按最小概率进行
-            if _game_step == _game_max_step -1 or _game_max_step == 1:
-                _max_probability_of_random_action = _probability_of_random_action
-            else:
-                _max_probability_of_random_action = FINAL_RANDOM_ACTION_PROB
-            _game_random_step = random.random() <= _max_probability_of_random_action 
-            _game_step += 1
-            # print(_game_random_step,_max_probability_of_random_action,_probability_of_random_action,_game_step,_game_max_step)
-
-        # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
-        _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-
-        if _game_random_step:
-            action_index = random.randrange(ACTIONS_COUNT)
-        else:
-            readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
-            action_index = np.argmax(readout_t)
-        _last_action[action_index] = 1
-
-        if  _game_step > _game_max_step:
-            _game_step = 1
-            game.reset()
+    def main(self):
+        while True:
+            time.sleep(0.1)
+            for event in pygame.event.get():  # 需要事件循环，否则白屏
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()    
+            if self.fallpiece['rotation']!=self.reward_r:
+                self.step(KEY_ROTATION)
+                continue
+            if self.fallpiece['x']>self.reward_x:
+                self.step(KEY_LEFT)
+                continue
+            if self.fallpiece['x']<self.reward_x:
+                self.step(KEY_RIGHT)
+                continue
+            self.step(None)
+                    
 
 if __name__ == '__main__':
-    train()
+    tetromino = Tetromino()
+    tetromino.main()
