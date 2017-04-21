@@ -9,6 +9,7 @@ import platform, sys, os
 from collections import deque
 import tensorflow as tf
 import cv2
+import copy
 
 winx = 400
 winy = 500
@@ -18,9 +19,6 @@ boardheight = 20
 xmargin = int(winx-boardwidth*boxsize)/5
 topmargin = int(winy-boardheight*boxsize-5)
 templatenum = 5
- 
-movedownfreq = 0.1
-movesidefreq = 0.15
  
 white = (255,255,255)
 black = (0,0,0)
@@ -42,7 +40,7 @@ stemplate = [['.....',
               '.....',
               '.....'],
              ['.....',
-              '..o..',
+              '..0..',
               '..00.',
               '...0.',
               '.....']]
@@ -159,7 +157,8 @@ class Tetromino(object):
         self.nextpiece = self.getnewpiece()
         self.score = 0
         self.board = self.getblankboard()
-        self.calc_reward = 0.0
+        self.calc_reward = 0.0 
+        self.rewards = self.calcAllRewards(self.board, self.fallpiece)      
 
     def step(self, action):
         reward  = 0
@@ -184,11 +183,12 @@ class Tetromino(object):
 
         if not self.validposition(self.board,self.fallpiece,ay = 1):
             self.addtoboard(self.board,self.fallpiece)
-            reward = self.removecompleteline(self.board)             
-            self.score += reward            
+            reward = self.calcReward(self.board, self.fallpiece)
+            reward = self.softmax(reward,self.rewards)
+
+            self.score += self.removecompleteline(self.board)            
             level = self.calculate(self.score)   
 
-            reward = self.calcreward(self.board, self.fallpiece, reward)
             self.fallpiece = None
         else:
             self.fallpiece['y'] +=1
@@ -208,15 +208,15 @@ class Tetromino(object):
             self.nextpiece = self.getnewpiece()
             if not self.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
-                self.reset()                
+                self.reset()     
+                reward = self.softmax(reward,self.rewards)
                 return reward, screen_image, is_terminal, shape  # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
-
+            self.rewards = self.calcAllRewards(self.board, self.fallpiece) # 计算下一步最佳分值
         return reward, screen_image, is_terminal, shape
 
     def calculate(self,score):
         level = int(score/10)+1
         return level
-    
         
     def terminal(self):
         pygame.quit()
@@ -290,126 +290,7 @@ class Tetromino(object):
                 # print(piece['x'],piece['y'])
                 if board[x+piece['x']+ax][y+piece['y']+ay]!=blank:
                     return False
-        return True
-    
-    def softmax(self,x):
-        e_x = np.exp(x - np.max(x))
-        return e_x / e_x.sum(axis=0)
-    
-    # 下落高度
-    def landingHeight(self,board,piece):
-        shape=pieces[piece['shape']][piece['rotation']]
-        for y in range(templatenum):
-            for x in range(templatenum):
-                if shape[x][y] != blank:
-                    return boardheight - (piece['y'] + y)
-
-    # 行变化次数
-    def rowTransitions(self,board):
-        totalTransNum = 0
-        for y in range(boardheight):
-            nowTransNum = 0
-            currisBlank = False
-            for x in range(boardwidth):
-                isBlank = board[x][y] == blank
-                if currisBlank != isBlank:
-                    nowTransNum += 1
-                    currisBlank = isBlank
-            if currisBlank:   
-                nowTransNum += 1
-            totalTransNum += nowTransNum
-        return totalTransNum  
-
-    # 列变化次数
-    def colTransitions(self,board):
-        totalTransNum = 0
-        for x in range(boardwidth):
-            nowTransNum = 0
-            currisBlank = False
-            for y in range(boardheight):
-                isBlank = board[x][y] == blank
-                if currisBlank != isBlank:
-                    nowTransNum += 1
-                    currisBlank = isBlank
-            if  currisBlank:   
-                nowTransNum += 1
-            totalTransNum += nowTransNum
-        return totalTransNum   
-
-    # 空洞个数
-    def emptyHoles(self, board):
-        totalEmptyHoles = 0
-        for x in range(boardwidth):
-            y = 0
-            emptyHoles = 0
-            while y < boardheight:
-                # print(board[x][y])
-                if board[x][y]!=blank:
-                    y += 1
-                    break
-                y += 1 
-            while y < boardheight:
-                # print(board[x][y])                
-                if board[x][y]==blank:
-                    emptyHoles += 1
-                y += 1
-            totalEmptyHoles += emptyHoles
-        return totalEmptyHoles
-
-    # 井的个数
-    def wellNums(self, board):
-        totalWellDepth  = 0
-        wellDepth = 0
-        tDepth = 0
-        # 获取左边的井数
-        for y in range(boardheight):            
-            if board[0][y] == blank and board[1][y] != blank:
-                tDepth += 1
-            else:
-                wellDepth += tDepth * (tDepth+1) / 2    
-                tDepth = 0
-        wellDepth += tDepth * (tDepth+1) / 2  
-        totalWellDepth += wellDepth
-        # 获取中间的井数
-        wellDepth = 0.
-        for x in range(1,boardwidth-1):
-            tDepth = 0.
-            for y in range(boardheight):
-                if board[x][y]==blank and board[x-1][y]!=blank and board[x+1][y]!=blank:
-                    tDepth += 1
-                else:
-                    wellDepth += tDepth * (tDepth+1) / 2
-                    tDepth = 0
-            wellDepth += tDepth * (tDepth+1) / 2
-        totalWellDepth += wellDepth
-        # 获取最右边的井数
-        wellDepth = 0
-        tDepth = 0
-        for y in range(boardheight):
-            if board[boardwidth-1][y] == blank and board[boardwidth-2][y] != blank:
-                tDepth += 1
-            else:
-                wellDepth += tDepth * (tDepth +1 )/2
-                tDepth = 0
-        wellDepth += tDepth * (tDepth +1 )/2
-        totalWellDepth += wellDepth
-        return totalWellDepth        
-
-
-    # 修改了价值评估 下落高度 消行个数 行变化次数 列变化次数 空洞个数 井的个数
-    def calcreward(self,board,shape,completelines):
-        _landingHeight = self.landingHeight(board, shape)
-        _rowsEliminated = completelines * boardwidth
-        _rowTransitions  = self.rowTransitions(board)
-        _colTransitions = self.colTransitions(board)
-        _emptyHoles = self.emptyHoles(board)
-        _wellNums = self.wellNums(board)
-        return -4.500158825082766 * _landingHeight \
-                    + 3.4181268101392694 * _rowsEliminated \
-                    + -3.2178882868487753 * _rowTransitions \
-                    + -9.348695305445199 * _colTransitions \
-                    + -7.899265427351652 * _emptyHoles \
-                    + -3.3855972247263626 * _wellNums;                 
+        return True           
 
     def completeline(self,board,y):
         for x in range(boardwidth):
@@ -473,8 +354,170 @@ class Tetromino(object):
         nextrect =nextsurf.get_rect()
         nextrect.topleft = (winx-120,80)
         self.disp.blit(nextsurf,nextrect)
-    
         self.drawpiece(piece,pixelx = winx-120,pixely = 100)
+
+    # 数据归一化
+    def softmax(self,reward,rewards):
+        if not reward in rewards:
+            rewards.append(reward)
+        rewards.sort()
+        i=rewards.index(reward)
+        return i*2.0/(len(rewards)-1) - 1.0
+        # print(reward,rewards)
+        # _reward = (reward - min(rewards)) * 2 / (max(rewards) - min(rewards)) - 1.0
+        # return _reward
+    
+    # 本次下落后此方块贡献（参与完整行组成的个数）*完整行的行数
+    def rowsEliminated(self,board,piece):
+        eliminatedNum = 0
+        eliminatedGridNum = 0
+        shape=pieces[piece['shape']][piece['rotation']]
+        for y in range(boardheight):
+            flag = True
+            for x in range(boardwidth):
+                if board[x][y] == blank:
+                    flag = False
+                    break
+            if flag:
+                eliminatedNum += 1
+                if (y>piece['y']) and (y <piece['y']+templatenum):
+                    for s in range(templatenum):
+                        if shape[y-piece['y']][s] != blank:
+                             eliminatedGridNum += 1
+        return eliminatedNum * eliminatedGridNum
+
+    # 本次下落的方块中点地板的距离
+    def landingHeight(self,board,piece):
+        shape=pieces[piece['shape']][piece['rotation']]
+        for y in range(templatenum):
+            for x in range(templatenum):
+                if shape[x][y] != blank:
+                    return boardheight - (piece['y'] + y)
+
+    # 在同一行，方块 从无到有 或 从有到无 算一次（边界算有方块）
+    def rowTransitions(self,board):
+        totalTransNum = 0
+        for y in range(boardheight):
+            nowTransNum = 0
+            currisBlank = False
+            for x in range(boardwidth):
+                isBlank = board[x][y] == blank
+                if currisBlank != isBlank:
+                    nowTransNum += 1
+                    currisBlank = isBlank
+            if currisBlank:   
+                nowTransNum += 1
+            totalTransNum += nowTransNum
+        return totalTransNum  
+
+    # 在同一列，方块 从无到有 或 从有到无 算一次（边界算有方块）
+    def colTransitions(self,board):
+        totalTransNum = 0
+        for x in range(boardwidth):
+            nowTransNum = 0
+            currisBlank = False
+            for y in range(boardheight):
+                isBlank = board[x][y] == blank
+                if currisBlank != isBlank:
+                    nowTransNum += 1
+                    currisBlank = isBlank
+            if  currisBlank:   
+                nowTransNum += 1
+            totalTransNum += nowTransNum
+        return totalTransNum   
+
+    # 空洞的数量。空洞无论有多大，只算一个。一个图中可能有多个空洞
+    def emptyHoles(self, board):
+        totalEmptyHoles = 0
+        for x in range(boardwidth):
+            y = 0
+            emptyHoles = 0
+            while y < boardheight:
+                if board[x][y]!=blank:
+                    y += 1
+                    break
+                y += 1 
+            while y < boardheight:
+                if board[x][y]==blank:
+                    emptyHoles += 1
+                y += 1
+            totalEmptyHoles += emptyHoles
+        return totalEmptyHoles
+
+    # 井就是两边都有方块的空列。（空洞也可以是井，一列中可能有多个井）。此值为所有的井以1为公差首项为1的等差数列的总和
+    def wellNums(self, board):
+        totalWellDepth  = 0
+        wellDepth = 0
+        tDepth = 0
+        # 获取左边的井数
+        for y in range(boardheight):            
+            if board[0][y] == blank and board[1][y] != blank:
+                tDepth += 1
+            else:
+                wellDepth += tDepth * (tDepth+1) / 2    
+                tDepth = 0
+        wellDepth += tDepth * (tDepth+1) / 2  
+        totalWellDepth += wellDepth
+        # 获取中间的井数
+        wellDepth = 0.
+        for x in range(1,boardwidth-1):
+            tDepth = 0.
+            for y in range(boardheight):
+                if board[x][y]==blank and board[x-1][y]!=blank and board[x+1][y]!=blank:
+                    tDepth += 1
+                else:
+                    wellDepth += tDepth * (tDepth+1) / 2
+                    tDepth = 0
+            wellDepth += tDepth * (tDepth+1) / 2
+        totalWellDepth += wellDepth
+        # 获取最右边的井数
+        wellDepth = 0
+        tDepth = 0
+        for y in range(boardheight):
+            if board[boardwidth-1][y] == blank and board[boardwidth-2][y] != blank:
+                tDepth += 1
+            else:
+                wellDepth += tDepth * (tDepth +1 )/2
+                tDepth = 0
+        wellDepth += tDepth * (tDepth +1 )/2
+        totalWellDepth += wellDepth
+        return totalWellDepth        
+
+    # 修改了价值评估 下落高度 消行个数 行变化次数 列变化次数 空洞个数 井的个数
+    def calcReward(self,board,piece):
+        _landingHeight = self.landingHeight(board, piece)
+        _rowsEliminated = self.rowsEliminated(board, piece)
+        _rowTransitions  = self.rowTransitions(board)
+        _colTransitions = self.colTransitions(board)
+        _emptyHoles = self.emptyHoles(board)
+        _wellNums = self.wellNums(board)
+        return -4.500158825082766 * _landingHeight \
+                    + 3.4181268101392694 * _rowsEliminated \
+                    + -3.2178882868487753 * _rowTransitions \
+                    + -9.348695305445199 * _colTransitions \
+                    + -7.899265427351652 * _emptyHoles \
+                    + -3.3855972247263626 * _wellNums;     
+
+    # 在游戏开始就计算多有的可能分值
+    def calcAllRewards(self,board,piece):
+        rewards=[]
+        rotationCount = len(pieces[piece['shape']]) 
+        for r in range(rotationCount):
+            m_piece = copy.deepcopy(piece)
+            m_board = copy.deepcopy(board)
+            m_piece['rotation']=r
+            for x in range(boardwidth+4):
+                m_piece['x']=x-2
+                if not self.validposition(m_board, m_piece, ax = 1):
+                    continue
+                for y in range(boardheight+4):
+                    m_piece['y']=y-2
+                    if not self.validposition(m_board, m_piece, ay = 1):
+                        self.addtoboard(m_board,m_piece)
+                        reward = self.calcReward(m_board, m_piece)
+                        rewards.append(reward)
+                        break
+        return rewards
 
 
 # 参数设置
@@ -598,8 +641,8 @@ def train():
         tf.summary.scalar("reward", tf.reduce_mean(_target))        
         _train_summary_op = tf.summary.merge_all()
         _train_summary_writer = tf.summary.FileWriter(_model_dir, _session.graph)
-    _min_reward = {}
-    _max_reward = {}
+    # _min_reward = {}
+    # _max_reward = {}
     _game_step  = 1
     _game_random_step = True
     while True:
@@ -612,22 +655,27 @@ def train():
 
         #将奖励分数归一化
         if reward != 0.0:
-            if shape not in _min_reward:
-                _min_reward[shape] = {}
-            if _game_step not in _min_reward[shape]:
-                _min_reward[shape][_game_step]=20000
-            if shape not in _max_reward:
-                _max_reward[shape] = {}
-            if  _game_step not in _max_reward[shape]:                   
-                _max_reward[shape][_game_step]=-20000
-            if reward < _min_reward[shape][_game_step]:
-                _min_reward[shape][_game_step] = reward - 0.1
-            elif reward > _max_reward[shape][_game_step]:
-                _max_reward[shape][_game_step] = reward
-            reward = (reward - _min_reward[shape][_game_step]) * 2 / (_max_reward[shape][_game_step] - _min_reward[shape][_game_step]) - 1.0
+            # if shape not in _min_reward:
+            #     _min_reward[shape] = {}
+            # if _game_step not in _min_reward[shape]:
+            #     _min_reward[shape][_game_step]=20000
+            # if shape not in _max_reward:
+            #     _max_reward[shape] = {}
+            # if  _game_step not in _max_reward[shape]:                   
+            #     _max_reward[shape][_game_step]=-20000
+            # if reward < _min_reward[shape][_game_step]:
+            #     _min_reward[shape][_game_step] = reward - 0.1
+            # elif reward > _max_reward[shape][_game_step]:
+            #     _max_reward[shape][_game_step] = reward
+            # reward = (reward - _min_reward[shape][_game_step]) * 2 / (_max_reward[shape][_game_step] - _min_reward[shape][_game_step]) - 1.0
+            # if not _game_random_step:
+            #     print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
+            # else:
+            #     print('*',shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])                       
             if not _game_random_step:
-                print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])            
-
+                print(shape,reward) 
+            else:
+                print('*',shape,reward) 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
@@ -686,7 +734,7 @@ def train():
             _probability_of_random_action = get_random_action_prob(_step)
  
             # 如果下一步是最后一步，按照当前概率进行，否则按最小概率进行
-            if _game_step == _game_max_step -1 :
+            if _game_step == _game_max_step -1 or _game_max_step == 1:
                 _max_probability_of_random_action = _probability_of_random_action
             else:
                 _max_probability_of_random_action = FINAL_RANDOM_ACTION_PROB
