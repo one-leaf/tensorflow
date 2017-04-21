@@ -184,8 +184,7 @@ class Tetromino(object):
         if not self.validposition(self.board,self.fallpiece,ay = 1):
             self.addtoboard(self.board,self.fallpiece)
             reward = self.calcReward(self.board, self.fallpiece)
-            reward = self.softmax(reward,self.rewards)
-
+            # reward = self.softmax(reward,self.rewards)            
             self.score += self.removecompleteline(self.board)            
             level = self.calculate(self.score)   
 
@@ -209,7 +208,7 @@ class Tetromino(object):
             if not self.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
                 self.reset()     
-                reward = self.softmax(reward,self.rewards)
+                # reward = self.softmax(reward,self.rewards)
                 return reward, screen_image, is_terminal, shape, self.rewards  # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
             self.rewards = self.calcAllRewards(self.board, self.fallpiece) # 计算下一步最佳分值
         return reward, screen_image, is_terminal, shape, self.rewards
@@ -655,7 +654,7 @@ def train():
                 sys.exit()         
 
         #将奖励分数归一化
-        if reward != 0.0:
+        if reward != 0.0:            
             # if shape not in _min_reward:
             #     _min_reward[shape] = {}
             # if _game_step not in _min_reward[shape]:
@@ -672,11 +671,18 @@ def train():
             # if not _game_random_step:
             #     print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
             # else:
-            #     print('*',shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])                       
+            #     print('*',shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
+            rewards.append(reward)
+            rewards=list(set(rewards))
+            rewards.sort()
+            print(reward,rewards)
+            i=rewards.index(reward)
+            reward = i*2.0/(len(rewards)-1) - 1.0                      
             if not _game_random_step:
-                print(shape,reward,rewards) 
+                print(shape,reward) 
             else:
-                print(shape,reward,'*',rewards) 
+                print(shape,reward,'*') 
+            
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
