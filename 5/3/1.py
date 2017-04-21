@@ -210,9 +210,9 @@ class Tetromino(object):
                 is_terminal = True       
                 self.reset()     
                 reward = self.softmax(reward,self.rewards)
-                return reward, screen_image, is_terminal, shape  # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
+                return reward, screen_image, is_terminal, shape, self.rewards  # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
             self.rewards = self.calcAllRewards(self.board, self.fallpiece) # 计算下一步最佳分值
-        return reward, screen_image, is_terminal, shape
+        return reward, screen_image, is_terminal, shape, self.rewards
 
     def calculate(self,score):
         level = int(score/10)+1
@@ -646,7 +646,7 @@ def train():
     _game_step  = 1
     _game_random_step = True
     while True:
-        reward, image, terminal, shape = game.step(list(_last_action))
+        reward, image, terminal, shape, rewards = game.step(list(_last_action))
         
         for event in pygame.event.get():  # 需要事件循环，否则白屏
             if event.type == QUIT:
@@ -673,9 +673,9 @@ def train():
             # else:
             #     print('*',shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step])                       
             if not _game_random_step:
-                print(shape,reward) 
+                print(shape,reward,rewards) 
             else:
-                print('*',shape,reward) 
+                print(shape,reward,'*',rewards) 
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
