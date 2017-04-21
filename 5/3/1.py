@@ -358,8 +358,8 @@ class Tetromino(object):
 
     # 数据归一化
     def softmax(self,reward,rewards):
-        if not reward in rewards:
-            rewards.append(reward)
+        rewards.append(reward)
+        rewards=list(set(rewards))
         rewards.sort()
         i=rewards.index(reward)
         return i*2.0/(len(rewards)-1) - 1.0
