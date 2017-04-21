@@ -681,7 +681,7 @@ def train():
             rewards.append(reward)
             rewards=list(set(rewards))
             rewards.sort()
-            print(reward,rewards)
+            # print(reward,rewards)
             i=rewards.index(reward)
             reward = i*2.0/(len(rewards)-1) - 1.0                      
             if not _game_random_step:
