@@ -30,9 +30,10 @@ red = (255,0,0)
 blank = '.'
 colors = (yellow,green,purple,red)
 
-KEY_ROTATION  = [0,1,0]
-KEY_LEFT      = [1,0,0]
-KEY_RIGHT     = [0,0,1]
+KEY_ROTATION  = [0,1,0,0]
+KEY_LEFT      = [1,0,0,0]
+KEY_RIGHT     = [0,0,1,0]
+KEY_DOWN      = [0,0,0,1]
 
 stemplate = [['.....',
               '..00.',
@@ -528,7 +529,7 @@ class Tetromino(object):
 
 # 参数设置
 DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
-ACTIONS_COUNT = 3  # 可选的动作，针对 左移 翻转 右移
+ACTIONS_COUNT = 4  # 可选的动作，针对 左移 翻转 右移 下移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
 GAME_ADD_ONE_STEPS = 2000000. # 游戏增加一步的学习步数
@@ -626,7 +627,7 @@ def train():
     _last_scores = deque()
 
     # 设置最后一步是固定
-    _last_action = KEY_LEFT
+    _last_action = KEY_DOWN
     _last_state = None          #4次的截图
 
     game = Tetromino()
