@@ -478,11 +478,11 @@ class Tetromino(object):
         _colTransitions = self.colTransitions(board)
         _emptyHoles = self.emptyHoles(board)
         _wellNums = self.wellNums(board)
-        print("shape",piece['shape'],"rotation",piece['rotation'],"x",piece['x'],"y",piece["y"])
-        print("_landingHeight",_landingHeight,"_rowsEliminated",_rowsEliminated)
-        print("_rowTransitions",_rowTransitions,"_colTransitions",_colTransitions)
-        print("_emptyHoles",_emptyHoles,"_wellNums",_wellNums)
-        print("===============================")
+        # print("shape",piece['shape'],"rotation",piece['rotation'],"x",piece['x'],"y",piece["y"])
+        # print("_landingHeight",_landingHeight,"_rowsEliminated",_rowsEliminated)
+        # print("_rowTransitions",_rowTransitions,"_colTransitions",_colTransitions)
+        # print("_emptyHoles",_emptyHoles,"_wellNums",_wellNums)
+        # print("===============================")
         return -4.500158825082766 * _landingHeight \
                     + 3.4181268101392694 * _rowsEliminated \
                     + -3.2178882868487753 * _rowTransitions \
@@ -517,7 +517,7 @@ class Tetromino(object):
                             r_reward=r
                         rewards.append(reward)
                         break
-        print(rewards,r_reward,x_reward )                        
+        # print(rewards,r_reward,x_reward )                        
         return rewards,r_reward,x_reward
 
     def main(self):

@@ -287,7 +287,6 @@ class Tetromino(object):
                     continue
                 if not self.onboard(x + piece['x']+ax,y+piece['y']+ay):
                     return False
-                # print(piece['x'],piece['y'])
                 if board[x+piece['x']+ax][y+piece['y']+ay]!=blank:
                     return False
         return True           
@@ -355,19 +354,15 @@ class Tetromino(object):
         nextrect.topleft = (winx-120,80)
         self.disp.blit(nextsurf,nextrect)
         self.drawpiece(piece,pixelx = winx-120,pixely = 100)
+   
+    # 本次下落的方块中点地板的距离
+    def landingHeight(self,board,piece):
+        shape=pieces[piece['shape']][piece['rotation']]
+        for y in range(templatenum):
+            for x in range(templatenum):
+                if shape[x][y] != blank:
+                    return boardheight - (piece['y'] + y)
 
-    # 数据归一化
-    def softmax(self,reward,rewards):
-        rewards.append(reward)
-        rewards=list(set(rewards))
-        rewards.sort()
-        # print(reward, rewards)
-        i=rewards.index(reward)
-        return i*2.0/(len(rewards)-1) - 1.0
-        # print(reward,rewards)
-        # _reward = (reward - min(rewards)) * 2 / (max(rewards) - min(rewards)) - 1.0
-        # return _reward
-    
     # 本次下落后此方块贡献（参与完整行组成的个数）*完整行的行数
     def rowsEliminated(self,board,piece):
         eliminatedNum = 0
@@ -386,14 +381,6 @@ class Tetromino(object):
                         if shape[y-piece['y']][s] != blank:
                              eliminatedGridNum += 1
         return eliminatedNum * eliminatedGridNum
-
-    # 本次下落的方块中点地板的距离
-    def landingHeight(self,board,piece):
-        shape=pieces[piece['shape']][piece['rotation']]
-        for y in range(templatenum):
-            for x in range(templatenum):
-                if shape[x][y] != blank:
-                    return boardheight - (piece['y'] + y)
 
     # 在同一行，方块 从无到有 或 从有到无 算一次（边界算有方块）
     def rowTransitions(self,board):
@@ -492,6 +479,11 @@ class Tetromino(object):
         _colTransitions = self.colTransitions(board)
         _emptyHoles = self.emptyHoles(board)
         _wellNums = self.wellNums(board)
+        # print("shape",piece['shape'],"rotation",piece['rotation'],"x",piece['x'],"y",piece["y"])
+        # print("_landingHeight",_landingHeight,"_rowsEliminated",_rowsEliminated)
+        # print("_rowTransitions",_rowTransitions,"_colTransitions",_colTransitions)
+        # print("_emptyHoles",_emptyHoles,"_wellNums",_wellNums)
+        # print("===============================")
         return -4.500158825082766 * _landingHeight \
                     + 3.4181268101392694 * _rowsEliminated \
                     + -3.2178882868487753 * _rowTransitions \
@@ -511,11 +503,12 @@ class Tetromino(object):
             m_piece['rotation']=r
             for x in range(boardwidth+10):
                 m_board =  copy.deepcopy(board)
-                m_piece['x']=x-2
-                if not self.validposition(m_board, m_piece):
-                    continue
+                m_piece['x']=x-5                
                 for y in range(boardheight+10):
                     m_piece['y']=y-1  
+                    if not self.validposition(m_board, m_piece):
+                        continue
+
                     if not self.validposition(m_board, m_piece, ay = 1):
                         self.addtoboard(m_board,m_piece)
                         reward = self.calcReward(m_board, m_piece)
@@ -525,10 +518,11 @@ class Tetromino(object):
                             r_reward=r
                         rewards.append(reward)
                         break
+        # print(rewards,r_reward,x_reward )                        
         return rewards,r_reward,x_reward
 
 # 参数设置
-DEBUG = True    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
+DEBUG = False    # 是否开启调试 到程序目录执行 tensorboard --logdir=game_model ，访问 http://127.0.0.1:6006
 ACTIONS_COUNT = 4  # 可选的动作，针对 左移 翻转 右移 下移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
@@ -683,7 +677,7 @@ def train():
             # rewards.append(reward)
             # rewards=list(set(rewards))
             # rewards.sort()
-            # # print(reward,rewards)
+            print(reward,rewards)
             # i=rewards.index(reward)
             # reward = i*2.0/(len(rewards)-1) - 1.0                      
             if reward >= max(rewards):
@@ -694,6 +688,7 @@ def train():
                 print(shape,reward) 
             else:
                 print(shape,reward,'*') 
+            time.sleep(1)
             
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
