@@ -273,7 +273,6 @@ class Tetromino(object):
         for x in range(templatenum):
             for y in range(templatenum):
                 if pieces[piece['shape']][piece['rotation']][y][x]!=blank:
-                    print(x+piece['x'],y + piece['y'])
                     board[x + piece['x']][y + piece['y']] = piece['color']
                 
     def onboard(self,x,y):
@@ -287,7 +286,6 @@ class Tetromino(object):
                     continue
                 if not self.onboard(x + piece['x']+ax,y+piece['y']+ay):
                     return False
-                # print(piece['x'],piece['y'])
                 if board[x+piece['x']+ax][y+piece['y']+ay]!=blank:
                     return False
         return True           
@@ -504,11 +502,12 @@ class Tetromino(object):
             m_piece['rotation']=r
             for x in range(boardwidth+10):
                 m_board =  copy.deepcopy(board)
-                m_piece['x']=x-2
-                if not self.validposition(m_board, m_piece):
-                    continue
+                m_piece['x']=x-5                
                 for y in range(boardheight+10):
                     m_piece['y']=y-1  
+                    if not self.validposition(m_board, m_piece):
+                        continue
+
                     if not self.validposition(m_board, m_piece, ay = 1):
                         self.addtoboard(m_board,m_piece)
                         reward = self.calcReward(m_board, m_piece)
@@ -518,15 +517,12 @@ class Tetromino(object):
                             r_reward=r
                         rewards.append(reward)
                         break
-
-
-
         print(rewards,r_reward,x_reward )                        
         return rewards,r_reward,x_reward
 
     def main(self):
         while True:
-            # time.sleep(0.1)
+            # time.sleep(1)
             for event in pygame.event.get():  # 需要事件循环，否则白屏
                 if event.type == QUIT:
                     pygame.quit()
