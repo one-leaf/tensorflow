@@ -678,12 +678,17 @@ def train():
             #     print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
             # else:
             #     print('*',shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
-            rewards.append(reward)
-            rewards=list(set(rewards))
-            rewards.sort()
-            # print(reward,rewards)
-            i=rewards.index(reward)
-            reward = i*2.0/(len(rewards)-1) - 1.0                      
+            
+            # rewards.append(reward)
+            # rewards=list(set(rewards))
+            # rewards.sort()
+            # # print(reward,rewards)
+            # i=rewards.index(reward)
+            # reward = i*2.0/(len(rewards)-1) - 1.0                      
+            if reward >= max(rewards):
+                reward=1
+            else:
+                reward=-1    
             if not _game_random_step:
                 print(shape,reward) 
             else:
