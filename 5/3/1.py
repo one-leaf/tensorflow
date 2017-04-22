@@ -508,12 +508,12 @@ class Tetromino(object):
         for r in range(rotationCount):
             m_piece = copy.deepcopy(piece)  
             m_piece['rotation']=r
-            for x in range(boardwidth+5):
+            for x in range(boardwidth+10):
                 m_board =  copy.deepcopy(board)
                 m_piece['x']=x-2
                 if not self.validposition(m_board, m_piece):
                     continue
-                for y in range(boardheight+4):
+                for y in range(boardheight+10):
                     m_piece['y']=y-1  
                     if not self.validposition(m_board, m_piece, ay = 1):
                         self.addtoboard(m_board,m_piece)

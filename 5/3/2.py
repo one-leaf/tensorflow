@@ -355,26 +355,14 @@ class Tetromino(object):
         nextrect.topleft = (winx-120,80)
         self.disp.blit(nextsurf,nextrect)
         self.drawpiece(piece,pixelx = winx-120,pixely = 100)
-
-    # 数据归一化
-    def softmax(self,reward,rewards):
-        rewards.append(reward)
-        rewards=list(set(rewards))
-        rewards.sort()
-        # print(reward, rewards)
-        i=rewards.index(reward)
-        return i*2.0/(len(rewards)-1) - 1.0
-        # print(reward,rewards)
-        # _reward = (reward - min(rewards)) * 2 / (max(rewards) - min(rewards)) - 1.0
-        # return _reward
-    
+   
     # 本次下落的方块中点地板的距离
     def landingHeight(self,board,piece):
         shape=pieces[piece['shape']][piece['rotation']]
         for y in range(templatenum):
             for x in range(templatenum):
                 if shape[x][y] != blank:
-                    return boardheight - (piece['y'] - y)
+                    return boardheight - (piece['y'] + y)
 
     # 本次下落后此方块贡献（参与完整行组成的个数）*完整行的行数
     def rowsEliminated(self,board,piece):
@@ -512,30 +500,15 @@ class Tetromino(object):
         x_reward=0
         r_reward=0
         for r in range(rotationCount):
-            m_piece = copy.deepcopy(piece) # piece # 
+            m_piece = copy.deepcopy(piece)  
             m_piece['rotation']=r
-            for x in range(boardwidth+5):
-                # board= self.getblankboard()
-                m_board =  copy.deepcopy(board) #board #
+            for x in range(boardwidth+10):
+                m_board =  copy.deepcopy(board)
                 m_piece['x']=x-2
                 if not self.validposition(m_board, m_piece):
                     continue
-                for y in range(boardheight+4):
-                    m_piece['y']=y-1
-
-                    # self.disp.fill(black)
-                    # self.drawboard(self.board)
-                    # self.drawstatus(self.score,0)
-                    # self.drawnextpiece(self.nextpiece)
-                    # if self.fallpiece !=None:
-                    #     self.drawpiece(self.fallpiece)
-                    # pygame.display.update()
-                    # for event in pygame.event.get():  # 需要事件循环，否则白屏
-                    #     if event.type == QUIT:
-                    #         pygame.quit()
-                    #         sys.exit()                          
-                    # # time.sleep(0.2)    
-
+                for y in range(boardheight+10):
+                    m_piece['y']=y-1  
                     if not self.validposition(m_board, m_piece, ay = 1):
                         self.addtoboard(m_board,m_piece)
                         reward = self.calcReward(m_board, m_piece)
@@ -553,7 +526,7 @@ class Tetromino(object):
 
     def main(self):
         while True:
-            time.sleep(0.1)
+            # time.sleep(0.1)
             for event in pygame.event.get():  # 需要事件循环，否则白屏
                 if event.type == QUIT:
                     pygame.quit()
