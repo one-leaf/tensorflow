@@ -159,10 +159,9 @@ class Tetromino(object):
         self.score = 0
         self.board = self.getblankboard()
         self.calc_reward = 0.0 
-        self.rewards, self.reward_r, self.reward_x = self.calcAllRewards(self.board, self.fallpiece)      
 
     def step(self, action):
-        reward  = 0
+        reward = 0        
         moveleft = False
         moveright = False
         is_terminal = False
@@ -185,10 +184,8 @@ class Tetromino(object):
         if not self.validposition(self.board,self.fallpiece,ay = 1):
             self.addtoboard(self.board,self.fallpiece)
             reward = self.calcReward(self.board, self.fallpiece)
-            # reward = self.softmax(reward,self.rewards)            
             self.score += self.removecompleteline(self.board)            
             level = self.calculate(self.score)   
-
             self.fallpiece = None
         else:
             self.fallpiece['y'] +=1
@@ -209,10 +206,8 @@ class Tetromino(object):
             if not self.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
                 self.reset()     
-                # reward = self.softmax(reward,self.rewards)
-                return reward, screen_image, is_terminal, shape, self.rewards  # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
-            self.rewards, self.reward_r, self.reward_x  = self.calcAllRewards(self.board, self.fallpiece) # 计算下一步最佳分值
-        return reward, screen_image, is_terminal, shape, self.rewards
+                return reward, screen_image, is_terminal, shape  # 虽然游戏结束了，但还是正常返回分值，而不是返回 -1
+        return reward, screen_image, is_terminal, shape
 
     def calculate(self,score):
         level = int(score/10)+1
@@ -646,8 +641,9 @@ def train():
     # _max_reward = {}
     _game_step  = 1
     _game_random_step = True
+    _calc_rewards = [-2000]
     while True:
-        reward, image, terminal, shape, rewards = game.step(list(_last_action))
+        reward, image, terminal, shape = game.step(list(_last_action))
         
         for event in pygame.event.get():  # 需要事件循环，否则白屏
             if event.type == QUIT:
@@ -655,32 +651,8 @@ def train():
                 sys.exit()         
 
         #将奖励分数归一化
-        if reward != 0.0:            
-            # if shape not in _min_reward:
-            #     _min_reward[shape] = {}
-            # if _game_step not in _min_reward[shape]:
-            #     _min_reward[shape][_game_step]=20000
-            # if shape not in _max_reward:
-            #     _max_reward[shape] = {}
-            # if  _game_step not in _max_reward[shape]:                   
-            #     _max_reward[shape][_game_step]=-20000
-            # if reward < _min_reward[shape][_game_step]:
-            #     _min_reward[shape][_game_step] = reward - 0.1
-            # elif reward > _max_reward[shape][_game_step]:
-            #     _max_reward[shape][_game_step] = reward
-            # reward = (reward - _min_reward[shape][_game_step]) * 2 / (_max_reward[shape][_game_step] - _min_reward[shape][_game_step]) - 1.0
-            # if not _game_random_step:
-            #     print(shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
-            # else:
-            #     print('*',shape,reward,_min_reward[shape][_game_step],_max_reward[shape][_game_step]) 
-            
-            # rewards.append(reward)
-            # rewards=list(set(rewards))
-            # rewards.sort()
-            print(reward,rewards)
-            # i=rewards.index(reward)
-            # reward = i*2.0/(len(rewards)-1) - 1.0                      
-            if reward >= max(rewards):
+        if reward != 0.0:        
+            if reward >= max(_calc_rewards):
                 reward=1
             else:
                 reward=-1    
@@ -688,7 +660,8 @@ def train():
                 print(shape,reward) 
             else:
                 print(shape,reward,'*') 
-            time.sleep(1)
+            if _game_step < _game_max_step: # 如果是最后一步，就不计算下一步了
+                _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
             
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -769,6 +742,7 @@ def train():
         if  _game_step > _game_max_step:
             _game_step = 1
             game.reset()
+            _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
 
 if __name__ == '__main__':
     train()
