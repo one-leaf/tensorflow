@@ -726,7 +726,9 @@ def train():
                 _store_socores_rate.clear()
 
             _probability_of_random_action = 1 - _store_socores_rate
- 
+            if _probability_of_random_action > INITIAL_RANDOM_ACTION_PROB:
+                 _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
+
             # 如果下一步是最后一步，按照当前概率进行，否则按最小概率进行
             if _game_step == _game_max_step -1 or _game_max_step == 1:
                 _max_probability_of_random_action = _probability_of_random_action
