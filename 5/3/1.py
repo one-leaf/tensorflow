@@ -592,6 +592,11 @@ def get_max_step(step):
 def get_random_action_prob(step):
     return INITIAL_RANDOM_ACTION_PROB - (step%GAME_ADD_ONE_STEPS)/GAME_ADD_ONE_STEPS*(1.0-FINAL_RANDOM_ACTION_PROB) 
 
+def softmax(x):
+    e_x = np.exp(x - np.max(x))
+    out = e_x / e_x.sum()
+    return out
+
 # 学习
 def train():    
     # 输入的图片，是每4张一组
@@ -651,11 +656,13 @@ def train():
                 sys.exit()         
 
         #将奖励分数归一化
-        if reward != 0.0:        
-            if reward >= max(_calc_rewards):
-                reward=1
-            else:
-                reward=-1    
+        if reward != 0.0:  
+            _calc_rewards.append(reward)
+            reward = softmax(_calc_rewards)[-1]*2.0 - 1.0
+            # if reward >= max(_calc_rewards):
+            #     reward=1
+            # else:
+            #     reward=-1    
             if not _game_random_step:
                 print(shape,reward) 
             else:
