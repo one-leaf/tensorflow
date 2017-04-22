@@ -658,7 +658,10 @@ def train():
         #将奖励分数归一化
         if reward != 0.0:  
             _calc_rewards.append(reward)
-            reward = softmax(_calc_rewards)[-1]*2.0 - 1.0
+            _rewards = softmax(_calc_rewards)
+            _rewards = _rewards*2.0/(max(_rewards)-min(_rewards))            
+            _rewards = _rewards - min(_rewards) -1
+            reward = _rewards[-1]
             # if reward >= max(_calc_rewards):
             #     reward=1
             # else:
