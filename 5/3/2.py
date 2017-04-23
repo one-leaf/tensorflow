@@ -723,7 +723,7 @@ def train():
             _store_socores_rate= sum(_last_scores) / STORE_SCORES_LEN
             if  _store_socores_rate > ADD_STEP_SCORE_RATE:
                 _game_max_step += 1
-                _last_scores = deque()
+                _last_scores.clear()
 
             _probability_of_random_action = 1 - _store_socores_rate
             if _probability_of_random_action > INITIAL_RANDOM_ACTION_PROB:
