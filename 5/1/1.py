@@ -115,7 +115,7 @@ lex_length = len(lex)
 n_input_layer = lex_length  # 输入层
 
 n_layer_1 = 1000    # hide layer
-n_layer_2 = 1000    # hide layer(隐藏层)听着很神秘，其实就是除输入输出层外的中间层
+n_layer_2 = 1000    # hide layer(隐藏层)
 
 n_output_layer = len(stars)       # 输出层
 
