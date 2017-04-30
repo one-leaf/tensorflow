@@ -547,7 +547,7 @@ def restore(sess):
     return saver, model_dir, saver_prefix
 
 # CNN网络
-def get_network(x, output_size, filter_size=[8,6,4,3,3], filter_nums=[256,256,256,256,256], pool_scale=[2,2,2,2,2], full_nums=1024, output_name="output_layer"):
+def get_network(x, output_size, filter_size=[8,5,5,3,3,3,3,3], filter_nums=[128,128,128,128,128,128,128,128], pool_scale=[2,2,2,2,2,2,2,2], pool_type=[0,0,0,1,1,1,1,1],full_nums=1024, output_name="output_layer"):
     def get_w_b(w_shape,w_name="w",b_name="b"):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
@@ -565,7 +565,10 @@ def get_network(x, output_size, filter_size=[8,6,4,3,3], filter_nums=[256,256,25
                 input = filter_layers[-1]
             w,b = get_w_b([filter_size[i],filter_size[i],int(input.get_shape()[-1]),filter_nums[i]])
             filter_layer = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input, w, strides=[1, 1, 1, 1], padding="SAME"), b))
-            pool_layer = tf.nn.max_pool(filter_layer, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME')
+            if pool_type[i]==0:
+                pool_layer = tf.nn.avg_pool(filter_layer, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME')
+            else:    
+                pool_layer = tf.nn.max_pool(filter_layer, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME')
             filter_layers.append(pool_layer)
             if DEBUG:
                 filter_map = tf.transpose(filter_layer[-1], perm=[2, 0, 1])
