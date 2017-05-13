@@ -39,3 +39,9 @@ boardWells指各“井”的深度的连加到1的和之和，“井”指两边
 http://colinfahey.com/tetris/ApplyingReinforcementLearningToTetris_DonaldCarr_RU_AC_ZA.pdf
 
 http://www.bbsmax.com/A/QW5YYKXN5m/
+
+性能：
+LEARNING_RATE = 1e-4        
+filter_size=[8,8,5,5,3], filter_nums=[32,32,32,32,32], pool_scale=[2,2,2,2,2], pool_type=[0,0,0,0,0],full_nums=32,
+STEP：375000
+TIME：49974 秒
