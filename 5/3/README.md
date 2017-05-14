@@ -56,3 +56,8 @@ LEARNING_RATE = 1e-6
 filter_size=[8,8,5,5,3], filter_nums=[32,32,32,32,32], pool_scale=[2,2,2,2,2], pool_type=[0,0,0,0,0],full_nums=32,
 STEP：697000       
 TIME: 93728  秒
+
+LEARNING_RATE = 1e-4        
+filter_size=[3,3,3,3,3], filter_nums=[32,32,32,32,32], pool_scale=[2,2,2,2,2], pool_type=[0,0,0,0,0],full_nums=32, 
+STEP：179000
+TIME：18412 秒
