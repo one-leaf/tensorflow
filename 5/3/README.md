@@ -41,6 +41,12 @@ http://colinfahey.com/tetris/ApplyingReinforcementLearningToTetris_DonaldCarr_RU
 http://www.bbsmax.com/A/QW5YYKXN5m/
 
 性能：
+
+LEARNING_RATE = 1e-3        
+filter_size=[8,8,5,5,3], filter_nums=[32,32,32,32,32], pool_scale=[2,2,2,2,2], pool_type=[0,0,0,0,0],full_nums=32,
+STEP：Fail
+TIME：Fail
+
 LEARNING_RATE = 1e-4        
 filter_size=[8,8,5,5,3], filter_nums=[32,32,32,32,32], pool_scale=[2,2,2,2,2], pool_type=[0,0,0,0,0],full_nums=32,
 STEP：375000

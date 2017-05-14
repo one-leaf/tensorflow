@@ -532,7 +532,7 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 ADD_STEP_SCORE_RATE = 0.95  # 多少分后增加一个方块
-LEARNING_RATE = 1e-3        # 学习速率
+LEARNING_RATE = 1e-4        # 学习速率
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -548,7 +548,7 @@ def restore(sess):
     return saver, model_dir, saver_prefix
 
 # CNN网络
-def get_network(x, output_size, filter_size=[8,8,5,5,3], filter_nums=[32,32,32,32,32], pool_scale=[2,2,2,2,2], 
+def get_network(x, output_size, filter_size=[3,3,3,3,3], filter_nums=[32,32,32,32,32], pool_scale=[2,2,2,2,2], 
         pool_type=[0,0,0,0,0],full_nums=32, output_name="output_layer"):
     def get_w_b(w_shape,w_name="w",b_name="b"):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
