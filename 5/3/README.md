@@ -67,3 +67,9 @@ filter_size=[3,3,3,3,3,3], filter_nums=[32,32,32,32,32,32], pool_scale=[2,2,2,2,
         pool_type=[0,0,0,0,0,0],full_nums=32, 
 STEP：125000
 TIME：13088 秒
+
+LEARNING_RATE = 1e-4
+filter_size=[3,3,3,3,3,3,3], filter_nums=[32,32,32,32,32,32,32], pool_scale=[2,2,2,2,2,2,2], 
+        pool_type=[0,0,0,0,0,0,0],full_nums=32,
+STEP：344000
+TIME：35372 秒
