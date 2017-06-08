@@ -533,6 +533,7 @@ SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 ADD_STEP_SCORE_RATE = 0.95  # 多少分后增加一个方块
 LEARNING_RATE = 1e-5        # 学习速率
+START_GAME_MAX_STEP = 10     # 从最低几步开始结束学习
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -636,7 +637,7 @@ def train():
 
     # 游戏最大进行步数
     _step = _session.run(global_step)
-    _game_max_step = 1
+    _game_max_step = START_GAME_MAX_STEP
     _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
     print("global step: %s game max step: %s train action prob: %s"%(_step, _game_max_step, _probability_of_random_action ))
     if DEBUG:
