@@ -621,7 +621,7 @@ def train():
     _train_operation = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cost, global_step=global_step)
 
     _observations = deque()
-    _last_scores = deque()
+    _last_scores = {}
 
     # 设置最后一步是固定
     _last_action = KEY_DOWN
@@ -681,17 +681,20 @@ def train():
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
        
         if reward != 0.0 and not _game_random_step:
-            _last_scores.append(reward)
-            if len(_last_scores) > STORE_SCORES_LEN:
-                _last_scores.popleft()
+            if _game_step not in _last_scores:
+                _last_scores[_game_step]=deque()
+            _last_scores[_game_step].append(reward)
+            if len(_last_scores[_game_step]) > STORE_SCORES_LEN:
+                _last_scores[_game_step].popleft()
         if _last_state is None:  # 填充第一次的4张图片            
             _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
 
         screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
-        # 优先按照后面的学习
-        if random.random() <= _game_step / _game_max_step :
+        # 按照每一步的独立概率进行学习
+        # if random.random() >= _game_step / _game_max_step :
+        if random.random() >= sum(_last_scores[_game_step]) / STORE_SCORES_LEN :
             _observations.append((_last_state, _last_action, reward, current_state, terminal))
 
         if len(_observations) > MEMORY_SIZE:
@@ -724,16 +727,17 @@ def train():
                 if DEBUG:
                     _train_summary_writer.add_summary(train_summary_op, _step)
                 print("step: %s random_prob: %s scores: %s max_step: %s reward: %s" %
-                  (_step, _probability_of_random_action, sum(_last_scores) / STORE_SCORES_LEN, _game_max_step, reward))
+                  (_step, _probability_of_random_action, sum(_last_scores[_game_step]) / STORE_SCORES_LEN, _game_max_step, reward))
             
         _last_state = current_state
 
         if reward != 0.0:
-            _store_socores_rate= sum(_last_scores) / STORE_SCORES_LEN
-            if  _store_socores_rate > ADD_STEP_SCORE_RATE:
-                _game_max_step += 1
-                _last_scores.clear()
-                # return
+            if _game_step==_game_max_step:
+                _store_socores_rate= sum(_last_scores[_game_step]) / STORE_SCORES_LEN
+                if  _store_socores_rate > ADD_STEP_SCORE_RATE :
+                    _game_max_step += 1
+                    # _last_scores.clear()
+                    # return
 
             _probability_of_random_action = 1 - _store_socores_rate
             if _probability_of_random_action > INITIAL_RANDOM_ACTION_PROB:
