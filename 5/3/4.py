@@ -732,8 +732,9 @@ def train():
         _last_state = current_state
 
         if reward != 0.0:
+            _store_socores_rate= sum(_last_scores[_game_step]) / STORE_SCORES_LEN
+
             if _game_step==_game_max_step:
-                _store_socores_rate= sum(_last_scores[_game_step]) / STORE_SCORES_LEN
                 if  _store_socores_rate > ADD_STEP_SCORE_RATE :
                     _game_max_step += 1
                     # _last_scores.clear()
