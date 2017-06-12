@@ -523,7 +523,7 @@ ACTIONS_COUNT = 4  # 可选的动作，针对 左移 翻转 右移 下移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
 INITIAL_RANDOM_ACTION_PROB = 0.95  # 随机移动的最大概率 0.95
-FINAL_RANDOM_ACTION_PROB = 0.1  # 随机移动的最小概率
+FINAL_RANDOM_ACTION_PROB = 0.05  # 随机移动的最小概率
 MEMORY_SIZE = 10000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
@@ -746,9 +746,10 @@ def train():
                  _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
 
             # 如果下一步是最后一步，按照当前概率进行，否则按最小概率进行
-            if _game_step == _game_max_step -1 or _game_max_step == 1:
-                _max_probability_of_random_action = _probability_of_random_action
-            else:
+            # if _game_step == _game_max_step -1 or _game_max_step == 1:
+            _max_probability_of_random_action = _probability_of_random_action
+            if _max_probability_of_random_action < FINAL_RANDOM_ACTION_PROB:
+            # else:
                 _max_probability_of_random_action = FINAL_RANDOM_ACTION_PROB
             _game_random_step = random.random() <= _max_probability_of_random_action 
             _game_step += 1
