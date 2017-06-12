@@ -622,6 +622,8 @@ def train():
 
     _observations = deque()
     _last_scores = {}
+    for key in range(START_GAME_MAX_STEP):
+        _last_scores[key+1]=deque()     
 
     # 设置最后一步是固定
     _last_action = KEY_DOWN
@@ -659,7 +661,7 @@ def train():
                 sys.exit()         
 
         #将奖励分数归一化
-        if reward != 0.0:  
+        if reward != 0.0:        
             _calc_rewards.append(reward)
             _rewards = softmax(_calc_rewards)
             _rewards = _rewards*2.0/(max(_rewards)-min(_rewards))            
@@ -680,9 +682,7 @@ def train():
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
        
-        if reward != 0.0 and not _game_random_step:
-            if _game_step not in _last_scores:
-                _last_scores[_game_step]=deque()
+        if reward != 0.0 and not _game_random_step:            
             _last_scores[_game_step].append(reward)
             if len(_last_scores[_game_step]) > STORE_SCORES_LEN:
                 _last_scores[_game_step].popleft()
@@ -694,7 +694,7 @@ def train():
 
         # 按照每一步的独立概率进行学习
         # if random.random() >= _game_step / _game_max_step :
-        if _game_step not in _last_scores or random.random() >= sum(_last_scores[_game_step]) / STORE_SCORES_LEN :
+        if random.random() >= sum(_last_scores[_game_step]) / STORE_SCORES_LEN :
             _observations.append((_last_state, _last_action, reward, current_state, terminal))
 
         if len(_observations) > MEMORY_SIZE:
@@ -737,6 +737,7 @@ def train():
             if _game_step==_game_max_step:
                 if  _store_socores_rate > ADD_STEP_SCORE_RATE :
                     _game_max_step += 1
+                    _last_scores[_game_max_step]=deque() 
                     # _last_scores.clear()
                     # return
 
