@@ -694,7 +694,7 @@ def train():
 
         # 按照每一步的独立概率进行学习
         # if random.random() >= _game_step / _game_max_step :
-        if random.random() >= sum(_last_scores[_game_step]) / STORE_SCORES_LEN :
+        if _game_step not in _last_scores or random.random() >= sum(_last_scores[_game_step]) / STORE_SCORES_LEN :
             _observations.append((_last_state, _last_action, reward, current_state, terminal))
 
         if len(_observations) > MEMORY_SIZE:
