@@ -675,9 +675,9 @@ def train():
             # else:
             #     reward=-1    
             if not _game_random_step:
-                print(shape,reward,_step_random) 
+                print(_game_step,shape,reward,_step_random) 
             else:
-                print(shape,reward,_step_random,'*') 
+                print(_game_step,shape,reward,_step_random,'*') 
             if _game_step < _game_max_step: # 如果是最后一步，就不计算下一步了
                 _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
             
