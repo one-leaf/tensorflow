@@ -660,7 +660,10 @@ def train():
                 pygame.quit()
                 sys.exit()         
 
-        #将奖励分数归一化
+        # 计算当前步数的正确率
+        _step_random = sum(_last_scores[_game_step]) / STORE_SCORES_LEN
+
+        # 将奖励分数归一化
         if reward != 0.0:        
             _calc_rewards.append(reward)
             _rewards = softmax(_calc_rewards)
@@ -672,9 +675,9 @@ def train():
             # else:
             #     reward=-1    
             if not _game_random_step:
-                print(shape,reward) 
+                print(shape,reward,_step_random) 
             else:
-                print(shape,reward,'*') 
+                print(shape,reward,_step_random,'*') 
             if _game_step < _game_max_step: # 如果是最后一步，就不计算下一步了
                 _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
             
@@ -694,7 +697,7 @@ def train():
 
         # 按照每一步的独立概率进行学习
         # if random.random() >= _game_step / _game_max_step :
-        if random.random() >= sum(_last_scores[_game_step]) / STORE_SCORES_LEN :
+        if random.random() >= _step_random :
             _observations.append((_last_state, _last_action, reward, current_state, terminal))
 
         if len(_observations) > MEMORY_SIZE:
@@ -727,14 +730,14 @@ def train():
                 if DEBUG:
                     _train_summary_writer.add_summary(train_summary_op, _step)
                 print("step: %s random_prob: %s scores: %s max_step: %s reward: %s" %
-                  (_step, _probability_of_random_action, sum(_last_scores[_game_step]) / STORE_SCORES_LEN, _game_max_step, reward))
+                  (_step, _probability_of_random_action, _step_random, _game_max_step, reward))
             
         _last_state = current_state
 
         if reward != 0.0:
-            _store_socores_rate= sum(_last_scores[_game_step]) / STORE_SCORES_LEN
+            _store_socores_rate = _step_random
 
-            if _game_step==_game_max_step:
+            if _game_step == _game_max_step:
                 if  _store_socores_rate > ADD_STEP_SCORE_RATE :
                     _game_max_step += 1
                     _last_scores[_game_max_step]=deque() 
