@@ -532,7 +532,7 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 ADD_STEP_SCORE_RATE = 0.95  # 多少分后增加一个方块
-LEARNING_RATE = 1e-5        # 学习速率
+LEARNING_RATE = 1e-6        # 学习速率
 START_GAME_MAX_STEP = 10     # 从最低几步开始结束学习
 
 # 初始化保存对象，如果有数据，就恢复
