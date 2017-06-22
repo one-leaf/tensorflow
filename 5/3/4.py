@@ -745,9 +745,9 @@ def train():
                     # return
 
             _probability_of_random_action = 1 - _store_socores_rate
-            if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB
+            if _probability_of_random_action > FINAL_RANDOM_ACTION_PROB:
                  _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
-            if _probability_of_random_action < INITIAL_RANDOM_ACTION_PROB
+            if _probability_of_random_action < INITIAL_RANDOM_ACTION_PROB:
                  _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
 
             _game_random_step = random.random() <= _probability_of_random_action 
