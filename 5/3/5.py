@@ -651,6 +651,8 @@ def train():
     _game_step  = 1
     _game_random_step = True
     _calc_rewards = [-2000]
+    _step_random = INITIAL_RANDOM_ACTION_PROB
+
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
         
@@ -658,10 +660,7 @@ def train():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()         
-
-        # 计算当前步数的正确率
-        _step_random = sum(_last_scores) / STORE_SCORES_LEN
-
+        
         # 将奖励分数归一化
         if reward != 0.0:        
             _calc_rewards.append(reward)
@@ -670,18 +669,22 @@ def train():
             _rewards = _rewards - min(_rewards) -1
             reward = _rewards[-1]   
             if not _game_random_step:
-                print(_game_step,shape,reward) 
-            else:
-                print(_game_step,shape,reward,'*') 
+                _last_scores.append(reward)
+                if len(_last_scores) > STORE_SCORES_LEN:
+                    _last_scores.popleft()
+
+                # 计算当前步数的正确率                    
+                _step_random = sum(_last_scores) / STORE_SCORES_LEN
+                print(_game_step,shape,reward,_step_random) 
+
+            # else:
+                # print(_game_step,shape,reward,'*') 
                         
         image = cv2.resize(image,(RESIZED_SCREEN_Y, RESIZED_SCREEN_X))
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
        
-        if reward != 0.0 and not _game_random_step:            
-            _last_scores.append(reward)
-            if len(_last_scores) > STORE_SCORES_LEN:
-                _last_scores.popleft()
+
 
         if _last_state is None:  # 填充第一次的4张图片            
             _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
