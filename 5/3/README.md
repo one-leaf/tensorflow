@@ -120,4 +120,4 @@ LEARNING_RATE = 1e-5
 filter_size=[3,3,3,3,3,3,3,3,3,3], filter_nums=[32,32,32,32,32,32,32,32,32,32], pool_scale=[2,2,2,2,2,-1,-1,-1,-1,-1], 
         pool_type=[0,0,0,0,0,-1,-1,-1,-1,-1],full_nums=384,
 game_max_step = all ,所有步骤均分奖励
-STEPSTOP: 失败
+STEPSTOP: ?
