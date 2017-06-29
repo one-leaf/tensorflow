@@ -533,7 +533,7 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
 LEARNING_RATE = 1e-5        # 学习速率
-START_GAME_MAX_STEP = 10    # 从最低几步开始结束学习
+START_GAME_MAX_STEP = 2     # 从最低几步开始结束学习
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -759,7 +759,7 @@ def train():
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
 
-        if  terminal:
+        if terminal or _game_step>=START_GAME_MAX_STEP:
             _game_step = 1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
