@@ -684,8 +684,6 @@ def train():
         screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         _, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
        
-
-
         if _last_state is None:  # 填充第一次的4张图片            
             _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
 
@@ -705,34 +703,34 @@ def train():
             while len(_observations) > MEMORY_SIZE:
                 _observations.popleft()
         
-            mini_batch = random.sample(_observations, MINI_BATCH_SIZE)
-            previous_states = [d[OBS_LAST_STATE_INDEX] for d in mini_batch]
-            actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
-            rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
-            current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
-            terminals = [d[OBS_TERMINAL_INDEX] for d in mini_batch]
+                mini_batch = random.sample(_observations, MINI_BATCH_SIZE)
+                previous_states = [d[OBS_LAST_STATE_INDEX] for d in mini_batch]
+                actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
+                rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
+                current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
+                terminals = [d[OBS_TERMINAL_INDEX] for d in mini_batch]
 
-            agents_expected_reward = []
-            agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
-            for i in range(len(mini_batch)):
-                if terminals[i]:    # 如果是游戏结束没有下一步奖励
-                    agents_expected_reward.append(rewards[i])
-                else:
-                    agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
+                agents_expected_reward = []
+                agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
+                for i in range(len(mini_batch)):
+                    if terminals[i]:    # 如果是游戏结束没有下一步奖励
+                        agents_expected_reward.append(rewards[i])
+                    else:
+                        agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
 
-            if DEBUG:
-                _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
-                        _target: agents_expected_reward})
-            else:            
-                _, _step = _session.run([_train_operation,global_step], feed_dict={_input_layer: previous_states,_action: actions,
-                        _target: agents_expected_reward})
-
-            if _step % SAVE_EVERY_X_STEPS == 0:
-                _saver.save(_session, _checkpoint_path, global_step=_step)
                 if DEBUG:
-                    _train_summary_writer.add_summary(train_summary_op, _step)
-                print("step: %s random_prob: %s scores: %s reward: %s" %
-                  (_step, _probability_of_random_action, _step_random, reward))
+                    _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
+                        _target: agents_expected_reward})
+                else:            
+                    _, _step = _session.run([_train_operation,global_step], feed_dict={_input_layer: previous_states,_action: actions,
+                        _target: agents_expected_reward})
+
+                if _step % SAVE_EVERY_X_STEPS == 0:
+                    _saver.save(_session, _checkpoint_path, global_step=_step)
+                    if DEBUG:
+                        _train_summary_writer.add_summary(train_summary_op, _step)
+                    print("step: %s random_prob: %s scores: %s reward: %s" %
+                    (_step, _probability_of_random_action, _step_random, reward))
             
         _last_state = current_state
 
