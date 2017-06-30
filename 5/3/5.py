@@ -532,8 +532,8 @@ RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (80, 100)   # 图片缩小后的尺寸
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200.     # 分数保留的长度
-LEARNING_RATE = 1e-5        # 学习速率
-START_GAME_MAX_STEP = 2     # 从最低几步开始结束学习
+LEARNING_RATE = 1e-6        # 学习速率
+START_GAME_MAX_STEP = 5     # 从最低几步开始结束学习
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -697,7 +697,7 @@ def train():
         if reward != 0.0: 
             _vation_len = len(_onevations)
             for i,vation in enumerate(_onevations):
-                vation[2]=reward*(i+1)/_vation_len                       
+                vation[2]=reward*(((i+1)/_vation_len)**2)
                 _observations.append(vation)
             _onevations.clear()
 
