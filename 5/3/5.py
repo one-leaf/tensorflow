@@ -549,8 +549,8 @@ def restore(sess):
     return saver, model_dir, saver_prefix
 
 # CNN网络
-def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], filter_nums=[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32], pool_scale=[2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], 
-        pool_type=[0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],full_nums=384, output_name="output_layer"):
+def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], filter_nums=[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32], pool_scale=[2,2,2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], 
+        pool_type=[0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],full_nums=384, output_name="output_layer"):
     def get_w_b(w_shape,w_name="w",b_name="b"):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
