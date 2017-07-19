@@ -129,6 +129,7 @@ def get_songs(midi_path):
             song = np.array(midiToNoteStateMatrix(f))
             if np.array(song).shape[0] > 64:
                 songs.append(song)
+                print(song)
         except Exception as e:
             print('数据无效: ', e)
     print("读取的有效midi文件个数: ", len(songs))
