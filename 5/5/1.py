@@ -192,11 +192,11 @@ def train_neural_network():
     update = neural_network()
  
     with tf.Session() as sess:
-        sess.run(tf.initialize_all_variables())
+        sess.run(tf.global_variables_initializer())
  
         saver = tf.train.Saver(tf.all_variables())
  
-        epochs = 2560
+        epochs = 25600
         batch_size = 64
         for epoch in range(epochs):
             for song in songs:
@@ -204,9 +204,9 @@ def train_neural_network():
                 song = song[:int(np.floor(song.shape[0]/n_timesteps) * n_timesteps)]
                 song = np.reshape(song, [song.shape[0]//n_timesteps, song.shape[1] * n_timesteps])
         
-            for i in range(1, len(song), batch_size): 
-                train_x = song[i:i+batch_size]
-                sess.run(update, feed_dict={X: train_x})
+                for i in range(1, len(song), batch_size): 
+                    train_x = song[i:i+batch_size]
+                    sess.run(update, feed_dict={X: train_x})
             print(epoch)
             # 保存模型
             if epoch == epochs - 1:
