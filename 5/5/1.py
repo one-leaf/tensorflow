@@ -140,7 +140,6 @@ def get_songs(midi_path):
 # midi目录中包含了下载的midi文件
 midi_dir=os.path.join(curr_dir,'midi')
 songs = get_songs(midi_dir)
-raise Exception("xxx")  
 note_range = upper_bound - lower_bound
 # 音乐长度
 n_timesteps = 128
