@@ -204,9 +204,9 @@ def train_neural_network():
                 song = song[:int(np.floor(song.shape[0]/n_timesteps) * n_timesteps)]
                 song = np.reshape(song, [song.shape[0]//n_timesteps, song.shape[1] * n_timesteps])
         
-            for i in range(1, len(song), batch_size): 
-                train_x = song[i:i+batch_size]
-                sess.run(update, feed_dict={X: train_x})
+                for i in range(1, len(song), batch_size): 
+                    train_x = song[i:i+batch_size]
+                    sess.run(update, feed_dict={X: train_x})
             print(epoch)
             # 保存模型
             if epoch == epochs - 1:
@@ -215,6 +215,7 @@ def train_neural_network():
         # 生成midi
         sample = gibbs_sample(1).eval(session=sess, feed_dict={X: np.zeros((1, n_input))})
         S = np.reshape(sample[0,:], (n_timesteps, 2 * note_range))
+        print(S)
         noteStateMatrixToMidi(S, "auto_gen_music.mid")
         print('生成 auto_gen_music.mid 文件')
  
