@@ -20,6 +20,7 @@ def midiToNoteStateMatrix(midi_file_path, squash=True, span=span):
     for track in mid.tracks:
         time_left.append(track[0].time)
 
+    print("time_left",time_left)
     posns = [0 for track in mid.tracks]
     
     statematrix = []
@@ -50,8 +51,8 @@ def midiToNoteStateMatrix(midi_file_path, squash=True, span=span):
                                 state[msg.note-lower_bound] = [0, 0]
                             else:       
                                 state[msg.note-lower_bound] = [1, 1]
-                elif msg.type == 'end_of_track':
-                    if msg.time not in (2, 4):
+                elif msg.type == 'time_signature':
+                    if msg.numerator not in (2, 4):
                         out =  statematrix
                         condition = False
                         break
@@ -130,6 +131,7 @@ def get_songs(midi_path):
             if np.array(song).shape[0] > 64:
                 songs.append(song)
                 print(song)
+                return songs
         except Exception as e:
             print('数据无效: ', e)
     print("读取的有效midi文件个数: ", len(songs))
@@ -138,7 +140,7 @@ def get_songs(midi_path):
 # midi目录中包含了下载的midi文件
 midi_dir=os.path.join(curr_dir,'midi')
 songs = get_songs(midi_dir)
- 
+raise Exception("xxx")  
 note_range = upper_bound - lower_bound
 # 音乐长度
 n_timesteps = 128
