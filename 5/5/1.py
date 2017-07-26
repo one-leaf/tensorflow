@@ -21,32 +21,44 @@ def midiToNoteStateMatrix(midi_file_path, squash=True, span=span):
         time_left.append(track[0].time)
 
     print("time_left",time_left)
+    # 所有的音轨
     posns = [0 for track in mid.tracks]
     
+    # 状态列表
     statematrix = []
     time = 0
 
+    # 先插入空白的
     state = [[0,0] for x in range(span)]
     statematrix.append(state)
+
     condition = True
     while condition:
+        # mid.ticks_per_beat = 120 含义： 1 tick 的时间长度为 1/120 拍
+        # 一小节结束时，最后一个音符重复插入
         if time % (mid.ticks_per_beat / 4) == (mid.ticks_per_beat / 8):
             oldstate = state
             state = [[oldstate[x][0],0] for x in range(span)]
             statematrix.append(state)
+        # 按音轨循环    
         for i in range(len(time_left)):
+            # 如果midi终止了，中断循环
             if not condition:
                 break
+            # time==0 表示 1/4 音符，如果是 1/4 音符继续
             while time_left[i] == 0:
                 track = mid.tracks[i]
+
+                # 音符的位置，从 0 开始
                 pos = posns[i]
  
                 msg = track[pos]  
                 if not msg.is_meta:               
                     if msg.type=='note_on':
                         if (msg.note < lower_bound) or (msg.note >= upper_bound):
-                            pass
+                            pass  # 这里直接抛弃实际上有问题的，因为丢失了音符
                         else:
+                            # 音符的强度 这里的处理也损失了信息
                             if msg.velocity == 0:
                                 state[msg.note-lower_bound] = [0, 0]
                             else:       
@@ -56,12 +68,16 @@ def midiToNoteStateMatrix(midi_file_path, squash=True, span=span):
                         out =  statematrix
                         condition = False
                         break
+                
+                # 如果当前音轨的时长和下一个音符一致，继续循环读取下一个音符
+                # 如果下一个音符没有了，标记为 None，   
                 try:
                     time_left[i] = track[pos + 1].time
                     posns[i] += 1
                 except IndexError:
                     time_left[i] = None
- 
+
+            # 如果当前不为空，减1
             if time_left[i] is not None:
                 time_left[i] -= 1
  
