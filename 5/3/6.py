@@ -697,7 +697,7 @@ def train():
         if reward != 0.0: 
             _vation_len = len(_onevations)
             for i,vation in enumerate(_onevations):
-                vation[2]=reward*(((i+1)/_vation_len)**3)
+                vation[2]=reward*(((i+1)/_vation_len)**2)
                 _observations.append(vation)
             _onevations.clear()
 
