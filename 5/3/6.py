@@ -549,8 +549,7 @@ def restore(sess):
     return saver, model_dir, saver_prefix
 
 # CNN网络
-def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], filter_nums=[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32], pool_scale=[2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], 
-        pool_type=[0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],full_nums=384, output_name="output_layer"):
+def get_network(x, output_size, filter_size=[8,4,3,3,3], strides_size=[4,2,1,1,1], filter_nums=[32,64,128,256,512], pool_scale=[2,2,2,2,2], pool_type=[1,1,1,1,1],full_nums=384, output_name="output_layer"):
     def get_w_b(w_shape,w_name="w",b_name="b"):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
@@ -567,7 +566,7 @@ def get_network(x, output_size, filter_size=[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3
             else:
                 input = filter_layers[-1]
             w,b = get_w_b([filter_size[i],filter_size[i],int(input.get_shape()[-1]),filter_nums[i]])
-            filter_layer = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input, w, strides=[1, 1, 1, 1], padding="SAME"), b))
+            filter_layer = tf.nn.relu(tf.nn.bias_add(tf.nn.conv2d(input, w, strides=[1, strides_size[i], strides_size[i], 1], padding="SAME"), b))
             if pool_scale[i]>0:
                 if pool_type[i]==0:
                     pool_layer = tf.nn.avg_pool(filter_layer, ksize=[1, pool_scale[i], pool_scale[i], 1], strides=[1, pool_scale[i], pool_scale[i], 1], padding='SAME')

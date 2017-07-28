@@ -167,5 +167,10 @@ STEPSTOP: 失败
 LEARNING_RATE = 1e-5
 filter_size=[3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3], filter_nums=[32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32], pool_scale=[2,2,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], 
         pool_type=[0,0,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],full_nums=384, 
-game_max_step = 0.99
+game_max_step = 0.8 
+STEPSTOP: 失败
+
+LEARNING_RATE = 1e-5
+ffilter_size=[8,4,3,3,3], strides_size=[4,2,1,1,1], filter_nums=[32,64,128,256,512], pool_scale=[2,2,2,2,2], pool_type=[1,1,1,1,1],full_nums=384,  
+game_max_step = 0.8 
 STEPSTOP: ?
