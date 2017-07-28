@@ -534,6 +534,7 @@ SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 10.     # 分数保留的长度
 LEARNING_RATE = 1e-5        # 学习速率
 GAME_REWARD_NEXT_STEP = 0.9  # 到多少步后学习下一步
+GAME_MAX_STEP = 10           # 当前最大步数
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -691,8 +692,8 @@ def train():
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
         # 负分只取一半进行训练
-        if reward > 0 or random.random() > 0.5:
-            _onevations.append([_last_state, _last_action, reward, current_state, terminal])
+        # if reward > 0 or random.random() > 0.5:
+        #     _onevations.append([_last_state, _last_action, reward, current_state, terminal])
 
         if reward != 0.0: 
             _vation_len = len(_onevations)
@@ -752,14 +753,19 @@ def train():
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
 
+        # 如果当前正确率小于阈值，则多执行一步，并且最后一步为随机
+        if reward != 0.0 and _step_random < GAME_REWARD_NEXT_STEP:
+            GAME_MAX_STEP = _game_step  
+            _game_random_step = True
+
         if _game_random_step:
             action_index = random.randrange(ACTIONS_COUNT)
         else:
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
-
-        if terminal or (reward != 0.0 and _step_random < GAME_REWARD_NEXT_STEP):
+            
+        if terminal or _game_step > _game_max_step:
             _game_step = 1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
