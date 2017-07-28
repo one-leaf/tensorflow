@@ -750,14 +750,14 @@ def train():
             _game_step += 1
             # print(_game_random_step,_probability_of_random_action,_game_step,_game_max_step)
 
+            # 如果当前正确率小于阈值，则多执行一步，并且最后一步为随机
+            if _step_random < GAME_REWARD_NEXT_STEP:
+                GAME_MAX_STEP = _game_step  
+                _game_random_step = True
+
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-
-        # 如果当前正确率小于阈值，则多执行一步，并且最后一步为随机
-        if reward != 0.0 and _step_random < GAME_REWARD_NEXT_STEP:
-            GAME_MAX_STEP = _game_step  
-            _game_random_step = True
-
+        
         if _game_random_step:
             action_index = random.randrange(ACTIONS_COUNT)
         else:
