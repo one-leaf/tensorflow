@@ -765,7 +765,7 @@ def train():
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
             
-        if terminal or _game_step > _game_max_step:
+        if terminal or _game_step > GAME_MAX_STEP:
             _game_step = 1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
