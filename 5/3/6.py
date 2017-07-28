@@ -620,7 +620,7 @@ def train():
     _train_operation = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cost, global_step=global_step)
 
     _observations = deque()
-    _last_scores = deque()
+    # _last_scores = deque()
 
     # 定义一步落地后的所有图形列表
     _onevations = []
@@ -649,7 +649,8 @@ def train():
 
     _game_step  = 1
     _game_random_step = True
-    #_calc_rewards = [-2000]
+    # 预计下一步的所有得分
+    _calc_rewards = [-2000]
     _step_random = INITIAL_RANDOM_ACTION_PROB
     _game_max_step = -1
 
@@ -657,6 +658,7 @@ def train():
     shape_scores={}
     for shape in pieces:
         shape_scores[shape]=deque()        
+        shape_scores[shape]=[-2000]
 
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
@@ -666,7 +668,7 @@ def train():
                 pygame.quit()
                 sys.exit()         
         
-        _calc_rewards = shape_scores[shape]
+        _last_scores = shape_scores[shape]
 
         # 将奖励分数归一化
         if reward != 0.0:        
