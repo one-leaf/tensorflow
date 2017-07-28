@@ -652,7 +652,7 @@ def train():
     _game_random_step = True
     _calc_rewards = [-2000]
     _step_random = INITIAL_RANDOM_ACTION_PROB
-    _game_max_step = 2
+    _game_max_step = -1
 
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
@@ -751,7 +751,7 @@ def train():
             # print(_game_random_step,_probability_of_random_action,_game_step,_game_max_step)
 
             # 如果当前正确率小于阈值，则多执行一步，并且最后一步为随机
-            if _step_random < GAME_REWARD_NEXT_STEP:
+            if _step_random < GAME_REWARD_NEXT_STEP and (_game_max_step == -1):
                 _game_max_step = _game_step  
                 _game_random_step = True
 
@@ -767,6 +767,7 @@ def train():
             
         if terminal or (reward != 0.0 and _game_step > _game_max_step):
             _game_step = 1
+            _game_max_step = -1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
 
