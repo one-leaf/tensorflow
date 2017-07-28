@@ -653,10 +653,15 @@ def train():
     _calc_rewards = [-2000]
     _step_score = INITIAL_RANDOM_ACTION_PROB
 
-    # 按照不同的形状统计成功率
+    # 按照不同的形状统计成功率的列表
     shape_scores={}
     for shape in pieces:
         shape_scores[shape]=deque()        
+
+    # 按照不同形状的成功率
+    shape_reward={}
+    for shape in pieces:
+        shape_reward[shape]=0  
 
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
@@ -681,6 +686,7 @@ def train():
 
                 # 计算当前形状的正确率                    
                 _step_score = sum(_last_scores) / STORE_SCORES_LEN
+                shape_reward[shape]=_step_score
                 print(_game_step,shape,reward,_step_score) 
 
             # else:
@@ -744,20 +750,25 @@ def train():
         _last_state = current_state
 
         if reward != 0.0:
-            _store_socores_rate = _step_score
+            _game_step += 1
 
-            _probability_of_random_action = 1 - _store_socores_rate
+        # 如果得分不是 1 直接重置游戏    
+        if terminal or reward == -1:
+            _game_step = 1
+            game.reset()
+            _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
+
+        if reward != 0.0:
+            _probability_of_random_action = 1 - shape_reward[game.fallpiece['shape']]
             if _probability_of_random_action < FINAL_RANDOM_ACTION_PROB:
                  _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
             if _probability_of_random_action > INITIAL_RANDOM_ACTION_PROB:
                  _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
 
             _game_random_step = random.random() <= _probability_of_random_action 
-            _game_step += 1
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
-        _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-        
+        _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
         if _game_random_step:
             action_index = random.randrange(ACTIONS_COUNT)
         else:
@@ -765,11 +776,6 @@ def train():
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
 
-        # 如果得分不是 1 直接重置游戏    
-        if terminal or reward == -1:
-            _game_step = 1
-            game.reset()
-            _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
 
 if __name__ == '__main__':
     start = time.clock()
