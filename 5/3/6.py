@@ -692,8 +692,8 @@ def train():
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
         # 负分只取一半进行训练
-        # if reward > 0 or random.random() > 0.5:
-        #     _onevations.append([_last_state, _last_action, reward, current_state, terminal])
+        #if reward > 0 or random.random() > 0.5:
+        _onevations.append([_last_state, _last_action, reward, current_state, terminal])
 
         if reward != 0.0: 
             _vation_len = len(_onevations)
