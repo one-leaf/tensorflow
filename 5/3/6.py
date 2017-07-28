@@ -649,9 +649,14 @@ def train():
 
     _game_step  = 1
     _game_random_step = True
-    _calc_rewards = [-2000]
+    #_calc_rewards = [-2000]
     _step_random = INITIAL_RANDOM_ACTION_PROB
     _game_max_step = -1
+
+    # 按照不同的形状统计成功率
+    shape_scores={}
+    for shape in pieces:
+        shape_scores[shape]=deque()        
 
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
@@ -661,6 +666,8 @@ def train():
                 pygame.quit()
                 sys.exit()         
         
+        _calc_rewards = shape_scores[shape]
+
         # 将奖励分数归一化
         if reward != 0.0:        
             _calc_rewards.append(reward)
@@ -673,7 +680,7 @@ def train():
                 if len(_last_scores) > STORE_SCORES_LEN:
                     _last_scores.popleft()
 
-                # 计算当前步数的正确率                    
+                # 计算当前形状的正确率                    
                 _step_random = sum(_last_scores) / STORE_SCORES_LEN
                 print(_game_step,shape,reward,_step_random) 
 
@@ -690,9 +697,9 @@ def train():
         screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
         current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
 
-        # 负分只取一半进行训练
-        #if reward > 0 or random.random() > 0.5:
-        _onevations.append([_last_state, _last_action, reward, current_state, terminal])
+        # 如果当前图像的正确率进入到学习库
+        if reward > 0 or random.random() > _step_random:
+            _onevations.append([_last_state, _last_action, reward, current_state, terminal])
 
         if reward != 0.0: 
             _vation_len = len(_onevations)
