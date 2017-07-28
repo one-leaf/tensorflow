@@ -658,7 +658,6 @@ def train():
     shape_scores={}
     for shape in pieces:
         shape_scores[shape]=deque()        
-        shape_scores[shape]=[-2000]
 
     while True:
         reward, image, terminal, shape = game.step(list(_last_action))
