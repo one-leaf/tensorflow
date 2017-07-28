@@ -755,7 +755,7 @@ def train():
                 _game_max_step = _game_step  
                 _game_random_step = random.random() <= _probability_of_random_action 
             else:
-                _game_random_step = false
+                _game_random_step = False
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
