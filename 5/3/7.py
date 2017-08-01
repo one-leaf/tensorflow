@@ -744,8 +744,12 @@ def train():
                     _saver.save(_session, _checkpoint_path, global_step=_step)
                     if DEBUG:
                         _train_summary_writer.add_summary(train_summary_op, _step)
-                    print("step: %s random_prob: %s scores: %s reward: %s" %
-                    (_step, _probability_of_random_action, _step_score, reward))
+                    all_score=0
+                    all_score_len=0
+                    for score in shape_scores:
+                        all_score = all_score + sum(shape_scores[score])                        
+                        all_score_len = all_score_len + len(shape_scores[score])
+                    print("step: %s scores: %s" % (_step, all_score/all_score_len))
             
         _last_state = current_state
 
