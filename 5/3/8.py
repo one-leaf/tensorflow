@@ -215,6 +215,12 @@ class Tetromino(object):
 #        screen_image = pygame.surfarray.array3d(pygame.display.get_surface())
         pygame.display.update()
 
+        # if reward !=0:
+        #     print(shape,reward)
+        #     print(self.board)
+        #     print(self.fallpiece)
+        #     print(screen_image)
+
         if self.fallpiece == None:
             self.fallpiece = self.nextpiece
             self.nextpiece = self.getnewpiece()
