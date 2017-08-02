@@ -720,39 +720,39 @@ def train():
             while len(_observations) > MEMORY_SIZE:
                 _observations.popleft()
 
-        for _ in range(TRAIN_EPOCHS):
-            mini_batch = random.sample(_observations, TRAIN_BATCH_SIZE)
-            previous_states = [d[OBS_LAST_STATE_INDEX] for d in mini_batch]
-            actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
-            rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
-            current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
-            terminals = [d[OBS_TERMINAL_INDEX] for d in mini_batch]
+            for _ in range(TRAIN_EPOCHS):
+                mini_batch = random.sample(_observations, TRAIN_BATCH_SIZE)
+                previous_states = [d[OBS_LAST_STATE_INDEX] for d in mini_batch]
+                actions = [d[OBS_ACTION_INDEX] for d in mini_batch]
+                rewards = [d[OBS_REWARD_INDEX] for d in mini_batch]
+                current_states = [d[OBS_CURRENT_STATE_INDEX] for d in mini_batch]
+                terminals = [d[OBS_TERMINAL_INDEX] for d in mini_batch]
 
-            agents_expected_reward = []
-            agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
-            for i in range(len(mini_batch)):
-                if terminals[i]:    # 如果是游戏结束没有下一步奖励
-                    agents_expected_reward.append(rewards[i])
-                else:
-                    agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
+                agents_expected_reward = []
+                agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
+                for i in range(len(mini_batch)):
+                    if terminals[i]:    # 如果是游戏结束没有下一步奖励
+                        agents_expected_reward.append(rewards[i])
+                    else:
+                        agents_expected_reward.append(rewards[i] + FUTURE_REWARD_DISCOUNT * np.max(agents_reward_per_action[i]))
 
-            if DEBUG:
-                _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
-                    _target: agents_expected_reward})
-            else:            
-                _, _step = _session.run([_train_operation,global_step], feed_dict={_input_layer: previous_states,_action: actions,
-                    _target: agents_expected_reward})
-
-            if _step % SAVE_EVERY_X_STEPS == 0:
-                _saver.save(_session, _checkpoint_path, global_step=_step)
                 if DEBUG:
-                    _train_summary_writer.add_summary(train_summary_op, _step)
-                all_score=0
-                all_score_len=0
-                for shape in pieces:
-                    all_score = all_score + sum(shape_scores[shape])                        
-                    all_score_len = all_score_len + len(shape_scores[shape])
-                print("step: %s scores: %s" % (_step, all_score/all_score_len))
+                    _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
+                        _target: agents_expected_reward})
+                else:            
+                    _, _step = _session.run([_train_operation,global_step], feed_dict={_input_layer: previous_states,_action: actions,
+                        _target: agents_expected_reward})
+
+                if _step % SAVE_EVERY_X_STEPS == 0:
+                    _saver.save(_session, _checkpoint_path, global_step=_step)
+                    if DEBUG:
+                        _train_summary_writer.add_summary(train_summary_op, _step)
+                    all_score=0
+                    all_score_len=0
+                    for shape in pieces:
+                        all_score = all_score + sum(shape_scores[shape])                        
+                        all_score_len = all_score_len + len(shape_scores[shape])
+                    print("step: %s scores: %s" % (_step, all_score/all_score_len))
             
         _last_state = current_state
 
