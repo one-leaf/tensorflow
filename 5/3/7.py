@@ -683,6 +683,7 @@ def train():
                 _last_scores_len = len(_last_scores)
                 if _last_scores_len > STORE_SCORES_LEN:
                     _last_scores.popleft()
+                    _last_scores_len = STORE_SCORES_LEN
 
                 # 计算当前形状的正确率                    
                 _step_score = sum(_last_scores) / _last_scores_len
