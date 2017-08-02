@@ -680,11 +680,12 @@ def train():
                 reward = -1           
             if not _game_random_step:
                 _last_scores.append(reward)
-                if len(_last_scores) > STORE_SCORES_LEN:
+                _last_scores_len = len(_last_scores)
+                if _last_scores_len > STORE_SCORES_LEN:
                     _last_scores.popleft()
 
                 # 计算当前形状的正确率                    
-                _step_score = sum(_last_scores) / STORE_SCORES_LEN
+                _step_score = sum(_last_scores) / _last_scores_len
                 shape_reward[shape]=_step_score
                 print(_game_step,shape,reward,_step_score) 
 
