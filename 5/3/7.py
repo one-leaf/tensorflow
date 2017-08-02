@@ -745,9 +745,9 @@ def train():
                         _train_summary_writer.add_summary(train_summary_op, _step)
                     all_score=0
                     all_score_len=0
-                    for score in shape_scores:
-                        all_score = all_score + sum(shape_scores[score])                        
-                        all_score_len = all_score_len + len(shape_scores[score])
+                    for shape in pieces:
+                        all_score = all_score + sum(shape_scores[shape])                        
+                        all_score_len = all_score_len + len(shape_scores[shape])
                     print("step: %s scores: %s" % (_step, all_score/all_score_len))
             
         _last_state = current_state
