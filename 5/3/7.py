@@ -716,7 +716,7 @@ def train():
                     _observations.append(vation)
             _onevations.clear()
 
-        if len(_observations) > MEMORY_SIZE:
+        if len(_observations) >= MEMORY_SIZE:
             while len(_observations) > MEMORY_SIZE:
                 _observations.popleft()
 
