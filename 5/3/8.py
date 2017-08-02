@@ -168,6 +168,7 @@ class Tetromino(object):
         moveright = False
         is_terminal = False
         shape  = self.fallpiece['shape']
+        
         level = self.calculate(self.score)
 
         if action == KEY_LEFT and self.validposition(self.board,self.fallpiece,ax = -1):
@@ -205,6 +206,12 @@ class Tetromino(object):
                 if self.board[x][y]!=blank:
                     screen_image[x,y]=1
 
+        if self.fallpiece !=None:
+            shapedraw = pieces[shape][self.fallpiece['rotation']]
+            for x in range(templatenum):
+                for y in range(templatenum):
+                    if shapedraw[y][x]!=blank:
+                        screen_image[x + self.fallpiece['x'],y + self.fallpiece['y']] = 1
 #        screen_image = pygame.surfarray.array3d(pygame.display.get_surface())
         pygame.display.update()
 
@@ -704,6 +711,7 @@ def train():
         #screen_resized_grayscaled = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
         #_, screen_resized_binary = cv2.threshold(screen_resized_grayscaled, 1, 255, cv2.THRESH_BINARY)
         screen_resized_binary = image
+        # print(shape,reward,image)
         if _last_state is None:  # 填充第一次的4张图片            
             _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
 
