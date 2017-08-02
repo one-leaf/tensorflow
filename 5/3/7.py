@@ -523,7 +523,7 @@ DEBUG = False    # 是否开启调试 到程序目录执行 tensorboard --logdir
 ACTIONS_COUNT = 4  # 可选的动作，针对 左移 翻转 右移 下移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
-INITIAL_RANDOM_ACTION_PROB = 0.5  # 随机移动的最小概率
+INITIAL_RANDOM_ACTION_PROB = 0.9  # 随机移动的最小概率
 FINAL_RANDOM_ACTION_PROB = 0  # 随机移动的最大概率 0
 MEMORY_SIZE = 10000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
@@ -533,7 +533,6 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200      # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
-GAME_REWARD_NEXT_STEP = 0.9  # 到多少步后学习下一步
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
