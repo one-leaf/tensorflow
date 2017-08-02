@@ -708,7 +708,7 @@ def train():
 
         if reward != 0.0:
             # 按概率低于正确率的进入学习库
-            if random.random() > _step_score: 
+            if reward == 1 or random.random() > _step_score: 
                 _vation_len = len(_onevations)
                 for i,vation in enumerate(_onevations):
                    # 不摊分其他步骤得分 
