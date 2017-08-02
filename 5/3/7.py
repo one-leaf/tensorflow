@@ -523,8 +523,8 @@ DEBUG = False    # 是否开启调试 到程序目录执行 tensorboard --logdir
 ACTIONS_COUNT = 4  # 可选的动作，针对 左移 翻转 右移 下移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
-INITIAL_RANDOM_ACTION_PROB = 0.9  # 随机移动的最小概率
-FINAL_RANDOM_ACTION_PROB = 0  # 随机移动的最大概率 0
+MIN_RANDOM_ACTION_PROB = 0.95    # 随机移动的最小概率
+MAX_RANDOM_ACTION_PROB = 0.05    # 随机移动的最大概率 
 MEMORY_SIZE = 10000  # 记住的观察队列
 MINI_BATCH_SIZE = 100  # 每次学习的批次
 STATE_FRAMES = 4  # 每次保存的状态数
@@ -638,7 +638,7 @@ def train():
 
     # 游戏最大进行步数
     _step = _session.run(global_step)
-    _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
+    _probability_of_random_action = MIN_RANDOM_ACTION_PROB
     print("global step: %s train action prob: %s"%(_step, _probability_of_random_action ))
     if DEBUG:
         tf.summary.scalar("cost", cost)
@@ -650,7 +650,7 @@ def train():
     _game_random_step = True
     # 预计下一步的所有得分
     _calc_rewards = [-2000]
-    _step_score = INITIAL_RANDOM_ACTION_PROB
+    _step_score = 0
 
     # 按照不同的形状统计成功率的列表
     shape_scores={}
@@ -763,10 +763,10 @@ def train():
 
         if reward != 0.0:
             _probability_of_random_action = 1 - shape_reward[game.fallpiece['shape']]
-            if _probability_of_random_action < FINAL_RANDOM_ACTION_PROB:
-                 _probability_of_random_action = FINAL_RANDOM_ACTION_PROB
-            if _probability_of_random_action > INITIAL_RANDOM_ACTION_PROB:
-                 _probability_of_random_action = INITIAL_RANDOM_ACTION_PROB
+            if _probability_of_random_action < MAX_RANDOM_ACTION_PROB:
+                 _probability_of_random_action = MAX_RANDOM_ACTION_PROB
+            if _probability_of_random_action > MIN_RANDOM_ACTION_PROB:
+                 _probability_of_random_action = MIN_RANDOM_ACTION_PROB
 
             _game_random_step = random.random() <= _probability_of_random_action 
 
