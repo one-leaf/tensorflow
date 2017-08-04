@@ -553,6 +553,7 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200      # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
+TEST = False                # 测试状态
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -774,7 +775,8 @@ def train():
                             all_score = all_score + sum(shape_scores[shape])                        
                             all_score_len = all_score_len + len(shape_scores[shape])
                         print("step: %s scores: %s" % (_step, all_score/all_score_len))
-            
+                        # 每保存一次，就测试一局
+                        TEST = True
         _last_state = current_state
 
         if reward != 0.0:
@@ -785,16 +787,19 @@ def train():
             _game_step = 1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
+            TEST = False
 
         if reward != 0.0:
-            # 将错误率的1/2作为随机移动的概率
-            _probability_of_random_action = (1 - shape_reward[game.fallpiece['shape']])/2.0
-            if _probability_of_random_action < MIN_RANDOM_ACTION_PROB:
-                 _probability_of_random_action = MIN_RANDOM_ACTION_PROB
-            if _probability_of_random_action > MAX_RANDOM_ACTION_PROB:
-                 _probability_of_random_action = MAX_RANDOM_ACTION_PROB
-
-            _game_random_step = random.random() <= _probability_of_random_action 
+            if TEST:
+                _game_random_step = False
+            else:    
+                # 将错误率的1/2作为随机移动的概率
+                _probability_of_random_action = (1 - shape_reward[game.fallpiece['shape']])/2.0
+                if _probability_of_random_action < MIN_RANDOM_ACTION_PROB:
+                    _probability_of_random_action = MIN_RANDOM_ACTION_PROB
+                if _probability_of_random_action > MAX_RANDOM_ACTION_PROB:
+                    _probability_of_random_action = MAX_RANDOM_ACTION_PROB
+                _game_random_step = random.random() <= _probability_of_random_action 
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
