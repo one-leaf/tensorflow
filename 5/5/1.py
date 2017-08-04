@@ -8,8 +8,11 @@ import os
 lower_bound = 24
 upper_bound = 102
 span = upper_bound - lower_bound
-curr_dir = os.path.dirname(__file__)
 
+curr_dir = os.path.dirname(__file__)
+model_dir = os.path.join(curr_dir, "model")
+if not os.path.exists(model_dir):
+    os.mkdir(model_dir)
 
 # midi文件转Note(音符)
 def midiToNoteStateMatrix(midi_file_path, squash=True, span=span):
@@ -167,9 +170,11 @@ W = None
 bh = None
 bv = None
  
+# 一个简单的小范围内随机取整 0，1
 def sample(probs):
     return tf.floor(probs + tf.random_uniform(tf.shape(probs), 0, 1))
- 
+
+# ?  
 def gibbs_sample(k):
     def body(count, k, xk):
         hk = sample(tf.sigmoid(tf.matmul(xk, W) + bh))
@@ -184,7 +189,7 @@ def gibbs_sample(k):
     x_sample = tf.stop_gradient(x_sample) 
     return x_sample
  
-#定义神经网络
+#定义神经网络 同时兼顾 音符和音强
 def neural_network():
     global W
     W  = tf.Variable(tf.random_normal([n_input, n_hidden], 0.01))
@@ -228,13 +233,13 @@ def train_neural_network():
             print(epoch)
             # 保存模型
             if epoch == epochs - 1:
-                saver.save(sess, 'midi.module')
+                saver.save(sess, os.path.join(model_dir,'midi.module'))
  
         # 生成midi
         sample = gibbs_sample(1).eval(session=sess, feed_dict={X: np.zeros((1, n_input))})
         S = np.reshape(sample[0,:], (n_timesteps, 2 * note_range))
         print(S)
-        noteStateMatrixToMidi(S, "auto_gen_music.mid")
+        noteStateMatrixToMidi(S, os.path.join(curr_dir,"auto_gen_music.mid"))
         print('生成 auto_gen_music.mid 文件')
  
 train_neural_network()
