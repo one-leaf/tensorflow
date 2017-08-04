@@ -553,7 +553,6 @@ OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDE
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200      # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
-TEST = False                # 测试状态
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
@@ -669,10 +668,12 @@ def train():
 
     _game_step  = 1
     _game_random_step = True
+    # 测试一把
+    _game_test = False
     # 预计下一步的所有得分
     _calc_rewards = [-2000]
     _step_score = 0
-
+    
     # 按照不同的形状统计成功率的列表
     shape_scores={}
     for shape in pieces:
@@ -776,7 +777,7 @@ def train():
                             all_score_len = all_score_len + len(shape_scores[shape])
                         print("step: %s scores: %s" % (_step, all_score/all_score_len))
                         # 每保存一次，就测试一局
-                        TEST = True
+                        _game_test = True
         _last_state = current_state
 
         if reward != 0.0:
@@ -787,10 +788,10 @@ def train():
             _game_step = 1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
-            TEST = False
+            _game_test = False
 
         if reward != 0.0:
-            if TEST:
+            if _game_test:
                 _game_random_step = False
             else:    
                 # 将错误率的1/2作为随机移动的概率
