@@ -787,7 +787,8 @@ def train():
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
 
         if reward != 0.0:
-            _probability_of_random_action = 1 - shape_reward[game.fallpiece['shape']]
+            # 将错误率的1/2作为随机移动的概率
+            _probability_of_random_action = (1 - shape_reward[game.fallpiece['shape']])/2.0
             if _probability_of_random_action < MIN_RANDOM_ACTION_PROB:
                  _probability_of_random_action = MIN_RANDOM_ACTION_PROB
             if _probability_of_random_action > MAX_RANDOM_ACTION_PROB:
