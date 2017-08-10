@@ -109,7 +109,7 @@ def train_neural_networks():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
     
-        # 为啥需要这个逻辑，输入等于输出，找出输入数据之间的规律？
+        # 为啥需要这个逻辑，输入等于输出，找出输入数据之间的规律？加到这里作用不大，加到后面的训练有效
         # ------------ Training Autoencoders - Unsupervised Learning ----------- #
         # autoencoder是一种非监督学习算法，他利用反向传播算法，让目标值等于输入值
         # for epoch in range(training_epochs):
