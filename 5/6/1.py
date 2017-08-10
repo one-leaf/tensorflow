@@ -129,7 +129,7 @@ def train_neural_networks():
                 offset = (b * batch_size) % (train_x.shape[0] - batch_size)
                 batch_x = train_x[offset:(offset + batch_size), :]
                 batch_y = train_y[offset:(offset + batch_size), :]
-                # 加了反向传播后，正确率提供一点
+                # 加了反向传播后，正确率会提高
                 _, c = sess.run([us_optimizer, us_cost_function],feed_dict={X: batch_x})
                 _, c = sess.run([s_optimizer, s_cost_function],feed_dict={X: batch_x, Y : batch_y})
                 epoch_costs = np.append(epoch_costs,c)
