@@ -93,10 +93,11 @@ def neural_networks():
 # 训练神经网络
 def train_neural_networks():
     decoded, predict_output = neural_networks()    
+
     us_cost_function = tf.reduce_mean(tf.pow(X - decoded, 2))
-    s_cost_function = -tf.reduce_sum(Y * tf.log(predict_output))
     us_optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(us_cost_function)
     
+    s_cost_function = -tf.reduce_sum(Y * tf.log(predict_output))
     s_optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(s_cost_function)
 
     correct_prediction = tf.equal(tf.argmax(predict_output, 1), tf.argmax(Y,1))
@@ -108,17 +109,18 @@ def train_neural_networks():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
     
+        # 为啥需要这个逻辑，输入等于输出，找出输入数据之间的规律？
         # ------------ Training Autoencoders - Unsupervised Learning ----------- #
         # autoencoder是一种非监督学习算法，他利用反向传播算法，让目标值等于输入值
-        for epoch in range(training_epochs):
-            epoch_costs = np.empty(0)
-            for b in range(total_batches):
-                offset = (b * batch_size) % (train_x.shape[0] - batch_size)
-                batch_x = train_x[offset:(offset + batch_size), :]
-                _, c = sess.run([us_optimizer, us_cost_function],feed_dict={X: batch_x})
-                epoch_costs = np.append(epoch_costs, c)
-            print("Epoch: ",epoch," Loss: ",np.mean(epoch_costs))
-        print("------------------------------------------------------------------")
+        # for epoch in range(training_epochs):
+        #     epoch_costs = np.empty(0)
+        #     for b in range(total_batches):
+        #         offset = (b * batch_size) % (train_x.shape[0] - batch_size)
+        #         batch_x = train_x[offset:(offset + batch_size), :]
+        #         _, c = sess.run([us_optimizer, us_cost_function],feed_dict={X: batch_x})
+        #         epoch_costs = np.append(epoch_costs, c)
+        #     print("Epoch: ",epoch," Loss: ",np.mean(epoch_costs))
+        # print("------------------------------------------------------------------")
 
         # ---------------- Training NN - Supervised Learning ------------------ #
         for epoch in range(training_epochs):
@@ -127,6 +129,8 @@ def train_neural_networks():
                 offset = (b * batch_size) % (train_x.shape[0] - batch_size)
                 batch_x = train_x[offset:(offset + batch_size), :]
                 batch_y = train_y[offset:(offset + batch_size), :]
+                # 加了反向传播后，正确率提供一点
+                _, c = sess.run([us_optimizer, us_cost_function],feed_dict={X: batch_x})
                 _, c = sess.run([s_optimizer, s_cost_function],feed_dict={X: batch_x, Y : batch_y})
                 epoch_costs = np.append(epoch_costs,c)
 
