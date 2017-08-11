@@ -85,9 +85,7 @@ def neural_networks():
     layer_7 = tf.nn.tanh(tf.add(tf.matmul(encoded, w_1),   b_1))
     layer_8 = tf.nn.tanh(tf.add(tf.matmul(layer_7, w_2),   b_2))
     out = tf.nn.softmax(tf.add(tf.matmul( layer_8, w_3),   b_3))
-    print(layer_1.shape,layer_2.shape,encoded.shape)
-    print(layer_4.shape,layer_5.shape,decoded.shape)
-    print(layer_7.shape,layer_8.shape,out.shape)
+
     return (decoded, out)
 
 # 训练神经网络
@@ -109,20 +107,6 @@ def train_neural_networks():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
     
-        # 为啥需要这个逻辑，输入等于输出，找出输入数据之间的规律？加到这里作用不大，加到后面的训练有效
-        # ------------ Training Autoencoders - Unsupervised Learning ----------- #
-        # autoencoder是一种非监督学习算法，他利用反向传播算法，让目标值等于输入值
-        # for epoch in range(training_epochs):
-        #     epoch_costs = np.empty(0)
-        #     for b in range(total_batches):
-        #         offset = (b * batch_size) % (train_x.shape[0] - batch_size)
-        #         batch_x = train_x[offset:(offset + batch_size), :]
-        #         _, c = sess.run([us_optimizer, us_cost_function],feed_dict={X: batch_x})
-        #         epoch_costs = np.append(epoch_costs, c)
-        #     print("Epoch: ",epoch," Loss: ",np.mean(epoch_costs))
-        # print("------------------------------------------------------------------")
-
-        # ---------------- Training NN - Supervised Learning ------------------ #
         for epoch in range(training_epochs):
             epoch_costs = np.empty(0)
             for b in range(total_batches):
@@ -137,6 +121,5 @@ def train_neural_networks():
             accuracy_in_train_set = sess.run(accuracy, feed_dict={X: train_x, Y: train_y})
             accuracy_in_test_set = sess.run(accuracy, feed_dict={X: test_x, Y: test_y})
             print("Epoch: ",epoch," Loss: ",np.mean(epoch_costs)," Accuracy: ", accuracy_in_train_set, ' ', accuracy_in_test_set)
-
 
 train_neural_networks()
