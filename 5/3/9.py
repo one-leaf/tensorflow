@@ -673,7 +673,9 @@ def train():
     # 预计下一步的所有得分
     _calc_rewards = [-2000]
     _step_score = 0
-    
+    # 平均步数
+    _avg_step = []
+
     # 按照不同的形状统计成功率的列表
     shape_scores={}
     for shape in pieces:
@@ -775,7 +777,8 @@ def train():
                         for shape in pieces:
                             all_score = all_score + sum(shape_scores[shape])                        
                             all_score_len = all_score_len + len(shape_scores[shape])
-                        print("step: %s scores: %s" % (_step, all_score/all_score_len))
+                        print("step: %s scores: %s avg steps: %s" % (_step, all_score/all_score_len, sum(_avg_step)/len(_avg_step)))
+                        _avg_step.clear()
                         # 每保存一次，就测试一局
                         _game_test = True
         _last_state = current_state
@@ -785,6 +788,7 @@ def train():
 
         # 如果得分不是 1 直接重置游戏    
         if terminal or reward == -1:
+            _avg_step.append(_game_step)
             _game_step = 1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
