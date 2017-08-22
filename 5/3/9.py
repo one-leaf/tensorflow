@@ -689,24 +689,24 @@ def train():
                 pygame.quit()
                 sys.exit()    
 
-        # 如果是游戏测试
-        if _game_test:
-            screen_resized_binary = image
-            if _last_state is None:           
-                _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
-            screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
-            current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
-            _last_state = current_state
-            _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
-            readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
-            action_index = np.argmax(readout_t)
-            _last_action[action_index] = 1   
-            if terminal:
-                _game_test = False
-                game.reset()
-                current_state = None
-            time.sleep(0.01)
-            continue
+        # # 如果是游戏测试
+        # if _game_test:
+        #     screen_resized_binary = image
+        #     if _last_state is None:           
+        #         _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
+        #     screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
+        #     current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
+        #     _last_state = current_state
+        #     _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
+        #     readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
+        #     action_index = np.argmax(readout_t)
+        #     _last_action[action_index] = 1   
+        #     if terminal:
+        #         _game_test = False
+        #         game.reset()
+        #         current_state = None
+        #     time.sleep(0.01)
+        #     continue
                 
         _last_scores = shape_scores[shape]
 
@@ -797,7 +797,7 @@ def train():
                         print("step: %s scores: %s avg steps: %s" % (_step, all_score/all_score_len, sum(_avg_step)/len(_avg_step)))
                         _avg_step.clear()
                         # 每保存一次，就测试一局
-                        _game_test = True
+                        # _game_test = True
         _last_state = current_state
 
         if reward != 0.0:
