@@ -729,7 +729,7 @@ def train():
                 # 计算当前形状的正确率                    
                 _step_score = sum(_last_scores) / _last_scores_len
                 shape_reward[shape]=_step_score
-                print(_game_step,shape,reward,_step_score) 
+                # print(_game_step,shape,reward,_step_score) 
 
             # else:
                 # print(_game_step,shape,reward,'*') 
