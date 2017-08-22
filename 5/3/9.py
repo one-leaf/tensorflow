@@ -687,8 +687,20 @@ def train():
         for event in pygame.event.get():  # 需要事件循环，否则白屏
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit()         
-        
+                sys.exit()    
+
+        # 如果是游戏测试
+        if _game_test:
+            _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
+            readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
+            action_index = np.argmax(readout_t)
+            _last_action[action_index] = 1   
+            if terminal:
+                _game_test = False
+                game.reset()
+            time.sleep(0.1)
+            continue
+                
         _last_scores = shape_scores[shape]
 
         # 将奖励分数归一化
@@ -790,20 +802,16 @@ def train():
             _game_step = 1
             game.reset()
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
-            _game_test = False
 
         if reward != 0.0:
-            if _game_test:
-                _game_random_step = False
-            else:    
-                # 将错误率的和计算步骤作为随机移动的概率
-                _off = (_step+1000000)/1000000
-                _probability_of_random_action = (1 - shape_reward[game.fallpiece['shape']])/_off
-                if _probability_of_random_action < MIN_RANDOM_ACTION_PROB:
-                    _probability_of_random_action = MIN_RANDOM_ACTION_PROB
-                if _probability_of_random_action > MAX_RANDOM_ACTION_PROB:
-                    _probability_of_random_action = MAX_RANDOM_ACTION_PROB
-                _game_random_step = random.random() <= _probability_of_random_action 
+            # 将错误率的和计算步骤作为随机移动的概率
+            _off = (_step+1000000)/1000000
+            _probability_of_random_action = (1 - shape_reward[game.fallpiece['shape']])/_off
+            if _probability_of_random_action < MIN_RANDOM_ACTION_PROB:
+                _probability_of_random_action = MIN_RANDOM_ACTION_PROB
+            if _probability_of_random_action > MAX_RANDOM_ACTION_PROB:
+                _probability_of_random_action = MAX_RANDOM_ACTION_PROB
+            _game_random_step = random.random() <= _probability_of_random_action 
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
