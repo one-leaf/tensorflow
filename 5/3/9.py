@@ -691,6 +691,12 @@ def train():
 
         # 如果是游戏测试
         if _game_test:
+            screen_resized_binary = image
+            if _last_state is None:           
+                _last_state = np.stack(tuple(screen_resized_binary for _ in range(STATE_FRAMES)), axis=2)
+            screen_resized_binary = np.reshape(screen_resized_binary, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
+            current_state = np.append(_last_state[:, :, 1:], screen_resized_binary, axis=2)
+            _last_state = current_state
             _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
             action_index = np.argmax(readout_t)
