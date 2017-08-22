@@ -704,6 +704,7 @@ def train():
             if terminal:
                 _game_test = False
                 game.reset()
+                current_state = None
             time.sleep(0.01)
             continue
                 
@@ -807,6 +808,7 @@ def train():
             _avg_step.append(_game_step)
             _game_step = 1
             game.reset()
+            current_state = None
             _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
 
         if reward != 0.0:
