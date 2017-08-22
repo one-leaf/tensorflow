@@ -613,11 +613,6 @@ def get_network(x, output_size, filter_size=[5,3,3,3,3,3,3,3,3,3], strides_size=
         output = tf.nn.bias_add(tf.matmul(full_connects[-1], w) , b, name=output_name)
         return output
 
-def softmax(x):
-    e_x = np.exp(x - np.max(x))
-    out = e_x / e_x.sum()
-    return out
-
 # 学习
 def train():    
     # 输入的图片，是每4张一组
@@ -733,12 +728,15 @@ def train():
         if reward != 0.0:
             # 按概率低于正确率的进入学习库
             #if reward == 1 or random.random() > _step_score: 
-            if random.random() > _step_score: 
-                _vation_len = len(_onevations)
-                for i,vation in enumerate(_onevations):
-                   # 不摊分其他步骤得分 
+            # if random.random() > _step_score: 
+            _vation_len = len(_onevations)
+            for i,vation in enumerate(_onevations):
+                   # 摊分其他步骤得分 
                    # vation[2]=reward*(((i+1)/_vation_len)**2)
-                    _observations.append(vation)
+                # 按正常概率纳入训练,最后4步一定计算
+                if random.random()>(i+5)/_vation_len:
+                    continue
+                _observations.append(vation)
             _onevations.clear()
 
             if len(_observations) >= MEMORY_SIZE:
