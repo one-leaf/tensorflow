@@ -704,7 +704,7 @@ def train():
             if terminal:
                 _game_test = False
                 game.reset()
-            time.sleep(0.1)
+            time.sleep(0.01)
             continue
                 
         _last_scores = shape_scores[shape]
