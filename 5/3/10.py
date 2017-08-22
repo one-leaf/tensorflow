@@ -797,7 +797,8 @@ def train():
                         for shape in pieces:
                             all_score = all_score + sum(shape_scores[shape])                        
                             all_score_len = all_score_len + len(shape_scores[shape])
-                        print("step: %s scores: %s avg steps: %s shape_reward: %s" % (_step, all_score/all_score_len, sum(_avg_step)/len(_avg_step)),shape_reward)
+                        
+                        print("step: %s scores: %s avg steps: %s shape_reward: %s" % (_step, all_score/all_score_len, sum(_avg_step)/len(_avg_step),str(shape_reward)))
                         _avg_step.clear()
                         # 每保存一次，就测试一局
                         # _game_test = True
