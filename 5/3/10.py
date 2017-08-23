@@ -571,7 +571,7 @@ def restore(sess):
     return saver, model_dir, saver_prefix
 
 # CNN网络
-def get_network(x, output_size, filter_size=[5,3,3,3,3,3,3,3,3,3], strides_size=[1,1,1,1,1,1,1,1,1,1], filter_nums=[192,192,192,192,192,192,192,192,192,192], pool_scale=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], pool_type=[1,1,1,1,1,1,1,1,1,1],full_nums=384, output_name="output_layer"):
+def get_network(x, keep_prob, output_size, filter_size=[5,3,3,3,3,3,3,3,3,3], strides_size=[1,1,1,1,1,1,1,1,1,1], filter_nums=[192,192,192,192,192,192,192,192,192,192], pool_scale=[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1], pool_type=[1,1,1,1,1,1,1,1,1,1],full_nums=384, output_name="output_layer"):
     def get_w_b(w_shape,w_name="w",b_name="b"):
         w = tf.get_variable(w_name, w_shape, initializer=tf.contrib.layers.xavier_initializer())
         b = tf.get_variable(b_name, [w_shape[-1]], initializer=tf.constant_initializer(0.01))
@@ -611,16 +611,23 @@ def get_network(x, output_size, filter_size=[5,3,3,3,3,3,3,3,3,3], strides_size=
         full_connect = tf.nn.relu(tf.matmul(input, w) + b)
         full_connects.append(full_connect)
 
+    with tf.variable_scope('full-connect-drop'):    
+        full_connect_drop = tf.nn.dropout(full_connects[-1], keep_prob)
+
     with tf.variable_scope('output'):
         w, b = get_w_b([full_nums, output_size])
-        output = tf.nn.bias_add(tf.matmul(full_connects[-1], w) , b, name=output_name)
+        output = tf.nn.bias_add(tf.matmul(full_connect_drop, w) , b, name=output_name)
         return output
 
 # 学习
 def train():    
     # 输入的图片，是每4张一组
     _input_layer =  tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   
-    _output_layer = get_network(_input_layer, ACTIONS_COUNT)
+    
+    # 损失值
+    _keep_prob = tf.placeholder(tf.float32)
+
+    _output_layer = get_network(_input_layer, _keep_prob, ACTIONS_COUNT)
     
     _action = tf.placeholder("float", [None, ACTIONS_COUNT])    # 移动的方向
     _target = tf.placeholder("float", [None])                   # 得分
@@ -774,7 +781,7 @@ def train():
                     terminals = [d[OBS_TERMINAL_INDEX] for d in mini_batch]
 
                     agents_expected_reward = []
-                    agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states})
+                    agents_reward_per_action = _session.run(_output_layer, feed_dict={_input_layer: current_states, _keep_prob: 1.0})
                     for i in range(len(mini_batch)):
                         if terminals[i]:    # 如果是游戏结束没有下一步奖励
                             agents_expected_reward.append(rewards[i])
@@ -783,10 +790,10 @@ def train():
 
                     if DEBUG:
                         _, _step, train_summary_op =  _session.run([_train_operation,global_step,_train_summary_op], feed_dict={_input_layer: previous_states,_action: actions,
-                            _target: agents_expected_reward})
+                            _target: agents_expected_reward, _keep_prob: 0.5})
                     else:            
                         _, _step = _session.run([_train_operation,global_step], feed_dict={_input_layer: previous_states,_action: actions,
-                            _target: agents_expected_reward})
+                            _target: agents_expected_reward, _keep_prob: 0.5})
 
                     if _step % SAVE_EVERY_X_STEPS == 0:
                         _saver.save(_session, _checkpoint_path, global_step=_step)
@@ -830,7 +837,7 @@ def train():
         if _game_random_step:
             action_index = random.randrange(ACTIONS_COUNT)
         else:
-            readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state]})[0]
+            readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state], _keep_prob: 1.0})[0]
             action_index = np.argmax(readout_t)
         _last_action[action_index] = 1
 
