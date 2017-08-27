@@ -840,7 +840,9 @@ def train():
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
         if _game_random_step :
-            if game.fallpiece['rotation'] != _r:
+            if random.random()<0.5:
+               action_index = random.randrange(ACTIONS_COUNT)
+            elif game.fallpiece['rotation'] != _r:
                action_index = 1
             elif game.fallpiece['x'] > _x:
                action_index = 0
