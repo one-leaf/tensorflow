@@ -200,12 +200,11 @@ class Tetromino(object):
         if self.fallpiece !=None:
             self.drawpiece(self.fallpiece)
 
-        screen_image = np.zeros((boardheight, boardheight))
+        screen_image = np.zeros((boardwidth, boardheight))
         for y in range(boardheight):
             for x in range(boardwidth):
                 if self.board[x][y]!=blank:
                     screen_image[x,y]=255
-                    screen_image[boardwidth+x-1,boardheight-y-1]=255
 
         if self.fallpiece !=None:
             shapedraw = pieces[shape][self.fallpiece['rotation']]
@@ -214,7 +213,6 @@ class Tetromino(object):
                     if shapedraw[y][x]!=blank:
                         if (y+self.fallpiece['y'])<0 or (x + self.fallpiece['x'])<0 : continue
                         screen_image[x + self.fallpiece['x'],y + self.fallpiece['y']] = 255
-                        screen_image[boardwidth+x+self.fallpiece['x']-1,boardheight- y - self.fallpiece['y'] -1 ] = 255
 #        screen_image = pygame.surfarray.array3d(pygame.display.get_surface())
         pygame.display.update()
 
@@ -551,7 +549,7 @@ MEMORY_SIZE = 10000  # 记住的观察队列
 TRAIN_BATCH_SIZE = 100  # 每次学习的批次
 TRAIN_EPOCHS = 2   # 每次学习轮数
 STATE_FRAMES = 4  # 每次保存的状态数
-RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (boardheight, boardheight)   # 图片的尺寸 
+RESIZED_SCREEN_X, RESIZED_SCREEN_Y = (boardwidth, boardheight)   # 图片的尺寸 
 OBS_LAST_STATE_INDEX, OBS_ACTION_INDEX, OBS_REWARD_INDEX, OBS_CURRENT_STATE_INDEX, OBS_TERMINAL_INDEX = range(5)
 SAVE_EVERY_X_STEPS = 1000   # 每学习多少轮后保存
 STORE_SCORES_LEN = 200      # 分数保留的长度
