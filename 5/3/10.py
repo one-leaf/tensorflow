@@ -680,6 +680,11 @@ def train():
     _step_score = 0
     # 平均步数
     _avg_step = []
+    # 正确的角度
+    _r = 0
+    # 正确的坐标位置
+    _x = 0 
+
 
     # 按照不同的形状统计成功率的列表
     shape_scores={}
@@ -820,7 +825,9 @@ def train():
             _game_step = 1
             game.reset()
             current_state = None
-            _calc_rewards,_,_ = game.calcAllRewards(game.board,game.fallpiece)
+
+        if reward != 0.0:
+            _calc_rewards,_r,_x = game.calcAllRewards(game.board,game.fallpiece)
 
         if reward != 0.0:
             # 将错误率的和计算步骤作为随机移动的概率
@@ -834,8 +841,17 @@ def train():
 
         # 游戏执行下一步,按概率选择下一次是随机还是机器进行移动
         _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)        
-        if _game_random_step:
-            action_index = random.randrange(ACTIONS_COUNT)
+        if _game_random_step :
+            print(_r,_x,game.fallpiece['rotation'],game.fallpiece['x'])
+            if game.fallpiece['rotation'] != _r:
+               action_index = 1
+            elif game.fallpiece['x'] > _x:
+               action_index = 0
+            elif game.fallpiece['x'] < _x:  
+               action_index = 2
+            else:
+               action_index = 3    
+            #action_index = random.randrange(ACTIONS_COUNT)
         else:
             readout_t = _session.run(_output_layer, feed_dict={_input_layer: [_last_state], _keep_prob: 1.0})[0]
             action_index = np.argmax(readout_t)
