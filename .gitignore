@@ -9,5 +9,7 @@ checkpoints/
 summaries/
 logs/
 data/
+test/
+fonts/
 *_model/
 .DS_Store
