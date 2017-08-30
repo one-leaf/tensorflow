@@ -48,9 +48,8 @@ def neural_networks():
     # 可以为:
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
-    cell = tf.contrib.rnn.core_rnn_cell.LSTMCell(num_hidden, state_is_tuple=True)
-    stack = tf.contrib.rnn.core_rnn_cell.MultiRNNCell([cell] * num_layers,
-                                        state_is_tuple=True)
+    cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
     # 输出，不会用到
     outputs, _ = tf.nn.dynamic_rnn(cell, inputs, seq_len, dtype=tf.float32)
 
@@ -238,5 +237,5 @@ def train():
 
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "1"
     train()
