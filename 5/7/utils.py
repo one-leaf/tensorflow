@@ -43,9 +43,9 @@ def img2bw(img_gray):
     return img_bw
 
 # 图片转为向量, img 参数是 np.array 类型
-def img2vec(img, width=-1, height=-1):
-    w=img.shape[0]
-    h=img.shape[1]
+def img2vec(img, height=-1, width=-1):
+    h=img.shape[0]
+    w=img.shape[1]
     if width==-1: width=w
     if height==-1: height=h
     vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(255,))  # 在图像上补齐
@@ -125,6 +125,11 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=5, minimun_range=5):
         else:
             raise ValueError("cannot parse this case...")
     return peek_ranges
+
+def readImgFile(filename):
+    _img = cv2.imread(filename, 0)
+    _img = img2bw(_img)
+    return _img
 
 def main():
     curr_dir = os.path.dirname(__file__)
