@@ -25,7 +25,7 @@ chars = u"阿富汗巴林孟加拉国不丹文莱缅甸柬埔寨塞浦路斯朝�
 num_classes = len(chars) + 1 + 1
 
 #初始化学习速率
-INITIAL_LEARNING_RATE = 1e-3
+INITIAL_LEARNING_RATE = 1e-4
 DECAY_STEPS = 5000
 REPORT_STEPS = 10000
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
@@ -151,8 +151,8 @@ def train():
     loss = tf.nn.ctc_loss(labels=targets,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss)
 
-    # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate,                                           momentum=MOMENTUM).minimize(cost, global_step=global_step)
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss,global_step=global_step)
+    optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
+    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss,global_step=global_step)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), targets))
 
