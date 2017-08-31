@@ -48,6 +48,8 @@ def img2vec(img, height=-1, width=-1):
     w=img.shape[1]
     if width==-1: width=w
     if height==-1: height=h
+    if h>height or w>width:
+        raise "image size too large"
     vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(255,))  # 在图像上补齐
     vector = vector.flatten() / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
