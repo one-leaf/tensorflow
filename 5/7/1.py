@@ -27,7 +27,7 @@ num_classes = len(chars) + 1 + 1
 #初始化学习速率
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
-REPORT_STEPS = 1000
+REPORT_STEPS = 200
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 MOMENTUM = 0.9
 
@@ -181,7 +181,10 @@ def train():
         print("Test Accuracy:", true_numer * 1.0 / len(original_list))
 
     def do_report():
-        test_inputs,test_labels,test_seq_len = get_next_batch(100)
+        test_inputs,test_labels,test_seq_len = get_next_batch(10)
+        print(test_inputs)
+        print(test_labels)
+        print(test_seq_len)
         test_feed = {inputs: test_inputs,
                      labels: test_labels,
                      seq_len: test_seq_len}
