@@ -182,9 +182,9 @@ def train():
 
     def do_report():
         test_inputs,test_labels,test_seq_len = get_next_batch(10)
-        print(test_inputs)
-        print(test_labels)
-        print(test_seq_len)
+        # print(test_inputs)
+        # print(test_labels)
+        # print(test_seq_len)
         test_feed = {inputs: test_inputs,
                      labels: test_labels,
                      seq_len: test_seq_len}
