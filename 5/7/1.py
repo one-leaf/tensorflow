@@ -92,15 +92,15 @@ def get_next_batch(batch_size=128):
         for char in text:
             text_list.append(chars.index(char))
         codes.append(text_list)
-    #比如batch_size=2，两条数据分别是"12"和"1"，则targets [['1','2'],['1']]
+    #比如batch_size=2，两条数据分别是"12"和"1"，则labels [['1','2'],['1']]
 
-    targets = [np.asarray(i) for i in codes]
-    #targets转成稀疏矩阵
-    sparse_targets = sparse_tuple_from(targets)
+    labels = [np.asarray(i) for i in codes]
+    #labels转成稀疏矩阵
+    sparse_labels = sparse_tuple_from(labels)
     #(batch_size,) sequence_length值都是256，最大划分列数
     seq_len = np.ones(inputs.shape[0]) * image_size[1]
 
-    return inputs, sparse_targets, seq_len
+    return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
 def sparse_tuple_from(sequences, dtype=np.int32):
@@ -161,8 +161,8 @@ def train():
 
     init = tf.global_variables_initializer()
 
-    def report_accuracy(decoded_list, test_targets):
-        original_list = decode_sparse_tensor(test_targets)
+    def report_accuracy(decoded_list, test_labels):
+        original_list = decode_sparse_tensor(test_labels)
         detected_list = decode_sparse_tensor(decoded_list)
         true_numer = 0
         
@@ -180,19 +180,19 @@ def train():
         print("Test Accuracy:", true_numer * 1.0 / len(original_list))
 
     def do_report():
-        test_inputs,test_targets,test_seq_len = get_next_batch(BATCH_SIZE)
+        test_inputs,test_labels,test_seq_len = get_next_batch(BATCH_SIZE)
         test_feed = {inputs: test_inputs,
-                     targets: test_targets,
+                     labels: test_labels,
                      seq_len: test_seq_len}
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
-        report_accuracy(dd, test_targets)
+        report_accuracy(dd, test_labels)
  
     def do_batch():
-        train_inputs, train_targets, train_seq_len = get_next_batch(BATCH_SIZE)
+        train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
         
-        feed = {inputs: train_inputs, targets: train_targets, seq_len: train_seq_len}
+        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
         
-        b_loss,b_targets, b_logits, b_seq_len,b_cost, steps, _ = session.run([loss, targets, logits, seq_len, cost, global_step, optimizer], feed)
+        b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, _ = session.run([loss, labels, logits, seq_len, cost, global_step, optimizer], feed)
         
         print(b_cost, steps)
         if steps > 0 and steps % REPORT_STEPS == 0:
@@ -227,9 +227,9 @@ def train():
             
             train_cost /= TRAIN_SIZE
             
-            train_inputs, train_targets, train_seq_len = get_next_batch(BATCH_SIZE)
+            train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
             val_feed = {inputs: train_inputs,
-                        targets: train_targets,
+                        labels: train_labels,
                         seq_len: train_seq_len}
  
             val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
