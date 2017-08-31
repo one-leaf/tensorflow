@@ -25,7 +25,7 @@ chars = u"阿富汗巴林孟加拉国不丹文莱缅甸柬埔寨塞浦路斯朝�
 num_classes = len(chars) + 1 + 1
 
 #初始化学习速率
-INITIAL_LEARNING_RATE = 1e-4
+INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 REPORT_STEPS = 10000
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
@@ -41,17 +41,20 @@ def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度
     inputs = tf.placeholder(tf.float32, [None, None, image_size[0]])
     # 定义 ctc_loss 是稀疏矩阵
-    targets = tf.sparse_placeholder(tf.int32)
+    labels = tf.sparse_placeholder(tf.int32)
     # 1维向量 序列长度 [batch_size,]
     seq_len = tf.placeholder(tf.int32, [None])
     # 定义 LSTM 网络
     # 可以为:
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
-    cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
-    # 输出，不会用到
-    outputs, _ = tf.nn.dynamic_rnn(cell, inputs, seq_len, dtype=tf.float32)
+    # cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    # stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
+
+    stack = tf.contrib.rnn.MultiRNNCell([tf.contrib.rnn.LSTMCell(num_hidden,state_is_tuple=True) for i in range(num_layers)] , state_is_tuple=True)
+
+    # 第二个输出状态，不会用到
+    outputs, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
 
     shape = tf.shape(inputs)
 
@@ -66,7 +69,7 @@ def neural_networks():
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
 
     logits = tf.transpose(logits, (1, 0, 2))
-    return logits, inputs, targets, seq_len, W, b
+    return logits, inputs, labels, seq_len, W, b
 
 
 # 生成一个训练batch
@@ -146,15 +149,15 @@ def train():
                                                 DECAY_STEPS,
                                                 LEARNING_RATE_DECAY_FACTOR,
                                                 staircase=True)
-    logits, inputs, targets, seq_len, W, b = neural_networks()
+    logits, inputs, labels, seq_len, W, b = neural_networks()
 
-    loss = tf.nn.ctc_loss(labels=targets,inputs=logits, sequence_length=seq_len)
+    loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss)
 
-    optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
-    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss,global_step=global_step)
+    # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss,global_step=global_step)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
-    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), targets))
+    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels))
 
     init = tf.global_variables_initializer()
 
