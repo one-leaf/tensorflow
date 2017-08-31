@@ -3,7 +3,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2vec
+from utils import readImgFile, img2vec, show
 import time
 import random
 
@@ -85,7 +85,7 @@ def get_next_batch(batch_size=128):
         text = lines[1].strip()
         image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
         image_vec = img2vec(image,image_size[0],image_size[1])
-        #np.transpose 矩阵转置 (32*256,) => (32,256) => (256,32)
+        #np.transpose 矩阵转置 (12*256,) => (12,256) => (256,12)
         inputs[i,:] = np.transpose(image_vec.reshape((image_size[0],image_size[1])))
         #标签转成列表保存在codes
         text_list = []
@@ -99,7 +99,6 @@ def get_next_batch(batch_size=128):
     sparse_labels = sparse_tuple_from(labels)
     #(batch_size,) sequence_length值都是256，最大划分列数
     seq_len = np.ones(inputs.shape[0]) * image_size[1]
-
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
@@ -141,6 +140,8 @@ def decode_a_seq(indexes, spars_tensor):
         decoded.append(str)
     return decoded
 
+def list_to_chars(list):
+    return "".join([chars[v] for v in list])
 
 def train():
     global_step = tf.Variable(0, trainable=False)
@@ -174,7 +175,7 @@ def train():
         for idx, number in enumerate(original_list):
             detect_number = detected_list[idx]
             hit = (number == detect_number)
-            print(hit, number, "(", len(number), ") <-------> ", detect_number, "(", len(detect_number), ")")
+            print(hit, list_to_chars(number), "(", len(number), ") <-------> ", list_to_chars(detect_number), "(", len(detect_number), ")")
             if hit:
                 true_numer = true_numer + 1
         print("Test Accuracy:", true_numer * 1.0 / len(original_list))
