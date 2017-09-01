@@ -12,8 +12,6 @@ curr_dir = os.path.dirname(__file__)
 # 图片的高度为12X256，宽度为不定长
 image_size = (12,256)
 
-#训练最大轮次
-num_epochs = 10000
 #LSTM
 num_hidden = 64
 num_layers = 1
@@ -214,7 +212,9 @@ def train():
     with tf.Session() as session:
         session.run(init)
         saver, model_dir, checkpoint_path = restore(session) # tf.train.Saver(tf.global_variables(), max_to_keep=100)
-        for curr_epoch in range(num_epochs):
+        coord = tf.train.Coordinator()
+        threads = tf.train.start_queue_runners(coord=coord)
+        while not coord.should_stop():            
             print("Epoch.......", curr_epoch)
             train_cost = train_ler = 0
             for batch in range(BATCHES):
@@ -236,7 +236,8 @@ def train():
             # log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
             # print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
             saver.save(session, checkpoint_path, global_step=steps)
-
+            coord.request_stop()
+        coord.join(threads)
 
 if __name__ == '__main__':
     os.environ["CUDA_VISIBLE_DEVICES"] = "1"
