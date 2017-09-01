@@ -34,6 +34,7 @@ BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
+print("Loading data ...")
 train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
 
 def neural_networks():
