@@ -32,8 +32,9 @@ LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 MOMENTUM = 0.9
 
 BATCHES = 100
-BATCH_SIZE = 128
+BATCH_SIZE = 100
 TRAIN_SIZE = BATCHES * BATCH_SIZE
+TEST_BATCH_SIZE = 10
 
 train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
 
@@ -181,12 +182,11 @@ def train():
         print("Test Accuracy:", true_numer * 1.0 / len(original_list))
 
     def do_report():
-        test_inputs,test_labels,test_seq_len = get_next_batch(BATCH_SIZE)
+        test_inputs,test_labels,test_seq_len = get_next_batch(TEST_BATCH_SIZE)
         test_feed = {inputs: test_inputs,
                      labels: test_labels,
                      seq_len: test_seq_len}
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
-        print("acc",accuracy)
         report_accuracy(dd, test_labels)
  
     def do_batch():
@@ -226,17 +226,17 @@ def train():
                 seconds = time.time() - start
                 print("Step:", steps, ", batch seconds:", seconds)
             
-            # train_cost /= TRAIN_SIZE
+            train_cost /= TRAIN_SIZE
             
-            # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-            # val_feed = {inputs: train_inputs,
-            #             labels: train_labels,
-            #             seq_len: train_seq_len}
+            train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+            val_feed = {inputs: train_inputs,
+                        labels: train_labels,
+                        seq_len: train_seq_len}
  
-            # val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
+            val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
  
-            # log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
-            # print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
+            log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
+            print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
             saver.save(session, checkpoint_path, global_step=steps)
 
 
