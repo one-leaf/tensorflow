@@ -201,7 +201,6 @@ def train():
         print(b_cost, steps)
         if steps > 0 and steps % REPORT_STEPS == 0:
             do_report()
-            save_path = saver.save(session, "ocr.model", global_step=steps)
         return b_cost, steps
 
     def restore(sess):
