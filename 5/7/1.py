@@ -181,7 +181,7 @@ def train():
         print("Test Accuracy:", true_numer * 1.0 / len(original_list))
 
     def do_report():
-        test_inputs,test_labels,test_seq_len = get_next_batch(10)
+        test_inputs,test_labels,test_seq_len = get_next_batch(BATCH_SIZE)
         test_feed = {inputs: test_inputs,
                      labels: test_labels,
                      seq_len: test_seq_len}
