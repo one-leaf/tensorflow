@@ -191,8 +191,7 @@ def train():
         feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
         
         b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, _ = session.run([loss, labels, logits, seq_len, cost, global_step, optimizer], feed)
-        
-        print(b_cost, steps)
+
         if steps > 0 and steps % REPORT_STEPS == 0:
             do_report()
         return b_cost, steps
@@ -205,7 +204,7 @@ def train():
         ckpt = tf.train.get_checkpoint_state(model_dir)
         saver = tf.train.Saver(max_to_keep=5)
         if ckpt and ckpt.model_checkpoint_path:
-            print("restore model ...")
+            print("Restore Model ...")
             saver.restore(sess, ckpt.model_checkpoint_path)
         return saver, model_dir, saver_prefix
 
@@ -221,7 +220,7 @@ def train():
                 c, steps = do_batch()
                 train_cost += c * BATCH_SIZE
                 seconds = time.time() - start
-                print("Step:", steps, ", batch seconds:", seconds)
+                print("Step:", steps, ", Cost:", c, ", batch seconds:", seconds)
             
             # train_cost /= TRAIN_SIZE
             
