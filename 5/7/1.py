@@ -215,7 +215,6 @@ def train():
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
         while not coord.should_stop():            
-            print("Epoch.......", curr_epoch)
             train_cost = train_ler = 0
             for batch in range(BATCHES):
                 start = time.time()
