@@ -235,7 +235,7 @@ def train():
  
             # log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
             # print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
-            # saver.save(session, checkpoint_path, global_step=steps)
+            saver.save(session, checkpoint_path, global_step=steps)
 
 
 if __name__ == '__main__':
