@@ -27,7 +27,7 @@ num_classes = len(chars) + 1 + 1
 #初始化学习速率
 INITIAL_LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
-REPORT_STEPS = 200
+REPORT_STEPS = 500
 LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 MOMENTUM = 0.9
 
