@@ -98,8 +98,6 @@ def get_next_batch(batch_size=128):
     labels = [np.asarray(i) for i in codes]
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
-    print(labels)
-    print(sparse_labels)
     #(batch_size,) sequence_length值都是256，最大划分列数
     seq_len = np.ones(inputs.shape[0]) * image_size[1]
     return inputs, sparse_labels, seq_len
