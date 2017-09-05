@@ -20,9 +20,9 @@ num_layers = 1
 # 所有 unicode CJK统一汉字（4E00-9FBB） + CJK统一汉字扩充A（3400-4DB5） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
 # https://zh.wikipedia.org/wiki/ASCII
-# num_classes = 20924 + 6582 + (126 - 32) + 1 + 1
-# unicode 5.0 99089 个字符
-num_classes = 99089 + 1 + 1
+num_classes = 20924 + 6582 + (126 - 32) + 1 + 1
+# unicode 5.0 99089 个字符 但太大了，无法计算
+# num_classes = 99089 + 1 + 1
 
 #初始化学习速率
 LEARNING_RATE = 1e-4
