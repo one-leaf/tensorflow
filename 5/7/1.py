@@ -152,7 +152,8 @@ def train():
     cost = tf.reduce_mean(loss)
 
     # optimizer = tf.train.MomentumOptimizer(learning_rate=LEARNING_RATE, momentum=MOMENTUM).minimize(cost, global_step=global_step)
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost,global_step=global_step)
+    # optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost,global_step=global_step)
+    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss,global_step=global_step)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels))
 
