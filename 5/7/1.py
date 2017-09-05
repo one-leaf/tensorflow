@@ -17,12 +17,14 @@ image_size = (12,256)
 num_hidden = 64
 num_layers = 1
 
-# 所有 unicode CJK统一汉字（4E00-9FBB） + CJK统一汉字扩充A（3400-4DB5） + ascii的字符加 + blank + ctc blank
+# 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
 # https://zh.wikipedia.org/wiki/ASCII
-num_classes = 20924 + 6582 + (126 - 32) + 1 + 1
-# unicode 5.0 99089 个字符 但太大了，无法计算
-# num_classes = 99089 + 1 + 1
+ZH_CHARS = [chr(c) for c in range(int('4E00',16),int('9FBB',16)+1)]
+ASCII_CHARS = [chr(c) for c in range(32,126+1)]
+
+CHARS = ZH_CHARS + ASCII_CHARS
+num_classes = len(CHARS) + 1 + 1
 
 #初始化学习速率
 LEARNING_RATE = 1e-4
@@ -87,13 +89,15 @@ def get_next_batch(batch_size=128):
         #np.transpose 矩阵转置 (12*256,) => (12,256) => (256,12)
         inputs[i,:] = np.transpose(image_vec.reshape((image_size[0],image_size[1])))
         #标签转成列表保存在codes
-        text_list = [ord(char) for char in text]
+        text_list = [CHARS.index(char) for char in text]
         codes.append(text_list)
     #比如batch_size=2，两条数据分别是"12"和"1"，则labels [['1','2'],['1']]
 
     labels = [np.asarray(i) for i in codes]
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
+    print(labels)
+    print(sparse_labels)
     #(batch_size,) sequence_length值都是256，最大划分列数
     seq_len = np.ones(inputs.shape[0]) * image_size[1]
     return inputs, sparse_labels, seq_len
@@ -138,7 +142,7 @@ def decode_a_seq(indexes, spars_tensor):
     return decoded
 
 def list_to_chars(list):
-    return "".join([chr(v) for v in list])
+    return "".join([CHARS[v] for v in list])
 
 def train():
     global_step = tf.Variable(0, trainable=False)
