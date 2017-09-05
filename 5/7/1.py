@@ -20,10 +20,12 @@ num_layers = 1
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
 # https://zh.wikipedia.org/wiki/ASCII
-ZH_CHARS = [chr(c) for c in range(int('4E00',16),int('9FBB',16)+1)]
 ASCII_CHARS = [chr(c) for c in range(32,126+1)]
+ZH_CHARS = [chr(c) for c in range(int('4E00',16),int('9FBB',16)+1)]
+ZH_CHARS_PUN = ['。','？','！','，','、','；','：','「','」','『','』','‘','’','“','”',\
+                '（','）','〔','〕','【','】','—','…','–','．','《','》','〈','〉']
 
-CHARS = ZH_CHARS + ASCII_CHARS
+CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
 num_classes = len(CHARS) + 1 + 1
 
 #初始化学习速率
