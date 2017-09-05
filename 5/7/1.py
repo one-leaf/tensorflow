@@ -54,6 +54,8 @@ def neural_networks():
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
     cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    input_keep_prob = tf.placeholder(tf.float32)
+    cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
     stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
     
     # 第二个输出状态，不会用到
@@ -72,7 +74,7 @@ def neural_networks():
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
 
     logits = tf.transpose(logits, (1, 0, 2))
-    return logits, inputs, labels, seq_len, W, b
+    return logits, inputs, labels, seq_len, W, b, input_keep_prob
 
 
 # 生成一个训练batch
@@ -146,7 +148,7 @@ def list_to_chars(list):
 
 def train():
     global_step = tf.Variable(0, trainable=False)
-    logits, inputs, labels, seq_len, W, b = neural_networks()
+    logits, inputs, labels, seq_len, W, b, input_keep_prob = neural_networks()
 
     loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss)
@@ -181,14 +183,15 @@ def train():
         test_inputs,test_labels,test_seq_len = get_next_batch(TEST_BATCH_SIZE)
         test_feed = {inputs: test_inputs,
                      labels: test_labels,
-                     seq_len: test_seq_len}
+                     seq_len: test_seq_len,
+                     input_keep_prob: 1.0}
         dd, log_probs, accuracy = session.run([decoded[0], log_prob, acc], test_feed)
         report_accuracy(dd, test_labels)
  
     def do_batch():
         train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
         
-        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
+        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 0.5}
         
         b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, _ = session.run([loss, labels, logits, seq_len, cost, global_step, optimizer], feed)
 
@@ -225,7 +228,8 @@ def train():
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
             # val_feed = {inputs: train_inputs,
             #             labels: train_labels,
-            #             seq_len: train_seq_len}
+            #             seq_len: train_seq_len,
+            #             input_keep_prob: 1.0  }
 
             # val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
 
