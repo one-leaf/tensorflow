@@ -1,4 +1,5 @@
 # coding=utf-8
+# 中文OCR学习
 
 import tensorflow as tf
 import numpy as np
@@ -16,17 +17,15 @@ image_size = (12,256)
 num_hidden = 64
 num_layers = 1
 
-chars = u"阿富汗巴林孟加拉国不丹文莱缅甸柬埔寨塞浦路斯朝鲜香港印度尼西亚伊朗克以色列日本约旦科威特老挝黎嫩澳门马来尔代夫蒙古泊联邦民主共和曼基坦勒菲律宾卡塔沙伯新坡韩里兰叙利泰土耳其酋也越南中台澎金关税区东帝汶哈萨吉库乌兹别洲他家(地)及安哥贝宁博茨瓦纳布隆迪喀麦那群岛佛得角非卜休达乍摩罗刚果提埃赤道几内俄比蓬冈绍肯维毛求洛莫桑米留汪卢旺圣多美普舌昂索撒苏突干法赞津韦托梅士厄立时英德爱意大森堡荷希腊葡萄牙班奥保芬直陀匈冰支敦登挪波力诺瑞典脱陶宛格鲁拜疆白黑山捷伐前顿梵蒂城欧瓜根廷族玻开智伦属圭危海洪都买墨拿秘各丁凯委京皮密陵百慕北斐济盖瑙努图福社会所汤艾帕劳浮洋详合机构际组织性包装原产市辖阳丰石景淀头沟房通州顺义昌平兴怀柔谷云延庆天河红桥丽青辰武清宝坻滨静县蓟省庄长华井陉矿裕藁鹿泉栾正定行唐灵寿高邑深泽皇无极元氏赵辛集晋乐冶润曹妃滦亭迁玉田遵化秦戴抚龙满自治邯郸丛复峰临漳成名涉磁肥乡永年邱鸡广馆魏曲周邢丘柏尧任巨宗宫竞秀莲池苑徐水涞阜容源望易蠡野雄涿碑店张口宣下花园康沽尚蔚万全崇礼承双鹰手营子宽围场沧运光盐肃吴献村回黄骅间廊坊次固厂霸三衡桃枣强饶故冀太小迎杏岭尖草坪娄烦交同郊荣镇浑左盂襄垣屯壶沁潞川朔阴应右仁榆权昔祁遥介湖猗闻喜稷绛夏陆芮忻府五繁峙神岢岚偏汾沃翼洞隰蒲侯霍吕梁离柳楼方孝呼浩赛罕默旗昆仑拐鄂九茂明勃湾松什腾翁牛喇敖汉辽后奈扎郭胜准杭锦审盟赉斡春温陈虎额彦淖磴察卓资商凉四王锡二连嘎珠穆仆寺镶蓝善沈姑铁于岗甘旅鞍千岫岩溪桓振凤凌站鲅鱼圈边细彰宏伟弓灯盘洼银调兵建票葫芦绥绿农树惠潭船蛟桦舒磐梨公江辉靖宇乾扶余洮们珲外依木志常齐锋碾讷冠恒滴麻鹤向工萝鸭贤友谊让胡肇杜岔好翠峦带星上嘉荫佳进风远七茄牡棱逊孙奎玛漠汇闸虹杨闵奉玄淮邺鼓栖霞雨六溧淳塘宜贾铜沛睢沂邳钟坛相熟仓如启皋赣灌涟盱眙响射扬邗仪征邮徒句姜堰宿豫沭泗浙拱墅萧桐庐曙鄞象姚慈瓯苍浔柯虞诸暨嵊婺衢游舟岱椒环仙居缙遂畲徽瑶蜀巢芜镜弋鸠为蚌埠禹庵谢八潘当涂含烈濉官狮观枞潜岳歙黟滁琅琊谯颍界首埇砀璧亳涡贵至郎泾绩旌尾闽厦思翔莆厢涵荔屿流尤将鲤芗霄诏政邵夷汀蕉屏柘鼎谱萍湘栗修彭渝分月章贡信犹寻峡袁载樟铅横鄱历槐崂李胶即淄薛峄儿滕垦烟芝罘牟招潍寒朐兖微祥邹乳照莒钢郯费聊莘茌沾棣菏单郓鄄郑管街巩荥封符杞许尉考瀍涧嵩汝偃师顶卫湛叶郏舞殷滑壁淇浚牧获焦作解放陟濮范鄢葛漯郾召陕渑卧淅邓浉始潢息项驻驿蔡舆确泌级划岸硚陂十茅箭郧竹伍点军猇秭归枝樊荆掇刀感悟梦监滋团浠蕲穴咸随曾恩施苗架芙蓉心麓浏株淞攸茶炎醴韶晖雁蒸耒步君汨澧植益赫沅郴桂禾零冷滩牌溆晃侗芷底泸凰丈番禺从增浈圳斗汕濠潮澄禅坎廉雷电端要紫壮莞揭榕郁良邕鸣融叠彩恭梧圩藤岑防钦覃绵业贺昭峨仫佬等凭琼棠涯崖儋指迈重涪渡坝碚綦足黔潼垫忠节巫柱酉羊堂郫邛崃沿攀蔺邡梓羌油剑阁犍研夹沐彝眉充部陇阆雅珙筠邻蓥渠经棉简藏理壤若孜孚炉稻拖觉冕烽真仡务湄习毕雍碧阡晴贞谟册亨秉穗匀瓮独呈禄劝麒麟傣冲巧蒗洱祜佤澜耿楚谋个旧弥砚畴版勐漾濞巍颇芒盈怒傈僳堆则迦结仲聂类隅乃囊措查错浪申戈札噶革改勤灞未央阎户耀渭岐彬旬功起勉略脂柞峪积祝掖崆峒酒煌岷宕两迭碌湟互助循晏久杂称谦令峻嘴吾磨坂碱吐鄯坤奇垒精音楞轮犁且末焉耆硕车恰疏附莎伽策敏蕴位可境先人币盾铢镑桶闭镀锌铝圆板纤塑料琵琶罐箱漏再生纸袋/席编薄膜硬璃瓷条筐膨箩笼物铺材散裸挂捆然座辆艘套只件把块卷副片份幅对棵筒盆具疋担扇盒亿伏升尺吨短司斤磅盎码寸毫制批打匹发枚粒瓶舱净种样标每品总航蹲领域企实验室素模页证50pm12934678PQ.RSNMVWL"
-
-
-# 所有的字符加 + blank + ctc blank
-num_classes = len(chars) + 1 + 1
+# 所有 unicode 中文字符 + ascii的字符加 + blank + ctc blank
+# https://zh.wikipedia.org/wiki/Unicode
+# https://zh.wikipedia.org/wiki/ASCII
+num_classes = 20924 + (126 - 32) + 1 + 1
 
 #初始化学习速率
-INITIAL_LEARNING_RATE = 1e-3
+LEARNING_RATE = 1e-4
 DECAY_STEPS = 5000
 REPORT_STEPS = 500
-LEARNING_RATE_DECAY_FACTOR = 0.9  # The learning rate decay factor
 MOMENTUM = 0.9
 
 BATCHES = 100
@@ -85,9 +84,7 @@ def get_next_batch(batch_size=128):
         #np.transpose 矩阵转置 (12*256,) => (12,256) => (256,12)
         inputs[i,:] = np.transpose(image_vec.reshape((image_size[0],image_size[1])))
         #标签转成列表保存在codes
-        text_list = []
-        for char in text:
-            text_list.append(chars.index(char))
+        text_list = [ord(char) for char in text]
         codes.append(text_list)
     #比如batch_size=2，两条数据分别是"12"和"1"，则labels [['1','2'],['1']]
 
@@ -138,22 +135,17 @@ def decode_a_seq(indexes, spars_tensor):
     return decoded
 
 def list_to_chars(list):
-    return "".join([chars[v] for v in list])
+    return "".join([chr(v) for v in list])
 
 def train():
     global_step = tf.Variable(0, trainable=False)
-    learning_rate = tf.train.exponential_decay(INITIAL_LEARNING_RATE,
-                                                global_step,
-                                                DECAY_STEPS,
-                                                LEARNING_RATE_DECAY_FACTOR,
-                                                staircase=True)
     logits, inputs, labels, seq_len, W, b = neural_networks()
 
     loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss)
 
-    optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
-    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss,global_step=global_step)
+    # optimizer = tf.train.MomentumOptimizer(learning_rate=LEARNING_RATE, momentum=MOMENTUM).minimize(cost, global_step=global_step)
+    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost,global_step=global_step)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels))
 
