@@ -14,8 +14,8 @@ curr_dir = os.path.dirname(__file__)
 image_size = (12,256)
 
 #LSTM
-num_hidden = 64
-num_layers = 1
+num_hidden = 128
+num_layers = 2
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
