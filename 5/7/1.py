@@ -15,7 +15,7 @@ image_size = (12,256)
 
 #LSTM
 num_hidden = 128
-num_layers = 2
+num_layers = 1
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
