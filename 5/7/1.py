@@ -29,12 +29,12 @@ CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
 num_classes = len(CHARS) + 1 + 1
 
 #初始化学习速率
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 REPORT_STEPS = 500
 MOMENTUM = 0.9
 
-BATCHES = 100
+BATCHES = 64
 BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
@@ -153,9 +153,9 @@ def train():
     loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss)
 
-    optimizer = tf.train.MomentumOptimizer(learning_rate=LEARNING_RATE, momentum=MOMENTUM).minimize(cost, global_step=global_step)
-    # optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost,global_step=global_step)
-    # optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss,global_step=global_step)
+    # optimizer = tf.train.MomentumOptimizer(learning_rate=LEARNING_RATE, momentum=MOMENTUM).minimize(cost, global_step=global_step)
+    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost, global_step=global_step)
+    # optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss, global_step=global_step)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
     acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels))
 
