@@ -147,6 +147,7 @@ def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
 
 def train():
+    global LEARNING_RATE
     global_step = tf.Variable(0, trainable=False)
     logits, inputs, labels, seq_len, W, b, input_keep_prob = neural_networks()
 
