@@ -29,7 +29,7 @@ CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
 num_classes = len(CHARS) + 1 + 1
 
 #初始化学习速率
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-3
 DECAY_STEPS = 5000
 REPORT_STEPS = 500
 MOMENTUM = 0.9
@@ -224,9 +224,10 @@ def train():
                 print("Step:", steps, ", Cost:", c, ", batch seconds:", seconds)
                 if np.isnan(c):
                     print("Error: cost is nan")
-                    return
-            # train_cost /= TRAIN_SIZE
-            
+                    return                
+            train_cost /= TRAIN_SIZE
+            if train_cost < 10:
+                LEARNING_RATE = 1e-4            
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
             # val_feed = {inputs: train_inputs,
             #             labels: train_labels,
