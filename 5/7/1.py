@@ -44,17 +44,17 @@ train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,12]
-    inputs = tf.placeholder(tf.float32, [None, None, image_size[0]], name='inputs')
+    inputs = tf.placeholder(tf.float32, [None, None, image_size[0]])
     # 定义 ctc_loss 是稀疏矩阵
-    labels = tf.sparse_placeholder(tf.int32, name='labels')
+    labels = tf.sparse_placeholder(tf.int32)
     # 1维向量 序列长度 [batch_size,]
-    seq_len = tf.placeholder(tf.int32, [None], name='seqlen')
+    seq_len = tf.placeholder(tf.int32, [None])
     # 定义 LSTM 网络
     # 可以为:
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
     cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    input_keep_prob = tf.placeholder(tf.float32, name='inputKeepProb')
+    input_keep_prob = tf.placeholder(tf.float32)
     cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
     stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
     
@@ -73,7 +73,7 @@ def neural_networks():
     logits = tf.matmul(outputs, W) + b
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
 
-    logits = tf.transpose(logits, (1, 0, 2), name="logits")
+    logits = tf.transpose(logits, (1, 0, 2))
     return logits, inputs, labels, seq_len, W, b, input_keep_prob
 
 
@@ -158,8 +158,7 @@ def train():
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost, global_step=global_step)
     # optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss, global_step=global_step)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
-    decoded.name = "decoded"
-    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels) ,name="acc")
+    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels))
 
     init = tf.global_variables_initializer()
 
