@@ -241,9 +241,16 @@ def train():
                 if np.isnan(c):
                     print("Error: cost is nan")
                     return                
-            train_cost /= TRAIN_SIZE * BATCHES
+
+            train_cost /= TRAIN_SIZE
+            print(train_cost)
             if train_cost < 10:
-                LEARNING_RATE = 1e-4            
+                LEARNING_RATE = 1e-4  
+            if train_cost < 1:
+                LEARNING_RATE = 1e-5  
+            if train_cost < 0.5:
+                LEARNING_RATE = 1e-6  
+                          
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
             # val_feed = {inputs: train_inputs,
             #             labels: train_labels,
