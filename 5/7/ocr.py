@@ -10,7 +10,7 @@ import random
 
 curr_dir = os.path.dirname(__file__)
 
-# 图片的高度为20，宽度为不定长256
+# 图片的高度为20，宽度为256
 image_size = (20,256)
 
 #LSTM
@@ -102,7 +102,7 @@ def get_next_batch(batch_size=128):
             image = np.insert(image, 0, values=0, axis=1)
 
         image_vec = img2vec(image,image_size[0],image_size[1])
-        #np.transpose 矩阵转置 (12*256,) => (12,256) => (256,12)
+        #np.transpose 矩阵转置 (20*256,) => (20,256) => (256,20)
         inputs[i,:] = np.transpose(image_vec.reshape((image_size[0],image_size[1])))
         #标签转成列表保存在codes
         text_list = [CHARS.index(char) for char in text]
