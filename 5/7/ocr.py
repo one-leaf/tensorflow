@@ -10,7 +10,7 @@ import random
 
 curr_dir = os.path.dirname(__file__)
 
-# 图片的高度为20X256，宽度为不定长
+# 图片的高度为20，宽度为不定长256
 image_size = (20,256)
 
 #LSTM
