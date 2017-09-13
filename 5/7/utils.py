@@ -8,22 +8,21 @@ def show(img):
     cv2.imshow('image', img)
     cv2.waitKey(0)
 
-# img 参数是 np.array 类型 输入是灰度后的数据 2D
+# img 参数是 np.array 类型 输入是二值化并且反色的图片
 # 用于清除表格线
-def clearImg(img):
+def clearImg(adaptive_binary_inv):
     # 清除竖线
-    _sum=np.sum(img,axis=0)
-    _mean = 255 * img.shape[0]
+    _sum=np.sum(adaptive_binary_inv,axis=0)
+    _mean = 255 * adaptive_binary_inv.shape[0]
     for i,x in enumerate(_sum):
         if x>_mean*0.8:
-            img[:,i]=0
-
+            adaptive_binary_inv[:,i]=0
     # 清除横线
-    _sum=np.sum(img,axis=1)
-    _mean = 255 * img.shape[1]
+    _sum=np.sum(adaptive_binary_inv,axis=1)
+    _mean = 255 * adaptive_binary_inv.shape[1]
     for i,x in enumerate(_sum):
         if x>_mean*0.8:
-            img[i,:]=0
+            adaptive_binary_inv[i,:]=0
 
 # 图片转灰度, 参数是 np.array 类型
 def img2gray(img_color):
@@ -33,9 +32,9 @@ def img2gray(img_color):
 # 为了方便计算，需要反色
 # 后面的方法更好一些，会保留一些轮廓信息
 def img2bw(img_gray):
-    # thresh, img_bw = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV)
+    thresh, img_bw = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV)
     # thresh, img_bw = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
-    img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 11)
+    #img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 11)
     # 去噪点，实际测试不需要
     # kernel = np.ones((3, 3), np.uint8)
     # open = cv2.morphologyEx(img_bw, cv2.MORPH_OPEN, kernel, iterations=2)
@@ -54,60 +53,30 @@ def img2vec(img, height=-1, width=-1):
     vector = vector.flatten() / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
 
-# 图片分割，先按水平投影分割，然后按垂直投影分割
-def splitImg(img):
-    h_sum = np.sum(img, axis=1)
-    # plt.plot(h_sum, range(h_sum.shape[0]))
-    # plt.gca().invert_yaxis()
-    # plt.show()
-    peek_ranges = extract_peek_ranges_from_array(h_sum,10,5)
-    # line_seg_adaptive_threshold = np.copy(img)
-    # for i, peek_range in enumerate(peek_ranges):
-    #     x = 0
-    #     y = peek_range[0]
-    #     w = line_seg_adaptive_threshold.shape[1]
-    #     h = peek_range[1] - y
-    #     pt1 = (x, y)
-    #     pt2 = (x + w, y + h)
-    #     cv2.rectangle(line_seg_adaptive_threshold, pt1, pt2, 255)
-    # cv2.imshow('line image', line_seg_adaptive_threshold)
-    # cv2.waitKey(0)
+# 图片分割，按水平投影分割
+# img_gray 传入的灰度图像
+def splitImg(img_gray):
+    # 将灰度图二值化，并反色
+    thresh, adaptive_binary_inv = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    # 清除多余的线段
+    clearImg(adaptive_binary_inv)
 
-    v_peek_ranges2d = []
-    for peek_range in peek_ranges:
-        start_y = peek_range[0]
-        end_y = peek_range[1]
-        line_img = img[start_y:end_y, :]
-        v_sum = np.sum(line_img, axis=0)
-        # plt.plot(v_sum, range(v_sum.shape[0]))
-        # plt.gca().invert_yaxis()
-        # plt.show()
-        print(v_sum,)
-        v_peek_ranges = extract_peek_ranges_from_array(v_sum,max(v_sum)*0.1,1)
-        v_peek_ranges2d.append(v_peek_ranges)
+    h_sum = np.sum(adaptive_binary_inv, axis=1)
+    peek_ranges = extract_peek_ranges_from_array(h_sum,3,5)
 
-    print(v_peek_ranges2d)
-
-    color = (255, 0, 0)
-    line_seg_adaptive_threshold = np.copy(img)
+    images=[]
     for i, peek_range in enumerate(peek_ranges):
-        for v_range in v_peek_ranges2d[i]:
-            x = v_range[0]
-            y = peek_range[0]
-            w = v_range[1] - x
-            h = peek_range[1] - y
-            pt1 = (x, y)
-            pt2 = (x + w, y + h)
-            cv2.rectangle(img, pt1, pt2, color)
-    cv2.imshow('char image', img)
-    cv2.waitKey(0)
-
-    # print(ranges)
-
+        x = 0
+        y = peek_range[0]
+        w = adaptive_binary_inv.shape[1]
+        h = peek_range[1] - y
+        images.append(img_gray[y: y + h, x: x + w])
+    return images
+    
 # 从一个数组抓到分割点
 # minimun_val 最小分割的最小值
 # minimun_range 最小分割的长度
-def extract_peek_ranges_from_array(array_vals, minimun_val=5, minimun_range=5):
+def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
     start_i = None
     end_i = None
     peek_ranges = []
@@ -133,18 +102,53 @@ def readImgFile(filename):
     _img = img2bw(_img)
     return _img
 
+# img_gray 传入的灰度图像
+# minArea 最小的区域面积
+# x,y,w,h 过滤器
+# 返回 (img,rect)
+def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
+    # 将灰度图像二值化
+    #adaptive_binary= cv2.adaptiveThreshold(img_gray,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,11,2)
+    thresh, adaptive_binary = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # ret, adaptive_binary = cv2.threshold(adaptive_binary,127,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    im2, contours, hierarchy = cv2.findContours(adaptive_binary, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    images=[]
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        _x,_y,_w,_h = cv2.boundingRect(cnt)
+        if minArea>0 and area < minArea: continue
+        if x>0 and x!=_x: continue
+        if y>0 and y!=_y: continue
+        if w>0 and w!=_w: continue
+        if h>0 and h!=_h: continue
+        # cv2.drawContours(adaptive_binary, cnt, -1, (0,255,0), 3)
+        # show(adaptive_binary)
+        # 高度和宽度减了一个像素，防止灰度边框
+        img = img_gray[_y:_y+_h-1,_x:_x+_w-1]
+        images.append((img,(_x,_y,_w,_h)))
+    return images
+
+# 装载图片，并分解为待识别图像
+def loadImage(filename):
+    img = cv2.imread(filename, 0)
+    if img.shape != (1123,794):
+        raise "不是进口商检单"
+
+    result_images =[]
+
+    images = getGrids(img,1000,h=210)
+    # 按 rect 的 x 排序
+    sorted_images = sorted(images, key = lambda image: image[1][0])
+    for img,rect in sorted_images:
+        split_images = splitImg(img)
+        result_images.append(split_images)        
+        # for split_image in split_images:
+        #     show(split_image)
+    return result_images   
+
 def main():
     curr_dir = os.path.dirname(__file__)
-    # image = Image.open(os.path.join(curr_dir,"data/13.png"))
-
-    # _img = image2array(image)
-    # _img = img2gray(_img)
-
-    # 直接用 cv2 按灰度读取
-    _img = cv2.imread(os.path.join(curr_dir,"test/N-05.png"), 0)
-    _img = img2bw(_img)
-    clearImg(_img)
-    splitImg(_img)
+    need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
 
 if __name__ == '__main__':
     main()

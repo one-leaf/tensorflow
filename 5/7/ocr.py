@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2vec, show
+from utils import readImgFile, img2vec
 import time
 import random
 
