@@ -10,8 +10,8 @@ import random
 
 curr_dir = os.path.dirname(__file__)
 
-# 图片的高度为12X256，宽度为不定长
-image_size = (12,256)
+# 图片的高度为20X256，宽度为不定长
+image_size = (20,256)
 
 #LSTM
 num_hidden = 128
@@ -39,22 +39,25 @@ BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
-print("Loading data ...")
-train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
+if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
+    print("Loading data ...")
+    train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
+else:
+    train_files = []
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,12]
-    inputs = tf.placeholder(tf.float32, [None, None, image_size[0]])
+    inputs = tf.placeholder(tf.float32, [None, None, image_size[0]], name="inputs")
     # 定义 ctc_loss 是稀疏矩阵
-    labels = tf.sparse_placeholder(tf.int32)
+    labels = tf.sparse_placeholder(tf.int32, name="labels")
     # 1维向量 序列长度 [batch_size,]
-    seq_len = tf.placeholder(tf.int32, [None])
+    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     # 定义 LSTM 网络
     # 可以为:
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
+    input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
     cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    input_keep_prob = tf.placeholder(tf.float32)
     cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
     stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
     
@@ -73,7 +76,7 @@ def neural_networks():
     logits = tf.matmul(outputs, W) + b
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
 
-    logits = tf.transpose(logits, (1, 0, 2))
+    logits = tf.transpose(logits, (1, 0, 2), name="logits")
     return logits, inputs, labels, seq_len, W, b, input_keep_prob
 
 
@@ -88,7 +91,16 @@ def get_next_batch(batch_size=128):
         lines = line.split(" ")
         imageFileName = lines[0]+".png"
         text = lines[1].strip()
+
+        # 输出图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
+        
+        # 随机在图片前面和上面增加黑色区域，加入干扰
+        for _ in range(random.randint(0,5)):
+            image = np.insert(image, 0, values=0, axis=0)
+        for _ in range(random.randint(0,5)):
+            image = np.insert(image, 0, values=0, axis=1)
+
         image_vec = img2vec(image,image_size[0],image_size[1])
         #np.transpose 矩阵转置 (12*256,) => (12,256) => (256,12)
         inputs[i,:] = np.transpose(image_vec.reshape((image_size[0],image_size[1])))
@@ -152,13 +164,16 @@ def train():
     logits, inputs, labels, seq_len, W, b, input_keep_prob = neural_networks()
 
     loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
-    cost = tf.reduce_mean(loss)
+    cost = tf.reduce_mean(loss, name="cost")
 
+    # 收敛效果不好
     # optimizer = tf.train.MomentumOptimizer(learning_rate=LEARNING_RATE, momentum=MOMENTUM).minimize(cost, global_step=global_step)
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost, global_step=global_step)
+    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(cost, global_step=global_step, name="optimizer")
+    # 直接最小化 loss 容易过拟合
     # optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE).minimize(loss, global_step=global_step)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
-    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels))
+    
+    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels), name="acc")
 
     init = tf.global_variables_initializer()
 

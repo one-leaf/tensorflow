@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 
 # 显示图片,esc 关闭，参数是 np.array 类型
 def show(img):
@@ -70,7 +71,15 @@ def splitImg(img_gray):
         y = peek_range[0]
         w = adaptive_binary_inv.shape[1]
         h = peek_range[1] - y
-        images.append(img_gray[y: y + h, x: x + w])
+
+        # 删除前面的空白区域
+        w_sum = np.sum(adaptive_binary_inv[y: y + h, x: x + w], axis=0)
+        for s in w_sum:
+            if s==0:
+                x += 1
+            else:
+                break
+        images.append(img_gray[y: y + h, x: w])
     return images
     
 # 从一个数组抓到分割点
@@ -142,9 +151,17 @@ def loadImage(filename):
     for img,rect in sorted_images:
         split_images = splitImg(img)
         result_images.append(split_images)        
-        # for split_image in split_images:
-        #     show(split_image)
+        for split_image in split_images:
+
+            # for _ in range(random.randint(0,5)):
+            #     split_image = np.insert(split_image, 0, values=255, axis=0)
+            # for _ in range(random.randint(0,5)):
+            #     split_image = np.insert(split_image, 0, values=255, axis=1)
+
+            show(split_image)
+            print(split_image.shape)
     return result_images   
+
 
 def main():
     curr_dir = os.path.dirname(__file__)

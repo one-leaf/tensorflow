@@ -3,6 +3,8 @@ import tensorflow as tf
 import numpy as np
 import ocr
 import utils
+import cv2
+import random
 
 curr_dir = os.path.dirname(__file__)
 
@@ -24,7 +26,7 @@ def init():
 
 
 def scan():
-    session, inputs, seq_len, input_keep_prob, decoded, log_prob = init()
+    # session, inputs, seq_len, input_keep_prob, decoded, log_prob = init()
     need_ocr_images = utils.loadImage(os.path.join(curr_dir,'test','0.jpg'))
     ocr_text_groups = []
     for idx,images_group in enumerate(need_ocr_images):
@@ -35,7 +37,7 @@ def scan():
         for i, image in enumerate(images_group):
             print(i,image.shape)
             image_vec = utils.img2vec(image,ocr.image_size[0],ocr.image_size[1])
-            ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr.image_size[0],ocr.image_size[1])))
+            ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr.image_size[0],ocr.image_size[1])))           
             utils.show(image)
         # ocr_seq_len = np.ones(ocr_inputs.shape[0]) * ocr.image_size[1]
 
@@ -51,8 +53,12 @@ def scan():
     return ocr_text_groups             
 
 if __name__ == '__main__':
+    # img = cv2.imread(os.path.join(curr_dir,'test','1.png'), 0)
+    # print(img.shape)
+    # split_images = utils.splitImg(img)
+    # print(split_images[0].shape)
     ocr_text = scan()
-    print(ocr_text)
+    #print(ocr_text)
 
 
 
