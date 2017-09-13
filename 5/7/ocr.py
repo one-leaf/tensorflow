@@ -243,7 +243,6 @@ def train():
                     return                
 
             train_cost /= TRAIN_SIZE
-            print(train_cost)
             if train_cost < 10:
                 LEARNING_RATE = 1e-4  
             if train_cost < 1:
