@@ -164,7 +164,7 @@ def train():
 
     learning_rate = tf.train.exponential_decay(LEARNING_RATE_INITIAL,
                                                global_step,
-                                               LEARNING_RATE_ECAY_STEPS,
+                                               LEARNING_RATE_DECAY_STEPS,
                                                LEARNING_RATE_DECAY_FACTOR,
                                                staircase=True, name="learning_rate")
 
