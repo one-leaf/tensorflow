@@ -29,11 +29,11 @@ CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
 num_classes = len(CHARS) + 1 + 1
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-3
-LEARNING_RATE_DECAY_FACTOR = 0.9
-LEARNING_RATE_DECAY_STEPS = 2000
+# LEARNING_RATE_INITIAL = 1e-3
+# LEARNING_RATE_DECAY_FACTOR = 0.9
+# LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
-MOMENTUM = 0.9
+# MOMENTUM = 0.9
 
 BATCHES = 64
 BATCH_SIZE = 64
@@ -161,12 +161,15 @@ def list_to_chars(list):
 
 def train():
     global_step = tf.Variable(0, trainable=False)
-
-    learning_rate = tf.train.exponential_decay(LEARNING_RATE_INITIAL,
-                                               global_step,
-                                               LEARNING_RATE_DECAY_STEPS,
-                                               LEARNING_RATE_DECAY_FACTOR,
-                                               staircase=True, name="learning_rate")
+    
+    # learning_rate = tf.train.exponential_decay(LEARNING_RATE_INITIAL,
+                                            #    global_step,
+                                            #    LEARNING_RATE_DECAY_STEPS,
+                                            #    LEARNING_RATE_DECAY_FACTOR,
+                                            #    staircase=True, name="learning_rate")
+    # 决定还是自定义学习速率比较靠谱                                            
+    curr_learning_rate = 1e-3
+    learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, W, b, input_keep_prob = neural_networks()
 
@@ -213,7 +216,8 @@ def train():
  
     def do_batch():
         train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
-        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 0.7}        
+        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
+                input_keep_prob: 0.7, learning_rate: curr_learning_rate}        
         b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, b_learning_rate, _ = session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
         if steps > 0 and steps % REPORT_STEPS == 0:
@@ -246,7 +250,15 @@ def train():
                 if np.isnan(c):
                     print("Error: cost is nan")
                     return                
-                          
+            
+            train_cost =/ TRAIN_SIZE
+            if train_cost < 100 and curr_learning_rate > 1e-4:
+                curr_learning_rate = 1e-4
+            if train_cost < 20 and curr_learning_rate > 1e-5:
+                curr_learning_rate = 1e-5
+            if train_cost < 1 and curr_learning_rate > 1e-6:
+                curr_learning_rate = 1e-6
+
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
             # val_feed = {inputs: train_inputs,
             #             labels: train_labels,
