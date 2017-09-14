@@ -216,8 +216,8 @@ def train():
         
         feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 0.7}
         
-        b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, _ = session.run([loss, labels, logits, seq_len, cost, global_step, optimizer], feed)
-        b_learning_rate = session.run(learning_rate)
+        b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, _, b_learning_rate = session.run([loss, labels, logits, seq_len, cost, global_step, optimizer, learning_rate], feed)
+        # b_learning_rate = session.run(learning_rate)
         if steps > 0 and steps % REPORT_STEPS == 0:
             do_report()
         return b_cost, steps, b_learning_rate
