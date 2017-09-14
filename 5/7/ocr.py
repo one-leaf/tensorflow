@@ -212,12 +212,10 @@ def train():
         report_accuracy(dd, test_labels)
  
     def do_batch():
-        train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-        
-        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 0.7}
-        
-        b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, _ = session.run([loss, labels, logits, seq_len, cost, global_step, optimizer], feed)
-        b_learning_rate = session.run(learning_rate)
+        train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
+        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 0.7}        
+        b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, b_learning_rate, _ = session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
+
         if steps > 0 and steps % REPORT_STEPS == 0:
             do_report()
         return b_cost, steps, b_learning_rate
@@ -241,10 +239,10 @@ def train():
             train_cost = train_ler = 0
             for batch in range(BATCHES):
                 start = time.time()
-                c, steps, learning_rate = do_batch()
+                c, steps, rate = do_batch()
                 train_cost += c * BATCH_SIZE
                 seconds = round(time.time() - start,2)
-                print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", learning_rate)
+                print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", rate)
                 if np.isnan(c):
                     print("Error: cost is nan")
                     return                
