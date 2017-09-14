@@ -237,17 +237,17 @@ def train():
                 c, steps = do_batch()
                 train_cost += c * BATCH_SIZE
                 seconds = time.time() - start
-                print("Step:", steps, ", Cost:", c, ", batch seconds:", seconds)
+                print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", LEARNING_RATE)
                 if np.isnan(c):
                     print("Error: cost is nan")
                     return                
 
             train_cost /= TRAIN_SIZE
-            if train_cost < 50:
+            if train_cost < 50 and LEARNING_RATE > 1e-4:
                 LEARNING_RATE = 1e-4  
-            if train_cost < 20:
+            if train_cost < 20 and LEARNING_RATE > 1e-5:
                 LEARNING_RATE = 1e-5  
-            if train_cost < 1:
+            if train_cost < 1  and LEARNING_RATE > 1e-6:
                 LEARNING_RATE = 1e-6  
                           
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
