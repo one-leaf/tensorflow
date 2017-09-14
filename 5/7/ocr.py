@@ -236,7 +236,7 @@ def train():
                 start = time.time()
                 c, steps = do_batch()
                 train_cost += c * BATCH_SIZE
-                seconds = time.time() - start
+                seconds = round(time.time() - start,2)
                 print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", LEARNING_RATE)
                 if np.isnan(c):
                     print("Error: cost is nan")
