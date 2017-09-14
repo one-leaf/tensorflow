@@ -251,7 +251,7 @@ def train():
                     print("Error: cost is nan")
                     return                
             
-            train_cost =/ TRAIN_SIZE
+            train_cost /= TRAIN_SIZE
             if train_cost < 100 and curr_learning_rate > 1e-4:
                 curr_learning_rate = 1e-4
             if train_cost < 20 and curr_learning_rate > 1e-5:
