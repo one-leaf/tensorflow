@@ -243,11 +243,11 @@ def train():
                     return                
 
             train_cost /= TRAIN_SIZE
-            if train_cost < 10:
+            if train_cost < 50:
                 LEARNING_RATE = 1e-4  
-            if train_cost < 1:
+            if train_cost < 10:
                 LEARNING_RATE = 1e-5  
-            if train_cost < 0.5:
+            if train_cost < 1:
                 LEARNING_RATE = 1e-6  
                           
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
