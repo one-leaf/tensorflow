@@ -91,7 +91,7 @@ def get_next_batch(batch_size=128):
     for i, line in enumerate(batch):
         lines = line.split(" ")
         imageFileName = lines[0]+".png"
-        text = lines[1].strip()
+        text = line[line.index(' '):].strip()
 
         # 输出图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
@@ -111,6 +111,7 @@ def get_next_batch(batch_size=128):
     #比如batch_size=2，两条数据分别是"12"和"1"，则labels [['1','2'],['1']]
 
     labels = [np.asarray(i) for i in codes]
+
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
     #(batch_size,) sequence_length值都是256，最大划分列数
