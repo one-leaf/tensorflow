@@ -9,6 +9,9 @@ checkpoints/
 summaries/
 logs/
 data/
+dataset/
+data64/
+data128/
 test/
 fonts/
 *_model/
