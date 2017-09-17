@@ -150,16 +150,11 @@ def loadImage(filename):
     sorted_images = sorted(images, key = lambda image: image[1][0])
     for img,rect in sorted_images:
         split_images = splitImg(img)
-        result_images.append(split_images)        
         for split_image in split_images:
-
-            # for _ in range(random.randint(0,5)):
-            #     split_image = np.insert(split_image, 0, values=255, axis=0)
-            # for _ in range(random.randint(0,5)):
-            #     split_image = np.insert(split_image, 0, values=255, axis=1)
-
-            show(split_image)
-            print(split_image.shape)
+            split_image = img2bw(split_image)
+        result_images.append(split_images)        
+#            show(split_image)
+#            print(split_image.shape)
     return result_images   
 
 

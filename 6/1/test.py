@@ -38,16 +38,17 @@ def scan():
             print(i,image.shape)
             image_vec = utils.img2vec(image,ocr.image_size[0],ocr.image_size[1])
             ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr.image_size[0],ocr.image_size[1])))           
-            utils.show(image)
-        # ocr_seq_len = np.ones(ocr_inputs.shape[0]) * ocr.image_size[1]
+            # utils.show(image)
+            
+        ocr_seq_len = np.ones(ocr_inputs.shape[0]) * ocr.image_size[1]
 
-        # feed = {inputs: ocr_inputs, seq_len: ocr_seq_len,  input_keep_prob: 1.0}
-        # print("starting ocr inputs...")
-        # decoded_list,_  = session.run([decoded[0],log_prob], feed)
-        # print("filished ocr inputs...")
-        # detected_list = ocr.decode_sparse_tensor(decoded_list)
-        # for detect_number in detected_list:
-        #     ocr_texts.append(ocr.list_to_chars(detect_number))
+        feed = {inputs: ocr_inputs, seq_len: ocr_seq_len,  input_keep_prob: 1.0}
+        print("starting ocr inputs...")
+        decoded_list,_  = session.run([decoded[0],log_prob], feed)
+        print("filished ocr inputs...")
+        detected_list = ocr.decode_sparse_tensor(decoded_list)
+        for detect_number in detected_list:
+            ocr_texts.append(ocr.list_to_chars(detect_number))
 
         ocr_text_groups.append(ocr_texts)   
     return ocr_text_groups             
