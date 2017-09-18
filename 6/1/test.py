@@ -26,7 +26,7 @@ def init():
 
 
 def scan():
-    # session, inputs, seq_len, input_keep_prob, decoded, log_prob = init()
+    session, inputs, seq_len, input_keep_prob, decoded, log_prob = init()
     need_ocr_images = utils.loadImage(os.path.join(curr_dir,'test','0.jpg'))
     ocr_text_groups = []
     for idx,images_group in enumerate(need_ocr_images):
@@ -35,22 +35,28 @@ def scan():
 
         ocr_inputs = np.zeros([len(images_group), ocr.image_size[1], ocr.image_size[0]])
         for i, image in enumerate(images_group):
-            print(i,image.shape)
+            # print(i,image.shape)
+            for _ in range(5):
+                image = np.insert(image, 0, values=0, axis=0)
+            for _ in range(5):
+                image = np.insert(image, 0, values=0, axis=1)
+
             image_vec = utils.img2vec(image,ocr.image_size[0],ocr.image_size[1])
-            ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr.image_size[0],ocr.image_size[1])))           
+            ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr.image_size[0],ocr.image_size[1])))         
             # utils.show(image)
-            
+            # return
         ocr_seq_len = np.ones(ocr_inputs.shape[0]) * ocr.image_size[1]
 
         feed = {inputs: ocr_inputs, seq_len: ocr_seq_len,  input_keep_prob: 1.0}
-        print("starting ocr inputs...")
+        print("starting ocr inputs %s ..." % idx)
         decoded_list,_  = session.run([decoded[0],log_prob], feed)
-        print("filished ocr inputs...")
+        print("filished ocr inputs %s ..." % idx)
         detected_list = ocr.decode_sparse_tensor(decoded_list)
         for detect_number in detected_list:
             ocr_texts.append(ocr.list_to_chars(detect_number))
 
-        ocr_text_groups.append(ocr_texts)   
+        ocr_text_groups.append(ocr_texts)
+        # break   
     return ocr_text_groups             
 
 if __name__ == '__main__':
@@ -59,7 +65,7 @@ if __name__ == '__main__':
     # split_images = utils.splitImg(img)
     # print(split_images[0].shape)
     ocr_text = scan()
-    #print(ocr_text)
+    print(ocr_text)
 
 
 

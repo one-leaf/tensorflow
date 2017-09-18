@@ -43,14 +43,14 @@ def img2bw(img_gray):
     return img_bw
 
 # 图片转为向量, img 参数是 np.array 类型
-def img2vec(img, height=-1, width=-1):
+def img2vec(img, height=-1, width=-1, value=0):
     h=img.shape[0]
     w=img.shape[1]
     if width==-1: width=w
     if height==-1: height=h
     if h>height or w>width:
         raise "image size too large"
-    vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(255,))  # 在图像上补齐
+    vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(value,))  # 在图像上补齐
     vector = vector.flatten() / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
 
@@ -58,7 +58,8 @@ def img2vec(img, height=-1, width=-1):
 # img_gray 传入的灰度图像
 def splitImg(img_gray):
     # 将灰度图二值化，并反色
-    thresh, adaptive_binary_inv = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    adaptive_binary_inv=img2bw(img_gray)
+    # thresh, adaptive_binary_inv = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # 清除多余的线段
     clearImg(adaptive_binary_inv)
 
@@ -71,15 +72,20 @@ def splitImg(img_gray):
         y = peek_range[0]
         w = adaptive_binary_inv.shape[1]
         h = peek_range[1] - y
-
-        # 删除前面的空白区域
+        # 删除前面和后面的空白区域
         w_sum = np.sum(adaptive_binary_inv[y: y + h, x: x + w], axis=0)
         for s in w_sum:
             if s==0:
                 x += 1
             else:
                 break
-        images.append(img_gray[y: y + h, x: w])
+        w = adaptive_binary_inv.shape[1] - x 
+        for s in w_sum[::-1]:
+            if s==0:
+                w -= 1
+            else:
+                break
+        images.append(img_gray[y: y + h , x: x + w ])
     return images
     
 # 从一个数组抓到分割点
@@ -150,9 +156,11 @@ def loadImage(filename):
     sorted_images = sorted(images, key = lambda image: image[1][0])
     for img,rect in sorted_images:
         split_images = splitImg(img)
+        b_w_split_images = []
         for split_image in split_images:
-            split_image = img2bw(split_image)
-        result_images.append(split_images)        
+            b_w_split_images.append(img2bw(split_image))
+        result_images.append(b_w_split_images)        
+
 #            show(split_image)
 #            print(split_image.shape)
     return result_images   
