@@ -266,7 +266,7 @@ def train():
                     return                
             
             train_cost /= TRAIN_SIZE
-            if train_cost < 20 and curr_learning_rate > 1e-4:
+            if train_cost < 10 and curr_learning_rate > 1e-4:
                 curr_learning_rate = 1e-4
             if train_cost < 1 and curr_learning_rate > 1e-5:
                 curr_learning_rate = 1e-5
