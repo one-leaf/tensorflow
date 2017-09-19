@@ -101,8 +101,8 @@ def get_next_batch(batch_size=128):
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
 
-        image = redisClient.get(imageFileName)
-        if image is None:
+        image_vec = redisClient.get(imageFileName)
+        if image_vec is None:
             # 输出图片为反色黑白
             image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
         
