@@ -82,7 +82,15 @@ def neural_networks():
 
 
 # 生成一个训练batch
+redisClient = None
 def get_next_batch(batch_size=128):
+
+    # 创建一个redis连接
+    global redisClient
+    if redisClient is None:
+        import redis
+        redisClient = redis.StrictRedis(host='localhost', port=6379, db=0)
+
     inputs = np.zeros([batch_size, image_size[1], image_size[0]])
     codes = []
 
@@ -93,16 +101,21 @@ def get_next_batch(batch_size=128):
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
 
-        # 输出图片为反色黑白
-        image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
+        image = redisClient.get(imageFileName)
+        if image is None:
+            # 输出图片为反色黑白
+            image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
         
-        # 随机在图片前面和上面增加黑色区域，加入干扰
-        for _ in range(random.randint(0,5)):
-            image = np.insert(image, 0, values=0, axis=0)
-        for _ in range(random.randint(0,5)):
-            image = np.insert(image, 0, values=0, axis=1)
+            # 随机在图片前面和上面增加黑色区域，加入干扰
+            for _ in range(random.randint(0,5)):
+                image = np.insert(image, 0, values=0, axis=0)
+            for _ in range(random.randint(0,5)):
+                image = np.insert(image, 0, values=0, axis=1)
 
-        image_vec = img2vec(image,image_size[0],image_size[1])
+            image_vec = img2vec(image,image_size[0],image_size[1])
+            redisClient.set(imageFileName,image_vec)
+            # 1小时后自动过期
+            redisClient.expire(imageFileName,60*60)
         #np.transpose 矩阵转置 (20*256,) => (20,256) => (256,20)
         inputs[i,:] = np.transpose(image_vec.reshape((image_size[0],image_size[1])))
         #标签转成列表保存在codes
