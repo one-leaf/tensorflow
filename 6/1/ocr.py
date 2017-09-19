@@ -85,7 +85,6 @@ def neural_networks():
 db = {}
 def get_next_batch(batch_size=128):
 
-    # 创建一个redis连接
     inputs = np.zeros([batch_size, image_size[1], image_size[0]])
     codes = []
 
@@ -97,7 +96,7 @@ def get_next_batch(batch_size=128):
         text = line[line.index(' '):].strip()
 
         if imageFileName in db:
-            image_vec = redisClient.get(imageFileName)
+            image_vec = db[imageFileName]
         else:
             # 输出图片为反色黑白
             image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
