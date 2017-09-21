@@ -8,6 +8,10 @@ import random
 def show(img):
     cv2.imshow('image', img)
     cv2.waitKey(0)
+    
+# 保存图片
+def save(img,filename):
+    cv2.imwrite(filename,img)
 
 # img 参数是 np.array 类型 输入是二值化并且反色的图片
 # 用于清除表格线
