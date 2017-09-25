@@ -41,6 +41,8 @@ def scan():
             for _ in range(4):
                 image = np.insert(image, 0, values=0, axis=1)
 
+            # utils.show(utils.dropZeroEdges(image))
+
             utils.save(image,os.path.join(curr_dir,"test","%s-%s.png"%(idx,i)))
             image_vec = utils.img2vec(image,ocr.image_size[0],ocr.image_size[1])
             ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr.image_size[0],ocr.image_size[1])))         

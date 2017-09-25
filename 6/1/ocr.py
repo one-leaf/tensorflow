@@ -4,14 +4,14 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2vec
+from utils import readImgFile, img2vec, dropZeroEdges
 import time
 import random
 
 curr_dir = os.path.dirname(__file__)
 
 # 图片的高度为20，宽度为256
-image_size = (20,256)
+image_size = (20,600)
 
 #LSTM
 num_hidden = 128
@@ -97,11 +97,12 @@ def get_next_batch(batch_size=128):
         # 输出图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
     
-        # 随机在图片前面和上面增加黑色区域，加入干扰
-        for _ in range(random.randint(0,5)):
-            image = np.insert(image, 0, values=0, axis=0)
-        for _ in range(random.randint(0,5)):
-            image = np.insert(image, 0, values=0, axis=1)
+        image = dropZeroEdges(image)
+        # # 随机在图片前面和上面增加黑色区域，加入干扰
+        # for _ in range(random.randint(0,5)):
+        #     image = np.insert(image, 0, values=0, axis=0)
+        # for _ in range(random.randint(0,5)):
+        #     image = np.insert(image, 0, values=0, axis=1)
 
         image_vec = img2vec(image,image_size[0],image_size[1])
 

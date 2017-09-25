@@ -8,7 +8,7 @@ import random
 def show(img):
     cv2.imshow('image', img)
     cv2.waitKey(0)
-    
+
 # 保存图片
 def save(img,filename):
     cv2.imwrite(filename,img)
@@ -57,6 +57,13 @@ def img2vec(img, height=-1, width=-1, value=0):
     vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(value,))  # 在图像上补齐
     vector = vector.flatten() / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
+
+# 清除边缘，输入参数黑白反射
+def dropZeroEdges(img_bw_inv):
+    true_points = np.argwhere(img_bw_inv)
+    top_left = true_points.min(axis=0)
+    bottom_right = true_points.max(axis=0)
+    return img_bw_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
 
 # 图片分割，按水平投影分割
 # img_gray 传入的灰度图像
