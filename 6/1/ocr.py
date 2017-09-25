@@ -11,7 +11,7 @@ import random
 curr_dir = os.path.dirname(__file__)
 
 # 图片的高度为20，宽度为256
-image_size = (20,600)
+image_size = (20,700)
 
 #LSTM
 num_hidden = 128

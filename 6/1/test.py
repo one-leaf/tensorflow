@@ -36,11 +36,11 @@ def scan():
         ocr_inputs = np.zeros([len(images_group), ocr.image_size[1], ocr.image_size[0]])
         for i, image in enumerate(images_group):
             # print(i,image.shape)
-            for _ in range(4):
-                image = np.insert(image, 0, values=0, axis=0)
-            for _ in range(4):
-                image = np.insert(image, 0, values=0, axis=1)
-
+            # for _ in range(4):
+            #     image = np.insert(image, 0, values=0, axis=0)
+            # for _ in range(4):
+            #     image = np.insert(image, 0, values=0, axis=1)
+            image = utils.dropZeroEdges(image)
             # utils.show(utils.dropZeroEdges(image))
 
             utils.save(image,os.path.join(curr_dir,"test","%s-%s.png"%(idx,i)))
