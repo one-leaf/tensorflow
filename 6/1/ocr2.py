@@ -35,7 +35,7 @@ REPORT_STEPS = 500
 
 BATCHES = 64
 # 模型太大了一次只能学2笔
-BATCH_SIZE = 2
+BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
@@ -222,11 +222,11 @@ def train():
                     return                
             
             # train_cost /= TRAIN_SIZE
-                if c < 10 and curr_learning_rate > 1e-4:
+                if c < 1 and curr_learning_rate > 1e-4:
                     curr_learning_rate = 1e-4
-                if c < 1 and curr_learning_rate > 1e-5:
+                if c < 0.1 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
-                if c < 0.1 and curr_learning_rate > 1e-6:
+                if c < 0.01 and curr_learning_rate > 1e-6:
                     curr_learning_rate = 1e-6
 
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
