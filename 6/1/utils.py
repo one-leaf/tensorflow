@@ -168,6 +168,7 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
         if y>0 and y!=_y: continue
         if w>0 and w!=_w: continue
         if h>0 and h!=_h: continue
+        
         # cv2.drawContours(adaptive_binary, cnt, -1, (0,255,0), 3)
         # show(adaptive_binary)
         # 高度和宽度减了一个像素，防止灰度边框
@@ -176,18 +177,23 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
     return images
 
 # 装载图片，并分解为待识别图像
-def loadImage(filename):
+def loadImage(filename,imgtype):
     img = cv2.imread(filename, 0)
     if img.shape != (1123,794):
         raise "不是进口商检单"
 
     result_images =[]
 
-    images = getGrids(img,1000,h=210)
+    if imgtype==0:        
+        images = getGrids(img,1000,h=210)
+    elif imgtype==1:            
+        images = getGrids(img,1000,h=158)
+
     # 按 rect 的 x 排序
     sorted_images = sorted(images, key = lambda image: image[1][0])
     for img,rect in sorted_images:
         split_images = splitImg(img)
+        
         b_w_split_images = []
         for split_image in split_images:
             b_w_split_images.append(img2bwinv(split_image))

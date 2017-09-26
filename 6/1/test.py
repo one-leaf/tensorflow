@@ -28,7 +28,7 @@ def init():
 
 def scan():
     session, inputs, seq_len, input_keep_prob, decoded, log_prob = init()
-    need_ocr_images = utils.loadImage(os.path.join(curr_dir,'test','0.jpg'))
+    need_ocr_images = utils.loadImage(os.path.join(curr_dir,'test','1.jpg'),0)
     ocr_text_groups = []
     for idx,images_group in enumerate(need_ocr_images):
         # if idx != 1: continue
