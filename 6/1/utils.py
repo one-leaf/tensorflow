@@ -36,7 +36,7 @@ def img2gray(img_color):
 # 将图片转为黑白2色，参数是 np.array 类型
 # 为了方便计算，需要反色
 # 后面的方法更好一些，会保留一些轮廓信息
-def img2bw(img_gray):
+def img2bwinv(img_gray):
     thresh, img_bw = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV)
     # thresh, img_bw = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
     #img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 11)
@@ -69,7 +69,7 @@ def dropZeroEdges(img_bw_inv):
 # img_gray 传入的灰度图像
 def splitImg(img_gray):
     # 将灰度图二值化，并反色
-    adaptive_binary_inv=img2bw(img_gray)
+    adaptive_binary_inv=img2bwinv(img_gray)
     # thresh, adaptive_binary_inv = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # 清除多余的线段
     clearImg(adaptive_binary_inv)
@@ -125,7 +125,7 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
 
 def readImgFile(filename):
     _img = cv2.imread(filename, 0)
-    _img = img2bw(_img)
+    _img = img2bwinv(_img)
     return _img
 
 # img_gray 传入的灰度图像
@@ -169,7 +169,7 @@ def loadImage(filename):
         split_images = splitImg(img)
         b_w_split_images = []
         for split_image in split_images:
-            b_w_split_images.append(img2bw(split_image))
+            b_w_split_images.append(img2bwinv(split_image))
         result_images.append(b_w_split_images)        
 
 #            show(split_image)
