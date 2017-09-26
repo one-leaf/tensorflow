@@ -81,13 +81,13 @@ def neural_networks():
         with tf.variable_scope('full-connect-{}'.format(i)):
             if i == 0:
                 in_size = int(conv_pools[-1].get_shape()[1]) * int(conv_pools[-1].get_shape()[2]) * int(conv_pools[-1].get_shape()[3])
-                inputs = tf.reshape(conv_pools[-1], [-1, in_size])
+                input = tf.reshape(conv_pools[-1], [-1, in_size])
             else:
-                inputs = full_connects[-1]
+                input = full_connects[-1]
                 in_size = hidden_sizes[i - 1]
             W = tf.get_variable("weights", [in_size, hidden_sizes[i]], initializer=tf.contrib.layers.xavier_initializer())
             b = tf.get_variable("biases", [hidden_sizes[i]], initializer=tf.constant_initializer(0.0))
-            full_connect = tf.nn.relu(tf.matmul(inputs, W) + b)
+            full_connect = tf.nn.relu(tf.matmul(input, W) + b)
             full_connects.append(full_connect)
     # 由于是多个文本，需要合并输出
     outputs = []
