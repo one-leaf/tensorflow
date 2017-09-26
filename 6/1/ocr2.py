@@ -189,7 +189,7 @@ def train():
 
     def restore(sess):
         curr_dir = os.path.dirname(__file__)
-        model_dir = os.path.join(curr_dir, "model")
+        model_dir = os.path.join(curr_dir, "model2")
         if not os.path.exists(model_dir): os.mkdir(model_dir)
         saver_prefix = os.path.join(model_dir, "model.ckpt")        
         ckpt = tf.train.get_checkpoint_state(model_dir)
