@@ -185,7 +185,7 @@ def train():
     def do_report():
         test_inputs,test_labels = get_next_batch(TEST_BATCH_SIZE)
         test_feed = {inputs: test_inputs, labels: test_labels}
-        _prediction, _accuracy = session.run([prediction], test_feed)
+        _prediction = session.run(prediction, test_feed)
         report_accuracy(_prediction, test_labels)
  
     def do_batch():
