@@ -164,26 +164,29 @@ def train():
 
     init = tf.global_variables_initializer()
 
-    def report_accuracy(_prediction, test_labels, accuracy):
+    def report_accuracy(_prediction, test_labels):
         if len(_prediction) != len(test_labels):
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                   " test and detect length desn't match")
             return
+        true_numer = 0        
         print("T/F: original(length) <-------> detectcted(length)")
         for idx, number in enumerate(test_labels):
-            label = "".join([CHARS[s] for s in number])
-            detect_label = "".join([CHARS[s] for s in _prediction[idx]])
+            label = "".join([CHARS[int(s)] for s in number])
+            detect_label = "".join([CHARS[int(s)] for s in _prediction[idx]])
             label = label.strip()
             detect_label = detect_label.strip()
             hit = (label == detect_label)
+            if hit:
+                true_numer = true_numer + 1            
             print(hit, label, "(", len(label), ") <-------> ", detect_label, "(", len(detect_label), ")")
-        print("Test Accuracy:", accuracy)
+        print("Test Accuracy:", true_numer * 1.0 / len(test_labels)))
 
     def do_report():
         test_inputs,test_labels = get_next_batch(TEST_BATCH_SIZE)
         test_feed = {inputs: test_inputs, labels: test_labels}
-        _prediction, _accuracy = session.run([prediction, accuracy], test_feed)
-        report_accuracy(_prediction, test_labels, _accuracy)
+        _prediction, _accuracy = session.run([prediction], test_feed)
+        report_accuracy(_prediction, test_labels)
  
     def do_batch():
         train_inputs, train_labels = get_next_batch(BATCH_SIZE)       
