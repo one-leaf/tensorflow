@@ -104,8 +104,7 @@ def neural_networks():
     for i in range(label_size):
         with tf.variable_scope('loss-part-{}'.format(i)):
             outputs_part = tf.slice(output, begin=[0, i * CHARS_SIZE], size=[-1, CHARS_SIZE])
-            targets_part = tf.slice(labels, begin=[0, i], size=[-1, 1])
-            targets_part = tf.reshape(targets_part, [-1])
+            targets_part = tf.slice(labels, begin=[0, i * CHARS_SIZE], size=[-1, CHARS_SIZE])
             loss_part = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
             reduced_loss_part = tf.reduce_mean(loss_part)
             losses.append(reduced_loss_part)
