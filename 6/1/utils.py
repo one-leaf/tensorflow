@@ -4,6 +4,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
+# 文本转向量
+def text2vec(char_set,text):
+    text_len = len(text)
+    char_set_len = len(char_set)
+    vector = np.zeros(text_len*char_set_len)
+    for i, c in enumerate(text):
+        idx = i * char_set_len + char_set.index(c)
+        vector[idx] = 1
+    return vector
+
+# 向量转回文本
+def vec2text(char_set,vec):
+    char_set_len = len(char_set)
+    char_pos = vec.nonzero()[0]
+    text=[]
+    for i, c in enumerate(char_pos):
+        char_at_pos = i
+        char_idx = c % char_set_len
+        text.append(char_set[char_idx])
+    return "".join(text)
+
 # 显示图片,esc 关闭，参数是 np.array 类型
 def show(img):
     cv2.imshow('image', img)
