@@ -143,7 +143,7 @@ def get_next_batch(batch_size=128):
         image = readImgFile(os.path.join(curr_dir,"data",imageFileName))   
         image = dropZeroEdges(image)
         inputs[i,:] = img2vec(image,image_size[0],image_size[1])
-        labels[i,:] = list(text) 
+        labels[i,:] = [CHARS.index(c) for c in text] 
     return inputs, labels
 
 def train():
