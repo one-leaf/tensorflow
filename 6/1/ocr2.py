@@ -122,7 +122,7 @@ def neural_networks():
     prediction = tf.stack(predictions, axis=1, name='prediction')
 
     # 计算正确率
-    correct_prediction = tf.cast(tf.equal(prediction, y_), tf.float32)
+    correct_prediction = tf.cast(tf.equal(prediction, labels), tf.float32)
     correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
     accuracy = tf.reduce_mean(
         tf.cast(tf.equal(correct_prediction, 1.0), tf.float32), name='accuracy')
