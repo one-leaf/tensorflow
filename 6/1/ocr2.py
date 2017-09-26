@@ -113,7 +113,7 @@ def neural_networks():
 
     # 得到最终的验证码
     predictions = []
-    for i in range(captcha_size):
+    for i in range(label_size):
         with tf.variable_scope('predictions-part-{}'.format(i)):
             outputs_part = tf.slice(output, begin=[0, i * CHARS_SIZE], size=[-1, CHARS_SIZE])
             prediction_part = tf.argmax(outputs_part, axis=1)
