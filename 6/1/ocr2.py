@@ -34,7 +34,8 @@ REPORT_STEPS = 500
 # MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 64
+# 模型太大了一次只能学2笔
+BATCH_SIZE = 2
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
@@ -185,7 +186,7 @@ def train():
 
         if steps > 0 and steps % REPORT_STEPS == 0:
             do_report()
-        return b_cost, steps, b_learning_rate
+        return b_loss, steps, b_learning_rate
 
     def restore(sess):
         curr_dir = os.path.dirname(__file__)
