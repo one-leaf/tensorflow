@@ -48,7 +48,7 @@ def neural_networks():
     # 训练或学习的样本
     inputs = tf.placeholder(tf.float32, [None, image_size[0]*image_size[1]], name="inputs")
     # 训练的结果
-    labels = tf.placeholder(tf.int32, [None, label_size*CHARS_SIZE], name='labels')
+    labels = tf.placeholder(tf.int32, [None, label_size], name='labels')
     # 卷积层
     filter_sizes = [5, 3, 3]
     filter_nums = [32, 32, 32]
@@ -104,37 +104,34 @@ def neural_networks():
     for i in range(label_size):
         with tf.variable_scope('loss-part-{}'.format(i)):
             outputs_part = tf.slice(output, begin=[0, i * CHARS_SIZE], size=[-1, CHARS_SIZE])
-            targets_part = tf.slice(labels, begin=[0, i * CHARS_SIZE], size=[-1, CHARS_SIZE])
-            loss_part = tf.nn.softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
+            targets_part = tf.slice(labels, begin=[0, i], size=[-1, 1])
+            targets_part = tf.reshape(targets_part, [-1])
+            loss_part = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=outputs_part, labels=targets_part)
             reduced_loss_part = tf.reduce_mean(loss_part)
             losses.append(reduced_loss_part)
     loss = tf.reduce_mean(losses, name='loss')
+
     # 得到最终的验证码
     predictions = []
-    for i in range(label_size):
+    for i in range(captcha_size):
         with tf.variable_scope('predictions-part-{}'.format(i)):
             outputs_part = tf.slice(output, begin=[0, i * CHARS_SIZE], size=[-1, CHARS_SIZE])
             prediction_part = tf.argmax(outputs_part, axis=1)
+            prediction_part = tf.cast(prediction_part, tf.int32)
             predictions.append(prediction_part)
     prediction = tf.stack(predictions, axis=1, name='prediction')
 
-    predictions_y = []
-    for i in range(label_size):
-        with tf.variable_scope('predictions-y-part-{}'.format(i)):
-            outputs_part = tf.slice(labels, begin=[0, i * CHARS_SIZE], size=[-1, CHARS_SIZE])
-            prediction_part = tf.argmax(outputs_part, axis=1)
-            predictions_y.append(prediction_part)
-    prediction_y = tf.stack(predictions_y, axis=1, name='prediction_y')
-
     # 计算正确率
-    correct_prediction = tf.cast(tf.equal(prediction, prediction_y), tf.float32)
-    accuracy = tf.reduce_mean(correct_prediction, name='accuracy')  
+    correct_prediction = tf.cast(tf.equal(prediction, y_), tf.float32)
+    correct_prediction = tf.reduce_mean(correct_prediction, axis=1)
+    accuracy = tf.reduce_mean(
+        tf.cast(tf.equal(correct_prediction, 1.0), tf.float32), name='accuracy')
     return inputs, labels, output, prediction, loss, accuracy
 
 # 生成一个训练batch
 def get_next_batch(batch_size=128):
     inputs = np.zeros([batch_size, image_size[1]*image_size[0]])
-    labels = np.zeros([batch_size, label_size*CHARS_SIZE])
+    labels = np.zeros([batch_size, label_size])
     batch = random.sample(train_files, batch_size)
     for i, line in enumerate(batch):
         lines = line.split(" ")
@@ -146,7 +143,7 @@ def get_next_batch(batch_size=128):
         image = readImgFile(os.path.join(curr_dir,"data",imageFileName))   
         image = dropZeroEdges(image)
         inputs[i,:] = img2vec(image,image_size[0],image_size[1])
-        labels[i,:] = text2vec(CHARS, text) 
+        labels[i,:] = list(text) 
     return inputs, labels
 
 def train():
@@ -167,7 +164,7 @@ def train():
             return
         print("T/F: original(length) <-------> detectcted(length)")
         for idx, number in enumerate(test_labels):
-            label = vec2text(CHARS,number)
+            label = "".join([CHARS[s] for s in number])
             detect_label = "".join([CHARS[s] for s in _prediction[idx]])
             label = label.strip()
             detect_label = detect_label.strip()
