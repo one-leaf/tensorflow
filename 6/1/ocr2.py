@@ -141,6 +141,8 @@ def get_next_batch(batch_size=128):
         lines = line.split(" ")
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
+        # 文本需要补齐空格
+        text = text+"".join([' ' for x in range(label_size-len(text))])
         # 输出图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"data",imageFileName))   
         image = dropZeroEdges(image)
@@ -168,6 +170,8 @@ def train():
         for idx, number in enumerate(test_labels):
             label = vec2text(CHARS,number)
             detect_label = "".join([CHARS[s] for s in _prediction[idx]])
+            label = label.strip()
+            detect_label = detect_label.strip()
             hit = (label == detect_label)
             print(hit, label, "(", len(label), ") <-------> ", detect_label, "(", len(detect_label), ")")
         print("Test Accuracy:", accuracy)
