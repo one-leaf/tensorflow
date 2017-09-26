@@ -180,7 +180,7 @@ def train():
             if hit:
                 true_numer = true_numer + 1            
             print(hit, label, "(", len(label), ") <-------> ", detect_label, "(", len(detect_label), ")")
-        print("Test Accuracy:", true_numer * 1.0 / len(test_labels)))
+        print("Test Accuracy:", true_numer * 1.0 / len(test_labels))
 
     def do_report():
         test_inputs,test_labels = get_next_batch(TEST_BATCH_SIZE)
