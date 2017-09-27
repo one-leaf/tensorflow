@@ -36,10 +36,11 @@ BATCHES = 64 * 8
 BATCH_SIZE = 20
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
+DATA_DIR = "data.1"
 
-if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
+if os.path.exists(os.path.join(curr_dir, DATA_DIR, "index.txt")):
     print("Loading data ...")
-    train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
+    train_files = open(os.path.join(curr_dir, DATA_DIR, "index.txt")).readlines()
 else:
     train_files = []
 
@@ -139,7 +140,7 @@ def get_next_batch(batch_size=128):
         # 文本需要补齐空格
         text = text+"".join([' ' for x in range(label_size-len(text))])
         # 输出图片为反色黑白
-        image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
+        image = readImgFile(os.path.join(curr_dir, DATA_DIR, imageFileName))
         image = dropZeroEdges(image)
         inputs[i,:] = img2vec(image,image_size[0],image_size[1])
         label_list=[]
