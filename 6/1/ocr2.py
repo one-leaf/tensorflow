@@ -32,8 +32,8 @@ CHARS_SIZE = len(CHARS)
 REPORT_STEPS = 1000
 
 BATCHES = 64 * 8
-# 模型太大了一次只能学10笔
-BATCH_SIZE = 10
+# 模型太大了一次只能学20笔
+BATCH_SIZE = 20
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
@@ -49,10 +49,10 @@ def neural_networks():
     # 训练的结果
     labels = tf.placeholder(tf.int32, [None, label_size], name='labels')
     # 卷积层
-    filter_sizes = [5, 3, 3]
+    filter_sizes = [3, 3, 3]
     filter_nums = [32, 32, 32]
-    pool_types = ['avg', 'avg', 'max']
-    pool_scale = [2, 2, 2]
+    pool_types = ['avg', 'avg', 'avg']
+    pool_scale = [1, 1, 2]
     conv_pools = []    
     for i in range(len(filter_sizes)):
         with tf.variable_scope('conv-pool-{}'.format(i)):
