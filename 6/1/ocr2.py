@@ -136,7 +136,8 @@ def get_next_batch(batch_size=128):
         # 文本需要补齐空格
         text = text+"".join([' ' for x in range(label_size-len(text))])
         # 输出图片为反色黑白
-        image = readImgFile(os.path.join(curr_dir,"data",imageFileName))   
+        image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
+        print(imageFileName, image.shape)   
         image = dropZeroEdges(image)
         inputs[i,:] = img2vec(image,image_size[0],image_size[1])
         label_list=[]
