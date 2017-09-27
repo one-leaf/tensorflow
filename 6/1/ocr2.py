@@ -202,7 +202,7 @@ def train():
 
     session= tf.InteractiveSession()
     session.run(tf.global_variables_initializer())
-    saver, model_dir, checkpoint_path = restore(session) # tf.train.Saver(tf.global_variables(), max_to_keep=100)
+    saver, model_dir, checkpoint_path = restore(session) 
     while True:            
         train_cost = train_ler = 0
         for batch in range(BATCHES):
