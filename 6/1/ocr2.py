@@ -201,7 +201,7 @@ def train():
     optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step, name="optimizer")
 
     session= tf.InteractiveSession()
-    session.run(tf.global_variables_initializer)
+    session.run(tf.global_variables_initializer())
     saver, model_dir, checkpoint_path = restore(session) # tf.train.Saver(tf.global_variables(), max_to_keep=100)
     while True:            
         train_cost = train_ler = 0
