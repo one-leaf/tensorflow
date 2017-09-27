@@ -127,7 +127,7 @@ def neural_networks():
 # 生成一个训练batch
 def get_next_batch(batch_size=128):
     inputs = np.zeros([batch_size, image_size[1]*image_size[0]])
-    labels = np.zeros([batch_size, label_size])
+    labels = np.zeros([batch_size, label_size], dtype=int)
     batch = random.sample(train_files, batch_size)
     for i, line in enumerate(batch):
         lines = line.split(" ")
@@ -157,8 +157,8 @@ def train():
         true_numer = 0        
         print("T/F: original(length) <-------> detectcted(length)")
         for idx, number in enumerate(test_labels):
-            label = "".join([CHARS[int(s)] for s in number])
-            detect_label = "".join([CHARS[int(s)] for s in _prediction[idx]])
+            label = "".join([CHARS[s] for s in number])
+            detect_label = "".join([CHARS[s] for s in _prediction[idx]])
             label = label.strip()
             detect_label = detect_label.strip()
             hit = (label == detect_label)
