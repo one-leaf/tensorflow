@@ -26,14 +26,9 @@ ZH_CHARS_PUN = "　。？！，、；：「」『』“”（）〔〕【】…�
 
 CHARS = sorted(set(list(ASCII_CHARS + ZH_CHARS_ONE + ZH_CHARS_TWO + ZH_CHARS_PUN)))
 CHARS_SIZE = len(CHARS)
-#初始化学习速率
-# LEARNING_RATE_INITIAL = 1e-3
-# LEARNING_RATE_DECAY_FACTOR = 0.9
-# LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 500
-# MOMENTUM = 0.9
+REPORT_STEPS = 1000
 
-BATCHES = 64
+BATCHES = 64 * 8
 # 模型太大了一次只能学10笔
 BATCH_SIZE = 10
 TRAIN_SIZE = BATCHES * BATCH_SIZE
@@ -154,16 +149,6 @@ def get_next_batch(batch_size=128):
     return inputs, labels
 
 def train():
-    global_step = tf.Variable(0, trainable=False)
-    
-    # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-3
-    learning_rate = tf.placeholder(tf.float32, shape=[])                                            
-    inputs, labels, output, prediction, loss, accuracy = neural_networks()
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step, name="optimizer")
-
-    init = tf.global_variables_initializer()
-
     def report_accuracy(_prediction, test_labels):
         if len(_prediction) != len(test_labels):
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
@@ -198,7 +183,6 @@ def train():
         return b_loss, steps, b_learning_rate
 
     def restore(sess):
-        curr_dir = os.path.dirname(__file__)
         model_dir = os.path.join(curr_dir, "model2")
         if not os.path.exists(model_dir): os.mkdir(model_dir)
         saver_prefix = os.path.join(model_dir, "model.ckpt")        
@@ -208,6 +192,15 @@ def train():
             print("Restore Model ...")
             saver.restore(sess, ckpt.model_checkpoint_path)
         return saver, model_dir, saver_prefix
+
+    global_step = tf.Variable(0, trainable=False)   
+    # 决定还是自定义学习速率比较靠谱                                            
+    curr_learning_rate = 1e-3
+    learning_rate = tf.placeholder(tf.float32, shape=[])                                            
+    inputs, labels, output, prediction, loss, accuracy = neural_networks()
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step, name="optimizer")
+
+    init = tf.global_variables_initializer()
 
     with tf.Session() as session:
         session.run(init)
