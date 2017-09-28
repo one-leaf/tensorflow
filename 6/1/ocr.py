@@ -10,8 +10,7 @@ import random
 
 curr_dir = os.path.dirname(__file__)
 
-# 图片的高度为28，宽度为1000
-image_size = (3000,28)
+image_height = 28
 
 #LSTM
 num_hidden = 128
@@ -36,7 +35,7 @@ REPORT_STEPS = 500
 # MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
@@ -64,16 +63,14 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
             except:
                 print(dst_image_name,"error")
                 continue
-            resized_image = resize(image,image_size[1])
-            if resized_image.shape[1]>image_size[0]:
-                raise Exception("image %s too large, width: %s,canot resize"%(image_name,resized_image.shape[1]))
+            resized_image = resize(image,image_height)
             save(resized_image,dst_image_name)
             train_files.append(line)
 
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,12]
-    inputs = tf.placeholder(tf.float32, [None, None, image_size[1]], name="inputs")
+    inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
     # 定义 ctc_loss 是稀疏矩阵
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     # 1维向量 序列长度 [batch_size,]
@@ -106,15 +103,13 @@ def neural_networks():
     return logits, inputs, labels, seq_len, W, b, input_keep_prob
 
 
-# 生成一个训练batch
+# 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
-
-    inputs = np.zeros([batch_size, image_size[0], image_size[1]])
+    batch = random.sample(train_files, batch_size)    
     codes = []
-
-    batch = random.sample(train_files, batch_size)
-
-    for i, line in enumerate(batch):
+    images = []
+    max_width_image = 0
+    for line in batch:
         lines = line.split(" ")
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
@@ -122,21 +117,21 @@ def get_next_batch(batch_size=128):
         # text = text.replace('O','0')
         # 输出图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"dataset",imageFileName))    
-        image_vec = img2vec(image, width=image_size[0], height=image_size[1])
-
-        #np.transpose 矩阵转置 (20*256,) => (20,256) => (256,20)
-        inputs[i,:] = np.transpose(image_vec.reshape((image_size[1],image_size[0])))
-        #标签转成列表保存在codes
+        images.append(image)
+        if image.shape[0] > max_width_image: 
+            max_width_image = image.shape[0]
         text_list = [CHARS.index(char) for char in text]
         codes.append(text_list)
-    #比如batch_size=2，两条数据分别是"12"和"1"，则labels [['1','2'],['1']]
+
+    inputs = np.zeros([batch_size, max_width_image, image_height])
+    for i in range(len(images)):
+        image_vec = img2vec(image, width=max_width_image, height=image_height)
+        inputs[i,:] = np.transpose(image_vec.reshape((image_height,max_width_image)))
 
     labels = [np.asarray(i) for i in codes]
-
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
-    #(batch_size,) sequence_length值都是256，最大划分列数
-    seq_len = np.ones(inputs.shape[0]) * image_size[0]
+    seq_len = np.ones(inputs.shape[0]) * max_width_image
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
