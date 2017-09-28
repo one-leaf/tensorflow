@@ -11,7 +11,7 @@ import random
 curr_dir = os.path.dirname(__file__)
 
 # 图片的高度为28，宽度为1000
-image_size = (1000,28)
+image_size = (2000,28)
 
 #LSTM
 num_hidden = 128
@@ -36,7 +36,7 @@ REPORT_STEPS = 500
 # MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
