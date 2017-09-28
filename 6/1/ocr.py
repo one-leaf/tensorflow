@@ -10,7 +10,7 @@ import random
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 28
+image_height = 16
 
 #LSTM
 num_hidden = 128
