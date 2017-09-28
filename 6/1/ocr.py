@@ -119,14 +119,14 @@ def get_next_batch(batch_size=128):
         # 输出图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"dataset",imageFileName))    
         images.append(image)
-        if image.shape[0] > max_width_image: 
-            max_width_image = image.shape[0]
+        if image.shape[1] > max_width_image: 
+            max_width_image = image.shape[1]
         text_list = [CHARS.index(char) for char in text]
         codes.append(text_list)
 
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
-        image_vec = img2vec(images[i], width=max_width_image, height=image_height)
+        image_vec = img2vec(images[i], height=image_height, width=max_width_image)
         inputs[i,:] = np.transpose(image_vec.reshape((image_height,max_width_image)))
 
     labels = [np.asarray(i) for i in codes]
