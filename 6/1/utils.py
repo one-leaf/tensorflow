@@ -7,7 +7,7 @@ import random
 
 # 按高度缩放图片
 def resize(img,height=28):
-    width = height*img.shape[0]/img.shape[1]
+    width = round(height*img.shape[0]/img.shape[1])
     return cv2.resize(img,(width,height),interpolation=cv2.INTER_CUBIC)
 
 # 文本转向量
