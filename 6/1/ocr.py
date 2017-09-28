@@ -59,9 +59,13 @@ for i, line in enumerate(train_files):
     if not os.path.exists(os.path.dirname(dst_image_name)):
         os.mkdir(os.path.dirname(dst_image_name))        
     src_image_name = os.path.join(curr_dir,"data",image_name)
-    image = readImgFile(src_image_name)
-    image = img2bwinv(image)    
-    image = dropZeroEdges(image)    
+    try:
+        image = readImgFile(src_image_name)
+        image = img2bwinv(image)    
+        image = dropZeroEdges(image)    
+    except:
+        train_files.remove(line)
+        continue
     resized_image = resize(image,image_size[1])
     if resized_image.shape[1]>image_size[0]:
         raise Exception("image %s too large, width: %s,canot resize"%(image_name,resized_image.shape[1]))
