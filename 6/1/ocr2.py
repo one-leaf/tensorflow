@@ -36,7 +36,7 @@ BATCHES = 64 * 4
 BATCH_SIZE = 10
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
-DATA_DIR = "data.1"
+DATA_DIR = "data.bak/data.half.all.1"
 
 if os.path.exists(os.path.join(curr_dir, DATA_DIR, "index.txt")):
     print("Loading data ...")
