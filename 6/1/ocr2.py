@@ -50,10 +50,10 @@ def neural_networks():
     # 训练的结果
     labels = tf.placeholder(tf.int32, [None, label_size], name='labels')
     # 卷积层
-    filter_sizes = [3, 3, 3]
+    filter_sizes = [5, 3, 3]
     filter_nums = [32, 32, 32]
-    pool_types = ['avg', 'avg', 'avg']
-    pool_scale = [1, 1, 2]
+    pool_types = ['avg', 'avg', 'max']
+    pool_scale = [2, 2, 1]
     conv_pools = []    
     for i in range(len(filter_sizes)):
         with tf.variable_scope('conv-pool-{}'.format(i)):
