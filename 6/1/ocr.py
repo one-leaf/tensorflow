@@ -40,39 +40,36 @@ BATCH_SIZE = 32
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
-
+train_files = []
 if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
     print("Loading data ...")
-    train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
-else:
-    train_files = []
-
-# 预处理图片
-if not os.path.exists(os.path.join(curr_dir, "dataset")):
-    os.mkdir(os.path.join(curr_dir, "dataset"))
-for i, line in enumerate(train_files):
-    lines = line.split(" ")
-    image_name = lines[0]+".png"
-    dst_image_name = os.path.join(curr_dir,"dataset",image_name)
-    if os.path.exists(dst_image_name):
-        continue
-    if not os.path.exists(os.path.dirname(dst_image_name)):
-        os.mkdir(os.path.dirname(dst_image_name))        
-    src_image_name = os.path.join(curr_dir,"data",image_name)
-    try:
-        image = readImgFile(src_image_name)
-        image = img2bwinv(image)    
-        image = dropZeroEdges(image)    
-    except:
-        train_files.remove(line)
-        print(dst_image_name,"error")
-        continue
-    resized_image = resize(image,image_size[1])
-    if resized_image.shape[1]>image_size[0]:
-        raise Exception("image %s too large, width: %s,canot resize"%(image_name,resized_image.shape[1]))
-    save(resized_image,dst_image_name)
-    if i%1000==0:
-        print("pre done image no: ",i)
+    # 预处理图片
+    if not os.path.exists(os.path.join(curr_dir, "dataset")):
+        os.mkdir(os.path.join(curr_dir, "dataset"))
+    with open(os.path.join(curr_dir, "data", "index.txt")) as index_file:
+        for i, line in enumerate(index_file.readlines()):
+            lines = line.split(" ")
+            image_name = lines[0]+".png"
+            dst_image_name = os.path.join(curr_dir,"dataset",image_name)
+            if os.path.exists(dst_image_name):
+                continue
+            if not os.path.exists(os.path.dirname(dst_image_name)):
+                os.mkdir(os.path.dirname(dst_image_name))        
+            src_image_name = os.path.join(curr_dir,"data",image_name)
+            try:
+                image = readImgFile(src_image_name)
+                image = img2bwinv(image)    
+                image = dropZeroEdges(image)    
+            except:
+                print(dst_image_name,"error")
+                continue
+            resized_image = resize(image,image_size[1])
+            if resized_image.shape[1]>image_size[0]:
+                raise Exception("image %s too large, width: %s,canot resize"%(image_name,resized_image.shape[1]))
+            save(resized_image,dst_image_name)
+            train_files.append(line)
+            if i%1000==0:
+                print("pre done image no: ",i)
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,12]
