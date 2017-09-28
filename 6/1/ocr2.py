@@ -141,14 +141,14 @@ def get_next_batch(batch_size=128):
         text = line[line.index(' '):].strip()
         # 文本需要补齐空格
         text = text+"".join([' ' for x in range(label_size-len(text))])
-        if text in images:
-            imgvec = images[text]
+        if imageFileName in images:
+            imgvec = images[imageFileName]
         else:    
             # 输出图片为反色黑白
             image = readImgFile(os.path.join(curr_dir, DATA_DIR, imageFileName))
             image = dropZeroEdges(image)
             imgvec = img2vec(image,image_size[0],image_size[1])
-            images[text] = imgvec
+            images[imageFileName] = imgvec
         inputs[i,:] = imgvec
         label_list=[]
         for c in text:
