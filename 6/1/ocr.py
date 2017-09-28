@@ -69,7 +69,7 @@ for i, line in enumerate(train_files):
     resized_image = resize(image,image_size[1])
     if resized_image.shape[1]>image_size[0]:
         raise Exception("image %s too large, width: %s,canot resize"%(image_name,resized_image.shape[1]))
-    save(image,dst_image_name)
+    save(resized_image,dst_image_name)
     if i%1000==0:
         print("pre done image no: ",i)
 
