@@ -140,7 +140,7 @@ def get_next_batch(batch_size=128):
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
         # 在宋体9号字体下，O和0完全一致，因此全部按0处理
-        text = text.replace('O','0')
+        # text = text.replace('O','0')
         # 文本需要补齐空格
         text = text+"".join([' ' for x in range(label_size-len(text))])
         if imageFileName in images:

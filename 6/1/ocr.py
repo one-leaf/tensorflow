@@ -122,7 +122,7 @@ def get_next_batch(batch_size=128):
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
         # 在宋体9号字体下，O和0完全一致，因此全部按0处理
-        text = text.replace('O','0')
+        # text = text.replace('O','0')
         # 输出图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"dataset",imageFileName))    
         image_vec = img2vec(image, width=image_size[0], height=image_size[1])
