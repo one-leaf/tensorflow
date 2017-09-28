@@ -11,7 +11,7 @@ import random
 curr_dir = os.path.dirname(__file__)
 
 # 图片的高度为20，宽度为1000
-image_size = (20,1000)
+image_size = (16,800)
 
 # 最长50个字节
 label_size = 50
@@ -27,13 +27,14 @@ UNKOWN_CHAR = "�"
 
 # 加了二级常用字，模型都超大
 # CHARS = sorted(set(list(ASCII_CHARS + ZH_CHARS_ONE + ZH_CHARS_TWO + ZH_CHARS_PUN)))
-CHARS = sorted(set(list(ASCII_CHARS + ZH_CHARS_ONE + ZH_CHARS_PUN+ UNKOWN_CHAR)))
+# CHARS = sorted(set(list(ASCII_CHARS + ZH_CHARS_ONE + ZH_CHARS_PUN+ UNKOWN_CHAR)))
+CHARS = sorted(set(list(ASCII_CHARS + UNKOWN_CHAR)))
 CHARS_SIZE = len(CHARS)
 REPORT_STEPS = 1000
 
 BATCHES = 64 * 4
-# 模型太大了一次只能学10笔
-BATCH_SIZE = 10
+# 模型太大了一次只能学60笔
+BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 DATA_DIR = "data.bak/data.acii"
