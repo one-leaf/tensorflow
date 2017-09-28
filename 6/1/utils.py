@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 import random
 
 
-# 按高度缩放图片
+# 按高度缩放图片,img_shape=(height,width)
 def resize(img,height=28):
-    width = round(height*img.shape[0]/img.shape[1])
-    print(img.shape[0],img.shape[1],width,height)
+    width = round(height*img.shape[1]/img.shape[0])
+    # print(img.shape[0],img.shape[1],width,height)
     return cv2.resize(img,(width,height),interpolation=cv2.INTER_CUBIC)
 
 # 文本转向量
