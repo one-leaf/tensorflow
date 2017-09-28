@@ -65,6 +65,7 @@ for i, line in enumerate(train_files):
         image = dropZeroEdges(image)    
     except:
         train_files.remove(line)
+        print(dst_image_name,"error")
         continue
     resized_image = resize(image,image_size[1])
     if resized_image.shape[1]>image_size[0]:
