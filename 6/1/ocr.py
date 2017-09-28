@@ -48,6 +48,7 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
         os.mkdir(os.path.join(curr_dir, "dataset"))
     with open(os.path.join(curr_dir, "data", "index.txt")) as index_file:
         for i, line in enumerate(index_file.readlines()):
+            if i%10000==0: print("resizing image no: ",i)
             lines = line.split(" ")
             image_name = lines[0]+".png"
             dst_image_name = os.path.join(curr_dir,"dataset",image_name)
@@ -68,8 +69,7 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
                 raise Exception("image %s too large, width: %s,canot resize"%(image_name,resized_image.shape[1]))
             save(resized_image,dst_image_name)
             train_files.append(line)
-            if i%1000==0:
-                print("pre done image no: ",i)
+
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,12]
