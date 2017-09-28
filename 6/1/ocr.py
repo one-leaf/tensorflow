@@ -4,14 +4,14 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2vec, dropZeroEdges
+from utils import readImgFile, img2bwinv, img2vec, dropZeroEdges, resize, save
 import time
 import random
 
 curr_dir = os.path.dirname(__file__)
 
-# 图片的高度为20，宽度为256
-image_size = (20,700)
+# 图片的高度为28，宽度为1000
+image_size = (1000,28)
 
 #LSTM
 num_hidden = 128
@@ -40,15 +40,38 @@ BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
+
 if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
     print("Loading data ...")
     train_files = open(os.path.join(curr_dir, "data", "index.txt")).readlines()
 else:
     train_files = []
 
+# 预处理图片
+if not os.path.exists(os.path.join(curr_dir, "dataset")):
+    os.mkdir(os.path.join(curr_dir, "dataset"))
+for i, line in enumerate(train_files):
+    lines = line.split(" ")
+    image_name = lines[0]+".png"
+    dst_image_name = os.path.join(curr_dir,"dataset",image_name)
+    if os.path.exists(dst_image_name):
+        continue
+    if not os.path.exists(os.path.dirname(dst_image_name)):
+        os.mkdir(os.path.dirname(dst_image_name))        
+    src_image_name = os.path.join(curr_dir,"data",image_name)
+    image = readImgFile(src_image_name)
+    image = img2bwinv(image)    
+    image = dropZeroEdges(image)    
+    resized_image = resize(image,image_size[1])
+    if resized_image.shape[1]>image_size[0]:
+        raise("image %s too large, canot resize"%image_name)
+    save(image,dst_image_name)
+    if i%1000==0:
+        print("pre done image no: ",i)
+
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,12]
-    inputs = tf.placeholder(tf.float32, [None, None, image_size[0]], name="inputs")
+    inputs = tf.placeholder(tf.float32, [None, None, image_size[1]], name="inputs")
     # 定义 ctc_loss 是稀疏矩阵
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     # 1维向量 序列长度 [batch_size,]
@@ -84,7 +107,7 @@ def neural_networks():
 # 生成一个训练batch
 def get_next_batch(batch_size=128):
 
-    inputs = np.zeros([batch_size, image_size[1], image_size[0]])
+    inputs = np.zeros([batch_size, image_size[0], image_size[1]])
     codes = []
 
     batch = random.sample(train_files, batch_size)
@@ -95,19 +118,11 @@ def get_next_batch(batch_size=128):
         text = line[line.index(' '):].strip()
 
         # 输出图片为反色黑白
-        image = readImgFile(os.path.join(curr_dir,"data",imageFileName))
-    
-        image = dropZeroEdges(image)
-        # # 随机在图片前面和上面增加黑色区域，加入干扰
-        # for _ in range(random.randint(0,5)):
-        #     image = np.insert(image, 0, values=0, axis=0)
-        # for _ in range(random.randint(0,5)):
-        #     image = np.insert(image, 0, values=0, axis=1)
-
-        image_vec = img2vec(image,image_size[0],image_size[1])
+        image = readImgFile(os.path.join(curr_dir,"dataset",imageFileName))    
+        image_vec = img2vec(image, width=image_size[0], height=image_size[1])
 
         #np.transpose 矩阵转置 (20*256,) => (20,256) => (256,20)
-        inputs[i,:] = np.transpose(image_vec.reshape((image_size[0],image_size[1])))
+        inputs[i,:] = np.transpose(image_vec.reshape((image_size[1],image_size[0])))
         #标签转成列表保存在codes
         text_list = [CHARS.index(char) for char in text]
         codes.append(text_list)
@@ -118,7 +133,7 @@ def get_next_batch(batch_size=128):
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
     #(batch_size,) sequence_length值都是256，最大划分列数
-    seq_len = np.ones(inputs.shape[0]) * image_size[1]
+    seq_len = np.ones(inputs.shape[0]) * image_size[0]
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    

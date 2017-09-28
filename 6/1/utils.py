@@ -4,6 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
+
+# 按高度缩放图片
+def resize(img,height=28):
+    width = height*img.shape[0]/img.shape[1]
+    return cv2.resize(img,(width,height),interpolation=cv2.INTER_CUBIC)
+
 # 文本转向量
 def text2vec(char_set,text):
     text_len = len(text)
@@ -146,7 +152,6 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
 
 def readImgFile(filename):
     _img = cv2.imread(filename, 0)
-    _img = img2bwinv(_img)
     return _img
 
 # img_gray 传入的灰度图像

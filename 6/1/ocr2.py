@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2vec, dropZeroEdges, text2vec, vec2text
+from utils import readImgFile, img2vec, dropZeroEdges, text2vec, vec2text, img2bwinv
 import time
 import random
 
@@ -146,6 +146,7 @@ def get_next_batch(batch_size=128):
         else:    
             # 输出图片为反色黑白
             image = readImgFile(os.path.join(curr_dir, DATA_DIR, imageFileName))
+            image = img2bwinv(image)
             image = dropZeroEdges(image)
             imgvec = img2vec(image,image_size[0],image_size[1])
             images[imageFileName] = imgvec
