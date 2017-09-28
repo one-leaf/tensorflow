@@ -52,6 +52,7 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
             image_name = lines[0]+".png"
             dst_image_name = os.path.join(curr_dir,"dataset",image_name)
             if os.path.exists(dst_image_name):
+                train_files.append(line)
                 continue
             if not os.path.exists(os.path.dirname(dst_image_name)):
                 os.mkdir(os.path.dirname(dst_image_name))        
