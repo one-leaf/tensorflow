@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2vec, dropZeroEdges, text2vec, vec2text, img2bwinv
+from utils import readImgFile, img2vec, dropZeroEdges, text2vec, vec2text, img2bwinv, resize
 import time
 import random
 
@@ -13,8 +13,8 @@ curr_dir = os.path.dirname(__file__)
 # 图片的高度为20，宽度为1000
 image_size = (20,1000)
 
-# 最长100个字节
-label_size = 100
+# 最长50个字节
+label_size = 50
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -150,6 +150,7 @@ def get_next_batch(batch_size=128):
             image = readImgFile(os.path.join(curr_dir, DATA_DIR, imageFileName))
             image = img2bwinv(image)
             image = dropZeroEdges(image)
+            image = resize(image,20)
             imgvec = img2vec(image,image_size[0],image_size[1])
             images[imageFileName] = imgvec
         inputs[i,:] = imgvec
