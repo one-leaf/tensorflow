@@ -64,7 +64,7 @@ for i, line in enumerate(train_files):
     image = dropZeroEdges(image)    
     resized_image = resize(image,image_size[1])
     if resized_image.shape[1]>image_size[0]:
-        raise("image %s too large, canot resize"%image_name)
+        raise Exception("image %s too large, canot resize"%image_name)
     save(image,dst_image_name)
     if i%1000==0:
         print("pre done image no: ",i)
