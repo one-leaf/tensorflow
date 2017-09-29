@@ -229,7 +229,7 @@ def train():
                      labels: test_labels,
                      seq_len: test_seq_len,
                      input_keep_prob: 1.0}
-        dd, log_probs = session.run([decoded[0], log_prob], test_feed)
+        dd = session.run(decoded[0], test_feed)
         report_accuracy(dd, test_labels)
  
     def do_batch():
