@@ -31,11 +31,11 @@ num_classes = len(CHARS) + 1 + 1
 # LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 500
+REPORT_STEPS = 10000
 # MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 16
+BATCH_SIZE = 50
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
@@ -82,7 +82,8 @@ def neural_networks():
     #   tf.nn.rnn_cell.GRUCell
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
     cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
+    # 随机抛弃函数，貌似没啥用
+    # cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
     stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
     
     # 第二个输出状态，不会用到
@@ -240,7 +241,7 @@ def train():
 
         if steps > 0 and steps % REPORT_STEPS == 0:
             do_report()
-        return b_cost, steps, b_learning_rate
+        return b_cost, steps, b_learning_rate, train_inputs.shape[1]
 
     def restore(sess):
         curr_dir = os.path.dirname(__file__)
@@ -261,10 +262,10 @@ def train():
             train_cost = train_ler = 0
             for batch in range(BATCHES):
                 start = time.time()
-                c, steps, rate = do_batch()
+                c, steps, rate, width = do_batch()
                 train_cost += c * BATCH_SIZE
                 seconds = round(time.time() - start,2)
-                print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", rate)
+                print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", rate, "width:", width)
                 if np.isnan(c):
                     print("Error: cost is nan")
                     return                
