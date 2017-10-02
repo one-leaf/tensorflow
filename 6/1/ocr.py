@@ -34,8 +34,8 @@ num_classes = len(CHARS) + 1 + 1
 REPORT_STEPS = 500
 # MOMENTUM = 0.9
 
-BATCHES = 64
-BATCH_SIZE = 50
+BATCHES = 128
+BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
@@ -263,7 +263,7 @@ def train():
         session.run(init)
         saver, model_dir, checkpoint_path = restore(session) # tf.train.Saver(tf.global_variables(), max_to_keep=100)
         while True:            
-            train_cost = train_ler = 0
+            train_cost = 0
             for batch in range(BATCHES):
                 start = time.time()
                 c, steps, rate, width = do_batch()
@@ -282,12 +282,11 @@ def train():
                     curr_learning_rate = 1e-5
 
             start = time.time()
-            train_cost /= TRAIN_SIZE
             train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
             val_feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 1.0, learning_rate: curr_learning_rate }
-            val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
-            log = "steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
-            print(log.format(steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
+            val_cost, val_acc, steps = session.run([cost, acc, global_step], feed_dict=val_feed)
+            log = "steps: {}, val_cost: {:.3f}, val_acc: {:.3f}, time: {:.3f}s"
+            print(log.format(steps, train_cost, val_cost, val_acc, time.time() - start, lr))
             saver.save(session, checkpoint_path, global_step=steps)
 
 if __name__ == '__main__':
