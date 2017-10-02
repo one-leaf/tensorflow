@@ -286,7 +286,7 @@ def train():
             val_feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 1.0, learning_rate: curr_learning_rate }
             val_cost, val_acc, steps = session.run([cost, acc, global_step], feed_dict=val_feed)
             log = "steps: {}, val_cost: {:.3f}, val_acc: {:.3f}, time: {:.3f}s"
-            print(log.format(steps, train_cost, val_cost, val_acc, time.time() - start, lr))
+            print(log.format(steps, val_cost, val_acc, time.time() - start))
             saver.save(session, checkpoint_path, global_step=steps)
 
 if __name__ == '__main__':
