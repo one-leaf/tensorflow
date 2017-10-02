@@ -37,7 +37,7 @@ REPORT_STEPS = 500
 BATCHES = 128
 BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
-TEST_BATCH_SIZE = 10
+TEST_BATCH_SIZE = 64
 
 train_files = []
 if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
@@ -281,12 +281,12 @@ def train():
                 if c < 0.03 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
 
-            start = time.time()
-            train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-            val_feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 1.0, learning_rate: curr_learning_rate }
-            val_cost, val_acc, steps = session.run([cost, acc, global_step], feed_dict=val_feed)
-            log = "steps: {}, val_cost: {:.3f}, val_acc: {:.3f}, time: {:.3f}s"
-            print(log.format(steps, val_cost, val_acc, time.time() - start))
+            # start = time.time()
+            # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+            # val_feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 1.0, learning_rate: curr_learning_rate }
+            # val_cost, val_acc, steps = session.run([cost, acc, global_step], feed_dict=val_feed)
+            # log = "steps: {}, val_cost: {:.3f}, val_acc: {:.3f}, time: {:.3f}s"
+            # print(log.format(steps, val_cost, val_acc, time.time() - start))
             saver.save(session, checkpoint_path, global_step=steps)
 
 if __name__ == '__main__':
