@@ -286,8 +286,8 @@ def train():
             train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
             val_feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 1.0, learning_rate: curr_learning_rate }
             val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
-            log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
-            print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
+            log = "steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
+            print(log.format(steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
             saver.save(session, checkpoint_path, global_step=steps)
 
 if __name__ == '__main__':
