@@ -274,24 +274,20 @@ def train():
                     print("Error: cost is nan")
                     return                
             
-            # train_cost /= TRAIN_SIZE
-                if c < 10 and curr_learning_rate > 1e-3:
+                if c < 3 and curr_learning_rate > 1e-3:
                     curr_learning_rate = 1e-3
-                if c < 1 and curr_learning_rate > 1e-4:
+                if c < 0.5 and curr_learning_rate > 1e-4:
                     curr_learning_rate = 1e-4
-                if c < 0.1 and curr_learning_rate > 1e-5:
+                if c < 0.01 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
 
-            # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-            # val_feed = {inputs: train_inputs,
-            #             labels: train_labels,
-            #             seq_len: train_seq_len,
-            #             input_keep_prob: 1.0  }
-
-            # val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
-
-            # log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
-            # print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
+            start = time.time()
+            train_cost /= TRAIN_SIZE
+            train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+            val_feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, input_keep_prob: 1.0  }
+            val_cost, val_ler, lr, steps = session.run([cost, acc, learning_rate, global_step], feed_dict=val_feed)
+            log = "Epoch {}/{}, steps = {}, train_cost = {:.3f}, train_ler = {:.3f}, val_cost = {:.3f}, val_ler = {:.3f}, time = {:.3f}s, learning_rate = {}"
+            print(log.format(curr_epoch + 1, num_epochs, steps, train_cost, train_ler, val_cost, val_ler, time.time() - start, lr))
             saver.save(session, checkpoint_path, global_step=steps)
 
 if __name__ == '__main__':
