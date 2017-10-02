@@ -278,7 +278,7 @@ def train():
                     curr_learning_rate = 1e-3
                 if c < 0.3 and curr_learning_rate > 1e-4:
                     curr_learning_rate = 1e-4
-                if c < 0.01 and curr_learning_rate > 1e-5:
+                if c < 0.03 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
 
             start = time.time()
