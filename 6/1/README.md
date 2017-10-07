@@ -12,3 +12,5 @@ https://github.com/JinpengLI/deep_ocr
 https://github.com/pannous/tensorflow-ocr
 http://www.jianshu.com/p/45828b18f133
 https://github.com/synckey/tensorflow_lstm_ctc_ocr/
+http://ilovin.me/2017-04-06/tensorflow-lstm-ctc-ocr/
+http://ilovin.me/2017-04-23/tensorflow-lstm-ctc-input-output/
