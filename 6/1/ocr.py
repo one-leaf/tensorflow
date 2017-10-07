@@ -13,8 +13,8 @@ curr_dir = os.path.dirname(__file__)
 image_height = 16
 
 #LSTM
-num_hidden = 128
-num_layers = 1
+num_hidden = 512
+num_layers = 2
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -81,10 +81,13 @@ def neural_networks():
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
-    cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    cells = []
+    for _ in range(num_layers):
+        cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+        cells.append(cell)
     # 随机抛弃函数，貌似没啥用
     # cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
-    stack = tf.contrib.rnn.MultiRNNCell([cell] * num_layers, state_is_tuple=True)
+    stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
     
     # 第二个输出状态，不会用到
     outputs, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
