@@ -190,7 +190,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-2
+    curr_learning_rate = 1e-3
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, W, b, input_keep_prob = neural_networks()
@@ -273,15 +273,15 @@ def train():
                 train_cost += c * BATCH_SIZE
                 seconds = round(time.time() - start,2)
                 print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", rate, "width:", width)
-                if np.isnan(c):
-                    print("Error: cost is nan")
+                if np.isnan(c) or np.isinf(c):
+                    print("Error: cost is nan or inf")
                     return                
             
-                if c < 3 and curr_learning_rate > 1e-3:
-                    curr_learning_rate = 1e-3
-                if c < 0.5 and curr_learning_rate > 1e-4:
+                if c < 5 and curr_learning_rate > 5e-4:
+                    curr_learning_rate = 5e-4
+                if c < 0.5 and curr_learning_rate > 5e-5:
                     curr_learning_rate = 5e-5
-                if c < 0.13 and curr_learning_rate > 1e-5:
+                if c < 0.1 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
 
             # start = time.time()
