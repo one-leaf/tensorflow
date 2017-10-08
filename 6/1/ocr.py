@@ -200,7 +200,13 @@ def train():
 
     # 收敛效果不好
     # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step, name="optimizer")
+
+    # 做一个梯度裁剪
+	grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+	grads_and_vars = grads_optimizer.compute_gradients(loss)
+	capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
+	optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars)
+
     # 直接最小化 loss 容易过拟合
     # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
     # The ctc_greedy_decoder is a special case of the ctc_beam_search_decoder with top_paths=1 (but that decoder is faster for this special case).
