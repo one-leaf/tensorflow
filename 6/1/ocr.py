@@ -13,7 +13,7 @@ curr_dir = os.path.dirname(__file__)
 image_height = 16
 
 #LSTM
-num_hidden = 512
+num_hidden = 256
 num_layers = 2
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
