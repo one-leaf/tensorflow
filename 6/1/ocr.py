@@ -223,19 +223,20 @@ def train():
         original_list = decode_sparse_tensor(test_labels)
         detected_list = decode_sparse_tensor(decoded_list)
         true_numer = 0
-        
+        all_numer = 0
         if len(original_list) != len(detected_list):
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                   " test and detect length desn't match")
             return
         print("T/F: original(length) <-------> detectcted(length)")
         for idx, number in enumerate(original_list):
-            detect_number = detected_list[idx]
-            hit = (number == detect_number)
+            detect_number = detected_list[idx]            
             print(hit, list_to_chars(number), "(", len(number), ") <-------> ", list_to_chars(detect_number), "(", len(detect_number), ")")
-            if hit:
-                true_numer = true_numer + 1
-        print("Test Accuracy:", true_numer * 1.0 / len(original_list))
+            all_numer += len(number)
+            for x in range(min(len(number),len(detect_number))):
+                if number[x]==detect_number[x]:
+                    true_numer += 1
+        print("Test Accuracy:", true_numer * 1.0 / all_numer
 
     def do_report():
         test_inputs,test_labels,test_seq_len = get_next_batch(TEST_BATCH_SIZE)
