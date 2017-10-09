@@ -236,7 +236,7 @@ def train():
             for x in range(min(len(number),len(detect_number))):
                 if number[x]==detect_number[x]:
                     true_numer += 1
-        print("Test Accuracy:", true_numer * 1.0 / all_numer
+        print("Test Accuracy:", true_numer * 1.0 / all_numer)
 
     def do_report():
         test_inputs,test_labels,test_seq_len = get_next_batch(TEST_BATCH_SIZE)
