@@ -231,7 +231,7 @@ def train():
         print("T/F: original(length) <-------> detectcted(length)")
         for idx, number in enumerate(original_list):
             detect_number = detected_list[idx]  
-            hit = (number == detect_number）          
+            hit = (number == detect_number)          
             print(hit, list_to_chars(number), "(", len(number), ") <-------> ", list_to_chars(detect_number), "(", len(detect_number), ")")
             all_numer += len(number)
             for x in range(min(len(number),len(detect_number))):
