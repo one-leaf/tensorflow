@@ -285,7 +285,7 @@ def train():
                     print("Error: cost is nan or inf")
                     return                
             
-                if c < 5 and curr_learning_rate > 5e-4:
+                if c < 1 and curr_learning_rate > 5e-4:
                     curr_learning_rate = 5e-4
                 if c < 0.5 and curr_learning_rate > 5e-5:
                     curr_learning_rate = 5e-5
