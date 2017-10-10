@@ -9,7 +9,7 @@ import random
 def resize(img,height=28):
     width = round(height*img.shape[1]/img.shape[0])
     # print(img.shape[0],img.shape[1],width,height)
-    return cv2.resize(img,(width,height),interpolation=cv2.INTER_LINEAR)
+    return cv2.resize(img,(width,height),interpolation=cv2.INTER_NEAREST)
 
 # 文本转向量
 def text2vec(char_set,text):
