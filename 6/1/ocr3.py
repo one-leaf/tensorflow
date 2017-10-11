@@ -81,40 +81,38 @@ def neural_networks():
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
-    cells1 = []
+    cells = []
     for _ in range(num_layers):
         cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, activation="relu")
         # 随机抛弃
         cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
-        cells1.append(cell)
-    
-    cells2 = []
-    for _ in range(num_layers):
-        cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, go_backwards=True, activation="relu")
-        cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
-        cells2.append(cell)
-    
-    cells = cells1 + cells2
-
+        cells.append(cell)
+   
     stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
     
-    # 第二个输出状态，不会用到
-    outputs, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-
     shape = tf.shape(inputs)
-
     batch_s, max_timesteps = shape[0], shape[1]
+
     # Reshaping to apply the same weights over the timesteps
-    outputs = tf.reshape(outputs, [-1, num_hidden])
+    outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
+    outputs1 = tf.reshape(outputs1, [-1, num_hidden])
+    W1 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    b1 = tf.Variable(tf.constant(0., shape=[num_classes]))
+    logits1 = tf.matmul(outputs, W1) + b1
 
-    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1), name="W")
-    b = tf.Variable(tf.constant(0., shape=[num_classes]), name="b")
+    inputs.reverse()
+    outputs2, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
+    outputs2 = tf.reshape(outputs2, [-1, num_hidden])
+    W2 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    b2 = tf.Variable(tf.constant(0., shape=[num_classes]))
+    logits2 = tf.matmul(outputs, W2) + b2
 
-    logits = tf.matmul(outputs, W) + b
+    logits = tf.add(logits1,logits2)
+
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
 
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
-    return logits, inputs, labels, seq_len, W, b, input_keep_prob
+    return logits, inputs, labels, seq_len, input_keep_prob
 
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
@@ -200,7 +198,7 @@ def train():
     curr_learning_rate = 1e-3
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
-    logits, inputs, labels, seq_len, W, b, input_keep_prob = neural_networks()
+    logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
 
     loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss, name="cost")
