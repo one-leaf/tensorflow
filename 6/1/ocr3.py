@@ -204,13 +204,13 @@ def train():
     cost = tf.reduce_mean(loss, name="cost")
 
     # 收敛效果不好
-    optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
+    # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
 
     # 做一个梯度裁剪，貌似也没啥用
-    # grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-    # grads_and_vars = grads_optimizer.compute_gradients(loss)
-    # capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
-    # optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
+    grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    grads_and_vars = grads_optimizer.compute_gradients(loss)
+    capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
+    optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
 
     # 直接最小化 loss 容易过拟合
     # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
