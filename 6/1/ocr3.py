@@ -206,7 +206,9 @@ def train():
     # 做一个梯度裁剪，貌似也没啥用
     grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     grads_and_vars = grads_optimizer.compute_gradients(loss)
-    capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
+    capped_grads_and_vars = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads_and_vars]
+
+    #capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
     optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
 
     # 直接最小化 loss 容易过拟合
