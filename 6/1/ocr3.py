@@ -98,14 +98,14 @@ def neural_networks():
     outputs1 = tf.reshape(outputs1, [-1, num_hidden])
     W1 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
     b1 = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits1 = tf.matmul(outputs, W1) + b1
+    logits1 = tf.matmul(outputs1, W1) + b1
 
     inputs.reverse()
     outputs2, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
     outputs2 = tf.reshape(outputs2, [-1, num_hidden])
     W2 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
     b2 = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits2 = tf.matmul(outputs, W2) + b2
+    logits2 = tf.matmul(outputs2, W2) + b2
 
     logits = tf.add(logits1,logits2)
 
