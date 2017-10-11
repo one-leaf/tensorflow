@@ -98,6 +98,7 @@ def matmul(sess):
     y = tf.matmul(x1,x2)
     print(sess.run(y))  # [[7 10] [15 22]]
 
+# 矩阵反向
 def reverse(sess):
     x = tf.random_normal([4,2,3],mean=1,stddev=0.5)
     y = tf.reverse(x,axis=[1])
