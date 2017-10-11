@@ -84,37 +84,24 @@ def neural_networks():
     shape = tf.shape(inputs)
     batch_s, max_timesteps = shape[0], shape[1]
 
-    cells1 = []
+    cells = []
     for _ in range(num_layers):
         cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, activation=tf.nn.relu)
         # 随机抛弃
         cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
-        cells1.append(cell)
-    stack1 = tf.contrib.rnn.MultiRNNCell(cells1, state_is_tuple=True)
+        cells.append(cell)
+    stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
 
     # Reshaping to apply the same weights over the timesteps
-    outputs1, _ = tf.nn.dynamic_rnn(stack1, inputs, seq_len, dtype=tf.float32)
-    outputs1 = tf.reshape(outputs1, [-1, num_hidden])
-    W1 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-    b1 = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits1 = tf.matmul(outputs1, W1) + b1
+    outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
+    outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
+    outputs = outputs1 + outputs2
+    outputs = tf.reshape(outputs, [-1, num_hidden])
 
-    cells2 = []
-    for _ in range(num_layers):
-        cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, activation=tf.nn.relu)
-        # 随机抛弃
-        cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
-        cells2.append(cell)
-    stack2 = tf.contrib.rnn.MultiRNNCell(cells2, state_is_tuple=True)
+    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    b = tf.Variable(tf.constant(0., shape=[num_classes]))
+    logits = tf.matmul(outputs1, W) + b
 
-    inputs_reverse = tf.reverse(inputs, axis=[1])
-    outputs2, _ = tf.nn.dynamic_rnn(stack2, inputs_reverse, seq_len, dtype=tf.float32)
-    outputs2 = tf.reshape(outputs2, [-1, num_hidden])
-    W2 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-    b2 = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits2 = tf.matmul(outputs2, W2) + b2
-
-    logits = tf.add(logits1,logits2)
 
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
 
