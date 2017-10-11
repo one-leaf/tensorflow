@@ -83,7 +83,7 @@ def neural_networks():
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
     cells = []
     for _ in range(num_layers):
-        cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, activation="relu")
+        cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, activation=tf.nn.relu)
         # 随机抛弃
         cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
         cells.append(cell)
