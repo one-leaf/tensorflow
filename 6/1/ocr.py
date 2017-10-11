@@ -70,7 +70,7 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
 
 
 def neural_networks():
-    # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,12]
+    # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
     # 定义 ctc_loss 是稀疏矩阵
     labels = tf.sparse_placeholder(tf.int32, name="labels")
@@ -118,9 +118,7 @@ def get_next_batch(batch_size=128):
         lines = line.split(" ")
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
-        # 在宋体9号字体下，O和0完全一致，因此全部按0处理
-        # text = text.replace('O','0')
-        # 输出图片为反色黑白
+        # 输入的图片为反色黑白
         image = readImgFile(os.path.join(curr_dir,"dataset",imageFileName))    
         images.append(image)
         if image.shape[1] > max_width_image: 
