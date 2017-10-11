@@ -98,6 +98,11 @@ def matmul(sess):
     y = tf.matmul(x1,x2)
     print(sess.run(y))  # [[7 10] [15 22]]
 
+def reverse(sess):
+    x = tf.random_normal([4,2,3],mean=1,stddev=0.5)
+    y = tf.reverse(x,axis=[1])
+    # print(sess.run(x))
+    print(sess.run([x,y]))
 
 if __name__ == '__main__':
     with tf.Session() as sess:
@@ -113,4 +118,5 @@ if __name__ == '__main__':
         # argmin(sess)
         # equal(sess)
         # cast(sess)
-        matmul(sess)
+        # matmul(sess)
+        reverse(sess)
