@@ -35,7 +35,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 64
 
@@ -93,25 +93,21 @@ def neural_networks():
     stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
 
     # Reshaping to apply the same weights over the timesteps
-    with tf.device('/gpu:0'):
-        outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-        outputs1 = tf.reshape(outputs1, [-1, num_hidden])
-        W1 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-        b1 = tf.Variable(tf.constant(0., shape=[num_classes]))
-        logits1 = tf.matmul(outputs1, W1) + b1
+    outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
+    outputs1 = tf.reshape(outputs1, [-1, num_hidden])
+    W1 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    b1 = tf.Variable(tf.constant(0., shape=[num_classes]))
+    logits1 = tf.matmul(outputs1, W1) + b1
 
-    with tf.device('/gpu:1'):
-        inputs_reverse = tf.reverse(inputs,axis=[1])
-        outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
-        outputs2 = tf.reshape(outputs2, [-1, num_hidden])
-        W2 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-        b2 = tf.Variable(tf.constant(0., shape=[num_classes]))
-        logits2 = tf.matmul(outputs2, W2) + b2
+    inputs_reverse = tf.reverse(inputs,axis=[1])
+    outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
+    outputs2 = tf.reshape(outputs2, [-1, num_hidden])
+    W2 = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    b2 = tf.Variable(tf.constant(0., shape=[num_classes]))
+    logits2 = tf.matmul(outputs2, W2) + b2
 
     logits = logits1 + logits2
-
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
-
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
     return logits, inputs, labels, seq_len, input_keep_prob
 
