@@ -94,7 +94,10 @@ def neural_networks():
 
     # Reshaping to apply the same weights over the timesteps
     outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
+
+    inputs_reverse = tf.reverse(inputs,axis=[1])
     outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
+    
     outputs = outputs1 + outputs2
     outputs = tf.reshape(outputs, [-1, num_hidden])
 
