@@ -1,7 +1,15 @@
 # coding=utf-8
-# 中文OCR学习，尝试多层
+# 中文OCR学习，
 
 import tensorflow as tf
+
+from keras import backend as K
+from keras.layers import Input, Dense, Activation
+from keras.layers.recurrent import LSTM
+from keras.optimizers import Adam
+from keras.layers.merge import add, concatenate
+from keras.layers import Reshape, Lambda
+
 import numpy as np
 import os
 from utils import readImgFile, img2bwinv, img2vec, dropZeroEdges, resize, save
@@ -71,46 +79,34 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
+    inputs = Input(shape=[None,None,image_height],dtype="float32",name='input')
+
     # 定义 ctc_loss 是稀疏矩阵
-    labels = tf.sparse_placeholder(tf.int32, name="labels")
+    labels = Input(shape=[1],dtype="int64",name="labels")
     # 1维向量 序列长度 [batch_size,]
-    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
+    seq_len = Input(shape=[None],dtype="int64",name="seq_len")
     # 定义 LSTM 网络
     # 可以为:
     #   tf.nn.rnn_cell.RNNCell
     #   tf.nn.rnn_cell.GRUCell
-    input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
+    input_keep_prob = Input(dtype="float64",name="input_keep_prob")
     shape = tf.shape(inputs)
     batch_s, max_timesteps = shape[0], shape[1]
 
-    cells = []
-    for _ in range(num_layers):
-        cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-        # 随机抛弃
-        cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
-        cells.append(cell)
-    stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
+    cell1 = LSTM(num_hidden,dropout=input_keep_prob)(inputs)
+    cell1b = LSTM(num_hidden,go_backwards=True,dropout=input_keep_prob)(inputs)
+    cell_merged = add([cell1,cell1b])
 
-    # Reshaping to apply the same weights over the timesteps
-    outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-    # cell1 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    # cell1 = tf.contrib.rnn.DropoutWrapper(cell1, input_keep_prob=input_keep_prob)
-    # outputs1, _ = tf.nn.dynamic_rnn(cell1, inputs, seq_len, dtype=tf.float32)
+    cell2 = LSTM(num_hidden,dropout=input_keep_prob)(cell_merged)
+    cell2b = LSTM(num_hidden,go_backwards=True,dropout=input_keep_prob)(cell_merged)
 
-    inputs_reverse = tf.reverse(inputs, axis=[1])
-    # cell2 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, reuse=True)
-    # cell2 = tf.contrib.rnn.DropoutWrapper(cell2, input_keep_prob=input_keep_prob)
-    # outputs2, _ = tf.nn.dynamic_rnn(cell2, inputs_reverse, seq_len, dtype=tf.float32)
-    outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
+    inner = Dense(num_classes)(concatenate([cell2,cell2b]))
+    y_pred = Activation('softmax')(inner)
+    y_pred = y_pred[:, 2:, :]
+    loss_out = K.ctc_batch_cost(labels, y_pred, input_length, label_length)
 
-    outputs = outputs1 + outputs2
-    outputs = tf.reshape(outputs, [-1, num_hidden])
-    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-    b = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits = tf.matmul(outputs, W) + b
-    logits = tf.reshape(logits, [batch_s, -1, num_classes])
-    logits = tf.transpose(logits, (1, 0, 2), name="logits")
+
+
     return logits, inputs, labels, seq_len, input_keep_prob
 
 
@@ -206,18 +202,18 @@ def train():
     # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
 
     # 做一个梯度裁剪，貌似也没啥用
-    # grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     # grads_and_vars = grads_optimizer.compute_gradients(loss)
     # capped_grads_and_vars = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads_and_vars]
-    # gradients, variables = zip(*grads_optimizer.compute_gradients(loss))
-    # gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
-    # capped_grads_and_vars = zip(gradients, variables)
+    gradients, variables = zip(*grads_optimizer.compute_gradients(loss))
+    gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+    capped_grads_and_vars = zip(gradients, variables)
 
     #capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
-    # optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
+    optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
 
     # 直接最小化 loss 容易过拟合
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
+    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
     # The ctc_greedy_decoder is a special case of the ctc_beam_search_decoder with top_paths=1 (but that decoder is faster for this special case).
     # decoded, log_prob = tf.nn.ctc_greedy_decoder(logits, seq_len, merge_repeated=False)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, beam_width=10, merge_repeated=False)
