@@ -100,10 +100,12 @@ def matmul(sess):
 
 # 矩阵反向
 def reverse(sess):
-    x = tf.random_normal([4,2,3],mean=1,stddev=0.5)
+    l = [x for x in range(24)]
+    x = tf.constant(l)
+    x = tf.reshape(x,[2,3,4])
     y = tf.reverse(x,axis=[1])
-    # print(sess.run(x))
-    print(sess.run([x,y]))
+    print(sess.run(x))
+    print(sess.run(y))
 
 if __name__ == '__main__':
     with tf.Session() as sess:
