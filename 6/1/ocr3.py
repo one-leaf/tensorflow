@@ -293,14 +293,14 @@ def train():
                 if np.isnan(c) or np.isinf(c):
                     print("Error: cost is nan or inf")
                     return                
-                if c < 200 and curr_learning_rate > 1e-5:
-                    curr_learning_rate = 1e-5           
-                if c < 20 and curr_learning_rate > 5e-6:
-                    curr_learning_rate = 5e-6
-                if c < 1 and curr_learning_rate > 1e-6:
+                if c < 100 and curr_learning_rate > 5e-6:
+                    curr_learning_rate = 5e-6           
+                if c < 20 and curr_learning_rate > 1e-6:
                     curr_learning_rate = 1e-6
-                if c < 1 and curr_learning_rate > 1e-6:
-                    curr_learning_rate = 1e-6
+                if c < 1 and curr_learning_rate > 5e-7:
+                    curr_learning_rate = 5e-7
+                if c < 0.1 and curr_learning_rate > 1e-7:
+                    curr_learning_rate = 1e-7
 
             # start = time.time()
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
