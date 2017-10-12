@@ -84,29 +84,29 @@ def neural_networks():
     shape = tf.shape(inputs)
     batch_s, max_timesteps = shape[0], shape[1]
 
-    cells = []
-    for _ in range(num_layers):
-        cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-        # 随机抛弃
-        cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
-        cells.append(cell)
-    stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
+    # cells = []
+    # for _ in range(num_layers):
+    #     cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    #     # 随机抛弃
+    #     cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
+    #     cells.append(cell)
+    # stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
 
     # Reshaping to apply the same weights over the timesteps
-    outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-    # cell1 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    # cell1 = tf.contrib.rnn.DropoutWrapper(cell1, input_keep_prob=input_keep_prob)
-    # outputs1, _ = tf.nn.dynamic_rnn(cell1, inputs, seq_len, dtype=tf.float32)
+    # outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
+    cell1 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    cell1 = tf.contrib.rnn.DropoutWrapper(cell1, input_keep_prob=input_keep_prob)
+    outputs1, _ = tf.nn.dynamic_rnn(cell1, inputs, seq_len, dtype=tf.float32)
 
     inputs_reverse = tf.reverse(inputs, axis=[1])
-    # cell2 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, reuse=True)
-    # cell2 = tf.contrib.rnn.DropoutWrapper(cell2, input_keep_prob=input_keep_prob)
-    # outputs2, _ = tf.nn.dynamic_rnn(cell2, inputs_reverse, seq_len, dtype=tf.float32)
-    outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
+    cell2 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, reuse=True)
+    cell2 = tf.contrib.rnn.DropoutWrapper(cell2, input_keep_prob=input_keep_prob)
+    outputs2, _ = tf.nn.dynamic_rnn(cell2, inputs_reverse, seq_len, dtype=tf.float32)
+    # outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
 
-    outputs = outputs1 + outputs2
-    outputs = tf.reshape(outputs, [-1, num_hidden])
-    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    outputs = tf.concat([outputs1, outputs2], 1)
+    outputs = tf.reshape(outputs, [-1, num_hidden*2])
+    W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
     b = tf.Variable(tf.constant(0., shape=[num_classes]))
     logits = tf.matmul(outputs, W) + b
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
