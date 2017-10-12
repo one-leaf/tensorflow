@@ -86,7 +86,7 @@ def neural_networks():
 
     cells = []
     for _ in range(num_layers):
-        cell = tf.contrib.rnn.GRUCell(num_hidden, state_is_tuple=True, activation=tf.nn.relu)
+        cell = tf.contrib.rnn.GRUCell(num_hidden, activation=tf.nn.relu)
         # 随机抛弃
         cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
         cells.append(cell)
@@ -98,7 +98,7 @@ def neural_networks():
 
     cells2 = []
     for _ in range(num_layers):
-        cell = tf.contrib.rnn.GRUCell(num_hidden, state_is_tuple=True, activation=tf.nn.relu)
+        cell = tf.contrib.rnn.GRUCell(num_hidden, activation=tf.nn.relu)
         # 随机抛弃
         cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
         cells2.append(cell)
