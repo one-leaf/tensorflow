@@ -28,7 +28,9 @@ def stack(sess):
 def concat(sess):
     x1 = [[1, 2, 3], [4, 5, 6]]
     x2 = [[2, 3, 4], [7, 8, 9]]
+    
     y = tf.concat([x1, x2], 0)
+    print(y.shape)
     print(sess.run(y))      # [[1 2 3] [4 5 6] [2 3 4] [7 8 9]]
     y = tf.concat([x1, x2], 1) 
     print(sess.run(y))      # [[1 2 3 2 3 4] [4 5 6 7 8 9]]
@@ -54,6 +56,6 @@ if __name__ == '__main__':
         # shape(sess)
         # expand_dims(sess)
         # stack(sess)
-        # concat(sess)
+        concat(sess)
         # reshape(sess)
-        slice(sess)
+        # slice(sess)

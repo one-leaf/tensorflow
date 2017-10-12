@@ -120,7 +120,7 @@ def neural_networks():
     # outputs2, _ = tf.nn.dynamic_rnn(cell2, inputs_reverse, seq_len, dtype=tf.float32)
     # outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
 
-    outputs = tf.concat(outputs_list, 0)
+    outputs = tf.concat(outputs_list, 1)
     #outputs = tf.reshape(outputs, [-1, num_hidden*2])
     W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
     b = tf.Variable(tf.constant(0., shape=[num_classes]))
