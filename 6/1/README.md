@@ -14,3 +14,5 @@ http://www.jianshu.com/p/45828b18f133
 https://github.com/synckey/tensorflow_lstm_ctc_ocr/
 http://ilovin.me/2017-04-06/tensorflow-lstm-ctc-ocr/
 http://ilovin.me/2017-04-23/tensorflow-lstm-ctc-input-output/
+很有意思：
+https://github.com/fchollet/keras/blob/master/examples/image_ocr.py
