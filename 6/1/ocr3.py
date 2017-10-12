@@ -92,6 +92,10 @@ def neural_networks():
         cells.append(cell)
     stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
 
+    # Reshaping to apply the same weights over the timesteps
+    outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
+    inputs_reverse = tf.reverse(inputs, axis=[1])
+
     cells2 = []
     for _ in range(num_layers):
         cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True, activation=tf.nn.relu)
@@ -100,9 +104,6 @@ def neural_networks():
         cells2.append(cell)
     stack2 = tf.contrib.rnn.MultiRNNCell(cells2, state_is_tuple=True)
 
-    # Reshaping to apply the same weights over the timesteps
-    outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-    inputs_reverse = tf.reverse(inputs, axis=[1])
     outputs2, _ = tf.nn.dynamic_rnn(stack2, inputs_reverse, seq_len, dtype=tf.float32)
     outputs = outputs1 + outputs2
     outputs = tf.reshape(outputs, [-1, num_hidden])
