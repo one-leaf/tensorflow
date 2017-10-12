@@ -94,7 +94,7 @@ def neural_networks():
 
     # Reshaping to apply the same weights over the timesteps
     # outputs1, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-    cell1 = tf.contrib.rnn.LSTMCell(num_hidden,state_is_tuple=True, activation=tf.nn.relu, reuse=True)
+    cell1 = tf.contrib.rnn.LSTMCell(num_hidden,state_is_tuple=True, activation=tf.nn.relu)
     cell1 = tf.contrib.rnn.DropoutWrapper(cell1, input_keep_prob=input_keep_prob)
     outputs1, _ = tf.nn.dynamic_rnn(cell1, inputs, seq_len, dtype=tf.float32)
 
