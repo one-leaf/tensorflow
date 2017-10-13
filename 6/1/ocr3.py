@@ -85,7 +85,7 @@ def neural_networks():
     shape = tf.shape(inputs)
     batch_s, max_timesteps = shape[0], shape[1]
 
-    outputs_list =[]
+    stacks =[]
     with tf.variable_scope('cell1'):
         cells = []
         for _ in range(num_layers):
@@ -94,12 +94,9 @@ def neural_networks():
             cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
             cells.append(cell)
         stack = tf.contrib.rnn.MultiRNNCell(cells)
-        outputs, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-        outputs = tf.reshape(outputs, [-1, num_hidden])
-        outputs_list.append(outputs)
+        stacks.append(stack)
 
     with tf.variable_scope('cell2'):
-        inputs_reverse = tf.reverse(inputs, axis=[1])
         cells = []
         for _ in range(num_layers):
             cell = tf.contrib.rnn.GRUCell(num_hidden,)
@@ -107,10 +104,9 @@ def neural_networks():
             cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
             cells.append(cell)
         stack = tf.contrib.rnn.MultiRNNCell(cells)
-        outputs, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
-        outputs = tf.reshape(outputs, [-1, num_hidden])
-        outputs_list.append(outputs)
+        stacks.append(stack)
 
+    outputs, _ = tf.nn.bidirectional_dynamic_rnns(stacks[0],stacks[1], inputs, seq_len, dtype=tf.float32)
     # Reshaping to apply the same weights over the timesteps
     # cell1 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # cell1 = tf.contrib.rnn.DropoutWrapper(cell1, input_keep_prob=input_keep_prob)
@@ -121,9 +117,8 @@ def neural_networks():
     # outputs2, _ = tf.nn.dynamic_rnn(cell2, inputs_reverse, seq_len, dtype=tf.float32)
     # outputs2, _ = tf.nn.dynamic_rnn(stack, inputs_reverse, seq_len, dtype=tf.float32)
 
-    outputs = tf.concat(outputs_list, 1)
-    #outputs = tf.reshape(outputs, [-1, num_hidden*2])
-    W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
+    outputs = tf.reshape(outputs, [-1, num_hidden])
+    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
     b = tf.Variable(tf.constant(0., shape=[num_classes]))
     logits = tf.nn.softmax(tf.matmul(outputs, W) + b)
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
