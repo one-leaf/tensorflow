@@ -91,7 +91,7 @@ def neural_networks():
         for _ in range(num_layers):
             cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
             # 随机抛弃
-            cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
+            # cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
             cells.append(cell)
         stack = tf.contrib.rnn.MultiRNNCell(cells)
         stacks.append(stack)
@@ -101,7 +101,7 @@ def neural_networks():
         for _ in range(num_layers):
             cell = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
             # 随机抛弃
-            cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
+            # cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
             cells.append(cell)
         stack = tf.contrib.rnn.MultiRNNCell(cells)
         stacks.append(stack)
