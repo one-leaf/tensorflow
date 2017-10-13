@@ -124,7 +124,7 @@ def neural_networks():
     #outputs = tf.reshape(outputs, [-1, num_hidden*2])
     W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
     b = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits = tf.matmul(outputs, W) + b
+    logits = tf.nn.softmax(tf.matmul(outputs, W) + b)
     logits = tf.reshape(logits, [batch_s, -1, num_classes])
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
     return logits, inputs, labels, seq_len, input_keep_prob

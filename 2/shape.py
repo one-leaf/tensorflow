@@ -34,6 +34,8 @@ def concat(sess):
     print(sess.run(y))      # [[1 2 3] [4 5 6] [2 3 4] [7 8 9]]
     y = tf.concat([x1, x2], 1) 
     print(sess.run(y))      # [[1 2 3 2 3 4] [4 5 6 7 8 9]]
+    y = tf.concat([x1, x2], -1) 
+    print(sess.run(y))      # [[1 2 3 2 3 4] [4 5 6 7 8 9]]
 
 # 矩阵变形
 def reshape(sess):
