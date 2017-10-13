@@ -77,14 +77,14 @@ def neural_networks():
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     # 1维向量 序列长度 [batch_size,]
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
-    # 定义 LSTM 网络
-    # 可以为:
-    #   tf.nn.rnn_cell.RNNCell
-    #   tf.nn.rnn_cell.GRUCell
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
     shape = tf.shape(inputs)
     batch_s, max_timesteps = shape[0], shape[1]
 
+    # 定义 LSTM 网络
+    # 可以为:
+    #   tf.nn.rnn_cell.RNNCell
+    #   tf.nn.rnn_cell.GRUCell
     stacks =[]
     with tf.variable_scope('cell1'):
         cells = []
