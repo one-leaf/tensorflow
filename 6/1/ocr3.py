@@ -25,8 +25,8 @@ ZH_CHARS = [chr(c) for c in range(int('4E00',16),int('9FBB',16)+1)]
 ZH_CHARS_PUN = ['。','？','！','，','、','；','：','「','」','『','』','‘','’','“','”',\
                 '（','）','〔','〕','【','】','—','…','–','．','《','》','〈','〉']
 
-# CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
-CHARS = ASCII_CHARS
+CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
+# CHARS = ASCII_CHARS
 num_classes = len(CHARS) + 1 + 1
 
 #初始化学习速率
