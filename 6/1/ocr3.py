@@ -105,8 +105,8 @@ def neural_networks():
             cells.append(cell)
         stack = tf.contrib.rnn.MultiRNNCell(cells)
         stacks.append(stack)
-
-    outputs, _ = tf.nn.bidirectional_dynamic_rnns(stacks[0],stacks[1], inputs, seq_len, dtype=tf.float32)
+                       
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(stacks[0],stacks[1], inputs, seq_len, dtype=tf.float32)
     # Reshaping to apply the same weights over the timesteps
     # cell1 = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # cell1 = tf.contrib.rnn.DropoutWrapper(cell1, input_keep_prob=input_keep_prob)
