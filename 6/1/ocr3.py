@@ -121,7 +121,7 @@ def neural_networks():
     outputs_fw = outputs[0]
     outputs_bw = outputs[1]
     outputs_fw = tf.reshape(outputs_fw, [-1, num_hidden])
-    outputs_fw = tf.reshape(outputs_fw, [-1, num_hidden])
+    outputs_bw = tf.reshape(outputs_bw, [-1, num_hidden])
     W_fw =tf.Variable(tf.truncated_normal(shape=[num_hidden, num_classes], mean=0, stddev=0.1, dtype=tf.float32))
     W_bw =tf.Variable(tf.truncated_normal(shape=[num_hidden, num_classes], mean=0, stddev=0.1, dtype=tf.float32))
     
