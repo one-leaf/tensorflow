@@ -102,11 +102,11 @@ def neural_networks():
         inputs_reverse = tf.reverse(inputs, axis=[1])
         cells = []
         for _ in range(num_layers):
-            cell = tf.contrib.rnn.GRUCell(num_hidden, state_is_tuple=True)
+            cell = tf.contrib.rnn.GRUCell(num_hidden,)
             # 随机抛弃
             cell = tf.contrib.rnn.DropoutWrapper(cell, input_keep_prob=input_keep_prob)
             cells.append(cell)
-        stack = tf.contrib.rnn.MultiRNNCell(cells, state_is_tuple=True)
+        stack = tf.contrib.rnn.MultiRNNCell(cells)
         outputs, _ = tf.nn.dynamic_rnn(stack, inputs, seq_len, dtype=tf.float32)
         outputs = tf.reshape(outputs, [-1, num_hidden])
         outputs_list.append(outputs)
