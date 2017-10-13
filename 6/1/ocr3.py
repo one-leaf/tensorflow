@@ -12,9 +12,10 @@ curr_dir = os.path.dirname(__file__)
 
 image_height = 16
 
-#LSTM
+# LSTM
 num_hidden = 1024
-num_layers = 2
+# 不支持多层双向LSTM
+num_layers = 1
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
