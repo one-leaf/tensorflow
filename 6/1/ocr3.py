@@ -250,7 +250,7 @@ def train():
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                   " test and detect length desn't match")
         print("T/F: original(length) <-------> detectcted(length)")
-        for idx in range(min(len(original_list),len(detected_list)))::
+        for idx in range(min(len(original_list),len(detected_list))):
             number = original_list[idx]
             detect_number = detected_list[idx]  
             hit = (number == detect_number)          
