@@ -147,7 +147,7 @@ def get_next_batch(batch_size=128):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.transpose(image_vec)
 
-    labels = [np.asarray(i) for i in codes]
+    labels = np.array([i for i in codes], dtype=int64)
     #labels转成稀疏矩阵
     # sparse_labels = sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * max_width_image
@@ -277,7 +277,7 @@ def train():
         train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
         feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
                 input_keep_prob: 0.7, learning_rate: curr_learning_rate}        
-        b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, b_learning_rate, _ = session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
+        b_loss, b_logits, b_seq_len,b_cost, steps, b_learning_rate, _ = session.run([loss, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
         if steps > 0 and steps % REPORT_STEPS == 0:
             do_report()
