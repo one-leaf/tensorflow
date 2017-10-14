@@ -1,15 +1,7 @@
 # coding=utf-8
-# 中文OCR学习，
+# 中文OCR学习，尝试多层
 
 import tensorflow as tf
-
-from keras import backend as K
-from keras.layers import Input, Dense, Activation
-from keras.layers.recurrent import LSTM
-from keras.optimizers import Adam
-from keras.layers.merge import add, concatenate
-from keras.layers import Reshape, Lambda
-
 import numpy as np
 import os
 from utils import readImgFile, img2bwinv, img2vec, dropZeroEdges, resize, save
@@ -20,8 +12,8 @@ curr_dir = os.path.dirname(__file__)
 
 image_height = 16
 
-#LSTM
-num_hidden = 1024
+# LSTM
+num_hidden = 64
 num_layers = 2
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
@@ -33,6 +25,7 @@ ZH_CHARS_PUN = ['。','？','！','，','、','；','：','「','」','『','』
                 '（','）','〔','〕','【','】','—','…','–','．','《','》','〈','〉']
 
 CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
+# CHARS = ASCII_CHARS
 num_classes = len(CHARS) + 1 + 1
 
 #初始化学习速率
@@ -79,34 +72,55 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = Input(shape=[None,None,image_height],dtype="float32",name='input')
-
-    # 定义 ctc_loss 是稀疏矩阵
-    labels = Input(shape=[1],dtype="int64",name="labels")
-    # 1维向量 序列长度 [batch_size,]
-    seq_len = Input(shape=[None],dtype="int64",name="seq_len")
-    # 定义 LSTM 网络
-    # 可以为:
-    #   tf.nn.rnn_cell.RNNCell
-    #   tf.nn.rnn_cell.GRUCell
-    input_keep_prob = Input(dtype="float64",name="input_keep_prob")
+    inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")    
+    labels = tf.placeholder(tf.int32, name="labels")
+    # 1维向量 size [batch_size] 等于 np.ones(batch_size)* image_width
+    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
+    input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
     shape = tf.shape(inputs)
-    batch_s, max_timesteps = shape[0], shape[1]
+    batch_size, max_timesteps = shape[0], shape[1]
 
-    cell1 = LSTM(num_hidden,dropout=input_keep_prob)(inputs)
-    cell1b = LSTM(num_hidden,go_backwards=True,dropout=input_keep_prob)(inputs)
-    cell_merged = add([cell1,cell1b])
+    # 第一种双向LSTM方法
+    cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
+    cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)                       
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    outputs = tf.concat(outputs, axis=2)
+    stack_cell = tf.contrib.rnn.MultiRNNCell(
+                [tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True) for _ in range(num_layers)],
+                state_is_tuple=True)
+    lstm_out, last_state = tf.nn.dynamic_rnn(stack_cell, outputs, seq_len, dtype=tf.float32)
+    lstm_out = tf.reshape(lstm_out, [-1, num_hidden])
+    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
+    logits = tf.matmul(lstm_out, W) + b
 
-    cell2 = LSTM(num_hidden,dropout=input_keep_prob)(cell_merged)
-    cell2b = LSTM(num_hidden,go_backwards=True,dropout=input_keep_prob)(cell_merged)
+    # 第二种双向LSTM方法
+    # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    # outputs_fw = tf.reshape(outputs[0], [-1, num_hidden])
+    # outputs_bw = tf.reshape(outputs[1], [-1, num_hidden])
+    # W_fw = tf.Variable(tf.truncated_normal(shape=[num_hidden, num_classes], stddev=0.1, dtype=tf.float32))
+    # W_bw = tf.Variable(tf.truncated_normal(shape=[num_hidden, num_classes], stddev=0.1, dtype=tf.float32))
+    # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
+    # logits = tf.add(tf.matmul(outputs_fw, W_fw),tf.matmul(outputs_bw, W_bw)) + b
+    # logits = tf.matmul(outputs, W) + b   
 
-    inner = Dense(num_classes)(concatenate([cell2,cell2b]))
-    y_pred = Activation('softmax')(inner)
-    y_pred = y_pred[:, 2:, :]
-    loss_out = K.ctc_batch_cost(labels, y_pred, input_length, label_length)
+    # 第三种双向LSTM方法
+    # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    # outputs = tf.concat(outputs, axis=2)
+    # outputs = tf.reshape(outputs, [-1, num_hidden*2 ])
+    # W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
+    # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
+    # logits = tf.matmul(outputs, W) + b   
 
-
-
+    # logits = tf.nn.softmax(logits)
+    # 输出对数： [batch_size , max_time , num_classes]
+    logits = tf.reshape(logits, [batch_size, -1, num_classes])
+    # 需要变换到 time_major == True [max_time x batch_size x num_classes]
+    logits = tf.transpose(logits, (1, 0, 2), name="logits")
     return logits, inputs, labels, seq_len, input_keep_prob
 
 
@@ -130,53 +144,53 @@ def get_next_batch(batch_size=128):
 
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
-        image_vec = img2vec(images[i], height=image_height, width=max_width_image)
-        inputs[i,:] = np.transpose(image_vec.reshape((image_height,max_width_image)))
+        image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
+        inputs[i,:] = np.transpose(image_vec)
 
     labels = [np.asarray(i) for i in codes]
     #labels转成稀疏矩阵
-    sparse_labels = sparse_tuple_from(labels)
-    seq_len = np.ones(inputs.shape[0]) * max_width_image
-    return inputs, sparse_labels, seq_len
+    # sparse_labels = sparse_tuple_from(labels)
+    seq_len = np.ones(batch_size) * max_width_image
+    return inputs, labels, seq_len
 
-# 转化一个序列列表为稀疏矩阵    
-def sparse_tuple_from(sequences, dtype=np.int32):
-    indices = []
-    values = []
+# # 转化一个序列列表为稀疏矩阵    
+# def sparse_tuple_from(sequences, dtype=np.int32):
+#     indices = []
+#     values = []
     
-    for n, seq in enumerate(sequences):
-        indices.extend(zip([n] * len(seq), range(len(seq))))
-        values.extend(seq)
+#     for n, seq in enumerate(sequences):
+#         indices.extend(zip([n] * len(seq), range(len(seq))))
+#         values.extend(seq)
  
-    indices = np.asarray(indices, dtype=np.int64)
-    values = np.asarray(values, dtype=dtype)
-    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
+#     indices = np.asarray(indices, dtype=np.int64)
+#     values = np.asarray(values, dtype=dtype)
+#     shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
 
-    return indices, values, shape
+#     return indices, values, shape
 
-def decode_sparse_tensor(sparse_tensor):
-    decoded_indexes = list()
-    current_i = 0
-    current_seq = []
-    for offset, i_and_index in enumerate(sparse_tensor[0]):
-        i = i_and_index[0]
-        if i != current_i:
-            decoded_indexes.append(current_seq)
-            current_i = i
-            current_seq = list()
-        current_seq.append(offset)
-    decoded_indexes.append(current_seq)
-    result = []
-    for index in decoded_indexes:
-        result.append(decode_a_seq(index, sparse_tensor))
-    return result
+# def decode_sparse_tensor(sparse_tensor):
+#     decoded_indexes = list()
+#     current_i = 0
+#     current_seq = []
+#     for offset, i_and_index in enumerate(sparse_tensor[0]):
+#         i = i_and_index[0]
+#         if i != current_i:
+#             decoded_indexes.append(current_seq)
+#             current_i = i
+#             current_seq = list()
+#         current_seq.append(offset)
+#     decoded_indexes.append(current_seq)
+#     result = []
+#     for index in decoded_indexes:
+#         result.append(decode_a_seq(index, sparse_tensor))
+#     return result
     
-def decode_a_seq(indexes, spars_tensor):
-    decoded = []
-    for m in indexes:
-        str = spars_tensor[1][m]
-        decoded.append(str)
-    return decoded
+# def decode_a_seq(indexes, spars_tensor):
+#     decoded = []
+#     for m in indexes:
+#         str = spars_tensor[1][m]
+#         decoded.append(str)
+#     return decoded
 
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
@@ -190,51 +204,57 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-5
+    curr_learning_rate = 1e-6
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
 
-    loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
+    # 将 labels 转为稀疏矩阵
+    idx = tf.where(tf.not_equal(labels, 0))
+    sparse_labels = tf.SparseTensor(idx, tf.gather_nd(labels, idx), tf.shape(labels, out_type=tf.int64))
+
+    # If time_major == True (default), this will be a Tensor shaped: [max_time x batch_size x num_classes]
+    # 返回 A 1-D float Tensor, size [batch], containing the negative log probabilities.
+    loss = tf.nn.ctc_loss(labels=sparse_labels, inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss, name="cost")
 
     # 收敛效果不好
     # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
 
     # 做一个梯度裁剪，貌似也没啥用
-    grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    # grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
     # grads_and_vars = grads_optimizer.compute_gradients(loss)
     # capped_grads_and_vars = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads_and_vars]
-    gradients, variables = zip(*grads_optimizer.compute_gradients(loss))
-    gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
-    capped_grads_and_vars = zip(gradients, variables)
+    # gradients, variables = zip(*grads_optimizer.compute_gradients(loss))
+    # gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
+    # capped_grads_and_vars = zip(gradients, variables)
 
     #capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
-    optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
+    # optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
 
     # 直接最小化 loss 容易过拟合
-    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost, global_step=global_step)
     # The ctc_greedy_decoder is a special case of the ctc_beam_search_decoder with top_paths=1 (but that decoder is faster for this special case).
     # decoded, log_prob = tf.nn.ctc_greedy_decoder(logits, seq_len, merge_repeated=False)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, beam_width=10, merge_repeated=False)
     # decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
+    outputs = tf.sparse_tensor_to_dense(decoded[0])
     
-    
-    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels), name="acc")
+    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), sparse_labels), name="acc")
 
     init = tf.global_variables_initializer()
 
     def report_accuracy(decoded_list, test_labels):
-        original_list = decode_sparse_tensor(test_labels)
-        detected_list = decode_sparse_tensor(decoded_list)
+        original_list = test_labels #decode_sparse_tensor(test_labels)
+        detected_list = decoded_list # decode_sparse_tensor(decoded_list)
         true_numer = 0
         all_numer = 0
         if len(original_list) != len(detected_list):
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                   " test and detect length desn't match")
-            return
         print("T/F: original(length) <-------> detectcted(length)")
-        for idx, number in enumerate(original_list):
+        for idx in range(min(len(original_list),len(detected_list))):
+            number = original_list[idx]
             detect_number = detected_list[idx]  
             hit = (number == detect_number)          
             print(hit, list_to_chars(number), "(", len(number), ") <-------> ", list_to_chars(detect_number), "(", len(detect_number), ")")
@@ -250,7 +270,7 @@ def train():
                      labels: test_labels,
                      seq_len: test_seq_len,
                      input_keep_prob: 1.0}
-        dd = session.run(decoded[0], test_feed)
+        dd = session.run(outputs, test_feed)
         report_accuracy(dd, test_labels)
  
     def do_batch():
@@ -289,14 +309,14 @@ def train():
                 if np.isnan(c) or np.isinf(c):
                     print("Error: cost is nan or inf")
                     return                
-                if c < 200 and curr_learning_rate > 1e-5:
-                    curr_learning_rate = 1e-5           
-                if c < 20 and curr_learning_rate > 5e-6:
-                    curr_learning_rate = 5e-6
-                if c < 1 and curr_learning_rate > 1e-6:
-                    curr_learning_rate = 1e-6
-                if c < 1 and curr_learning_rate > 1e-6:
-                    curr_learning_rate = 1e-6
+                # if c < 100 and curr_learning_rate > 1e-6:
+                #     curr_learning_rate = 1e-6           
+                # if c < 20 and curr_learning_rate > 1e-6:
+                #     curr_learning_rate = 1e-6
+                if c < 1 and curr_learning_rate > 5e-7:
+                    curr_learning_rate = 5e-7
+                if c < 0.1 and curr_learning_rate > 1e-7:
+                    curr_learning_rate = 1e-7
 
             # start = time.time()
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)

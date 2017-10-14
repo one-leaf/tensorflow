@@ -1,6 +1,6 @@
 # coding=utf-8
 import tensorflow as tf
-
+import numpy as np
 
 def shape(sess):
     x = tf.ones([2, 3])
@@ -53,11 +53,25 @@ def slice(sess):
     # [-1,2] 第一个-1决定了抽取开始以下的所有行，在抽取行中抽取2个元素
     print(sess.run(y))  # [[2 3] [5 6]]
 
+# sparse
+def sparseTest(sess):
+    a = np.reshape(np.arange(24), (3, 4, 2))
+    a_t = tf.constant(a)
+    print(sess.run(a_t))    
+    idx = tf.where(tf.not_equal(a_t, 0))
+    # Use tf.shape(a_t, out_type=tf.int64) instead of a_t.get_shape() if tensor shape is dynamic
+    sparse = tf.SparseTensor(idx, tf.gather_nd(a_t, idx), tf.shape(a_t, out_type=tf.int64))
+    print(sess.run(sparse))
+    dense = tf.sparse_tensor_to_dense(sparse)
+    print(sess.run(dense))
+
+
 if __name__ == '__main__':
     with tf.Session() as sess:
         # shape(sess)
         # expand_dims(sess)
         # stack(sess)
-        concat(sess)
+        # concat(sess)
         # reshape(sess)
         # slice(sess)
+        sparseTest(sess)

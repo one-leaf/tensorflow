@@ -91,7 +91,7 @@ def neural_networks():
                 state_is_tuple=True)
     lstm_out, last_state = tf.nn.dynamic_rnn(stack_cell, outputs, seq_len, dtype=tf.float32)
     lstm_out = tf.reshape(lstm_out, [-1, num_hidden])
-    W =  tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
     b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
     logits = tf.matmul(lstm_out, W) + b
 
