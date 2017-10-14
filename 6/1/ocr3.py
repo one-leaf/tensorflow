@@ -13,7 +13,7 @@ curr_dir = os.path.dirname(__file__)
 image_height = 16
 
 # LSTM
-num_hidden = 1024
+num_hidden = 64
 num_layers = 2
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
@@ -82,18 +82,18 @@ def neural_networks():
     batch_s, max_timesteps = shape[0], shape[1]
 
     # 第一种双向LSTM方法
-    cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
-    cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)                       
-    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
-    outputs = tf.concat(outputs, axis=2)
-    stack_cell = tf.contrib.rnn.MultiRNNCell(
-                [tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True) for _ in range(num_layers)],
-                state_is_tuple=True)
-    lstm_out, last_state = tf.nn.dynamic_rnn(stack_cell, outputs, seq_len, dtype=tf.float32)
-    lstm_out = tf.reshape(lstm_out, [-1, num_hidden])
-    W =  tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-    b = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits = tf.matmul(lstm_out, W) + b
+    # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
+    # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)                       
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    # outputs = tf.concat(outputs, axis=2)
+    # stack_cell = tf.contrib.rnn.MultiRNNCell(
+    #             [tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True) for _ in range(num_layers)],
+    #             state_is_tuple=True)
+    # lstm_out, last_state = tf.nn.dynamic_rnn(stack_cell, outputs, seq_len, dtype=tf.float32)
+    # lstm_out = tf.reshape(lstm_out, [-1, num_hidden])
+    # W =  tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    # b = tf.Variable(tf.constant(0., shape=[num_classes]))
+    # logits = tf.matmul(lstm_out, W) + b
 
     # 第二种双向LSTM方法
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
@@ -108,14 +108,14 @@ def neural_networks():
     # logits = tf.matmul(outputs, W) + b   
 
     # 第三种双向LSTM方法
-    # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw， inputs, seq_len, dtype=tf.float32)
-    # outputs = tf.concat(outputs, axis=2)
-    # outputs = tf.reshape(outputs, [-1, num_hidden*2 ])
-    # W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
-    # b = tf.Variable(tf.constant(0., shape=[num_classes]))
-    # logits = tf.matmul(outputs, W) + b   
+    cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw， inputs, seq_len, dtype=tf.float32)
+    outputs = tf.concat(outputs, axis=2)
+    outputs = tf.reshape(outputs, [-1, num_hidden*2 ])
+    W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
+    b = tf.Variable(tf.constant(0., shape=[num_classes]))
+    logits = tf.matmul(outputs, W) + b   
 
     # logits = tf.nn.softmax(logits)
     # 输出对数： [batch_size , max_time , num_classes]
