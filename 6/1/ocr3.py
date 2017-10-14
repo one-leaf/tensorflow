@@ -79,7 +79,7 @@ def neural_networks():
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
     shape = tf.shape(inputs)
-    batch_s, max_timesteps = shape[0], shape[1]
+    batch_size, max_timesteps = shape[0], shape[1]
 
     # 第一种双向LSTM方法
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
