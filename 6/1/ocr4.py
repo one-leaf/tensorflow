@@ -147,11 +147,11 @@ def get_next_batch(batch_size=128):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.transpose(image_vec)
 
-    labels = np.array(codes, dtype="int64")
+    _labels = np.array(codes)
     #labels转成稀疏矩阵
     # sparse_labels = sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * max_width_image
-    return inputs, labels, seq_len
+    return inputs, _labels, seq_len
 
 # # 转化一个序列列表为稀疏矩阵    
 # def sparse_tuple_from(sequences, dtype=np.int32):
