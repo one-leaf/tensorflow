@@ -14,8 +14,7 @@ image_height = 16
 
 # LSTM
 num_hidden = 1024
-# 不支持多层双向LSTM
-num_layers = 1
+num_layers = 2
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -206,7 +205,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-5
+    curr_learning_rate = 1e-6
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
@@ -305,8 +304,8 @@ def train():
                 if np.isnan(c) or np.isinf(c):
                     print("Error: cost is nan or inf")
                     return                
-                if c < 100 and curr_learning_rate > 5e-6:
-                    curr_learning_rate = 5e-6           
+                if c < 100 and curr_learning_rate > 1e-6:
+                    curr_learning_rate = 1e-6           
                 if c < 20 and curr_learning_rate > 1e-6:
                     curr_learning_rate = 1e-6
                 if c < 1 and curr_learning_rate > 5e-7:
