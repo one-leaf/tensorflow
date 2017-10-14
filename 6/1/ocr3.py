@@ -75,7 +75,7 @@ def neural_networks():
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
     # 定义 ctc_loss 是稀疏矩阵
     labels = tf.sparse_placeholder(tf.int32, name="labels")
-    # 1维向量 序列长度 [batch_size,] 等于 np.ones(batch_size)* image_width
+    # 1维向量 size [batch_size] 等于 np.ones(batch_size)* image_width
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
     shape = tf.shape(inputs)
@@ -111,15 +111,16 @@ def neural_networks():
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw， inputs, seq_len, dtype=tf.float32)
-    # outputs_fw = tf.reshape(outputs[0], [-1, num_hidden])
-    # outputs_bw = tf.reshape(outputs[1], [-1, num_hidden])
-    # outputs = tf.concat([outputs_fw，outputs_bw], axis=2)
+    # outputs = tf.concat(outputs, axis=2)
+    # outputs = tf.reshape(outputs, [-1, num_hidden*2 ])
     # W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
     # b = tf.Variable(tf.constant(0., shape=[num_classes]))
     # logits = tf.matmul(outputs, W) + b   
 
     # logits = tf.nn.softmax(logits)
-    logits = tf.reshape(logits, [batch_s, -1, num_classes])
+    # 输出对数： [batch_size , max_time , num_classes]
+    logits = tf.reshape(logits, [batch_size, -1, num_classes])
+    # 需要变换到 time_major == True [max_time x batch_size x num_classes]
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
     return logits, inputs, labels, seq_len, input_keep_prob
 
@@ -209,6 +210,8 @@ def train():
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
 
+    # If time_major == True (default), this will be a Tensor shaped: [max_time x batch_size x num_classes]
+    # 返回 A 1-D float Tensor, size [batch], containing the negative log probabilities.
     loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss, name="cost")
 
