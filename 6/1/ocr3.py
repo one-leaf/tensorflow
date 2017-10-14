@@ -133,7 +133,7 @@ def get_next_batch(batch_size=128):
 
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
-        image_vec = img2vec(images[i], height=image_height, width=max_width_image)
+        image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.transpose(image_vec)
 
     labels = [np.asarray(i) for i in codes]

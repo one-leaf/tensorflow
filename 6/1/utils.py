@@ -75,7 +75,7 @@ def img2bwinv(img_gray):
     return img_bw
 
 # 图片转为向量, img 参数是 np.array 类型
-def img2vec(img, height=-1, width=-1, value=0):
+def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     h=img.shape[0]
     w=img.shape[1]
     if width==-1: width=w
@@ -83,7 +83,9 @@ def img2vec(img, height=-1, width=-1, value=0):
     if h>height or w>width:
         raise "image size too large, src size: %s,%s dst size: %s,%s" % (w,h,width,height)
     vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(value,))  # 在图像上补齐
-    vector = vector.flatten() / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
+    if flatten:
+        vector = vector.flatten()
+    vector = vector / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
 
 # 清除边缘，输入参数黑白反射
