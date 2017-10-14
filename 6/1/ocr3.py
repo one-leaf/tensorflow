@@ -82,18 +82,18 @@ def neural_networks():
     batch_size, max_timesteps = shape[0], shape[1]
 
     # 第一种双向LSTM方法
-    # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
-    # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)                       
-    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
-    # outputs = tf.concat(outputs, axis=2)
-    # stack_cell = tf.contrib.rnn.MultiRNNCell(
-    #             [tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True) for _ in range(num_layers)],
-    #             state_is_tuple=True)
-    # lstm_out, last_state = tf.nn.dynamic_rnn(stack_cell, outputs, seq_len, dtype=tf.float32)
-    # lstm_out = tf.reshape(lstm_out, [-1, num_hidden])
-    # W =  tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-    # b = tf.Variable(tf.constant(0., shape=[num_classes]))
-    # logits = tf.matmul(lstm_out, W) + b
+    cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
+    cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)                       
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    outputs = tf.concat(outputs, axis=2)
+    stack_cell = tf.contrib.rnn.MultiRNNCell(
+                [tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True) for _ in range(num_layers)],
+                state_is_tuple=True)
+    lstm_out, last_state = tf.nn.dynamic_rnn(stack_cell, outputs, seq_len, dtype=tf.float32)
+    lstm_out = tf.reshape(lstm_out, [-1, num_hidden])
+    W =  tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
+    logits = tf.matmul(lstm_out, W) + b
 
     # 第二种双向LSTM方法
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
@@ -103,19 +103,19 @@ def neural_networks():
     # outputs_bw = tf.reshape(outputs[1], [-1, num_hidden])
     # W_fw = tf.Variable(tf.truncated_normal(shape=[num_hidden, num_classes], stddev=0.1, dtype=tf.float32))
     # W_bw = tf.Variable(tf.truncated_normal(shape=[num_hidden, num_classes], stddev=0.1, dtype=tf.float32))
-    # b = tf.Variable(tf.constant(0., shape=[num_classes]))
+    # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
     # logits = tf.add(tf.matmul(outputs_fw, W_fw),tf.matmul(outputs_bw, W_bw)) + b
     # logits = tf.matmul(outputs, W) + b   
 
     # 第三种双向LSTM方法
-    cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
-    outputs = tf.concat(outputs, axis=2)
-    outputs = tf.reshape(outputs, [-1, num_hidden*2 ])
-    W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
-    b = tf.Variable(tf.constant(0., shape=[num_classes]))
-    logits = tf.matmul(outputs, W) + b   
+    # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    # outputs = tf.concat(outputs, axis=2)
+    # outputs = tf.reshape(outputs, [-1, num_hidden*2 ])
+    # W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
+    # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
+    # logits = tf.matmul(outputs, W) + b   
 
     # logits = tf.nn.softmax(logits)
     # 输出对数： [batch_size , max_time , num_classes]
@@ -205,7 +205,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-5
+    curr_learning_rate = 1e-6
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
@@ -306,10 +306,10 @@ def train():
                 if np.isnan(c) or np.isinf(c):
                     print("Error: cost is nan or inf")
                     return                
-                if c < 100 and curr_learning_rate > 5e-6:
-                    curr_learning_rate = 5e-6           
-                if c < 20 and curr_learning_rate > 1e-6:
-                    curr_learning_rate = 1e-6
+                # if c < 100 and curr_learning_rate > 1e-6:
+                #     curr_learning_rate = 1e-6           
+                # if c < 20 and curr_learning_rate > 1e-6:
+                #     curr_learning_rate = 1e-6
                 if c < 1 and curr_learning_rate > 5e-7:
                     curr_learning_rate = 5e-7
                 if c < 0.1 and curr_learning_rate > 1e-7:
