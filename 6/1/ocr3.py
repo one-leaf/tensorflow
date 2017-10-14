@@ -98,7 +98,7 @@ def neural_networks():
     # 第二种双向LSTM方法
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw， inputs, seq_len, dtype=tf.float32)
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
     # outputs_fw = tf.reshape(outputs[0], [-1, num_hidden])
     # outputs_bw = tf.reshape(outputs[1], [-1, num_hidden])
     # W_fw = tf.Variable(tf.truncated_normal(shape=[num_hidden, num_classes], stddev=0.1, dtype=tf.float32))
@@ -110,7 +110,7 @@ def neural_networks():
     # 第三种双向LSTM方法
     cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
-    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw， inputs, seq_len, dtype=tf.float32)
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2)
     outputs = tf.reshape(outputs, [-1, num_hidden*2 ])
     W = tf.Variable(tf.truncated_normal([num_hidden*2, num_classes], stddev=0.1))
