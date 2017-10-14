@@ -88,7 +88,7 @@ def neural_networks():
     outputs = tf.concat(outputs, axis=2)
 
     stack_cell = tf.contrib.rnn.MultiRNNCell(
-                [tf.contrib.rnn.LSTMCell(num_hids, state_is_tuple=True) for _ in range(num_layers)],
+                [tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True) for _ in range(num_layers)],
                 state_is_tuple=True)
     lstm_out, last_state = tf.nn.dynamic_rnn(stack_cell, outputs, seq_len, dtype=tf.float32)
     lstm_out = tf.reshape(lstm_out, [-1, num_hidden])
