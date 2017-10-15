@@ -73,7 +73,7 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")    
-    labels = tf.placeholder(tf.int32, name="labels")
+    labels = tf.sparse_placeholder(tf.int32, name="labels")
     # 1维向量 size [batch_size] 等于 np.ones(batch_size)* image_width
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     input_keep_prob = tf.placeholder(tf.float32, name="input_keep_prob")
@@ -153,44 +153,41 @@ def get_next_batch(batch_size=128):
     seq_len = np.ones(batch_size) * max_width_image
     return inputs, _labels, seq_len
 
-# # 转化一个序列列表为稀疏矩阵    
-# def sparse_tuple_from(sequences, dtype=np.int32):
-#     indices = []
-#     values = []
-    
-#     for n, seq in enumerate(sequences):
-#         indices.extend(zip([n] * len(seq), range(len(seq))))
-#         values.extend(seq)
- 
-#     indices = np.asarray(indices, dtype=np.int64)
-#     values = np.asarray(values, dtype=dtype)
-#     shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
+# 转化一个序列列表为稀疏矩阵    
+def sparse_tuple_from(sequences, dtype=np.int32):
+    indices = []
+    values = []    
+    for n, seq in enumerate(sequences):
+        indices.extend(zip([n] * len(seq), range(len(seq))))
+        values.extend(seq)
+    indices = np.asarray(indices, dtype=np.int64)
+    values = np.asarray(values, dtype=dtype)
+    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
+    return indices, values, shape
 
-#     return indices, values, shape
-
-# def decode_sparse_tensor(sparse_tensor):
-#     decoded_indexes = list()
-#     current_i = 0
-#     current_seq = []
-#     for offset, i_and_index in enumerate(sparse_tensor[0]):
-#         i = i_and_index[0]
-#         if i != current_i:
-#             decoded_indexes.append(current_seq)
-#             current_i = i
-#             current_seq = list()
-#         current_seq.append(offset)
-#     decoded_indexes.append(current_seq)
-#     result = []
-#     for index in decoded_indexes:
-#         result.append(decode_a_seq(index, sparse_tensor))
-#     return result
+def decode_sparse_tensor(sparse_tensor):
+    decoded_indexes = list()
+    current_i = 0
+    current_seq = []
+    for offset, i_and_index in enumerate(sparse_tensor[0]):
+        i = i_and_index[0]
+        if i != current_i:
+            decoded_indexes.append(current_seq)
+            current_i = i
+            current_seq = list()
+        current_seq.append(offset)
+    decoded_indexes.append(current_seq)
+    result = []
+    for index in decoded_indexes:
+        result.append(decode_a_seq(index, sparse_tensor))
+    return result
     
-# def decode_a_seq(indexes, spars_tensor):
-#     decoded = []
-#     for m in indexes:
-#         str = spars_tensor[1][m]
-#         decoded.append(str)
-#     return decoded
+def decode_a_seq(indexes, spars_tensor):
+    decoded = []
+    for m in indexes:
+        str = spars_tensor[1][m]
+        decoded.append(str)
+    return decoded
 
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])

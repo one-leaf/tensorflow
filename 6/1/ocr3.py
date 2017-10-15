@@ -13,7 +13,7 @@ curr_dir = os.path.dirname(__file__)
 image_height = 16
 
 # LSTM
-num_hidden = 64
+num_hidden = 16
 num_layers = 2
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
@@ -205,7 +205,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-6
+    curr_learning_rate = 1e-5
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
