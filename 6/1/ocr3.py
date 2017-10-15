@@ -95,7 +95,7 @@ def neural_networks():
     # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
     # logits = tf.matmul(lstm_out, W) + b
 
-    # 第二种双向LSTM方法,很容易全部为blank ？
+    # 第二种双向LSTM方法
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
@@ -106,7 +106,7 @@ def neural_networks():
     # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
     # logits = tf.add(tf.matmul(outputs_fw, W_fw),tf.matmul(outputs_bw, W_bw)) + b
 
-    # 第三种双向LSTM方法,很容易全部为blank ？
+    # 第三种双向LSTM方法
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
     # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
     # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
@@ -220,7 +220,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-4
+    curr_learning_rate = 1e-3
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
@@ -323,10 +323,10 @@ def train():
                     return                
                 # if c < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
-                if c < 20 and curr_learning_rate > 1e-5:
+                if c < 20 and curr_learning_rate > 1e-4:
+                    curr_learning_rate = 1e-4
+                if c < 1 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
-                if c < 1 and curr_learning_rate > 5e-5:
-                    curr_learning_rate = 5e-5
                 if c < 0.1 and curr_learning_rate > 1e-6:
                     curr_learning_rate = 1e-6
 
