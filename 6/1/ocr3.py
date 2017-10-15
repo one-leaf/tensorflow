@@ -105,7 +105,6 @@ def neural_networks():
     W_bw = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1, dtype=tf.float32))
     b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
     logits = tf.add(tf.matmul(outputs_fw, W_fw),tf.matmul(outputs_bw, W_bw)) + b
-    logits = tf.matmul(outputs, W) + b   
 
     # 第三种双向LSTM方法
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
