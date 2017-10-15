@@ -95,7 +95,7 @@ def neural_networks():
     # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
     # logits = tf.matmul(lstm_out, W) + b
 
-    # 第二种双向LSTM方法
+    # 第二种双向LSTM方法,很容易全部为blank ？
     # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
