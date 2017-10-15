@@ -117,13 +117,13 @@ def neural_networks():
     # logits = tf.matmul(outputs, W) + b   
     
     # 第四种双向LSTM方法, BiRNN
-    cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden/2, forget_bias=1.0, state_is_tuple=True)
-    cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden/2, forget_bias=1.0, state_is_tuple=True)
+    cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
+    cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2)
-    outputs = tf.reshape(outputs, [-1, num_hidden])
+    outputs = tf.reshape(outputs, [-1, num_hidden*2])
     num_hidden_layer = 512
-    W = tf.Variable(tf.truncated_normal([num_hidden, num_hidden_layer], stddev=0.1))
+    W = tf.Variable(tf.truncated_normal([num_hidden*2, num_hidden_layer], stddev=0.1))
     b = tf.Variable(tf.constant(0.1, shape=[num_hidden_layer]))
     logits = tf.matmul(outputs, W) + b  
     layer = tf.minimum(tf.nn.relu(logits), 20) 
