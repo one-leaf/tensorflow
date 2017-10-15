@@ -107,14 +107,30 @@ def neural_networks():
     # logits = tf.add(tf.matmul(outputs_fw, W_fw),tf.matmul(outputs_bw, W_bw)) + b
 
     # 第三种双向LSTM方法,很容易全部为blank ？
-    cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
-    cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
+    # cell_fw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
+    # cell_bw = tf.contrib.rnn.LSTMCell(num_hidden/2, state_is_tuple=True)
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    # outputs = tf.concat(outputs, axis=2)
+    # outputs = tf.reshape(outputs, [-1, num_hidden])
+    # W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
+    # b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
+    # logits = tf.matmul(outputs, W) + b   
+    
+    # 第四种双向LSTM方法, BiRNN
+    cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden/2, forget_bias=1.0, state_is_tuple=True)
+    cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden/2, forget_bias=1.0, state_is_tuple=True)
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2)
     outputs = tf.reshape(outputs, [-1, num_hidden])
-    W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
-    b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
-    logits = tf.matmul(outputs, W) + b   
+    num_hidden_layer = 512
+    W = tf.Variable(tf.truncated_normal([num_hidden, num_hidden_layer], stddev=0.1))
+    b = tf.Variable(tf.constant(0.1, shape=[num_hidden_layer]))
+    logits = tf.matmul(outputs, W) + b  
+    layer = tf.minimum(tf.nn.relu(logits)) 
+    layer = tf.nn.dropout(layer, input_keep_prob)
+    W2 = tf.Variable(tf.truncated_normal([num_hidden_layer, num_classes], stddev=0.1))
+    b2 = tf.Variable(tf.constant(0.1, shape=[num_classes]))
+    logits = tf.matmul(layer, W2) + b2  
 
     # logits = tf.nn.softmax(logits)
     # 输出对数： [batch_size , max_time , num_classes]
