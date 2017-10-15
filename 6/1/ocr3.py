@@ -126,7 +126,7 @@ def neural_networks():
     W = tf.Variable(tf.truncated_normal([num_hidden, num_hidden_layer], stddev=0.1))
     b = tf.Variable(tf.constant(0.1, shape=[num_hidden_layer]))
     logits = tf.matmul(outputs, W) + b  
-    layer = tf.minimum(tf.nn.relu(logits)) 
+    layer = tf.minimum(tf.nn.relu(logits), 20) 
     layer = tf.nn.dropout(layer, input_keep_prob)
     W2 = tf.Variable(tf.truncated_normal([num_hidden_layer, num_classes], stddev=0.1))
     b2 = tf.Variable(tf.constant(0.1, shape=[num_classes]))
