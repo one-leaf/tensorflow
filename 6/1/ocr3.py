@@ -111,7 +111,7 @@ def neural_networks():
     cell_bw = tf.contrib.rnn.LSTMCell(num_hidden, state_is_tuple=True)
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
     # outputs = tf.concat(outputs, axis=2)
-    outputs = tf.reshape(outputs, [-1, num_hidden ])
+    outputs = tf.reshape(outputs[0], [-1, num_hidden ])
     W = tf.Variable(tf.truncated_normal([num_hidden, num_classes], stddev=0.1))
     b = tf.Variable(tf.constant(0.1, shape=[num_classes]))
     logits = tf.matmul(outputs, W) + b   
