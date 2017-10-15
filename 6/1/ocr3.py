@@ -16,7 +16,7 @@ image_height = 16
 num_hidden = 8
 num_layers = 1
 
-# 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + blank + ctc blank
+# 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
 # https://zh.wikipedia.org/wiki/ASCII
 ASCII_CHARS = [chr(c) for c in range(32,126+1)]
@@ -26,7 +26,7 @@ ZH_CHARS_PUN = ['。','？','！','，','、','；','：','「','」','『','』
 
 CHARS = ASCII_CHARS + ZH_CHARS + ZH_CHARS_PUN
 # CHARS = ASCII_CHARS
-num_classes = len(CHARS) + 1 + 1
+num_classes = len(CHARS) + 1
 
 #初始化学习速率
 # LEARNING_RATE_INITIAL = 1e-3
