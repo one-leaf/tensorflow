@@ -307,8 +307,8 @@ def train():
                     return                
                 # if c < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
-                # if c < 20 and curr_learning_rate > 1e-6:
-                #     curr_learning_rate = 1e-6
+                if c < 20 and curr_learning_rate > 1e-6:
+                    curr_learning_rate = 1e-6
                 if c < 1 and curr_learning_rate > 5e-7:
                     curr_learning_rate = 5e-7
                 if c < 0.1 and curr_learning_rate > 1e-7:
