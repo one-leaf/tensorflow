@@ -323,12 +323,12 @@ def train():
                     return                
                 # if c < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
-                if c < 20 and curr_learning_rate > 1e-4:
+                if c < 20 and curr_learning_rate > 5e-4:
+                    curr_learning_rate = 5e-4
+                if c < 1 and curr_learning_rate > 1e-4:
                     curr_learning_rate = 1e-4
-                if c < 1 and curr_learning_rate > 1e-5:
+                if c < 0.1 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
-                if c < 0.1 and curr_learning_rate > 1e-6:
-                    curr_learning_rate = 1e-6
 
             # start = time.time()
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)

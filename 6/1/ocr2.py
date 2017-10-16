@@ -153,7 +153,7 @@ def get_next_batch(batch_size=128):
             image = dropZeroEdges(image)
             image = resize(image,image_size[0])
             imgvec = img2vec(image,image_size[0],image_size[1])
-            images[imageFileName] = imgvec
+            # images[imageFileName] = imgvec
         inputs[i,:] = imgvec
         label_list=[]
         for c in text:
