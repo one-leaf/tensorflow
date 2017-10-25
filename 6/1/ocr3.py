@@ -329,8 +329,8 @@ def train():
                 if np.isnan(b_cost) or np.isinf(b_cost):
                     print("Error: cost is nan or inf")
                     train_labels_list = decode_sparse_tensor(train_labels)
-                    for train_label in train_labels_list:
-                        print(list_to_chars(train_label))
+                    for i, train_label in enumerate(train_labels_list):
+                        print(i,list_to_chars(train_label))
                     return                
                 # if b_cost < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
