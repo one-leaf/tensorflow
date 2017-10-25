@@ -233,19 +233,19 @@ def train():
     # 收敛效果不好
     # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
 
-    # 做一个梯度裁剪，貌似也没啥用
-    # grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-    # grads_and_vars = grads_optimizer.compute_gradients(loss)
-    # capped_grads_and_vars = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads_and_vars]
+    # 做一个梯度裁剪，貌似也没啥用, 将梯度控制到 -1 和 1 之间
+    grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    grads_and_vars = grads_optimizer.compute_gradients(loss)
+    capped_grads_and_vars = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads_and_vars]
     # gradients, variables = zip(*grads_optimizer.compute_gradients(loss))
     # gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
     # capped_grads_and_vars = zip(gradients, variables)
 
     #capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
-    # optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
+    optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
 
     # 最小化 loss
-    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
+    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
     # The ctc_greedy_decoder is a special case of the ctc_beam_search_decoder with top_paths=1 (but that decoder is faster for this special case).
     # decoded, log_prob = tf.nn.ctc_greedy_decoder(logits, seq_len, merge_repeated=False)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, beam_width=10, merge_repeated=False)
@@ -323,12 +323,12 @@ def train():
                     return                
                 # if c < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
-                if c < 20 and curr_learning_rate > 5e-4:
-                    curr_learning_rate = 5e-4
-                if c < 1 and curr_learning_rate > 1e-4:
+                if c < 20 and curr_learning_rate > 1e-4:
                     curr_learning_rate = 1e-4
-                if c < 0.1 and curr_learning_rate > 1e-5:
+                if c < 2 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
+                if c < 1 and curr_learning_rate > 1e-6:
+                    curr_learning_rate = 1e-6
 
             # start = time.time()
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
