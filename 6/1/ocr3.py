@@ -314,20 +314,31 @@ def train():
             train_cost = 0
             for batch in range(BATCHES):
                 start = time.time()
-                c, steps, rate, width = do_batch()
-                train_cost += c * BATCH_SIZE
+
+                train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
+                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
+                        input_keep_prob: 0.7, learning_rate: curr_learning_rate}        
+                b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
+
+                if steps > 0 and steps % REPORT_STEPS == 0:
+                    do_report()
+
+                train_cost += b_cost * BATCH_SIZE
                 seconds = round(time.time() - start,2)
-                print("step:", steps, "cost:", c, "batch seconds:", seconds, "learning rate:", rate, "width:", width)
-                if np.isnan(c) or np.isinf(c):
+                print("step:", steps, "cost:", b_cost, "batch seconds:", seconds, "learning rate:", b_learning_rate, "width:", train_seq_len[0])
+                if np.isnan(b_cost) or np.isinf(b_cost):
                     print("Error: cost is nan or inf")
+                    train_labels_list = decode_sparse_tensor(train_labels)
+                    for train_label in train_labels_list:
+                        print(list_to_chars(train_label))
                     return                
-                # if c < 100 and curr_learning_rate > 1e-6:
+                # if b_cost < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
-                if c < 20 and curr_learning_rate > 1e-4:
+                if b_cost < 20 and curr_learning_rate > 1e-4:
                     curr_learning_rate = 1e-4
-                if c < 2 and curr_learning_rate > 1e-5:
+                if b_cost < 2 and curr_learning_rate > 1e-5:
                     curr_learning_rate = 1e-5
-                if c < 1 and curr_learning_rate > 1e-6:
+                if b_cost < 1 and curr_learning_rate > 1e-6:
                     curr_learning_rate = 1e-6
 
             # start = time.time()
