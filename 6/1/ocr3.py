@@ -220,7 +220,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-3
+    curr_learning_rate = 1e-5
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
@@ -269,7 +269,8 @@ def train():
             number = original_list[idx]
             detect_number = detected_list[idx]  
             hit = (number == detect_number)          
-            print(hit, list_to_chars(number), "(", len(number), ") <-------> ", list_to_chars(detect_number), "(", len(detect_number), ")")
+            print("%8s" % hit, list_to_chars(number), "(", len(number), ")")
+            print("%8s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
             all_numer += len(number)
             for x in range(min(len(number),len(detect_number))):
                 if number[x]==detect_number[x]:
@@ -334,12 +335,12 @@ def train():
                     return                
                 # if b_cost < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
-                if b_cost < 20 and curr_learning_rate > 1e-4:
-                    curr_learning_rate = 1e-4
-                if b_cost < 2 and curr_learning_rate > 1e-5:
-                    curr_learning_rate = 1e-5
-                if b_cost < 1 and curr_learning_rate > 1e-6:
-                    curr_learning_rate = 1e-6
+                # if b_cost < 20 and curr_learning_rate > 1e-4:
+                #     curr_learning_rate = 1e-4
+                # if b_cost < 2 and curr_learning_rate > 1e-5:
+                #     curr_learning_rate = 1e-5
+                # if b_cost < 1 and curr_learning_rate > 1e-6:
+                #     curr_learning_rate = 1e-6
 
             # start = time.time()
             # train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
