@@ -271,7 +271,8 @@ def train():
             hit = (number == detect_number)          
             print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
             print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
-            acc += Levenshtein.ratio(number,detect_number)
+            # 计算莱文斯坦比
+            acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
         print("Test Accuracy:", acc / len(original_list))
 
     def do_report():
