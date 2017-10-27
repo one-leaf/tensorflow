@@ -7,6 +7,7 @@ import os
 from utils import readImgFile, img2bwinv, img2vec, dropZeroEdges, resize, save
 import time
 import random
+import Levenshtein
 
 curr_dir = os.path.dirname(__file__)
 
@@ -36,9 +37,9 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 64
+BATCH_SIZE = 16
 TRAIN_SIZE = BATCHES * BATCH_SIZE
-TEST_BATCH_SIZE = 64
+TEST_BATCH_SIZE = 10
 
 train_files = []
 if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
@@ -259,23 +260,19 @@ def train():
     def report_accuracy(decoded_list, test_labels):
         original_list = decode_sparse_tensor(test_labels)
         detected_list = decode_sparse_tensor(decoded_list)
-        true_numer = 0
-        all_numer = 0
         if len(original_list) != len(detected_list):
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                   " test and detect length desn't match")
         print("T/F: original(length) <-------> detectcted(length)")
+        acc = 0.
         for idx in range(min(len(original_list),len(detected_list))):
             number = original_list[idx]
             detect_number = detected_list[idx]  
             hit = (number == detect_number)          
-            print("%8s" % hit, list_to_chars(number), "(", len(number), ")")
-            print("%8s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
-            all_numer += len(number)
-            for x in range(min(len(number),len(detect_number))):
-                if number[x]==detect_number[x]:
-                    true_numer += 1
-        print("Test Accuracy:", true_numer * 1.0 / all_numer)
+            print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
+            print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+            acc += Levenshtein.ratio(number,detect_number)
+        print("Test Accuracy:", acc / len(original_list))
 
     def do_report():
         test_inputs,test_labels,test_seq_len = get_next_batch(TEST_BATCH_SIZE)
@@ -285,16 +282,6 @@ def train():
                      input_keep_prob: 1.0}
         dd = session.run(decoded[0], test_feed)
         report_accuracy(dd, test_labels)
- 
-    def do_batch():
-        train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
-        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
-                input_keep_prob: 1., learning_rate: curr_learning_rate}        
-        b_loss,b_labels, b_logits, b_seq_len,b_cost, steps, b_learning_rate, _ = session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
-
-        if steps > 0 and steps % REPORT_STEPS == 0:
-            do_report()
-        return b_cost, steps, b_learning_rate, train_inputs.shape[1]
 
     def restore(sess):
         curr_dir = os.path.dirname(__file__)
@@ -321,8 +308,6 @@ def train():
                         input_keep_prob: 1., learning_rate: curr_learning_rate}        
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
-                if steps > 0 and steps % REPORT_STEPS == 0:
-                    do_report()
 
                 train_cost += b_cost * BATCH_SIZE
                 seconds = round(time.time() - start,2)
@@ -332,7 +317,15 @@ def train():
                     train_labels_list = decode_sparse_tensor(train_labels)
                     for i, train_label in enumerate(train_labels_list):
                         print(i,list_to_chars(train_label))
-                    return                
+                    return   
+                
+                if seconds > 30: 
+                    print('Exit for long time')
+                    return
+
+                if steps > 0 and steps % REPORT_STEPS == 0:
+                    do_report()
+
                 # if b_cost < 100 and curr_learning_rate > 1e-6:
                 #     curr_learning_rate = 1e-6           
                 # if b_cost < 20 and curr_learning_rate > 1e-4:
