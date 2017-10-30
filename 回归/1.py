@@ -31,6 +31,7 @@ def neural_networks():
     list_x=[x]
     for i in range(1,1000):
         list_x.append(tf.sin(x * i))
+                
 
     _x = tf.concat(list_x,1)
     layer = add_layer(_x, 1000, 1000, tf.nn.relu)
