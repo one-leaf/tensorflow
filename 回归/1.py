@@ -29,14 +29,14 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 1], name='y')
 
     list_x=[x]
-    for i in range(999):
+    for i in range(1,1000):
         list_x.append(tf.sin(x * i))
 
     _x = tf.concat(list_x,1)
-    layer = add_layer(_x, 1000, 100, tf.nn.relu)
+    layer = add_layer(_x, 1000, 1000, tf.nn.relu)
     # for i in range(3):
     #     layer = add_layer(layer, 100, 100, tf.nn.relu)
-    prediction = add_layer(layer, 100, 1)
+    prediction = add_layer(layer, 1000, 1)
     cost = tf.reduce_mean(tf.reduce_sum(tf.square(y - prediction), reduction_indices=[1]))
     optimizer = tf.train.AdamOptimizer(0.1).minimize(cost)
     return x, y, prediction, optimizer, cost
