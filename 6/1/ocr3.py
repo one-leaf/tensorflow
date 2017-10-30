@@ -45,14 +45,14 @@ train_files = []
 if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
     print("Loading data ...")
     # 预处理图片
-    if not os.path.exists(os.path.join(curr_dir, "dataset")):
-        os.mkdir(os.path.join(curr_dir, "dataset"))
+    if not os.path.exists(os.path.join(curr_dir, "data" ,"dataset")):
+        os.mkdir(os.path.join(curr_dir, "data" ,"dataset"))
     with open(os.path.join(curr_dir, "data", "index.txt")) as index_file:
         for i, line in enumerate(index_file.readlines()):
             if i%10000==0: print("resizing image no: ",i)
             lines = line.split(" ")
             image_name = lines[0]+".png"
-            dst_image_name = os.path.join(curr_dir,"dataset",image_name)
+            dst_image_name = os.path.join(curr_dir, "data" ,"dataset", image_name)
             if os.path.exists(dst_image_name):
                 train_files.append(line)
                 continue
@@ -152,7 +152,7 @@ def get_next_batch(batch_size=128):
         imageFileName = lines[0]+".png"
         text = line[line.index(' '):].strip()
         # 输入的图片为反色黑白
-        image = readImgFile(os.path.join(curr_dir,"dataset",imageFileName))    
+        image = readImgFile(os.path.join(curr_dir, "data" ,"dataset", imageFileName))    
         images.append(image)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
@@ -221,7 +221,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-5
+    curr_learning_rate = 1e-4
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, input_keep_prob = neural_networks()
