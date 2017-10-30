@@ -28,7 +28,7 @@ def neural_networks():
     x = tf.placeholder(tf.float32, [None, 1], name='x')
     y = tf.placeholder(tf.float32, [None, 1], name='y')
     l1 = add_layer(x, 1, 10, tf.nn.relu)
-    prediction = add_layer(l1, 10, 1, tf.nn.relu)
+    prediction = add_layer(l1, 10, 1)
     cost = tf.reduce_mean(tf.reduce_sum(tf.square(y - prediction), reduction_indices=[1]))
     optimizer = tf.train.AdamOptimizer(0.1).minimize(cost)
     return x, y, prediction, optimizer, cost
