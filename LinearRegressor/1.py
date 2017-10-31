@@ -1,4 +1,6 @@
 
+# 线性回归
+
 import tensorflow as tf
 import numpy as np
 import random
@@ -26,21 +28,10 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 # 神经网络定义
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 1], name='x')
-    y = tf.placeholder(tf.float32, [None, 1], name='y')
-
-    list_x=[x]
-    # for i in range(1,11):
-    #     list_x.append(x ** i)   
-    #     list_x.append(x * i)   
-    #     list_x.append(x + i)     
-    #     list_x.append(x - i)
-    #     list_x.append(x / i)
-    _x = tf.concat(list_x,1)    
-    layer = add_layer(_x, len(list_x), 64, tf.nn.relu)
-    for i in range(5):
-        layer = add_layer(layer, 64, 64, tf.nn.relu)
-    prediction = add_layer(layer, 64, 1)
-    cost = tf.reduce_mean(tf.reduce_sum(tf.square(y - prediction), reduction_indices=[1]))
+    y = tf.placeholder(tf.float32, [None, 1], name='y')   
+    layer = add_layer(x, 1, 128, tf.nn.relu)
+    prediction = add_layer(layer, 128, 1)
+    cost = tf.reduce_sum(tf.square(y - prediction))
     optimizer = tf.train.AdamOptimizer(0.1).minimize(cost)
     return x, y, prediction, optimizer, cost
 
