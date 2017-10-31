@@ -29,13 +29,19 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 # 神经网络定义
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 1], name='x')
-    y = tf.placeholder(tf.float32, [None, 1], name='y')   
-    layer = add_layer(x, 1, 128, tf.nn.relu)
-    for i in range(4):
-        layer = add_layer(layer, 128, 128, tf.nn.relu)
+    y = tf.placeholder(tf.float32, [None, 1], name='y')
+
+    x_list=[]
+    for i in range(1,10):
+        x_list.append(tf.sin(x*i))
+        x_list.append(tf.cos(x*i))
+        x_list.append(tf.pow(x,i))
+    _x=tf.concat(x_list,axis=1)
+
+    layer = add_layer(_x, len(x_list), 128, tf.nn.relu)
     prediction = add_layer(layer, 128, 1)
     cost = tf.reduce_sum(tf.square(y - prediction))
-    optimizer = tf.train.AdamOptimizer(0.01).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(0.1).minimize(cost)
     return x, y, prediction, optimizer, cost
 
 if __name__ == '__main__':
