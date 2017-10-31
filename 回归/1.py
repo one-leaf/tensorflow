@@ -4,10 +4,10 @@ import numpy as np
 import random
 import matplotlib.pyplot as plt
 
-# 获得数据 , batchSize/10 是为了数据好看一点
+# 获得数据 / 10 只是让数据好看一点
 def getBatch(batchSize):    
-    start = random.randint(1, 100000)
-    n = np.linspace(start, start+batchSize/10, batchSize, endpoint=True).reshape((batchSize,1))
+    start = random.randint(1, 10000)
+    n = np.linspace(start, start+batchSize, batchSize, endpoint=True).reshape((batchSize,1)) / 10
     x = np.sin(n)
     y = np.cos(n)
     return x,y,n
@@ -29,15 +29,17 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 1], name='y')
 
     list_x=[x]
-    for i in range(1,1000):
-        list_x.append(tf.sin(x * i))
-                
-
-    _x = tf.concat(list_x,1)
-    layer = add_layer(_x, 1000, 1000, tf.nn.relu)
-    # for i in range(3):
-    #     layer = add_layer(layer, 100, 100, tf.nn.relu)
-    prediction = add_layer(layer, 1000, 1)
+    # for i in range(1,11):
+    #     list_x.append(x ** i)   
+    #     list_x.append(x * i)   
+    #     list_x.append(x + i)     
+    #     list_x.append(x - i)
+    #     list_x.append(x / i)
+    _x = tf.concat(list_x,1)    
+    layer = add_layer(_x, len(list_x), 64, tf.nn.relu)
+    for i in range(5):
+        layer = add_layer(layer, 64, 64, tf.nn.relu)
+    prediction = add_layer(layer, 64, 1)
     cost = tf.reduce_mean(tf.reduce_sum(tf.square(y - prediction), reduction_indices=[1]))
     optimizer = tf.train.AdamOptimizer(0.1).minimize(cost)
     return x, y, prediction, optimizer, cost
@@ -50,11 +52,11 @@ if __name__ == '__main__':
     plt.ion()
     plt.show()
     for i in range(10000):
-        batch_x, batch_y, batch_n= getBatch(100)
+        batch_x, batch_y, batch_n= getBatch(200)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
         print(i, loss)
         plt.clf()
         plt.plot(batch_n, batch_y, 'r', batch_n, pred, 'b')
         plt.ylim((-1.2, 1.2))        
         plt.draw()
-        plt.pause(0.3)
+        plt.pause(0.1)
