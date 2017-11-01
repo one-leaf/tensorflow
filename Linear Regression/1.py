@@ -30,10 +30,10 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 1], name='x')
     y = tf.placeholder(tf.float32, [None, 1], name='y')   
-    layer = add_layer(x, 1, 12800, tf.nn.relu)
-    prediction = add_layer(layer, 12800, 1)
+    layer = add_layer(x, 1, 20000, tf.nn.relu)
+    prediction = add_layer(layer, 20000, 1)
     cost = tf.reduce_sum(tf.square(y - prediction))
-    optimizer = tf.train.AdamOptimizer(1e-3).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     return x, y, prediction, optimizer, cost
 
 if __name__ == '__main__':
@@ -43,12 +43,13 @@ if __name__ == '__main__':
     sess.run(init)
     plt.ion()
     plt.show()
-    for i in range(10000):
+    for i in range(100000):
         batch_x, batch_y, batch_n= getBatch(200,0)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
-        print(i, loss)
-        plt.clf()
-        plt.plot(batch_n, batch_y, 'r', batch_n, pred, 'b')
-        plt.ylim((-1.2, 1.2))        
-        plt.draw()
-        plt.pause(0.1)
+        if i % 50 == 0 :
+            print(i, loss)
+            plt.clf()
+            plt.plot(batch_n, batch_y, 'r', batch_n, pred, 'b')
+            plt.ylim((-1.2, 1.2))        
+            plt.draw()
+            plt.pause(0.1)
