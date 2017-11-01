@@ -30,8 +30,8 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 1], name='x')
     y = tf.placeholder(tf.float32, [None, 1], name='y')   
-    layer = add_layer(x, 1, 20000, tf.nn.relu)
-    prediction = add_layer(layer, 20000, 1)
+    layer = add_layer(x, 1, 200, tf.nn.relu)
+    prediction = add_layer(layer, 200, 1)
     cost = tf.reduce_sum(tf.square(y - prediction))
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     return x, y, prediction, optimizer, cost
