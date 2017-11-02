@@ -33,7 +33,7 @@ def neural_networks(batch_size, seq_len, cell_size):
     
     _x = tf.reshape(x,[-1,1])
     layer = add_layer(_x, 1, cell_size)
-    inputs = tf.reshape(layer,[-1,seq_len,cell_size])
+    inputs = tf.reshape(layer,[-1, seq_len, cell_size])
 
     cell = tf.contrib.rnn.LSTMCell(cell_size, state_is_tuple=True)
     outputs, state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
