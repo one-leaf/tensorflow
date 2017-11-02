@@ -66,6 +66,7 @@ if __name__ == '__main__':
     plt.ion()
     plt.show()
     for i in range(100000):
+        # batch_x, batch_y, batch_n= getBatch(batch_size * seq_len, 0)
         batch_x, batch_y, batch_n= getBatch(batch_size * seq_len)
         batch_x = np.reshape(batch_x,[batch_size, seq_len, 1])
         batch_y = np.reshape(batch_y,[batch_size, seq_len, 1])
