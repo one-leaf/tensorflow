@@ -56,9 +56,9 @@ def neural_networks(batch_size, seq_len, cell_size):
     return x, y, prediction, optimizer, cost
 
 if __name__ == '__main__':
-    seq_len = 10
-    cell_size = 8
-    batch_size = 20
+    seq_len = 20
+    cell_size = 10
+    batch_size = 10
     x, y, prediction, optimizer, cost = neural_networks(batch_size, seq_len, cell_size)
     sess = tf.Session()
     init = tf.global_variables_initializer()
@@ -66,8 +66,8 @@ if __name__ == '__main__':
     plt.ion()
     plt.show()
     for i in range(100000):
-        # batch_x, batch_y, batch_n= getBatch(batch_size * seq_len, 0)
-        batch_x, batch_y, batch_n= getBatch(batch_size * seq_len)
+        batch_x, batch_y, batch_n= getBatch(batch_size * seq_len, 0)
+        # batch_x, batch_y, batch_n= getBatch(batch_size * seq_len)
         batch_x = np.reshape(batch_x,[batch_size, seq_len, 1])
         batch_y = np.reshape(batch_y,[batch_size, seq_len, 1])
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
