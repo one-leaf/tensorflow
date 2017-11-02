@@ -39,18 +39,21 @@ def neural_networks(batch_size, seq_len, cell_size):
     outputs, state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
 
     _outputs = tf.reshape(outputs, [-1, cell_size])
-    prediction = add_layer(_outputs, cell_size, 1)
+    prediction = add_layer(_outputs, cell_size, 1, activation_function=tf.nn.tanh)
+    # prediction = add_layer(_outputs, cell_size, 1)
+    # def ms_error(labels, logits):
+    #     return tf.square(tf.subtract(labels, logits))
 
-    def ms_error(labels, logits):
-        return tf.square(tf.subtract(labels, logits))
+    # cost = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
+    #         [tf.reshape(prediction,[-1])],
+    #         [tf.reshape(y,[-1])],
+    #         [tf.ones([batch_size * seq_len], dtype=tf.float32)],
+    #         average_across_timesteps=True,
+    #         softmax_loss_function=ms_error
+    #         )
 
-    cost = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
-            [tf.reshape(prediction,[-1])],
-            [tf.reshape(y,[-1])],
-            [tf.ones([batch_size * seq_len], dtype=tf.float32)],
-            average_across_timesteps=True,
-            softmax_loss_function=ms_error
-            )
+    cost = tf.square(tf.subtract(tf.reshape(prediction, [-1]), tf.reshape(y, [-1])))   
+    
     cost = tf.reduce_sum(cost)
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     return x, y, prediction, optimizer, cost
@@ -66,8 +69,8 @@ if __name__ == '__main__':
     plt.ion()
     plt.show()
     for i in range(100000):
-        batch_x, batch_y, batch_n= getBatch(batch_size * seq_len, 0)
-        # batch_x, batch_y, batch_n= getBatch(batch_size * seq_len)
+      #  batch_x, batch_y, batch_n= getBatch(batch_size * seq_len, 0)
+        batch_x, batch_y, batch_n= getBatch(batch_size * seq_len)
         batch_x = np.reshape(batch_x,[batch_size, seq_len, 1])
         batch_y = np.reshape(batch_y,[batch_size, seq_len, 1])
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
