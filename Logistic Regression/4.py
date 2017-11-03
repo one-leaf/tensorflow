@@ -32,36 +32,22 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
         outputs = activation_function(Wx_plus_b)
     return outputs
 
-# 增加卷积层
-def add_conv_layer(inputs, patch_size, in_size, out_size, activation_function=None, pool_function=None):
-    Weights = tf.Variable(tf.truncated_normal([patch_size, patch_size, in_size, out_size], stddev=0.1))
-    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-    layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='SAME')
-    Wconvlayer_plus_b = layer + biases
-    if activation_function is None:
-        convlayer = Wconvlayer_plus_b
-    else:
-        convlayer = activation_function(Wconvlayer_plus_b)
-    if pool_function is None:
-        outputs = convlayer
-    else:
-        outputs = pool_function(convlayer, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    return outputs
-
-# 神经网络定义, CNN
+# 神经网络定义, RNN
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
-    x_image = tf.reshape(x, [-1,28,28,1])
+    x_image = tf.reshape(x, [-1,28,28]) #[-1, time_step , input_size]
+    
+    num_units = 64
+    cell = tf.contrib.rnn.LSTMCell(num_units, state_is_tuple=True)
+    logits, _ = tf.nn.dynamic_rnn(cell, x_image, dtype=tf.float32, time_major=False)
+    logits = tf.transpose(logits, (0, 2, 1)) 
+    # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
+    logits = tf.reshape(logits,[-1, 28 * num_units])
+    prediction = add_layer(logits, 28 * num_units, 10)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
-    layer1 = add_conv_layer(x_image, 5, 1, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer2 = add_conv_layer(layer1, 3, 16, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer_size = (28//2//2)*(28//2//2)*32
-    full_layer =  tf.reshape(layer2, [-1,layer_size])
-    prediction = add_layer(full_layer, layer_size, 10, tf.nn.softmax) 
-
-    cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
-    optimizer = tf.train.AdamOptimizer(0.0001).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return x, y, prediction, optimizer, cost, accuracy
@@ -100,4 +86,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.9279
+    # Last accuracy: 0.9784
