@@ -19,7 +19,7 @@ def getBatch(batchSize,start=None):
 def add_layer(inputs, in_size, out_size, activation_function=None):
     Weights1 = tf.Variable(tf.random_normal([in_size, out_size]))
     Weights2 = tf.Variable(tf.random_normal([in_size, out_size]))
-    biases = tf.Variable(tf.zeros([1, out_size]) + 0.1)
+    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
     Wx_plus_b = tf.matmul(inputs * inputs, Weights1) + \
                 tf.matmul(inputs, Weights2) + \
                 biases
