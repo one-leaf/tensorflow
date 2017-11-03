@@ -37,24 +37,12 @@ def neural_networks(batch_size, seq_len, cell_size):
 
     cell = tf.contrib.rnn.LSTMCell(cell_size, state_is_tuple=True)
     outputs, state = tf.nn.dynamic_rnn(cell, inputs, dtype=tf.float32)
-
     _outputs = tf.reshape(outputs, [-1, cell_size])
-    prediction = add_layer(_outputs, cell_size, 1, activation_function=tf.nn.tanh)
-    # prediction = add_layer(_outputs, cell_size, 1)
-    # def ms_error(labels, logits):
-    #     return tf.square(tf.subtract(labels, logits))
-
-    # cost = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
-    #         [tf.reshape(prediction,[-1])],
-    #         [tf.reshape(y,[-1])],
-    #         [tf.ones([batch_size * seq_len], dtype=tf.float32)],
-    #         average_across_timesteps=True,
-    #         softmax_loss_function=ms_error
-    #         )
-
-    cost = tf.square(tf.subtract(tf.reshape(prediction, [-1]), tf.reshape(y, [-1])))   
     
+    prediction = add_layer(_outputs, cell_size, 1, activation_function=tf.nn.tanh)    
+    cost = tf.square(tf.subtract(tf.reshape(prediction, [-1]), tf.reshape(y, [-1])))   
     cost = tf.reduce_sum(cost)
+
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     return x, y, prediction, optimizer, cost
 
