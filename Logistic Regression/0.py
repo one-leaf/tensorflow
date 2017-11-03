@@ -23,7 +23,6 @@ def getTestImages():
 # 10*10 显示 100 张图片
 def plot_10_by_10_images(images):
     fig = plt.figure()
-    images = [image[3:25, 3:25] for image in images]
     for x in range(0,10):
         for y in range(0,10):
             ax = fig.add_subplot(10, 10, 10*y+x+1)
@@ -34,6 +33,14 @@ def plot_10_by_10_images(images):
 
 if __name__ == '__main__':
     batch_x, batch_y = getBatch(100)
+    images =  [np.reshape(f, (28, 28)) for f in batch_x]
+    plot_10_by_10_images(images)
+
+    batch_x, batch_y = getValidationImages()
+    images =  [np.reshape(f, (28, 28)) for f in batch_x]
+    plot_10_by_10_images(images)
+
+    batch_x, batch_y = getTestImages()
     images =  [np.reshape(f, (28, 28)) for f in batch_x]
     plot_10_by_10_images(images)
 
