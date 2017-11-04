@@ -36,10 +36,10 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
-    layer = add_layer(x, 28*28, 32, tf.nn.tanh) 
-    layer = add_layer(layer, 32, 32, tf.nn.tanh) 
-    prediction = add_layer(layer, 32, 10, tf.nn.softmax) 
-    cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
+    layer = add_layer(x, 28*28, 200, tf.nn.tanh) 
+    layer = add_layer(layer, 200, 200, tf.nn.tanh) 
+    prediction = add_layer(layer, 200, 10) 
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
@@ -79,5 +79,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.8339
-    # 多层对简单的神经网络不会有提升
+    # Last accuracy: 0.8536

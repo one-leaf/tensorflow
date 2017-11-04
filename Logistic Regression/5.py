@@ -27,24 +27,25 @@ def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
 
-    out = layers.flatten(x)  
-    out = layers.fully_connected(out,   
+    x_image = layers.flatten(x)  
+    layer = layers.fully_connected(x_image,   
                 num_outputs=200,  
                 weights_initializer = layers.xavier_initializer(uniform=True),  
                 weights_regularizer = layers.l2_regularizer(scale=1e-4),  
                 activation_fn = tf.nn.tanh)
-    out = layers.fully_connected(out,   
+    layer = layers.fully_connected(layer,   
                 num_outputs=200,  
                 weights_initializer = layers.xavier_initializer(uniform=True),  
                 weights_regularizer = layers.l2_regularizer(scale=1e-4),
                 activation_fn = tf.nn.tanh)  
-    prediction = layers.fully_connected(out,   
+    prediction = layers.fully_connected(layer,   
                 num_outputs=10, 
                 weights_initializer = layers.xavier_initializer(uniform=True),  
                 weights_regularizer = layers.l2_regularizer(scale=1e-4),  
                 activation_fn = None)  
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))  
+    reg_ws = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
     cost = cross_entropy + tf.reduce_sum(reg_ws)
     optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost)  
 
