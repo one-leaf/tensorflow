@@ -32,23 +32,54 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
         outputs = activation_function(Wx_plus_b)
     return outputs
 
-# 神经网络定义
+# 增加卷积层
+def add_conv_layer(inputs, patch_size, in_size, out_size, activation_function=None, pool_function=None):
+    Weights = tf.Variable(tf.truncated_normal([patch_size, patch_size, in_size, out_size], stddev=0.1))
+    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
+    layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='SAME')
+    Wconvlayer_plus_b = layer + biases
+    if activation_function is None:
+        convlayer = Wconvlayer_plus_b
+    else:
+        convlayer = activation_function(Wconvlayer_plus_b)
+    if pool_function is None:
+        outputs = convlayer
+    else:
+        outputs = pool_function(convlayer, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+    return outputs
+
+# 神经网络定义, RNN
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
-    y = tf.placeholder(tf.float32, [None, 10], name='y')  
-    keep_prob = tf.placeholder(tf.float32) 
-    layer = add_layer(x, 28*28, 200, tf.nn.tanh) 
-    layer = add_layer(layer, 200, 200, tf.nn.tanh) 
-    layer_drop = tf.nn.dropout(layer, keep_prob)    # 一般网络不深，dropout 会没有什么用
-    prediction = add_layer(layer_drop, 200, 10) 
+    y = tf.placeholder(tf.float32, [None, 10], name='y') 
+    
+    x_image = tf.reshape(x, [-1,28,28,1])
+    layer1 = add_conv_layer(x_image, 5, 1, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer2 = add_conv_layer(layer1, 3, 16, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer_size = (28//2//2)*(28//2//2)
+    x_image =  tf.reshape(layer2, [-1,layer_size,32])
+    x_image = tf.transpose(x_image, (0, 2, 1)) 
+
+    num_units = 64
+
+    cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
+    cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, x_image, dtype=tf.float32)
+    logits = tf.concat(outputs, axis=2)
+
+    logits = tf.transpose(logits, (0, 2, 1)) 
+    # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
+    logits = tf.reshape(logits,[-1, 32 * num_units])
+    prediction = add_layer(logits, 32 * num_units, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
+
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return x, y, keep_prob, prediction, optimizer, cost, accuracy
+    return x, y, prediction, optimizer, cost, accuracy
 
 if __name__ == '__main__':
-    x, y, keep_prob, prediction, optimizer, cost, accuracy = neural_networks()
+    x, y, prediction, optimizer, cost, accuracy = neural_networks()
     sess = tf.Session()
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -64,9 +95,9 @@ if __name__ == '__main__':
     step = 0
     while mnist.train.epochs_completed < 8:
         batch_x, batch_y= getBatch(100)
-        _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
+        _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
         if step % 10 == 0 :
-            acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, keep_prob: 1.0})
+            acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y})
             print(step, loss, acc)
             plt.clf()
             plt_n.append(step)
@@ -79,6 +110,6 @@ if __name__ == '__main__':
             plt.pause(0.1)
         step += 1
 
-    acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y, keep_prob: 1.0})
+    acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.8937
+    # Last accuracy: 0.9865
