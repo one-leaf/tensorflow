@@ -1,6 +1,7 @@
+# 加了正则化
 import tensorflow as tf
 import numpy as np
-import random
+import tensorflow.contrib.layers as layers  
 import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import os
@@ -21,47 +22,33 @@ def getValidationImages():
 def getTestImages():
     return mnist.test.images, mnist.test.labels
 
-# 增加层
-def add_layer(inputs, in_size, out_size, activation_function=None):
-    Weights = tf.Variable(tf.random_normal([in_size, out_size]))
-    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-    Wx_plus_b = tf.matmul(inputs, Weights) + biases
-    if activation_function is None:
-        outputs = Wx_plus_b
-    else:
-        outputs = activation_function(Wx_plus_b)
-    return outputs
-
-# 增加卷积层
-def add_conv_layer(inputs, patch_size, in_size, out_size, activation_function=None, pool_function=None):
-    Weights = tf.Variable(tf.truncated_normal([patch_size, patch_size, in_size, out_size], stddev=0.1))
-    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-    layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='SAME')
-    Wconvlayer_plus_b = layer + biases
-    if activation_function is None:
-        convlayer = Wconvlayer_plus_b
-    else:
-        convlayer = activation_function(Wconvlayer_plus_b)
-    if pool_function is None:
-        outputs = convlayer
-    else:
-        outputs = pool_function(convlayer, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    return outputs
-
-# 神经网络定义, CNN
+# 神经网络定义
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
-    x_image = tf.reshape(x, [-1,28,28,1])
 
-    layer1 = add_conv_layer(x_image, 5, 1, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer2 = add_conv_layer(layer1, 3, 16, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer_size = (28//2//2)*(28//2//2)*32
-    full_layer =  tf.reshape(layer2, [-1,layer_size])
-    prediction = add_layer(full_layer, layer_size, 10, tf.nn.softmax) 
+    x_image = layers.flatten(x)  
+    layer = layers.fully_connected(x_image,   
+                num_outputs=200,  
+                weights_initializer = layers.xavier_initializer(uniform=True),  
+                weights_regularizer = layers.l2_regularizer(scale=1e-4),  
+                activation_fn = tf.nn.tanh)
+    layer = layers.fully_connected(layer,   
+                num_outputs=200,  
+                weights_initializer = layers.xavier_initializer(uniform=True),  
+                weights_regularizer = layers.l2_regularizer(scale=1e-4),
+                activation_fn = tf.nn.tanh)  
+    prediction = layers.fully_connected(layer,   
+                num_outputs=10, 
+                weights_initializer = layers.xavier_initializer(uniform=True),  
+                weights_regularizer = layers.l2_regularizer(scale=1e-4),  
+                activation_fn = None)  
 
-    cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
-    optimizer = tf.train.AdamOptimizer(0.0001).minimize(cost)
+    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))  
+    reg_ws = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
+    cost = cross_entropy + tf.reduce_sum(reg_ws)
+    optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost)  
+
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return x, y, prediction, optimizer, cost, accuracy
@@ -100,4 +87,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.9279
+# Last accuracy: 0.9536

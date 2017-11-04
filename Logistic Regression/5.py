@@ -1,7 +1,6 @@
-# 加了正则化
 import tensorflow as tf
 import numpy as np
-import tensorflow.contrib.layers as layers  
+import random
 import matplotlib.pyplot as plt
 from tensorflow.examples.tutorials.mnist import input_data
 import os
@@ -22,33 +21,33 @@ def getValidationImages():
 def getTestImages():
     return mnist.test.images, mnist.test.labels
 
-# 神经网络定义
+# 增加层
+def add_layer(inputs, in_size, out_size, activation_function=None):
+    Weights = tf.Variable(tf.random_normal([in_size, out_size]))
+    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
+    Wx_plus_b = tf.matmul(inputs, Weights) + biases
+    if activation_function is None:
+        outputs = Wx_plus_b
+    else:
+        outputs = activation_function(Wx_plus_b)
+    return outputs
+
+# 神经网络定义, RNN
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
+    x_image = tf.reshape(x, [-1,28,28]) #[-1, time_step , input_size]
+    
+    num_units = 64
+    cell = tf.contrib.rnn.LSTMCell(num_units, state_is_tuple=True)
+    logits, _ = tf.nn.dynamic_rnn(cell, x_image, dtype=tf.float32, time_major=False)
+    logits = tf.transpose(logits, (0, 2, 1)) 
+    # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
+    logits = tf.reshape(logits,[-1, 28 * num_units])
+    prediction = add_layer(logits, 28 * num_units, 10)
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
-    x_image = layers.flatten(x)  
-    layer = layers.fully_connected(x_image,   
-                num_outputs=200,  
-                weights_initializer = layers.xavier_initializer(uniform=True),  
-                weights_regularizer = layers.l2_regularizer(scale=1e-4),  
-                activation_fn = tf.nn.tanh)
-    layer = layers.fully_connected(layer,   
-                num_outputs=200,  
-                weights_initializer = layers.xavier_initializer(uniform=True),  
-                weights_regularizer = layers.l2_regularizer(scale=1e-4),
-                activation_fn = tf.nn.tanh)  
-    prediction = layers.fully_connected(layer,   
-                num_outputs=10, 
-                weights_initializer = layers.xavier_initializer(uniform=True),  
-                weights_regularizer = layers.l2_regularizer(scale=1e-4),  
-                activation_fn = None)  
-
-    cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))  
-    reg_ws = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-    cost = cross_entropy + tf.reduce_sum(reg_ws)
-    optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost)  
-
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return x, y, prediction, optimizer, cost, accuracy
@@ -87,4 +86,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-# Last accuracy: 0.9536
+    # Last accuracy: 0.9784
