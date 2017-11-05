@@ -104,7 +104,7 @@ if __name__ == '__main__':
     plt_acc=[]
 
     step = 0
-    while mnist.train.epochs_completed < 8:
+    while mnist.train.epochs_completed < 80:
         batch_x, batch_y= getBatch(100)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
         if step % 10 == 0 :
