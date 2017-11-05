@@ -52,24 +52,15 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
     keep_prob = tf.placeholder(tf.float32) 
 
-    # x_image = tf.reshape(x,[-1,28,28])
-    # # x_image = tf.transpose(x_image, (1, 0, 2)) # [time_step, batch_size, input_size]
-    # #x_image_shape  = tf.shape(x_image)
-    # time_step = 28
-    # batch_size = 100
-    # input_size = 28
-    # x_image = tf.reshape(x_image, [-1, input_size])
-    # x_image_shape  = tf.shape(x_image)
-    layer = add_layer(x, 28*28, 64, activation_function=tf.nn.relu, norm=True)
+    layer = add_layer(x, 28*28, 128, activation_function=tf.nn.relu, norm=True)
+    layer = tf.nn.dropout(layer, keep_prob)
+    layer = add_layer(layer, 128, 64 , activation_function=tf.nn.relu, norm=True)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 64, 32 , activation_function=tf.nn.relu, norm=True)
-    # layer = tf.minimum(layer, 20.0)    
-    layer = tf.nn.dropout(layer, keep_prob)
-
-    layer = add_layer(layer, 32, 16 , activation_function=tf.nn.relu, norm=True)
-    # layer = tf.minimum(layer, 20.0)    
-    layer = tf.nn.dropout(layer, keep_prob)  # [time_step, 2800]
+    _layer = add_layer(layer, 64, 128 , activation_function=tf.nn.relu, norm=True)
+    _layer = add_layer(_layer, 128, 28*28 , activation_function=tf.nn.relu, norm=True)
+    _cost = tf.reduce_sum(tf.square(x - _layer))
+    _optimizer = tf.train.AdamOptimizer(0.001).minimize(_cost)
 
     x_image = tf.reshape(layer, [-1, 16, 1]) #[-1, time_step , input_size]
 
@@ -84,9 +75,9 @@ def neural_networks():
     logits = tf.concat(outputs, axis=2)
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 16 * num_units])
+    logits = tf.reshape(logits,[-1, 64 * num_units])
 
-    layer = add_layer(logits, 16 * num_units, 32, activation_function=tf.nn.relu)
+    layer = add_layer(logits, 64 * num_units, 32, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)
 
     layer = add_layer(layer, 32, 64, activation_function=tf.nn.relu)
@@ -98,10 +89,10 @@ def neural_networks():
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return x, y, keep_prob, prediction, optimizer, cost, accuracy
+    return x, y, keep_prob, prediction, optimizer, cost, accuracy, _optimizer
 
 if __name__ == '__main__':
-    x, y, keep_prob, prediction, optimizer, cost, accuracy = neural_networks()
+    x, y, keep_prob, prediction, optimizer, cost, accuracy, _optimizer = neural_networks()
     sess = tf.Session()
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -115,9 +106,9 @@ if __name__ == '__main__':
     plt_acc=[]
 
     step = 0
-    while mnist.train.epochs_completed < 80:
+    while mnist.train.epochs_completed < 8:
         batch_x, batch_y= getBatch(100)
-        _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
+        _, _, loss, pred = sess.run([_optimizer, optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
         if step % 10 == 0 :
             acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, keep_prob: 1})
             print(step, loss, acc)
