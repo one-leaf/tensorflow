@@ -59,10 +59,10 @@ def neural_networks():
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height
     x_image =  tf.reshape(layer2, [-1,layer_size,64])
-    x_image =  tf.reshape(layer2, [-1,image_width,image_height,64])
-    x_image =  tf.transpose(x_image, (0, 1, 3, 2)) 
-    x_image =  tf.reshape(layer2, [-1,image_width*64,image_height])
-    x_image = tf.transpose(x_image, (0, 2, 1)) 
+    # x_image =  tf.reshape(layer2, [-1,image_width,image_height,64])
+    # x_image =  tf.transpose(x_image, (0, 1, 3, 2)) 
+    # x_image =  tf.reshape(layer2, [-1,image_width*64,image_height])
+    # x_image = tf.transpose(x_image, (0, 2, 1)) 
 
     num_units = 64
 
@@ -73,8 +73,8 @@ def neural_networks():
 
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, image_height * num_units])
-    prediction = add_layer(logits, image_height * num_units, 10)
+    logits = tf.reshape(logits,[-1, layer_size * num_units])
+    prediction = add_layer(logits, layer_size * num_units, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
