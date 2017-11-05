@@ -38,26 +38,16 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
     keep_prob = tf.placeholder(tf.float32) 
 
-    layer = add_layer(x, 28*28, 512, activation_function=tf.nn.relu)
+    layer = add_layer(x, 28*28, 1024, activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 512, 256, activation_function=tf.nn.relu)
+    layer = add_layer(layer, 1024, 1024 , activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)
-
-    layer = add_layer(layer, 256, 128, activation_function=tf.nn.relu)
-    layer = tf.minimum(layer, 20.0)    
-    layer = tf.nn.dropout(layer, keep_prob)
-
-    layer = add_layer(layer, 128, 64, activation_function=tf.nn.relu)
-    layer = tf.minimum(layer, 20.0)    
-    layer = tf.nn.dropout(layer, keep_prob)
-    
-    _layer = add_layer(layer, 64, 128, activation_function=tf.nn.relu)
-    _layer = add_layer(_layer, 128, 256, activation_function=tf.nn.relu)
-    _layer = add_layer(_layer, 256, 512, activation_function=tf.nn.relu)
-    _layer = add_layer(_layer, 512, 28*28, activation_function=tf.nn.relu)
+   
+    _layer = add_layer(layer, 1024, 1024, activation_function=tf.nn.relu)
+    _layer = add_layer(_layer, 1024, 28*28, activation_function=tf.nn.relu)    
     _cost  = tf.reduce_sum(tf.square(x - _layer))
     _optimizer = tf.train.AdamOptimizer(0.001).minimize(_cost)
 
