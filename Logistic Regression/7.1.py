@@ -59,10 +59,6 @@ def neural_networks():
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height
     x_image =  tf.reshape(layer2, [-1,layer_size,64])
-    # x_image =  tf.reshape(layer2, [-1,image_width,image_height,64])
-    # x_image =  tf.transpose(x_image, (0, 1, 3, 2)) 
-    # x_image =  tf.reshape(layer2, [-1,image_width*64,image_height])
-    # x_image = tf.transpose(x_image, (0, 2, 1)) 
 
     num_units = 64
 
@@ -116,4 +112,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.9872
+    # Last accuracy: 0.989
