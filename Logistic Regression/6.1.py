@@ -46,17 +46,17 @@ def neural_networks():
     # input_size = 28
     # x_image = tf.reshape(x_image, [-1, input_size])
     # x_image_shape  = tf.shape(x_image)
-    layer = add_layer(x, 28*28, 256, activation_function=tf.nn.relu)
+    layer = add_layer(x, 28*28, 28*28, activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 256, 512 , activation_function=tf.nn.relu)
-    layer = tf.minimum(layer, 20.0)    
-    layer = tf.nn.dropout(layer, keep_prob)
+    # layer = add_layer(layer, 256, 512 , activation_function=tf.nn.relu)
+    # layer = tf.minimum(layer, 20.0)    
+    # layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 512, 28*28 , activation_function=tf.nn.relu)
-    layer = tf.minimum(layer, 20.0)    
-    layer = tf.nn.dropout(layer, keep_prob)  # [time_step, 2800]
+    # layer = add_layer(layer, 512, 28*28 , activation_function=tf.nn.relu)
+    # layer = tf.minimum(layer, 20.0)    
+    # layer = tf.nn.dropout(layer, keep_prob)  # [time_step, 2800]
 
     x_image = tf.reshape(layer, [-1, 28, 28]) #[-1, time_step , input_size]
 
