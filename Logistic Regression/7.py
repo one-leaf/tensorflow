@@ -80,10 +80,10 @@ def neural_networks():
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
     logits = tf.reshape(logits,[-1, 256 * num_units])
 
-    layer = add_layer(logits, 256 * num_units, 4096, activation_function=tf.nn.relu)
-    layer = tf.nn.dropout(layer, keep_prob)
+    # layer = add_layer(logits, 256 * num_units, 4096, activation_function=tf.nn.relu)
+    # layer = tf.nn.dropout(layer, keep_prob)
 
-    prediction = add_layer(layer, 4096, 10)
+    prediction = add_layer(logits, 4096, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
