@@ -38,15 +38,28 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
     keep_prob = tf.placeholder(tf.float32) 
 
-    layer = add_layer(x, 28*28, 1024, activation_function=tf.nn.relu)
+    x_image = tf.reshape(x,[-1,28,28])
+    # x_image = tf.transpose(x_image, (1, 0, 2)) # [time_step, batch_size, input_size]
+    #x_image_shape  = tf.shape(x_image)
+    time_step = 28
+    batch_size = 100
+    input_size = 28
+    x_image = tf.reshape(x_image, [-1, input_size])
+    x_image_shape  = tf.shape(x_image)
+    layer = add_layer(x_image, input_size, 256, activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 1024, 1024 , activation_function=tf.nn.relu)
+    layer = add_layer(layer, 256, 512 , activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)
- 
-    x_image = tf.reshape(layer, [-1,32,32]) #[-1, time_step , input_size]
+
+    layer = add_layer(layer, 512, 1024 , activation_function=tf.nn.relu)
+    layer = tf.minimum(layer, 20.0)    
+    layer = tf.nn.dropout(layer, keep_prob)  # [time_step, 2800]
+
+    x_image = tf.reshape(layer, [-1, batch_size, 1024]) #[-1, time_step , input_size]
+    # x_image = tf.transpose(x_image, (1, 0, 2))
     num_units = 64
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
@@ -57,9 +70,9 @@ def neural_networks():
     logits = tf.concat(outputs, axis=2)
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 32 * num_units])
+    logits = tf.reshape(logits,[-1, 28 * num_units])
 
-    layer = add_layer(logits, 32 * num_units, 512, activation_function=tf.nn.relu)
+    layer = add_layer(logits, 28 * num_units, 512, activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)
 
@@ -73,10 +86,10 @@ def neural_networks():
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return x, y, keep_prob, prediction, optimizer, cost, accuracy
+    return x, y, keep_prob, prediction, optimizer, cost, accuracy, x_image_shape
 
 if __name__ == '__main__':
-    x, y, keep_prob, prediction, optimizer, cost, accuracy = neural_networks()
+    x, y, keep_prob, prediction, optimizer, cost, accuracy, x_image_shape = neural_networks()
     sess = tf.Session()
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -92,6 +105,7 @@ if __name__ == '__main__':
     step = 0
     while mnist.train.epochs_completed < 8:
         batch_x, batch_y= getBatch(100)
+        # print(sess.run(x_image_shape,feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75}))
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
         if step % 10 == 0 :
             acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, keep_prob: 1})
