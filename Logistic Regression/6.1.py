@@ -51,7 +51,7 @@ def neural_networks():
     _cost  = tf.reduce_sum(tf.square(x - _layer))
     _optimizer = tf.train.AdamOptimizer(0.001).minimize(_cost)
 
-    x_image = tf.reshape(layer, [-1,64,1]) #[-1, time_step , input_size]
+    x_image = tf.reshape(layer, [-1,32,32]) #[-1, time_step , input_size]
     num_units = 64
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
@@ -62,9 +62,9 @@ def neural_networks():
     logits = tf.concat(outputs, axis=2)
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 64 * num_units])
+    logits = tf.reshape(logits,[-1, 32 * num_units])
 
-    layer = add_layer(logits, 64 * num_units, 512, activation_function=tf.nn.relu)
+    layer = add_layer(logits, 32 * num_units, 512, activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)
 
