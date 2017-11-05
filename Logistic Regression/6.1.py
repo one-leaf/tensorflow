@@ -60,18 +60,18 @@ def neural_networks():
     # input_size = 28
     # x_image = tf.reshape(x_image, [-1, input_size])
     # x_image_shape  = tf.shape(x_image)
-    layer = add_layer(x, 28*28, 512, activation_function=tf.nn.relu, norm=True)
+    layer = add_layer(x, 28*28, 64, activation_function=tf.nn.relu, norm=True)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 512, 256 , activation_function=tf.nn.relu, norm=True)
+    layer = add_layer(layer, 64, 32 , activation_function=tf.nn.relu, norm=True)
     # layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 256, 128 , activation_function=tf.nn.relu, norm=True)
+    layer = add_layer(layer, 32, 16 , activation_function=tf.nn.relu, norm=True)
     # layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)  # [time_step, 2800]
 
-    x_image = tf.reshape(layer, [-1, 128, 1]) #[-1, time_step , input_size]
+    x_image = tf.reshape(layer, [-1, 16, 1]) #[-1, time_step , input_size]
 
     # x_image = tf.transpose(x_image, (1, 0, 2))
     num_units = 64
@@ -84,17 +84,15 @@ def neural_networks():
     logits = tf.concat(outputs, axis=2)
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 128 * num_units])
+    logits = tf.reshape(logits,[-1, 16 * num_units])
 
-    layer = add_layer(logits, 128 * num_units, 512, activation_function=tf.nn.relu)
-    layer = tf.minimum(layer, 20.0)    
+    layer = add_layer(logits, 16 * num_units, 32, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 512, 512, activation_function=tf.nn.relu)
-    layer = tf.minimum(layer, 20.0)    
+    layer = add_layer(layer, 32, 64, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    prediction = add_layer(layer, 512, 10)
+    prediction = add_layer(layer, 64, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
