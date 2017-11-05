@@ -22,10 +22,24 @@ def getTestImages():
     return mnist.test.images, mnist.test.labels
 
 # 增加层
-def add_layer(inputs, in_size, out_size, activation_function=None):
+def add_layer(inputs, in_size, out_size, activation_function=None, norm=False):
     Weights = tf.Variable(tf.random_normal([in_size, out_size]))
     biases = tf.Variable(tf.zeros([out_size]) + 0.1)
     Wx_plus_b = tf.matmul(inputs, Weights) + biases
+
+    if norm: #归一化
+        fc_mean, fc_var = tf.nn.moments(Wx_plus_b, axes=[0])
+        scale = tf.Variable(tf.ones([out_size]))
+        shift = tf.Variable(tf.zeros([out_size]))
+        epsilon = 0.001
+        ema = tf.train.ExponentialMovingAverage(decay=0.5)
+        def mean_var_with_update():
+            ema_apply_op = ema.apply([fc_mean, fc_var])
+            with tf.control_dependencies([ema_apply_op]):
+                return tf.identity(fc_mean), tf.identity(fc_var)
+        mean, var = mean_var_with_update()
+        Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)
+
     if activation_function is None:
         outputs = Wx_plus_b
     else:
@@ -46,8 +60,7 @@ def neural_networks():
     # input_size = 28
     # x_image = tf.reshape(x_image, [-1, input_size])
     # x_image_shape  = tf.shape(x_image)
-    layer = add_layer(x, 28*28, 28*28, activation_function=tf.nn.relu)
-    layer = tf.minimum(layer, 20.0)
+    layer = add_layer(x, 28*28, 28*28, activation_function=tf.nn.relu, norm=True)
     layer = tf.nn.dropout(layer, keep_prob)
 
     # layer = add_layer(layer, 256, 512 , activation_function=tf.nn.relu)
