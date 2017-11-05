@@ -63,15 +63,15 @@ def neural_networks():
     layer = add_layer(x, 28*28, 512, activation_function=tf.nn.relu, norm=True)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    # layer = add_layer(layer, 512, 512 , activation_function=tf.nn.relu, norm=True)
-    # # layer = tf.minimum(layer, 20.0)    
-    # layer = tf.nn.dropout(layer, keep_prob)
-
     layer = add_layer(layer, 512, 256 , activation_function=tf.nn.relu, norm=True)
+    # layer = tf.minimum(layer, 20.0)    
+    layer = tf.nn.dropout(layer, keep_prob)
+
+    layer = add_layer(layer, 256, 128 , activation_function=tf.nn.relu, norm=True)
     # layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)  # [time_step, 2800]
 
-    x_image = tf.reshape(layer, [-1, 256, 1]) #[-1, time_step , input_size]
+    x_image = tf.reshape(layer, [-1, 128, 1]) #[-1, time_step , input_size]
 
     # x_image = tf.transpose(x_image, (1, 0, 2))
     num_units = 64
@@ -84,9 +84,9 @@ def neural_networks():
     logits = tf.concat(outputs, axis=2)
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 1024 * num_units])
+    logits = tf.reshape(logits,[-1, 128 * num_units])
 
-    layer = add_layer(logits, 1024 * num_units, 512, activation_function=tf.nn.relu)
+    layer = add_layer(logits, 128 * num_units, 512, activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)    
     layer = tf.nn.dropout(layer, keep_prob)
 
