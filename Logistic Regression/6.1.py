@@ -108,4 +108,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y, keep_prob: 1})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.977
+    # Last accuracy: 0.9667
