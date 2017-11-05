@@ -83,7 +83,7 @@ def neural_networks():
     # layer = add_layer(logits, 256 * num_units, 4096, activation_function=tf.nn.relu)
     # layer = tf.nn.dropout(layer, keep_prob)
 
-    prediction = add_layer(logits, 4096, 10)
+    prediction = add_layer(logits, 256 * num_units, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
