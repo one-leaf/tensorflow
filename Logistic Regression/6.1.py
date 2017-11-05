@@ -65,28 +65,28 @@ def neural_networks():
     _cost = tf.reduce_sum(tf.square(x - _layer))
     _optimizer = tf.train.AdamOptimizer(0.01).minimize(_cost)
 
-    x_image = tf.reshape(layer, [-1, 16, 1]) #[-1, time_step , input_size]
+    # x_image = tf.reshape(layer, [-1, 16, 1]) #[-1, time_step , input_size]
 
     # x_image = tf.transpose(x_image, (1, 0, 2))
-    num_units = 64
+    # num_units = 64
 
-    cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
-    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)
-    cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
-    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)
-    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, x_image, dtype=tf.float32)
-    logits = tf.concat(outputs, axis=2)
-    logits = tf.transpose(logits, (0, 2, 1)) 
-    # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 128 * num_units])
+    # cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
+    # cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)
+    # cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
+    # cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, x_image, dtype=tf.float32)
+    # logits = tf.concat(outputs, axis=2)
+    # logits = tf.transpose(logits, (0, 2, 1)) 
+    # # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
+    # logits = tf.reshape(logits,[-1, 128 * num_units])
 
-    layer = add_layer(logits, 128 * num_units, 512, activation_function=tf.nn.relu)
+    layer = add_layer(layer, 128 * num_units, 512, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    # layer = add_layer(layer, 32, 64, activation_function=tf.nn.relu)
-    # layer = tf.nn.dropout(layer, keep_prob)
+    layer = add_layer(layer, 512, 256, activation_function=tf.nn.relu)
+    layer = tf.nn.dropout(layer, keep_prob)
 
-    prediction = add_layer(layer, 512, 10)
+    prediction = add_layer(layer, 256, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
