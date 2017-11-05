@@ -22,23 +22,10 @@ def getTestImages():
     return mnist.test.images, mnist.test.labels
 
 # 增加层
-def add_layer(inputs, in_size, out_size, activation_function=None, norm=False):
+def add_layer(inputs, in_size, out_size, activation_function=None):
     Weights = tf.Variable(tf.random_normal([in_size, out_size]))
     biases = tf.Variable(tf.zeros([out_size]) + 0.1)
     Wx_plus_b = tf.matmul(inputs, Weights) + biases
-
-    if norm: #归一化
-        fc_mean, fc_var = tf.nn.moments(Wx_plus_b, axes=[0])
-        scale = tf.Variable(tf.ones([out_size]))
-        shift = tf.Variable(tf.zeros([out_size]))
-        epsilon = 0.001
-        ema = tf.train.ExponentialMovingAverage(decay=0.5)
-        def mean_var_with_update():
-            ema_apply_op = ema.apply([fc_mean, fc_var])
-            with tf.control_dependencies([ema_apply_op]):
-                return tf.identity(fc_mean), tf.identity(fc_var)
-        mean, var = mean_var_with_update()
-        Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)
 
     if activation_function is None:
         outputs = Wx_plus_b
@@ -56,20 +43,13 @@ def neural_networks():
     x_image = tf.transpose(x_image, (1, 0, 2))
     x_image = tf.reshape(x_image,[-1,28])
     
-    layer = add_layer(x_image, 28, 1024, activation_function=tf.nn.relu)
+    layer = add_layer(x_image, 28, 4096, activation_function=tf.nn.relu)
     layer = tf.minimum(layer,10.)
     layer = tf.nn.dropout(layer, keep_prob)
-    # layer = add_layer(layer, 1024, 1024 , activation_function=tf.nn.relu)
-    # layer = tf.minimum(layer,10.)
-    # layer = tf.nn.dropout(layer, keep_prob)    
-    # layer = add_layer(layer, 1024, 1024 , activation_function=tf.nn.relu)
-    # layer = tf.minimum(layer,10.)
-    # layer = tf.nn.dropout(layer, keep_prob)
-
-    x_image = tf.reshape(layer, [28, -1, 1024]) #[-1, time_step , input_size]
+    
+    x_image = tf.reshape(layer, [28, -1, 4096]) #[-1, time_step , input_size]
     x_image = tf.transpose(x_image, (1, 0, 2))
 
-    # x_image = tf.transpose(x_image, (1, 0, 2))
     num_units = 64
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
@@ -82,15 +62,11 @@ def neural_networks():
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
     logits = tf.reshape(logits,[-1, 28 * num_units])
 
-    layer = add_layer(logits, 28 * num_units, 1024, activation_function=tf.nn.relu)
+    layer = add_layer(logits, 28 * num_units, 4096, activation_function=tf.nn.relu)
     layer = tf.minimum(layer,10.)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    # layer = add_layer(layer, 1024, 1024, activation_function=tf.nn.relu)
-    # layer = tf.minimum(layer,10.)
-    # layer = tf.nn.dropout(layer, keep_prob)
-
-    prediction = add_layer(layer, 1024, 10)
+    prediction = add_layer(layer, 4096, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
