@@ -89,7 +89,7 @@ def neural_networks():
     prediction = add_layer(layer, 512, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(0.01).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return x, y, keep_prob, prediction, optimizer, cost, accuracy, _optimizer
