@@ -73,10 +73,10 @@ def neural_networks():
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return x, y, keep_prob, prediction, optimizer, cost, accuracy, _optimizer
+    return x, y, keep_prob, prediction, optimizer, cost, accuracy
 
 if __name__ == '__main__':
-    x, y, keep_prob, prediction, optimizer, cost, accuracy, optimizer2 = neural_networks()
+    x, y, keep_prob, prediction, optimizer, cost, accuracy = neural_networks()
     sess = tf.Session()
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     step = 0
     while mnist.train.epochs_completed < 8:
         batch_x, batch_y= getBatch(100)
-        _, _, loss, pred = sess.run([optimizer, optimizer2, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
+        _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
         if step % 10 == 0 :
             acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, keep_prob: 1})
             print(step, loss, acc)
