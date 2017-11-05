@@ -52,13 +52,16 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
     keep_prob = tf.placeholder(tf.float32) 
 
-    layer = add_layer(x, 28*28, 128, activation_function=tf.nn.relu)
+    layer = add_layer(x, 28*28, 512, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)
-    layer = add_layer(layer, 128, 64 , activation_function=tf.nn.relu)
+    layer = add_layer(layer, 512, 256 , activation_function=tf.nn.relu)
+    layer = tf.nn.dropout(layer, keep_prob)    
+    layer = add_layer(layer, 256, 128 , activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    _layer = add_layer(layer, 64, 128 , activation_function=tf.nn.relu)
-    _layer = add_layer(_layer, 128, 28*28 , activation_function=tf.nn.relu)
+    _layer = add_layer(layer, 128, 256)
+    _layer = add_layer(_layer, 256, 512)
+    _layer = add_layer(_layer, 512, 28*28)    
     _cost = tf.reduce_sum(tf.square(x - _layer))
     _optimizer = tf.train.AdamOptimizer(0.01).minimize(_cost)
 
@@ -75,15 +78,15 @@ def neural_networks():
     logits = tf.concat(outputs, axis=2)
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 64 * num_units])
+    logits = tf.reshape(logits,[-1, 128 * num_units])
 
-    layer = add_layer(logits, 64 * num_units, 32, activation_function=tf.nn.relu)
+    layer = add_layer(logits, 128 * num_units, 512, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)
 
-    layer = add_layer(layer, 32, 64, activation_function=tf.nn.relu)
-    layer = tf.nn.dropout(layer, keep_prob)
+    # layer = add_layer(layer, 32, 64, activation_function=tf.nn.relu)
+    # layer = tf.nn.dropout(layer, keep_prob)
 
-    prediction = add_layer(layer, 64, 10)
+    prediction = add_layer(layer, 512, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
