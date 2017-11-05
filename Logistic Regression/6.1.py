@@ -49,7 +49,7 @@ def neural_networks():
     _layer = add_layer(layer, 1024, 1024, activation_function=tf.nn.relu)
     _layer = add_layer(_layer, 1024, 28*28, activation_function=tf.nn.relu)    
     _cost  = tf.reduce_sum(tf.square(x - _layer))
-    _optimizer = tf.train.AdamOptimizer(0.001).minimize(_cost)
+    _optimizer = tf.train.AdamOptimizer(0.01).minimize(_cost)
 
     x_image = tf.reshape(layer, [-1,32,32]) #[-1, time_step , input_size]
     num_units = 64
