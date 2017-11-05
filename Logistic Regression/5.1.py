@@ -39,7 +39,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28]) #[-1, time_step , input_size]
     
     num_units = 64
-    cell = tf.contrib.rnn.LSTMCell(num_units, state_is_tuple=True)
+    cell = tf.contrib.rnn.BasicLSTMCell(num_units, state_is_tuple=True)
     logits, _ = tf.nn.dynamic_rnn(cell, x_image, dtype=tf.float32, time_major=False)
     logits = tf.transpose(logits, (0, 2, 1))
     logits = tf.reshape(logits,[-1, 28 * num_units])

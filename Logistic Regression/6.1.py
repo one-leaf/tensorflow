@@ -36,24 +36,57 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
-    x_image = tf.reshape(x, [-1,28,28]) #[-1, time_step , input_size]
+    keep_prob = tf.placeholder(tf.float32) 
+
+    layer = add_layer(x, 28*28, 512, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer, 20.0)
+    layer = tf.nn.dropout(layer, keep_prob)
+
+    layer = add_layer(layer, 512, 512, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer, 20.0)    
+    layer = tf.nn.dropout(layer, keep_prob)
+
+    layer = add_layer(layer, 512, 1024, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer, 20.0)    
+    layer = tf.nn.dropout(layer, keep_prob)
     
+    _layer = add_layer(layer, 1024, 512, activation_function=tf.nn.relu)
+    _layer = add_layer(_layer, 512, 512, activation_function=tf.nn.relu)
+    _layer = add_layer(_layer, 512, 28*28, activation_function=tf.nn.relu)
+    _cost  = tf.reduce_sum(tf.square(x - _layer))
+    _optimizer = tf.train.AdamOptimizer(0.001).minimize(_cost)
+
+    x_image = tf.reshape(layer, [-1,1024,1]) #[-1, time_step , input_size]
     num_units = 64
-    cell = tf.contrib.rnn.BasicLSTMCell(num_units, state_is_tuple=True)
-    logits, _ = tf.nn.dynamic_rnn(cell, x_image, dtype=tf.float32, time_major=False)
+
+    cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
+    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)
+    cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
+    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, x_image, dtype=tf.float32)
+    logits = tf.concat(outputs, axis=2)
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 28 * num_units])
-    prediction = add_layer(logits, 28 * num_units, 10)
+    logits = tf.reshape(logits,[-1, 1024 * num_units])
+
+    layer = add_layer(logits, 1024 * num_units, 512, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer, 20.0)    
+    layer = tf.nn.dropout(layer, keep_prob)
+
+    layer = add_layer(layer, 512, 512, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer, 20.0)    
+    layer = tf.nn.dropout(layer, keep_prob)
+
+    prediction = add_layer(layer, 512, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return x, y, prediction, optimizer, cost, accuracy
+    return x, y, keep_prob, prediction, optimizer, cost, accuracy, _optimizer
 
 if __name__ == '__main__':
-    x, y, prediction, optimizer, cost, accuracy = neural_networks()
+    x, y, keep_prob, prediction, optimizer, cost, accuracy, optimizer2 = neural_networks()
     sess = tf.Session()
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -69,9 +102,9 @@ if __name__ == '__main__':
     step = 0
     while mnist.train.epochs_completed < 8:
         batch_x, batch_y= getBatch(100)
-        _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
+        _, _, loss, pred = sess.run([optimizer, optimizer2, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
         if step % 10 == 0 :
-            acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y})
+            acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, keep_prob: 1})
             print(step, loss, acc)
             plt.clf()
             plt_n.append(step)
@@ -84,6 +117,6 @@ if __name__ == '__main__':
             plt.pause(0.1)
         step += 1
 
-    acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
+    acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y, keep_prob: 1})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.9784
+    # Last accuracy: 0.977
