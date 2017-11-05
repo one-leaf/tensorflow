@@ -55,10 +55,13 @@ def neural_networks():
     x_image = tf.reshape(x,[-1,28])
     
     layer = add_layer(x_image, 28, 1024, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer,10.)
     layer = tf.nn.dropout(layer, keep_prob)
     layer = add_layer(layer, 1024, 1024 , activation_function=tf.nn.relu)
+    layer = tf.minimum(layer,10.)
     layer = tf.nn.dropout(layer, keep_prob)    
     layer = add_layer(layer, 1024, 1024 , activation_function=tf.nn.relu)
+    layer = tf.minimum(layer,10.)
     layer = tf.nn.dropout(layer, keep_prob)
 
     x_image = tf.reshape(layer, [-1, 28, 1024]) #[-1, time_step , input_size]
@@ -77,15 +80,17 @@ def neural_networks():
     logits = tf.reshape(logits,[-1, 28 * num_units])
 
     layer = add_layer(logits, 28 * num_units, 1024, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer,10.)
     layer = tf.nn.dropout(layer, keep_prob)
 
     layer = add_layer(layer, 1024, 1024, activation_function=tf.nn.relu)
+    layer = tf.minimum(layer,10.)
     layer = tf.nn.dropout(layer, keep_prob)
 
     prediction = add_layer(layer, 1024, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
-    optimizer = tf.train.AdamOptimizer(0.01).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return x, y, keep_prob, prediction, optimizer, cost, accuracy
