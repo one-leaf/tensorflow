@@ -52,7 +52,7 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y')   
     keep_prob = tf.placeholder(tf.float32) 
 
-    x_image = tf.reshape(x_image,[-1,28,28])
+    x_image = tf.reshape(x,[-1,28,28])
     x_image = tf.transpose(x_image, (1, 0, 2))
     x_image = tf.reshape(x_image,[-1,28])
     
@@ -68,7 +68,7 @@ def neural_networks():
 
     x_image = tf.reshape(layer, [28, -1, 1024]) #[-1, time_step , input_size]
     x_image = tf.transpose(x_image, (1, 0, 2))
-    
+
     # x_image = tf.transpose(x_image, (1, 0, 2))
     num_units = 64
 
