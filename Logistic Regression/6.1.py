@@ -46,7 +46,7 @@ def neural_networks():
     # input_size = 28
     # x_image = tf.reshape(x_image, [-1, input_size])
     # x_image_shape  = tf.shape(x_image)
-    layer = add_layer(x, input_size, 256, activation_function=tf.nn.relu)
+    layer = add_layer(x, 28*28, 256, activation_function=tf.nn.relu)
     layer = tf.minimum(layer, 20.0)
     layer = tf.nn.dropout(layer, keep_prob)
 
@@ -59,7 +59,7 @@ def neural_networks():
     layer = tf.nn.dropout(layer, keep_prob)  # [time_step, 2800]
 
     x_image = tf.reshape(layer, [-1, batch_size, 28]) #[-1, time_step , input_size]
-    
+
     # x_image = tf.transpose(x_image, (1, 0, 2))
     num_units = 64
 
