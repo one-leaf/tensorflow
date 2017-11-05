@@ -52,47 +52,34 @@ def add_conv_layer(inputs, patch_size, in_size, out_size, activation_function=No
 def neural_networks():
     x = tf.placeholder(tf.float32, [None, 28*28], name='x')
     y = tf.placeholder(tf.float32, [None, 10], name='y') 
-    keep_prob = tf.placeholder(tf.float32) 
-
+    
     x_image = tf.reshape(x, [-1,28,28,1])
-    layer = add_conv_layer(x_image, 3, 1, 32, activation_function=tf.nn.relu)
-    layer = tf.nn.dropout(layer, keep_prob)
-    layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer = tf.nn.dropout(layer, keep_prob)    
-    layer = add_conv_layer(layer, 3, 64, 128, activation_function=tf.nn.relu) 
-    layer = tf.nn.dropout(layer, keep_prob)    
-    layer = add_conv_layer(layer, 3, 128, 256, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer = tf.nn.dropout(layer, keep_prob)
+    layer1 = add_conv_layer(x_image, 5, 1, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer2 = add_conv_layer(layer1, 3, 32, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
     layer_size = (28//2//2)*(28//2//2)
-    x_image =  tf.reshape(layer, [-1, layer_size, 256])
+    x_image =  tf.reshape(layer2, [-1,layer_size,32])
     x_image = tf.transpose(x_image, (0, 2, 1)) 
 
     num_units = 64
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
-    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
-    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, x_image, dtype=tf.float32)
     logits = tf.concat(outputs, axis=2)
 
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 256 * num_units])
-
-    # layer = add_layer(logits, 256 * num_units, 4096, activation_function=tf.nn.relu)
-    # layer = tf.nn.dropout(layer, keep_prob)
-
-    prediction = add_layer(logits, 256 * num_units, 10)
+    logits = tf.reshape(logits,[-1, 64 * num_units])
+    prediction = add_layer(logits, 64 * num_units, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    return x, y, keep_prob, prediction, optimizer, cost, accuracy
+    return x, y, prediction, optimizer, cost, accuracy
 
 if __name__ == '__main__':
-    x, y, keep_prob, prediction, optimizer, cost, accuracy = neural_networks()
+    x, y, prediction, optimizer, cost, accuracy = neural_networks()
     sess = tf.Session()
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -108,9 +95,9 @@ if __name__ == '__main__':
     step = 0
     while mnist.train.epochs_completed < 8:
         batch_x, batch_y= getBatch(100)
-        _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, keep_prob: 0.75})
+        _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
         if step % 10 == 0 :
-            acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, keep_prob: 1.0})
+            acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y})
             print(step, loss, acc)
             plt.clf()
             plt_n.append(step)
@@ -123,6 +110,6 @@ if __name__ == '__main__':
             plt.pause(0.1)
         step += 1
 
-    acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y, keep_prob: 1.0})
+    acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
     # Last accuracy: 0.9865
