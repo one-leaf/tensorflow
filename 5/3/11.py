@@ -442,8 +442,8 @@ def train():
     cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
 
     # 当前游戏的最大步数
-    global_step = tf.Variable(0, trainable=False)
-    train_operation = tf.train.AdamOptimizer(0.0001).minimize(cost, global_step=global_step)
+    global_step = tf.Variable(0,trainable=False)
+    train_operation = tf.train.AdamOptimizer(0.0001).minimize(cost)
 
     _observations = deque()
     # _last_scores = deque()
@@ -466,7 +466,7 @@ def train():
         _last_action = KEY_DOWN
         _last_state = None    
         _curr_avg_steps = 0             
-        while _game_times < 100:
+        while _game_times < 10:
             _curr_steps += 1
             image, terminal, shape = game.step(list(_last_action))
             if terminal:
@@ -474,10 +474,10 @@ def train():
                 print(_game_times, _curr_steps, round(_curr_steps/_game_times), _game_max_step)
                 continue
 
-            # for event in pygame.event.get():  # 需要事件循环，否则白屏
-            #     if event.type == QUIT:
-            #         pygame.quit()
-            #         sys.exit()    
+            for event in pygame.event.get():  # 需要事件循环，否则白屏
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()    
 
             if _last_state is None:  # 填充第一次的4张图片            
                 _last_state = np.stack(tuple(image for _ in range(STATE_FRAMES)), axis=2)
@@ -503,7 +503,7 @@ def train():
         if _curr_avg_steps > _game_max_step:
             print(_game_max_step, _curr_avg_steps, "save model ...")
             _game_max_step = _curr_avg_steps
-            _saver.save(_session, _checkpoint_path, global_step=_game_max_step)
+            _saver.save(_session, _checkpoint_path, global_step = _game_max_step)
         else:
             print(_game_max_step, _curr_avg_steps, "reload model ...")
             _saver,_model_dir,_checkpoint_path = restore(_session)
