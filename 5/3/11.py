@@ -471,7 +471,7 @@ def train():
             image, terminal, shape = game.step(list(_last_action))
             if terminal:
                 _game_times += 1
-                print(_game_times, _curr_steps, round(_curr_steps/_game_times))
+                print(_game_times, _curr_steps, round(_curr_steps/_game_times), _game_max_step)
                 continue
 
             # for event in pygame.event.get():  # 需要事件循环，否则白屏
