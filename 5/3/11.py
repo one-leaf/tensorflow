@@ -443,7 +443,7 @@ def train():
 
     cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
 
-    train_operation = tf.train.AdamOptimizer(0.001).minimize(cost)
+    train_operation = tf.train.AdamOptimizer(0.0001).minimize(cost)
 
     game = Tetromino()
 
