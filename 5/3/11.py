@@ -373,7 +373,7 @@ ACTIONS_COUNT = 4  # 可选的动作，针对 左移 翻转 右移 下移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
 MIN_RANDOM_ACTION_PROB = 0.05    # 随机移动的最小概率
-MAX_RANDOM_ACTION_PROB = 0.95    # 随机移动的最大概率 
+MAX_RANDOM_ACTION_PROB = 0.25    # 随机移动的最大概率 
 MEMORY_SIZE = 10000  # 记住的观察队列
 TRAIN_BATCH_SIZE = 100  # 每次学习的批次
 TRAIN_EPOCHS = 2   # 每次学习轮数
@@ -469,7 +469,8 @@ def train():
         _epoch_num = 0    
         _curr_x = []
         _curr_y = []
-        while _game_times < 50:
+
+        while _game_times < 3:
             image, terminal, is_epoch_end = game.step(list(_action))
             if is_epoch_end:
                 _epoch_num += 1
@@ -508,7 +509,7 @@ def train():
             _y = np.reshape(_action,[1,4])
 
         _epoch_num = _epoch_num//_game_times
-        if _epoch_num > _game_max_epoch:
+        if _epoch_num >= _game_max_epoch:
             _game_max_epoch = _epoch_num
             for i in range(_game_max_epoch):
                 _ = _session.run(train_operation, feed_dict={x: _curr_x, y: _curr_y, keep_prob: 0.75})
