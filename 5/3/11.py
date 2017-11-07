@@ -459,13 +459,18 @@ def train():
     else:
         _game_max_epoch = 0
 
+
+    _last_x = []
+    _last_y = []
     while True:
         _game_times = 0
-        _last_action = KEY_DOWN
-        _last_state = None    
-        _epoch_num = 0             
+        _action = KEY_DOWN
+        _state = None    
+        _epoch_num = 0    
+        _curr_x = []
+        _curr_y = []
         while _game_times < 50:
-            image, terminal, is_epoch_end = game.step(list(_last_action))
+            image, terminal, is_epoch_end = game.step(list(_action))
             if is_epoch_end:
                 _epoch_num += 1
 
@@ -479,35 +484,44 @@ def train():
                     pygame.quit()
                     sys.exit()    
 
-            if _last_state is None:  # 填充第一次的4张图片            
-                _last_state = np.stack(tuple(image for _ in range(STATE_FRAMES)), axis=2)
+            if _state is None:  # 填充第一次的4张图片            
+                _state = np.stack(tuple(image for _ in range(STATE_FRAMES)), axis=2)
 
             image = np.reshape(image, (RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 1))
-            _last_state = np.append(_last_state[:, :, 1:], image, axis=2)
-            _x = np.reshape(_last_state,[1,RESIZED_SCREEN_X,RESIZED_SCREEN_Y,4])
+            _state = np.append(_state[:, :, 1:], image, axis=2)
+            _curr_x.append(_state)
+            _curr_state = np.reshape(_state,[1, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 4])
 
-            _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-            _curr_random_action_prob = MAX_RANDOM_ACTION_PROB - (MAX_RANDOM_ACTION_PROB * _game_max_epoch / 10000)
+            _action = np.zeros([ACTIONS_COUNT],dtype=np.int)
+            _curr_random_action_prob = MAX_RANDOM_ACTION_PROB - (MAX_RANDOM_ACTION_PROB * _game_max_epoch / 100)
             if _curr_random_action_prob < MIN_RANDOM_ACTION_PROB:
                 _curr_random_action_prob = MIN_RANDOM_ACTION_PROB
             if random.random() <= _curr_random_action_prob:
                 action_index = random.randrange(ACTIONS_COUNT)
             else:
-                _per_action = _session.run(prediction, feed_dict={x: _x, keep_prob: 1.0})
+                _per_action = _session.run(prediction, feed_dict={x: _curr_state, keep_prob: 1.0})
                 action_index = np.argmax(_per_action)
-            _last_action[action_index] = 1
-            _y = np.reshape(_last_action,[1,4])
-            _ = _session.run(train_operation, feed_dict={x: _x, y: _y, keep_prob: 0.75})
+            _action[action_index] = 1
+
+            _curr_y.append(_action)
+
+            _y = np.reshape(_action,[1,4])
 
         _epoch_num = _epoch_num//_game_times
         if _epoch_num > _game_max_epoch:
-            print(_game_max_epoch, _epoch_num, "save model ...")
             _game_max_epoch = _epoch_num
+            for i in range(_game_max_epoch):
+                _ = _session.run(train_operation, feed_dict={x: _curr_x, y: _curr_y, keep_prob: 0.75})
+            _last_x = _curr_x
+            _last_y = _curr_y
             pickle.dump(_game_max_epoch, open(_game_max_epoch_dump_file, 'wb'))
-            _saver.save(_session, _checkpoint_path, global_step = _game_max_epoch)
         else:
-            print(_game_max_epoch, _epoch_num, "reload model ...")
-            _saver,_model_dir,_checkpoint_path = restore(_session)
+            if len(_last_x) > 0 :
+                for i in range(_game_max_epoch):
+                    _ = _session.run(train_operation, feed_dict={x: _last_x, y: _last_y, keep_prob: 0.75})
+
+        print(_game_max_epoch, _epoch_num, "save model ...")
+        _saver.save(_session, _checkpoint_path)
 
 
 if __name__ == '__main__':
