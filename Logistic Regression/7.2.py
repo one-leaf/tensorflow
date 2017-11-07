@@ -60,7 +60,7 @@ def neural_networks():
     layer_size = image_width*image_height
     x_image =  tf.reshape(layer, [-1,layer_size*64])
 
-    layer = add_layer(layer, layer_size*32, layer_size*16, tf.nn.sigmoid) 
+    layer = add_layer(x_image, layer_size*32, layer_size*16, tf.nn.sigmoid) 
     layer = add_layer(layer, layer_size*16, layer_size*2, tf.nn.sigmoid) 
 
     _layer = add_layer(layer, layer_size*2, layer_size*16, tf.nn.sigmoid) 
