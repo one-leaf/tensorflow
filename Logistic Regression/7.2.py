@@ -61,9 +61,9 @@ def neural_networks():
     layer_size = image_width*image_height
     x_image =  tf.reshape(layer, [-1,layer_size*128])
 
+    #自编码在当前情况下，如果循环次数不足够多，只会降低特征
     layer = add_layer(x_image, layer_size*128, layer_size*32, tf.nn.sigmoid) 
     layer = add_layer(layer, layer_size*32, layer_size*8, tf.nn.sigmoid) 
-
     _layer = add_layer(layer, layer_size*8, layer_size*32, tf.nn.sigmoid) 
     _layer = add_layer(_layer, layer_size*32, layer_size*128, tf.nn.sigmoid) 
     _cost  = tf.reduce_sum(tf.square(x_image - _layer))
@@ -132,4 +132,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.989
+    # Last accuracy: 0.9581
