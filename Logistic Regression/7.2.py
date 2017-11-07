@@ -58,7 +58,7 @@ def neural_networks():
     layer = add_conv_layer(layer, 3, 16, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height
-    x_image =  tf.reshape(layer, [-1,layer_size*64])
+    x_image =  tf.reshape(layer, [-1,layer_size*32])
 
     layer = add_layer(x_image, layer_size*32, layer_size*16, tf.nn.sigmoid) 
     layer = add_layer(layer, layer_size*16, layer_size*2, tf.nn.sigmoid) 
