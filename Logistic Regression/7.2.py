@@ -66,7 +66,7 @@ def neural_networks():
     _layer = add_layer(layer, layer_size*4, layer_size*16, tf.nn.sigmoid) 
     _layer = add_layer(_layer, layer_size*16, layer_size*32, tf.nn.sigmoid) 
     _cost  = tf.reduce_sum(tf.square(x_image - _layer))
-    _optimizer = tf.train.AdamOptimizer(0.00001).minimize(_cost)
+    _optimizer = tf.train.AdamOptimizer(0.001).minimize(_cost)
 
     x_image =  tf.reshape(layer, [-1, layer_size, 4])
     x_image = tf.transpose(x_image, (0, 2, 1)) 
