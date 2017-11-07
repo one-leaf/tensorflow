@@ -478,6 +478,7 @@ def train():
             if is_epoch_end:
                 _epoch_num += 1
                 _all_epoch_num += 1
+                _game_times +=1
 
             for event in pygame.event.get():  # 需要事件循环，否则白屏
                 if event.type == QUIT:
@@ -513,7 +514,7 @@ def train():
                     
                 _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
 
-                print(_all_epoch_num, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
+                print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
                 if _epoch_num > _avg_epoch_num:
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
