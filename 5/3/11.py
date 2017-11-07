@@ -439,9 +439,9 @@ def train():
     layer = tf.nn.dropout(layer, keep_prob)
     layer_size = RESIZED_SCREEN_X * RESIZED_SCREEN_Y * 128
     full_layer =  tf.reshape(layer, [-1,layer_size])    
-    prediction = add_layer(full_layer, layer_size, ACTIONS_COUNT, tf.nn.softmax) 
 
-    cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
+    prediction = add_layer(full_layer, layer_size, ACTIONS_COUNT) 
+    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     train_operation = tf.train.AdamOptimizer(0.0001).minimize(cost)
 
