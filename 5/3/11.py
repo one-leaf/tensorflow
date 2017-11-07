@@ -452,33 +452,32 @@ def train():
 
     # 恢复游戏进度
     _saver,_model_dir,_checkpoint_path = restore(_session)
-    # 游戏最大进行步数
-    _game_max_epoch_dump_file = os.path.join(_model_dir,"game_max_epoch.dump")
-    if os.path.exists(_game_max_epoch_dump_file):
-        _game_max_epoch = pickle.load(open(_game_max_epoch_dump_file,'rb'))
+
+    # 游戏平均进行步数
+    _avg_epoch_num_deque = deque()
+    _avg_epoch_num_dump_file = os.path.join(_model_dir,"avg_epoch_num.dump")
+    if os.path.exists(_avg_epoch_num_dump_file):
+        _avg_epoch_num = pickle.load(open(_avg_epoch_num_dump_file,'rb'))        
+        _avg_epoch_num_deque.append(_avg_epoch_num)
     else:
-        _game_max_epoch = 0
+        _avg_epoch_num = 0
 
 
-    _last_x = []
-    _last_y = []
+    _epoch_num = 0 
+    _all_epoch_num = 0
     while True:
         _game_times = 0
         _action = KEY_DOWN
         _state = None    
-        _epoch_num = 0    
         _curr_x = []
         _curr_y = []
-
-        while _game_times < 3:
+        _last_x = []
+        _last_y = []        
+        while len(_last_y) < 1000:
             image, terminal, is_epoch_end = game.step(list(_action))
             if is_epoch_end:
                 _epoch_num += 1
-
-            if terminal:
-                _game_times += 1
-                print(_game_times, _epoch_num//_game_times, _game_max_epoch)
-                continue
+                _all_epoch_num += 1
 
             for event in pygame.event.get():  # 需要事件循环，否则白屏
                 if event.type == QUIT:
@@ -493,8 +492,9 @@ def train():
             _curr_x.append(_state)
             _curr_state = np.reshape(_state,[1, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 4])
 
+
             _action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-            _curr_random_action_prob = MAX_RANDOM_ACTION_PROB - (MAX_RANDOM_ACTION_PROB * _game_max_epoch / 100)
+            _curr_random_action_prob = MAX_RANDOM_ACTION_PROB - (MAX_RANDOM_ACTION_PROB * _avg_epoch_num / 100)
             if _curr_random_action_prob < MIN_RANDOM_ACTION_PROB:
                 _curr_random_action_prob = MIN_RANDOM_ACTION_PROB
             if random.random() <= _curr_random_action_prob:
@@ -506,22 +506,27 @@ def train():
 
             _curr_y.append(_action)
 
-            _y = np.reshape(_action,[1,4])
+            if terminal:
+                _avg_epoch_num_deque.append(_epoch_num)
+                while len(_avg_epoch_num_deque) > 100:
+                    _avg_epoch_num_deque.popleft()
+                    
+                _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
 
-        _epoch_num = _epoch_num//_game_times
-        if _epoch_num >= _game_max_epoch:
-            _game_max_epoch = _epoch_num
-            for i in range(_game_max_epoch):
-                _ = _session.run(train_operation, feed_dict={x: _curr_x, y: _curr_y, keep_prob: 0.75})
-            _last_x = _curr_x
-            _last_y = _curr_y
-            pickle.dump(_game_max_epoch, open(_game_max_epoch_dump_file, 'wb'))
-        else:
-            if len(_last_x) > 0 :
-                for i in range(_game_max_epoch):
-                    _ = _session.run(train_operation, feed_dict={x: _last_x, y: _last_y, keep_prob: 0.75})
-
-        print(_game_max_epoch, _epoch_num, "save model ...")
+                print(_all_epoch_num, _epoch_num, _avg_epoch_num)
+                if _epoch_num > _avg_epoch_num:
+                    _last_x +=  _curr_x
+                    _last_y +=  _curr_y 
+                _curr_x = []
+                _curr_y = []
+                _epoch_num = 0
+                continue
+        
+        for i in range(100):
+            print(i, "train ...", _avg_epoch_num)
+            _ = _session.run(train_operation, feed_dict={x: _last_x, y: _last_y, keep_prob: 0.75})
+        pickle.dump(_avg_epoch_num, open(_avg_epoch_num_dump_file, 'wb'))
+        # print("save model ...")
         _saver.save(_session, _checkpoint_path)
 
 
