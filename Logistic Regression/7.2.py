@@ -97,10 +97,10 @@ if __name__ == '__main__':
     valid_x, valid_y = getValidationImages()
     test_x, test_y = getTestImages()
 
-    for i in range(10000):
+    for i in range(100000):
         batch_x, batch_y= getBatch(100)
         _, loss = sess.run([_optimizer, _cost], feed_dict={x: batch_x})
-        if i % 10 == 0 :
+        if i % 100 == 0 :
             print(i,loss)
     mnist.train._index_in_epoch = 0
     mnist.train._epochs_completed = 0
