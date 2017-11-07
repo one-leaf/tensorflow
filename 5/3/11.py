@@ -12,6 +12,7 @@ import tensorflow as tf
 import cv2
 import copy
 import time
+import pickle
 
 winx = 400
 winy = 500
@@ -163,9 +164,9 @@ class Tetromino(object):
         self.calc_reward = 0.0 
 
     def step(self, action):
-        reward = 0        
         moveleft = False
         moveright = False
+        is_epoch_end = False
         is_terminal = False
         shape  = self.fallpiece['shape']
         
@@ -189,6 +190,7 @@ class Tetromino(object):
             self.score += self.removecompleteline(self.board)            
             level = self.calculate(self.score)   
             self.fallpiece = None
+            is_epoch_end = True
         else:
             self.fallpiece['y'] +=1
 
@@ -221,8 +223,8 @@ class Tetromino(object):
             if not self.validposition(self.board,self.fallpiece):   
                 is_terminal = True       
                 self.reset()     
-                return screen_image, is_terminal, shape  
-        return screen_image, is_terminal, shape
+                return screen_image, is_terminal, is_epoch_end 
+        return screen_image, is_terminal, is_epoch_end
 
     def calculate(self,score):
         level = int(score/10)+1
@@ -383,8 +385,8 @@ STORE_SCORES_LEN = 200      # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
 
 # 初始化保存对象，如果有数据，就恢复
+curr_dir = os.path.dirname(__file__)
 def restore(sess):
-    curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, "game_model")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
@@ -441,15 +443,7 @@ def train():
 
     cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
 
-    # 当前游戏的最大步数
-    global_step = tf.Variable(0,trainable=False)
-    train_operation = tf.train.AdamOptimizer(0.0001).minimize(cost)
-
-    _observations = deque()
-    # _last_scores = deque()
-
-    # 定义一步落地后的所有图形列表
-    _onevations = []
+    train_operation = tf.train.AdamOptimizer(0.001).minimize(cost)
 
     game = Tetromino()
 
@@ -459,19 +453,25 @@ def train():
     # 恢复游戏进度
     _saver,_model_dir,_checkpoint_path = restore(_session)
     # 游戏最大进行步数
-    _game_max_step = _session.run(global_step)
+    _game_max_epoch_dump_file = os.path.join(curr_dir,"game_max_epoch.dump")
+    if os.path.exists(_game_max_epoch_dump_file):
+        _game_max_epoch = pickle.load(open(_game_max_epoch_dump_file,'rb'))
+    else:
+        _game_max_epoch = 0
+
     while True:
-        _curr_steps = 0
         _game_times = 0
         _last_action = KEY_DOWN
         _last_state = None    
-        _curr_avg_steps = 0             
-        while _game_times < 10:
-            _curr_steps += 1
-            image, terminal, shape = game.step(list(_last_action))
+        _epoch_num = 0             
+        while _game_times < 50:
+            image, terminal, is_epoch_end = game.step(list(_last_action))
+            if is_epoch_end:
+                _epoch_num += 1
+
             if terminal:
                 _game_times += 1
-                print(_game_times, _curr_steps, round(_curr_steps/_game_times), _game_max_step)
+                print(_game_times, _epoch_num//_game_times, _game_max_epoch)
                 continue
 
             for event in pygame.event.get():  # 需要事件循环，否则白屏
@@ -487,7 +487,7 @@ def train():
             _x = np.reshape(_last_state,[1,RESIZED_SCREEN_X,RESIZED_SCREEN_Y,4])
 
             _last_action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-            _curr_random_action_prob = MAX_RANDOM_ACTION_PROB - (MAX_RANDOM_ACTION_PROB * _game_max_step / 10000)
+            _curr_random_action_prob = MAX_RANDOM_ACTION_PROB - (MAX_RANDOM_ACTION_PROB * _game_max_epoch / 10000)
             if _curr_random_action_prob < MIN_RANDOM_ACTION_PROB:
                 _curr_random_action_prob = MIN_RANDOM_ACTION_PROB
             if random.random() <= _curr_random_action_prob:
@@ -499,13 +499,14 @@ def train():
             _y = np.reshape(_last_action,[1,4])
             _ = _session.run(train_operation, feed_dict={x: _x, y: _y, keep_prob: 0.75})
 
-        _curr_avg_steps = round(_curr_steps / _game_times)
-        if _curr_avg_steps > _game_max_step:
-            print(_game_max_step, _curr_avg_steps, "save model ...")
-            _game_max_step = _curr_avg_steps
-            _saver.save(_session, _checkpoint_path, global_step = _game_max_step)
+        _epoch_num = _epoch_num//_game_times
+        if _epoch_num > _game_max_epoch:
+            print(_game_max_epoch, _epoch_num, "save model ...")
+            _game_max_epoch = _epoch_num
+            pickle.dump(_game_max_epoch, open(_game_max_epoch_dump_file, 'wb'))
+            _saver.save(_session, _checkpoint_path, global_step = _game_max_epoch)
         else:
-            print(_game_max_step, _curr_avg_steps, "reload model ...")
+            print(_game_max_epoch, _epoch_num, "reload model ...")
             _saver,_model_dir,_checkpoint_path = restore(_session)
 
 
