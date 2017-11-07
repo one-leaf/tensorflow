@@ -56,7 +56,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
     layer = add_conv_layer(x_image, 5, 1, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
     layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
-    layer = add_conv_layer(layer, 3, 64, 128, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
+    layer = add_conv_layer(layer, 3, 64, 128, activation_function=tf.nn.relu)     
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height
     x_image =  tf.reshape(layer, [-1,layer_size*128])
