@@ -522,7 +522,7 @@ def train():
                 _epoch_num = 0
                 continue
         
-        for i in range(1000):
+        for i in range(200):
             if i % 100 == 0:
                 print(i, "train ...", _avg_epoch_num)
             _ = _session.run(train_operation, feed_dict={x: _last_x, y: _last_y, keep_prob: 0.75})
