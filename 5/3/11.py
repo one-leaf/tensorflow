@@ -386,6 +386,8 @@ LEARNING_RATE = 1e-6        # 学习速率
 
 # 初始化保存对象，如果有数据，就恢复
 def restore(sess):
+    curr_dir = os.path.dirname(__file__)
+    model_dir = os.path.join(curr_dir, "game_model")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
     ckpt = tf.train.get_checkpoint_state(model_dir)
