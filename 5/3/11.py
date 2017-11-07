@@ -513,7 +513,7 @@ def train():
                     
                 _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
 
-                print(_all_epoch_num, _epoch_num, _avg_epoch_num)
+                print(_all_epoch_num, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
                 if _epoch_num > _avg_epoch_num:
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
