@@ -54,21 +54,21 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y') 
     
     x_image = tf.reshape(x, [-1,28,28,1])
-    layer = add_conv_layer(x_image, 5, 1, 128, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer = add_conv_layer(layer, 3, 32, 256, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
+    layer = add_conv_layer(x_image, 5, 1, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer = add_conv_layer(layer, 3, 16, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height
     x_image =  tf.reshape(layer, [-1,layer_size*64])
 
-    layer = add_layer(layer, layer_size*256, layer_size*128, tf.nn.sigmoid) 
-    layer = add_layer(layer, layer_size*128, layer_size*64, tf.nn.sigmoid) 
+    layer = add_layer(layer, layer_size*32, layer_size*16, tf.nn.sigmoid) 
+    layer = add_layer(layer, layer_size*16, layer_size*2, tf.nn.sigmoid) 
 
-    _layer = add_layer(layer, layer_size*64, layer_size*128, tf.nn.sigmoid) 
-    _layer = add_layer(_layer, layer_size*128, layer_size*256, tf.nn.sigmoid) 
+    _layer = add_layer(layer, layer_size*2, layer_size*16, tf.nn.sigmoid) 
+    _layer = add_layer(_layer, layer_size*16, layer_size*32, tf.nn.sigmoid) 
     _cost  = tf.reduce_sum(tf.square(x_image - _layer))
     _optimizer = tf.train.AdamOptimizer(0.00001).minimize(_cost)
 
-    x_image =  tf.reshape(layer, [-1,layer_size,64])
+    x_image =  tf.reshape(layer, [-1,layer_size,2])
     num_units = 64
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
