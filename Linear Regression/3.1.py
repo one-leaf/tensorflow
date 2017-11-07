@@ -59,7 +59,7 @@ def neural_networks():
     prediction = add_layer(layer, 512, 1)
     cost = tf.reduce_sum(tf.square(y - prediction))
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
-    return x, y, prediction, optimizer, cost, _optimizer
+    return x, y, prediction, optimizer, cost
 
 if __name__ == '__main__':
     x, y, prediction, optimizer, cost = neural_networks()
