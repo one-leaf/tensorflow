@@ -495,7 +495,7 @@ def train():
 
 
             _action = np.zeros([ACTIONS_COUNT],dtype=np.int)
-            _curr_random_action_prob =(100 - _avg_epoch_num) / 100)
+            _curr_random_action_prob =(100 - _avg_epoch_num) / 100
             if _curr_random_action_prob < MIN_RANDOM_ACTION_PROB:
                 _curr_random_action_prob = MIN_RANDOM_ACTION_PROB
             if random.random() <= _curr_random_action_prob:
