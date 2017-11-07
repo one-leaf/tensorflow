@@ -509,7 +509,7 @@ def train():
 
             if terminal:
                 _avg_epoch_num_deque.append(_epoch_num)
-                while len(_avg_epoch_num_deque) > 100:
+                while len(_avg_epoch_num_deque) > 1000:
                     _avg_epoch_num_deque.popleft()
                     
                 _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
