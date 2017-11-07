@@ -373,7 +373,7 @@ ACTIONS_COUNT = 4  # 可选的动作，针对 左移 翻转 右移 下移
 FUTURE_REWARD_DISCOUNT = 0.99  # 下一次奖励的衰变率 
 OBSERVATION_STEPS = 15000.  # 在学习前观察的次数
 MIN_RANDOM_ACTION_PROB = 0.05    # 随机移动的最小概率
-MAX_RANDOM_ACTION_PROB = 0.25    # 随机移动的最大概率 
+MAX_RANDOM_ACTION_PROB = 0.50    # 随机移动的最大概率 
 MEMORY_SIZE = 10000  # 记住的观察队列
 TRAIN_BATCH_SIZE = 100  # 每次学习的批次
 TRAIN_EPOCHS = 2   # 每次学习轮数
@@ -509,7 +509,7 @@ def train():
 
             if terminal:
                 _avg_epoch_num_deque.append(_epoch_num)
-                while len(_avg_epoch_num_deque) > 1000:
+                while len(_avg_epoch_num_deque) > 10000:
                     _avg_epoch_num_deque.popleft()
                     
                 _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
