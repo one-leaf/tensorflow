@@ -522,8 +522,9 @@ def train():
                 _epoch_num = 0
                 continue
         
-        for i in range(100):
-            print(i, "train ...", _avg_epoch_num)
+        for i in range(1000):
+            if i mod 100 == 0:
+                print(i, "train ...", _avg_epoch_num)
             _ = _session.run(train_operation, feed_dict={x: _last_x, y: _last_y, keep_prob: 0.75})
         pickle.dump(_avg_epoch_num, open(_avg_epoch_num_dump_file, 'wb'))
         # print("save model ...")
