@@ -54,24 +54,17 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y') 
     
     x_image = tf.reshape(x, [-1,28,28,1])
-    layer = add_conv_layer(x_image, 5, 1, 1024, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer = add_conv_layer(layer, 3, 1024, 2048, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
-    layer = add_conv_layer(layer, 3, 2048, 4096, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
+    layer = add_conv_layer(x_image, 5, 1, 128, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer = add_conv_layer(layer, 3, 32, 256, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height
-    x_image =  tf.reshape(layer, [-1,layer_size*4096])
+    x_image =  tf.reshape(layer, [-1,layer_size*64])
 
-    layer = add_layer(x_image, layer_size*4096, layer_size*2048, tf.nn.sigmoid) 
-    layer = add_layer(layer, layer_size*2048, layer_size*1024, tf.nn.sigmoid) 
-    layer = add_layer(layer, layer_size*1024, layer_size*512, tf.nn.sigmoid) 
-    layer = add_layer(layer, layer_size*512, layer_size*256, tf.nn.sigmoid) 
-    layer = add_layer(layer, layer_size*256, layer_size*64, tf.nn.sigmoid) 
+    layer = add_layer(layer, layer_size*256, layer_size*128, tf.nn.sigmoid) 
+    layer = add_layer(layer, layer_size*128, layer_size*64, tf.nn.sigmoid) 
 
-    _layer = add_layer(layer, layer_size*64, layer_size*256, tf.nn.sigmoid) 
-    _layer = add_layer(_layer, layer_size*256, layer_size*512, tf.nn.sigmoid) 
-    _layer = add_layer(_layer, layer_size*512, layer_size*1024, tf.nn.sigmoid) 
-    _layer = add_layer(_layer, layer_size*1024, layer_size*2048, tf.nn.sigmoid) 
-    _layer = add_layer(_layer, layer_size*2048, layer_size*4096, tf.nn.sigmoid) 
+    _layer = add_layer(layer, layer_size*64, layer_size*128, tf.nn.sigmoid) 
+    _layer = add_layer(_layer, layer_size*128, layer_size*256, tf.nn.sigmoid) 
     _cost  = tf.reduce_sum(tf.square(x_image - _layer))
     _optimizer = tf.train.AdamOptimizer(0.00001).minimize(_cost)
 
