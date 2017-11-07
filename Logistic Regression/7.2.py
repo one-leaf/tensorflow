@@ -54,21 +54,26 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y') 
     
     x_image = tf.reshape(x, [-1,28,28,1])
-    layer = add_conv_layer(x_image, 5, 1, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer = add_conv_layer(layer, 3, 16, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
+    layer = add_conv_layer(x_image, 5, 1, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
+    layer = add_conv_layer(layer, 3, 64, 128, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool)     
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height
-    x_image =  tf.reshape(layer, [-1,layer_size*32])
+    x_image =  tf.reshape(layer, [-1,layer_size*128])
 
-    layer = add_layer(x_image, layer_size*32, layer_size*16, tf.nn.sigmoid) 
-    layer = add_layer(layer, layer_size*16, layer_size*4, tf.nn.sigmoid) 
+    layer = add_layer(x_image, layer_size*128, layer_size*64, tf.nn.sigmoid) 
+    layer = add_layer(layer, layer_size*64, layer_size*32, tf.nn.sigmoid) 
+    layer = add_layer(layer, layer_size*32, layer_size*16, tf.nn.sigmoid) 
+    layer = add_layer(layer, layer_size*16, layer_size*8, tf.nn.sigmoid) 
 
-    _layer = add_layer(layer, layer_size*4, layer_size*16, tf.nn.sigmoid) 
+    _layer = add_layer(layer, layer_size*8, layer_size*16, tf.nn.sigmoid) 
     _layer = add_layer(_layer, layer_size*16, layer_size*32, tf.nn.sigmoid) 
+    _layer = add_layer(_layer, layer_size*32, layer_size*64, tf.nn.sigmoid) 
+    _layer = add_layer(_layer, layer_size*64, layer_size*128, tf.nn.sigmoid) 
     _cost  = tf.reduce_sum(tf.square(x_image - _layer))
     _optimizer = tf.train.AdamOptimizer(0.001).minimize(_cost)
 
-    x_image =  tf.reshape(layer, [-1, layer_size, 4])
+    x_image =  tf.reshape(layer, [-1, layer_size, 8])
     x_image = tf.transpose(x_image, (0, 2, 1)) 
 
     num_units = 64
@@ -80,8 +85,8 @@ def neural_networks():
 
     logits = tf.transpose(logits, (0, 2, 1)) 
     # [batch_size, time_step, num_units] = > [batch_size, num_units, time_step] 不转也能学的
-    logits = tf.reshape(logits,[-1, 4 * num_units])
-    prediction = add_layer(logits, 4 * num_units, 10)
+    logits = tf.reshape(logits,[-1, 8 * num_units])
+    prediction = add_layer(logits, 8 * num_units, 10)
     cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
