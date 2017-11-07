@@ -385,9 +385,7 @@ STORE_SCORES_LEN = 200      # 分数保留的长度
 LEARNING_RATE = 1e-6        # 学习速率
 
 # 初始化保存对象，如果有数据，就恢复
-curr_dir = os.path.dirname(__file__)
 def restore(sess):
-    model_dir = os.path.join(curr_dir, "game_model")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
     ckpt = tf.train.get_checkpoint_state(model_dir)
@@ -453,7 +451,7 @@ def train():
     # 恢复游戏进度
     _saver,_model_dir,_checkpoint_path = restore(_session)
     # 游戏最大进行步数
-    _game_max_epoch_dump_file = os.path.join(curr_dir,"game_max_epoch.dump")
+    _game_max_epoch_dump_file = os.path.join(_model_dir,"game_max_epoch.dump")
     if os.path.exists(_game_max_epoch_dump_file):
         _game_max_epoch = pickle.load(open(_game_max_epoch_dump_file,'rb'))
     else:
