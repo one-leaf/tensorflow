@@ -525,7 +525,7 @@ def train():
 
 
 if __name__ == '__main__':
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "0"
     start = time.clock()
     train()
     elapsed = (time.clock() - start)
