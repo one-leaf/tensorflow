@@ -535,6 +535,7 @@ def train():
                     print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
                 _curr_x = []
                 _curr_y = []
+                _curr_reward = []
                 _epoch_num = 0
                 continue
         
