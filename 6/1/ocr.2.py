@@ -123,9 +123,9 @@ def neural_networks():
     # cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2)
-    outputs = tf.reshape(outputs, [-1, num_hidden*2])
+    layer = tf.reshape(outputs, [-1, num_hidden*2])
 
-    layer = add_layer(outputs, num_hidden*2, 1024 , activation_function=tf.nn.relu)
+    layer = add_layer(layer, num_hidden*2, 1024 , activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)        
     layer = add_layer(layer, 1024, num_classes)
 
@@ -135,7 +135,7 @@ def neural_networks():
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
 
 
-    return logits, inputs, labels, seq_len, keep_prob
+    return logits, inputs, labels, seq_len, keep_prob, outputs
 
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
@@ -221,7 +221,7 @@ def train():
     curr_learning_rate = 1e-5
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
-    logits, inputs, labels, seq_len, keep_prob = neural_networks()
+    logits, inputs, labels, seq_len, keep_prob, outputs = neural_networks()
 
     # If time_major == True (default), this will be a Tensor shaped: [max_time x batch_size x num_classes]
     # 返回 A 1-D float Tensor, size [batch], containing the negative log probabilities.
@@ -304,7 +304,10 @@ def train():
 
                 train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
-                        keep_prob: 0.95, learning_rate: curr_learning_rate}        
+                        keep_prob: 0.95, learning_rate: curr_learning_rate}       
+
+                _outputs = session.run(outputs,feed)
+                print(_outputs.shape)
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
                     session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
