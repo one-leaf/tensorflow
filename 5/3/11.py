@@ -523,11 +523,13 @@ def train():
                 _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
 
                 print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
-                _last_x +=  _curr_x
-                _last_y +=  _curr_y 
                 if _epoch_num > _avg_epoch_num + 5:
+                    _last_x +=  _curr_x
+                    _last_y +=  _curr_y 
                     _last_reward += [1 for i in range(len(_curr_y))]
-                else:
+                elif _epoch_num < _avg_epoch_num - 5::
+                    _last_x +=  _curr_x
+                    _last_y +=  _curr_y 
                     _last_reward += [-1 for i in range(len(_curr_y))]
                 _curr_x = []
                 _curr_y = []
