@@ -127,10 +127,11 @@ def neural_networks():
     outputs = tf.concat(outputs, axis=2)
     outputs = tf.reshape(outputs, [-1, num_hidden*2])
 
-    layer = add_layer(outputs, num_hidden*2, 1024, activation_function=tf.nn.relu)
-    layer = add_layer(layer, 1024, 512, activation_function=tf.nn.relu)
+    layer = add_layer(outputs, num_hidden*2, 512, activation_function=tf.nn.relu)
     layer = add_layer(layer, 512, 256, activation_function=tf.nn.relu)
-    layer = add_layer(layer, 256, num_classes)
+    layer = add_layer(layer, 256, 128, activation_function=tf.nn.relu)
+    layer = add_layer(layer, 128, 64, activation_function=tf.nn.relu)
+    layer = add_layer(layer, 64, num_classes)
 
     # logits = tf.nn.softmax(logits)
     # 输出对数： [batch_size , max_time , num_classes]
