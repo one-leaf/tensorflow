@@ -426,7 +426,9 @@ def add_conv_layer(inputs, patch_size, in_size, out_size, activation_function=No
 def train():    
     # 输入的图片，是每4张一组
     x =  tf.placeholder("float", [None, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, STATE_FRAMES], name='input_layer')   
-    y = tf.placeholder("float", [None, ACTIONS_COUNT])    # 移动的方向
+    y = tf.placeholder("float", [None, ACTIONS_COUNT])       # 移动的方向
+    reward = tf.placeholder("float", [None])                   # 得分
+    
     keep_prob = tf.placeholder(tf.float32)
 
     layer = add_conv_layer(x, 5, 4, 16, activation_function=tf.nn.relu)
@@ -441,9 +443,15 @@ def train():
     full_layer =  tf.reshape(layer, [-1,layer_size])    
 
     prediction = add_layer(full_layer, layer_size, ACTIONS_COUNT) 
-    cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
 
-    train_operation = tf.train.AdamOptimizer(0.0001).minimize(cost)
+    # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]  得到当前移动的概率
+    readout_action = tf.reduce_sum(tf.multiply(prediction, y), reduction_indices=1)
+    # 将（结果和评价相减）的平方，再求平均数。 得到和评价的距离。
+    cost = tf.reduce_mean(tf.square(reward - readout_action))
+
+    #cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))
+
+    train_operation = tf.train.AdamOptimizer(1e-5).minimize(cost)
 
     game = Tetromino()
 
@@ -473,6 +481,7 @@ def train():
         _curr_y = []
         _last_x = []
         _last_y = []        
+        _last_reward = []
         while len(_last_y) < 1000:
             image, terminal, is_epoch_end = game.step(list(_action))
             if is_epoch_end:
@@ -492,7 +501,6 @@ def train():
             _state = np.append(_state[:, :, 1:], image, axis=2)
             _curr_x.append(_state)
             _curr_state = np.reshape(_state,[1, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 4])
-
 
             _action = np.zeros([ACTIONS_COUNT],dtype=np.int)
             _curr_random_action_prob =(100 - _avg_epoch_num) / 100
@@ -515,16 +523,19 @@ def train():
                 _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
 
                 print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
+                _last_x +=  _curr_x
+                _last_y +=  _curr_y 
                 if _epoch_num > _avg_epoch_num + 5:
-                    _last_x +=  _curr_x
-                    _last_y +=  _curr_y 
+                    _last_reward += [1 for i in range(len(_curr_y))]
+                else:
+                    _last_reward += [-1 for i in range(len(_curr_y))]
                 _curr_x = []
                 _curr_y = []
                 _epoch_num = 0
                 continue
         
-        for i in range(50):
-            _, loss = _session.run([train_operation,cost], feed_dict={x: _last_x, y: _last_y, keep_prob: 0.75})
+        for i in range(10):
+            _, loss = _session.run([train_operation,cost], feed_dict={x: _last_x, y: _last_y, reward:_last_reward ,keep_prob: 0.75})
         print("train avg_epoch_num:", _avg_epoch_num, "loss:", loss)
         pickle.dump(_avg_epoch_num, open(_avg_epoch_num_dump_file, 'wb'))
         # print("save model ...")
