@@ -319,7 +319,7 @@ def train():
                         print(i,list_to_chars(train_label))
                     return   
                 
-                if seconds > 30: 
+                if seconds > 60: 
                     print('Exit for long time')
                     return
 
