@@ -526,12 +526,12 @@ def train():
                 if _epoch_num > _avg_epoch_num + 5:
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
-                    _last_reward += [x+1 for x in _curr_reward]
+                    _last_reward += [r+1 for r in _curr_reward]
                     print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
                 elif _epoch_num < _avg_epoch_num - 5:
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
-                    _last_reward += [x-1 for x in _curr_reward]
+                    _last_reward += [r-1 for r in _curr_reward]
                     print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
                 _curr_x = []
                 _curr_y = []
