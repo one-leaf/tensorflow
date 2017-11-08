@@ -110,11 +110,9 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
     layer = add_conv_layer(layer, 5, 1, 32)
-    layer = tf.nn.dropout(layer, keep_prob)     
     layer = add_conv_layer(layer, 5, 32, 32, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)
     layer = tf.nn.dropout(layer, keep_prob)             
     layer = add_conv_layer(layer, 3, 32, 64)     
-    layer = tf.nn.dropout(layer, keep_prob)
     layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)     
     layer = tf.nn.dropout(layer, keep_prob)
     layer = tf.reshape(layer, [batch_size,-1,64])
@@ -131,11 +129,12 @@ def neural_networks():
     layer = tf.nn.dropout(layer, keep_prob)        
     layer = add_layer(layer, 1024, num_classes)
 
-    # logits = tf.nn.softmax(logits)
     # 输出对数： [batch_size , max_time , num_classes]
     logits = tf.reshape(layer, [batch_size, -1, num_classes])
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
+
+
     return logits, inputs, labels, seq_len, keep_prob
 
 
@@ -219,7 +218,7 @@ def train():
                                             #    LEARNING_RATE_DECAY_FACTOR,
                                             #    staircase=True, name="learning_rate")
     # 决定还是自定义学习速率比较靠谱                                            
-    curr_learning_rate = 1e-4
+    curr_learning_rate = 1e-5
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
     logits, inputs, labels, seq_len, keep_prob = neural_networks()
@@ -233,18 +232,18 @@ def train():
     # optimizer = tf.train.MomentumOptimizer(learning_rate=learning_rate, momentum=MOMENTUM).minimize(cost, global_step=global_step)
 
     # 做一个梯度裁剪，貌似也没啥用, 将梯度控制到 -1 和 1 之间
-    grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
-    grads_and_vars = grads_optimizer.compute_gradients(loss)
-    capped_grads_and_vars = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads_and_vars]
+    # grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+    # grads_and_vars = grads_optimizer.compute_gradients(loss)
+    # capped_grads_and_vars = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in grads_and_vars]
     # gradients, variables = zip(*grads_optimizer.compute_gradients(loss))
     # gradients, _ = tf.clip_by_global_norm(gradients, 5.0)
     # capped_grads_and_vars = zip(gradients, variables)
 
     #capped_grads_and_vars = [(tf.clip_by_norm(g, 5), v) for g,v in grads_and_vars]
-    optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
+    # optimizer = grads_optimizer.apply_gradients(capped_grads_and_vars, global_step=global_step)
 
     # 最小化 loss
-    # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss, global_step=global_step)
+    optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost, global_step=global_step)
     # The ctc_greedy_decoder is a special case of the ctc_beam_search_decoder with top_paths=1 (but that decoder is faster for this special case).
     # decoded, log_prob = tf.nn.ctc_greedy_decoder(logits, seq_len, merge_repeated=False)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, beam_width=10, merge_repeated=False)
@@ -305,7 +304,7 @@ def train():
 
                 train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
-                        keep_prob: 0.75, learning_rate: curr_learning_rate}        
+                        keep_prob: 0.9, learning_rate: curr_learning_rate}        
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
                     session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
