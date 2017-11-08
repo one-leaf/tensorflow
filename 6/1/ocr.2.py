@@ -72,7 +72,7 @@ if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
 
 # 增加层
 def add_layer(inputs, in_size, out_size, activation_function=None):
-    Weights = tf.Variable(tf.random_normal([in_size, out_size]))
+    Weights = tf.Variable(tf.truncated_normal([in_size, out_size]))
     biases = tf.Variable(tf.zeros([out_size]) + 0.1)
     Wx_plus_b = tf.matmul(inputs, Weights) + biases
     if activation_function is None:
@@ -127,10 +127,10 @@ def neural_networks():
     outputs = tf.concat(outputs, axis=2)
     outputs = tf.reshape(outputs, [-1, num_hidden*2])
 
-    layer = add_layer(outputs, num_hidden*2, 512, activation_function=tf.nn.relu)
-    layer = add_layer(layer, 512, 256, activation_function=tf.nn.relu)
-    layer = add_layer(layer, 256, 128, activation_function=tf.nn.relu)
-    layer = add_layer(layer, 128, 64, activation_function=tf.nn.relu)
+    layer = add_layer(outputs, num_hidden*2, 64, activation_function=tf.nn.relu)
+    # layer = add_layer(layer, 512, 256, activation_function=tf.nn.relu)
+    # layer = add_layer(layer, 256, 128, activation_function=tf.nn.relu)
+    # layer = add_layer(layer, 128, 64, activation_function=tf.nn.relu)
     layer = add_layer(layer, 64, num_classes)
 
     # logits = tf.nn.softmax(logits)
