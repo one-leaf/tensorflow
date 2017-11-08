@@ -442,7 +442,7 @@ def train():
     layer_size = RESIZED_SCREEN_X * RESIZED_SCREEN_Y * 128
     full_layer =  tf.reshape(layer, [-1,layer_size])    
 
-    prediction = add_layer(full_layer, layer_size, ACTIONS_COUNT) 
+    prediction = add_layer(full_layer, layer_size, ACTIONS_COUNT, activation_function=tf.nn.softmax) 
 
     # 将预测的结果和移动的方向相乘，按照第二维度求和 [0.1,0.2,0.7] * [0, 1, 0] = [0, 0.2 ,0] = [0.2]  得到当前移动的概率
     readout_action = tf.reduce_sum(tf.multiply(prediction, y), reduction_indices=1)
