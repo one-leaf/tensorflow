@@ -36,7 +36,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 8
+BATCH_SIZE = 5
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 5
 
@@ -113,11 +113,11 @@ def neural_networks():
     layer = tf.nn.dropout(layer, keep_prob)     
     # layer = add_conv_layer(layer, 5, 32, 32, activation_function=tf.nn.relu)     
     # layer = tf.nn.dropout(layer, keep_prob)
-    layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu)     
-    layer = tf.nn.dropout(layer, keep_prob)
+    # layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu)     
+    # layer = tf.nn.dropout(layer, keep_prob)
     # layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu)     
     # layer = tf.nn.dropout(layer, keep_prob)
-    layer = tf.reshape(layer, [-1,image_width*image_height,64])
+    layer = tf.reshape(layer, [-1,image_width*image_height,32])
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
