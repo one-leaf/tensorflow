@@ -479,6 +479,7 @@ def train():
         _state = None    
         _curr_x = []
         _curr_y = []
+        _curr_reward = []
         _last_x = []
         _last_y = []        
         _last_reward = []
@@ -501,6 +502,7 @@ def train():
             _state = np.append(_state[:, :, 1:], image, axis=2)
             _curr_x.append(_state)
             _curr_state = np.reshape(_state,[1, RESIZED_SCREEN_X, RESIZED_SCREEN_Y, 4])
+            _per_action = _session.run(prediction, feed_dict={x: _curr_state, keep_prob: 1.0})
 
             _action = np.zeros([ACTIONS_COUNT],dtype=np.int)
             _curr_random_action_prob =(100 - _avg_epoch_num) / 100
@@ -509,12 +511,11 @@ def train():
             if random.random() <= _curr_random_action_prob:
                 action_index = random.randrange(ACTIONS_COUNT)
             else:
-                _per_action = _session.run(prediction, feed_dict={x: _curr_state, keep_prob: 1.0})
                 action_index = np.argmax(_per_action)
             _action[action_index] = 1
 
             _curr_y.append(_action)
-
+            _curr_reward.append(FUTURE_REWARD_DISCOUNT * np.max(_per_action))
             if terminal:
                 _avg_epoch_num_deque.append(_epoch_num)
                 while len(_avg_epoch_num_deque) > 100000:
@@ -525,12 +526,12 @@ def train():
                 if _epoch_num > _avg_epoch_num + 5:
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
-                    _last_reward += [1 for i in range(len(_curr_y))]
+                    _last_reward += [_curr_reward[i]+1 for i in range(len(_curr_y))]
                     print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
                 elif _epoch_num < _avg_epoch_num - 5:
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
-                    _last_reward += [-1 for i in range(len(_curr_y))]
+                    _last_reward += [_curr_reward[i]-1 for i in range(len(_curr_y))]
                     print(_all_epoch_num, _game_times, _epoch_num, _avg_epoch_num, _curr_random_action_prob)
                 _curr_x = []
                 _curr_y = []
