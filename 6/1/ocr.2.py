@@ -124,9 +124,9 @@ def neural_networks():
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
     layer = tf.reshape(outputs, [batch_size, -1])
-    shape = tf.shape(layer)
+    layer_size = tf.shape(layer)[1]
 
-    layer = add_layer(layer, shape[1], 1024 , activation_function=tf.nn.relu)
+    layer = add_layer(layer, layer_size, 1024 , activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)        
     layer = add_layer(layer, 1024, num_classes)
 
