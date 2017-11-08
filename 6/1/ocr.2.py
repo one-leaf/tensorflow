@@ -110,11 +110,9 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
     layer = add_conv_layer(layer, 5, 1, 32, activation_function=tf.nn.relu)
-    layer = tf.nn.dropout(layer, keep_prob)             
     layer = add_conv_layer(layer, 5, 32, 32, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)
     layer = tf.nn.dropout(layer, keep_prob)             
     layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu,)     
-    layer = tf.nn.dropout(layer, keep_prob)
     layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)     
     layer = tf.nn.dropout(layer, keep_prob)             
     layer = tf.reshape(layer, [batch_size, -1, 64])
