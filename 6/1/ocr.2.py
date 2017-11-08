@@ -118,14 +118,15 @@ def neural_networks():
     layer = tf.reshape(layer, [batch_size,-1,64])
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
-    # cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
-    # cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
-    outputs = tf.concat(outputs, axis=2)
-    layer = tf.reshape(outputs, [-1, num_hidden*2])
+    outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
+    layer = tf.reshape(outputs, [batch_size, -1])
+    shape = tf.shape(layer)
 
-    layer = add_layer(layer, num_hidden*2, 1024 , activation_function=tf.nn.relu)
+    layer = add_layer(layer, shape[1], 1024 , activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)        
     layer = add_layer(layer, 1024, num_classes)
 
