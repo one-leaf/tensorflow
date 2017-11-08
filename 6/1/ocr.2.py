@@ -136,7 +136,7 @@ def neural_networks():
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
 
 
-    return logits, inputs, labels, seq_len, keep_prob, outputs
+    return logits, inputs, labels, seq_len, keep_prob
 
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
@@ -222,7 +222,7 @@ def train():
     curr_learning_rate = 1e-5
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
-    logits, inputs, labels, seq_len, keep_prob, outputs = neural_networks()
+    logits, inputs, labels, seq_len, keep_prob = neural_networks()
 
     # If time_major == True (default), this will be a Tensor shaped: [max_time x batch_size x num_classes]
     # 返回 A 1-D float Tensor, size [batch], containing the negative log probabilities.
@@ -307,8 +307,6 @@ def train():
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
                         keep_prob: 0.95, learning_rate: curr_learning_rate}       
 
-                _outputs = session.run(outputs,feed)
-                print(_outputs.shape)
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
                     session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
