@@ -36,9 +36,9 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 TRAIN_SIZE = BATCHES * BATCH_SIZE
-TEST_BATCH_SIZE = 10
+TEST_BATCH_SIZE = 5
 
 train_files = []
 if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
@@ -127,7 +127,7 @@ def neural_networks():
     outputs = tf.concat(outputs, axis=2)
     outputs = tf.reshape(outputs, [-1, num_hidden*2])
 
-    layer = add_layer(outputs, num_hidden*2, 64, activation_function=tf.nn.relu)
+    layer = add_layer(outputs, num_hidden*2, 64 , activation_function=tf.nn.relu)
     # layer = add_layer(layer, 512, 256, activation_function=tf.nn.relu)
     # layer = add_layer(layer, 256, 128, activation_function=tf.nn.relu)
     # layer = add_layer(layer, 128, 64, activation_function=tf.nn.relu)
