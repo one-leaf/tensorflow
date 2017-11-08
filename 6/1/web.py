@@ -78,7 +78,7 @@ def index():
     return '''<!DOCTYPE html>
         <html lang="zh-CN">
         <body>
-            <form action="/crack" method="post" enctype="multipart/form-data">
+            <form action="/ocr" method="post" enctype="multipart/form-data">
                 Select image upload to ocr: <br/><br/>
                 <input type="file" name="file" id="file"> <br/><br/>
                 <button type="submit" class="btn btn-default">Submit</button>
@@ -87,7 +87,7 @@ def index():
         </html>
     '''
 
-@app.route('/crack', methods=['POST'])
+@app.route('/ocr', methods=['POST'])
 def single_digit():
     file = request.files['file']
     if file :
