@@ -13,7 +13,7 @@ curr_dir = os.path.dirname(__file__)
 image_height = 16
 
 # LSTM
-num_hidden = 64
+num_hidden = 8
 num_layers = 1
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
@@ -111,13 +111,13 @@ def neural_networks():
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
     layer = add_conv_layer(layer, 5, 1, 32, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)     
-    # layer = add_conv_layer(layer, 5, 32, 32, activation_function=tf.nn.relu)     
-    # layer = tf.nn.dropout(layer, keep_prob)
-    # layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu)     
-    # layer = tf.nn.dropout(layer, keep_prob)
-    # layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu)     
-    # layer = tf.nn.dropout(layer, keep_prob)
-    layer = tf.reshape(layer, [-1,image_width*image_height,32])
+    layer = add_conv_layer(layer, 5, 32, 32, activation_function=tf.nn.relu)     
+    layer = tf.nn.dropout(layer, keep_prob)
+    layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu)     
+    layer = tf.nn.dropout(layer, keep_prob)
+    layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu)     
+    layer = tf.nn.dropout(layer, keep_prob)
+    layer = tf.reshape(layer, [-1,image_width*image_height,64])
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
