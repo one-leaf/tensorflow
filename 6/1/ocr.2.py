@@ -304,7 +304,7 @@ def train():
 
                 train_inputs, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)       
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
-                        keep_prob: 0.9, learning_rate: curr_learning_rate}        
+                        keep_prob: 0.95, learning_rate: curr_learning_rate}        
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
                     session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
