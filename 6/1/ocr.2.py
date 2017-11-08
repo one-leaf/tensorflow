@@ -36,9 +36,9 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 4
+BATCH_SIZE = 16
 TRAIN_SIZE = BATCHES * BATCH_SIZE
-TEST_BATCH_SIZE = 4
+TEST_BATCH_SIZE = 5
 
 train_files = []
 if os.path.exists(os.path.join(curr_dir, "data", "index.txt")):
