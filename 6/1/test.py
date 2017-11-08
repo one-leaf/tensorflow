@@ -5,16 +5,16 @@ import utils
 import cv2
 import random
 import time
-import ocr3
+import ocr
 
 curr_dir = os.path.dirname(__file__)
 
 def init():
-#    logits, inputs, labels, seq_len, input_keep_prob = ocr3.neural_networks()
+#    logits, inputs, labels, seq_len, input_keep_prob = ocr.neural_networks()
     global_step = tf.Variable(0, trainable=False)
     curr_learning_rate = 1e-5
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
-    logits, inputs, labels, seq_len, input_keep_prob = ocr3.neural_networks()
+    logits, inputs, labels, seq_len, input_keep_prob = ocr.neural_networks()
     loss = tf.nn.ctc_loss(labels=labels,inputs=logits, sequence_length=seq_len)
     cost = tf.reduce_mean(loss, name="cost")
     grads_optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
@@ -49,13 +49,13 @@ def scan():
         widths=[image.shape[1] for image in images_group]
         maxImageWidth = max(widths)+5
 
-        ocr_inputs = np.zeros([len(images_group), maxImageWidth, ocr3.image_size[0]])
+        ocr_inputs = np.zeros([len(images_group), maxImageWidth, ocr.image_height])
         for i, image in enumerate(images_group):
             # image = utils.dropZeroEdges(image)
             # utils.show(utils.dropZeroEdges(image))
             utils.save(image,os.path.join(curr_dir,"test","%s-%s.png"%(idx,i)))
-            image_vec = utils.img2vec(image,ocr3.image_size[0],maxImageWidth)
-            ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr3.image_size[0],maxImageWidth)))         
+            image_vec = utils.img2vec(image,ocr.image_height,maxImageWidth)
+            ocr_inputs[i,:] = np.transpose(image_vec.reshape((ocr.image_height,maxImageWidth)))         
             # utils.show(image)
             # return
         ocr_seq_len = np.ones(ocr_inputs.shape[0]) * maxImageWidth
@@ -66,9 +66,9 @@ def scan():
         decoded_list = session.run(decoded[0], feed)
         seconds = round(time.time() - start,2)
         print("filished ocr inputs %s, paid %s seconds" % (idx,seconds))
-        detected_list = ocr3.decode_sparse_tensor(decoded_list)
+        detected_list = ocr.decode_sparse_tensor(decoded_list)
         for detect_number in detected_list:
-            ocr_texts.append(ocr3.list_to_chars(detect_number))
+            ocr_texts.append(ocr.list_to_chars(detect_number))
 
         ocr_text_groups.append(ocr_texts)
         # break   
@@ -84,12 +84,12 @@ def scan2():
 
         for i, image in enumerate(images_group):
             image = utils.dropZeroEdges(image)  
-            image = utils.resize(image,ocr3.image_height)
+            image = utils.resize(image,ocr.image_height)
             utils.save(image,os.path.join(curr_dir,"test","%s-%s.png"%(idx,i)))
             maxImageWidth = image.shape[1]+5
-            image_vec = utils.img2vec(image,ocr3.image_height,maxImageWidth)
-            ocr_inputs = np.zeros([1, maxImageWidth, ocr3.image_height])
-            ocr_inputs[0,:] = np.transpose(image_vec.reshape((ocr3.image_height,maxImageWidth)))         
+            image_vec = utils.img2vec(image,ocr.image_height,maxImageWidth)
+            ocr_inputs = np.zeros([1, maxImageWidth, ocr.image_height])
+            ocr_inputs[0,:] = np.transpose(image_vec.reshape((ocr.image_height,maxImageWidth)))         
             ocr_seq_len = np.ones(ocr_inputs.shape[0]) * maxImageWidth
             feed = {inputs: ocr_inputs, seq_len: ocr_seq_len,  input_keep_prob: 1.0}
             print("starting ocr inputs %s:%s ..." % (idx,i))
@@ -97,9 +97,9 @@ def scan2():
             decoded_list = session.run(decoded[0], feed)
             seconds = round(time.time() - start,2)
             print("filished ocr inputs %s, paid %s seconds" % (idx,seconds))
-            detected_list = ocr3.decode_sparse_tensor(decoded_list)            
+            detected_list = ocr.decode_sparse_tensor(decoded_list)            
             for detect_number in detected_list:
-                ocr_texts.append(ocr3.list_to_chars(detect_number))
+                ocr_texts.append(ocr.list_to_chars(detect_number))
 
         ocr_text_groups.append(ocr_texts)
         # break   

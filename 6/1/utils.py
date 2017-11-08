@@ -186,7 +186,7 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
 
 # 装载图片，并分解为待识别图像
 def loadImage(filename,imgtype):
-    img = cv2.imread(filename, 0)
+    img = cv2.imdecode(filename, 0)
     if img.shape != (1123,794):
         raise "不是进口商检单"
 
