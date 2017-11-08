@@ -517,7 +517,7 @@ def train():
 
             if terminal:
                 _avg_epoch_num_deque.append(_epoch_num)
-                while len(_avg_epoch_num_deque) > 10000:
+                while len(_avg_epoch_num_deque) > 100000:
                     _avg_epoch_num_deque.popleft()
                     
                 _avg_epoch_num = sum(_avg_epoch_num_deque) * 1.0 / len(_avg_epoch_num_deque)
@@ -527,7 +527,7 @@ def train():
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
                     _last_reward += [1 for i in range(len(_curr_y))]
-                elif _epoch_num < _avg_epoch_num - 5::
+                elif _epoch_num < _avg_epoch_num - 5:
                     _last_x +=  _curr_x
                     _last_y +=  _curr_y 
                     _last_reward += [-1 for i in range(len(_curr_y))]
