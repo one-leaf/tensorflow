@@ -115,25 +115,24 @@ def neural_networks():
     layer = add_conv_layer(layer, 3, 32, 64)     
     layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)     
     layer = tf.nn.dropout(layer, keep_prob)
-    # layer = tf.reshape(layer, [batch_size, -1, 64])
+    layer = tf.reshape(layer, [batch_size, -1, 64])
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
-    outputs = tf.concat(outputs, axis=2) #[batch_size, image_width//4, 2*num_hidden]
+    outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
     layer = tf.reshape(outputs, [-1, 2*num_hidden])
 
-    layer = add_layer(layer, 2*num_hidden, 1024, activation_function=tf.nn.relu)
+    layer = add_layer(layer, 2*num_hidden, 512, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)        
-    layer = add_layer(layer, 1024, num_classes)
+    layer = add_layer(layer, 512, num_classes)
 
     # 输出对数： [batch_size , max_time , num_classes]
     logits = tf.reshape(layer, [batch_size, -1, num_classes])
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
-
 
     return logits, inputs, labels, seq_len, keep_prob
 
