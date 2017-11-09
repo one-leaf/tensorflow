@@ -54,7 +54,7 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y') 
     
     x_image = tf.reshape(x, [-1,28,28,1])
-    layer = add_conv_layer(x_image, 3, 1, 32, activation_function=tf.nn.relu) 
+    layer = add_conv_layer(x_image, 5, 1, 32, activation_function=tf.nn.relu) 
     layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
     layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu) 
     layer = add_conv_layer(layer, 3, 64, 128, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
@@ -62,10 +62,10 @@ def neural_networks():
     layer_size = image_width*image_height*128
 
     layer =  tf.reshape(layer, [-1,layer_size])
-    layer = add_layer(layer, layer_size, 64, activation_function=tf.nn.relu)
-    layer = tf.reshape(layer, (-1, 1, 64))
+    layer = add_layer(layer, layer_size, 128, activation_function=tf.nn.relu)
+    layer = tf.reshape(layer, (-1, 1, 128))
 
-    num_units = 64
+    num_units = 128
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_units//2, state_is_tuple=True)
