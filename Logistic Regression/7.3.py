@@ -23,7 +23,7 @@ def getTestImages():
 
 # 增加层
 def add_layer(inputs, in_size, out_size, activation_function=None):
-    Weights = tf.Variable(tf.random_normal([in_size, out_size]))
+    Weights = tf.Variable(tf.truncated_normal([in_size, out_size]))
     biases = tf.Variable(tf.zeros([out_size]) + 0.1)
     Wx_plus_b = tf.matmul(inputs, Weights) + biases
     if activation_function is None:
@@ -33,20 +33,51 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
     return outputs
 
 # 增加卷积层
-def add_conv_layer(inputs, patch_size, in_size, out_size, activation_function=None, pool_function=None):
+def add_conv_layer(inputs, patch_size, in_size, out_size, norm=False, activation_function=None, pool_function=None):
     Weights = tf.Variable(tf.truncated_normal([patch_size, patch_size, in_size, out_size], stddev=0.1))
     biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-    layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='SAME')
-    Wconvlayer_plus_b = layer + biases
+    layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='SAME')    
+    Wx_plus_b = layer + biases
+
+    if norm:
+        fc_mean, fc_var = tf.nn.moments(Wx_plus_b, axes=[0])
+        scale = tf.Variable(tf.ones([out_size]))
+        shift = tf.Variable(tf.zeros([out_size]))
+        epsilon = 0.001
+        ema = tf.train.ExponentialMovingAverage(decay=0.5)
+        def mean_var_with_update():
+            ema_apply_op = ema.apply([fc_mean, fc_var])
+            with tf.control_dependencies([ema_apply_op]):
+                return tf.identity(fc_mean), tf.identity(fc_var)
+        mean, var = mean_var_with_update()
+        Wx_plus_b = tf.nn.batch_normalization(Wx_plus_b, mean, var, shift, scale, epsilon)
+
     if activation_function is None:
-        convlayer = Wconvlayer_plus_b
+        convlayer = Wx_plus_b
     else:
-        convlayer = activation_function(Wconvlayer_plus_b)
+        convlayer = activation_function(Wx_plus_b)
     if pool_function is None:
         outputs = convlayer
     else:
         outputs = pool_function(convlayer, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
     return outputs
+
+# def batch_norm(x, n_out, phase_train):
+#     beta = tf.Variable(tf.constant(0.0, shape=[n_out]))
+#     gamma = tf.Variable(tf.constant(1.0, shape=[n_out]))
+#     batch_mean, batch_var = tf.nn.moments(x, [0,1,2])
+#     ema = tf.train.ExponentialMovingAverage(decay=0.5)
+
+#     def mean_var_with_update():
+#         ema_apply_op = ema.apply([batch_mean, batch_var])
+#         with tf.control_dependencies([ema_apply_op]):
+#             return tf.identity(batch_mean), tf.identity(batch_var)
+
+#     mean, var = tf.cond(phase_train,
+#                         mean_var_with_update,
+#                         lambda: (ema.average(batch_mean), ema.average(batch_var)))
+#     normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
+#     return normed
 
 # 神经网络定义, RNN
 def neural_networks():
@@ -54,10 +85,10 @@ def neural_networks():
     y = tf.placeholder(tf.float32, [None, 10], name='y') 
     
     x_image = tf.reshape(x, [-1,28,28,1])
-    layer = add_conv_layer(x_image, 5, 1, 32, activation_function=tf.nn.relu) 
-    layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-    layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu) 
-    layer = add_conv_layer(layer, 3, 64, 128, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer = add_conv_layer(x_image, 5, 1, 32, norm=True, activation_function=tf.nn.relu) 
+    layer = add_conv_layer(layer, 3, 32, 64, norm=True, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+    layer = add_conv_layer(layer, 3, 64, 64, norm=True, activation_function=tf.nn.relu) 
+    layer = add_conv_layer(layer, 3, 64, 128, norm=True, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
     image_width = image_height = 28//2//2
     layer_size = image_width*image_height*128
 
