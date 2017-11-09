@@ -124,8 +124,8 @@ def getImage():
     draw.text((5,5),text,fill='black',font=font, spacing=200)
     img = img2bwinv(resize(img2gray(np.asarray(img)), image_height))
 
-    gb = random.randint(1, 6)
-    if gb>1: img = cv2.GaussianBlur(img,(gb,gb),0)
+    # gb = random.randint(1, 6)
+    # if gb>1: img = cv2.GaussianBlur(img,(gb,gb),0)
 
     return text, img
 
