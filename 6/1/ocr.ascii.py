@@ -111,11 +111,14 @@ def neural_networks():
 
 FontNames = os.listdir(os.path.join(curr_dir,"fonts"))
 def getImage():
-    font_length = random.randint(50, 80)
+    font_length = random.randint(50, 100)
     font_size = random.randint(9, 20)
     font_name = random.choice(FontNames)
     font = ImageFont.truetype(os.path.join(curr_dir, "fonts", font_name), font_size, index = 0)
-    text = ''.join(random.sample(CHARS, font_length)).strip()
+    text=''
+    for i in range(font_length)
+        text += random.choice(CHARS)
+    text=text.strip()
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
     draw = ImageDraw.Draw(img)
