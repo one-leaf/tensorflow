@@ -96,7 +96,7 @@ def neural_networks():
     layer = tf.layers.dropout(layer,drop_prob)
 
     #[batch_size, image_width, 16]
-    layer = tf.reshape(layer,[batch_size, -1, 16])
+    layer = tf.reshape(layer,[batch_size, 16, -1])
 
     num_hidden = image_height
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
