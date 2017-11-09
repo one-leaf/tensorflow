@@ -127,7 +127,7 @@ def neural_networks():
 
     layer = add_layer(layer, 2*num_hidden, 4*num_hidden, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)        
-    layer = add_layer(layer, 4*num_hidden, num_classes)
+    layer = add_layer(layer, 4*num_hidden, num_classes, activation_function=tf.nn.softmax)
 
     # 输出对数： [batch_size , max_time , num_classes]
     logits = tf.reshape(layer, [batch_size, -1, num_classes])
