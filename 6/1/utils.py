@@ -81,7 +81,7 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     if width==-1: width=w
     if height==-1: height=h
     if h>height or w>width:
-        raise "image size too large, src size: %s,%s dst size: %s,%s" % (w,h,width,height)
+        raise Exception("image size too large, src size: %s,%s dst size: %s,%s" % (w,h,width,height))
     vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(value,))  # 在图像上补齐
     if flatten:
         vector = vector.flatten()
@@ -186,7 +186,7 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
 
 # 装载图片，并分解为待识别图像
 def loadImage(filename,imgtype):
-    img = cv2.imdecode(filename, 0)
+    img = cv2.imread(filename, 0)
     if img.shape != (1123,794):
         raise "不是进口商检单"
 

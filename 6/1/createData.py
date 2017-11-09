@@ -46,11 +46,33 @@ def pil_font(text,curr_dir):
     draw.text( (0,30), u'中国', font=font, fill="Black")
     im.save(os.path.join(curr_dir, "test", "pil.png"),dpi=(96,96))
 
+def getImage():
+    fonts_length = random.randint(30, 40)
+    fonts_size = random.randint(5, 20)
+    font = ImageFont.truetype(os.path.join(curr_dir, "fonts", "simsun.ttc"), fonts_size, index = 0)
+    text = ''.join(random.sample(CHARS, fonts_length))
+    size = font.getsize(text)
+    img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
+    draw = ImageDraw.Draw(img)
+    draw.text((5,5),text,fill='black',font=font, spacing=200)
+    return text, np.asarray(img)
+
+def getImage2():
+    img=np.ones((100,1000,3), np.uint8)*255
+    fonts_length = random.randint(30, 40)
+    fonts_size = random.randint(8, 20)
+    text = ''.join(random.sample(CHARS, fonts_length))
+    fonts_type = random.choice([cv2.FONT_HERSHEY_DUPLEX, cv2.FONT_HERSHEY_TRIPLEX, cv2.FONT_HERSHEY_SCRIPT_COMPLEX])
+    cv2.putText(img, text, (20,50), fonts_type, 1, (0,0,0), 0, lineType=cv2.LINE_AA)
+    return text, img
+
+
 def main():
-    curr_dir = os.path.dirname(__file__)
-    text = u"1234567890"
-    pygame_freetype_font(text,curr_dir)
-   # pil_font(text,curr_dir)
+    lable,img=getImage()
+    print(lable)
+    cv2.imshow(lable,img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()    
 
 if __name__ == '__main__':
     main()
