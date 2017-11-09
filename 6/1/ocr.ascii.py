@@ -26,9 +26,6 @@ ASCII_CHARS = [chr(c) for c in range(32,126+1)]
 #ZH_CHARS_PUN = ['。','？','！','，','、','；','：','「','」','『','』','‘','’','“','”',\
 #                '（','）','〔','〕','【','】','—','…','–','．','《','》','〈','〉']
 
-# 空格符号不要了
-ASCII_CHARS.remove(' ')
-
 CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 # CHARS = ASCII_CHARS
 num_classes = len(CHARS) + 1
@@ -114,11 +111,11 @@ def neural_networks():
 
 FontNames = os.listdir(os.path.join(curr_dir,"fonts"))
 def getImage():
-    font_length = random.randint(30, 40)
+    font_length = random.randint(50, 100)
     font_size = random.randint(9, 20)
     font_name = random.choice(FontNames)
     font = ImageFont.truetype(os.path.join(curr_dir, "fonts", font_name), font_size, index = 0)
-    text = ''.join(random.sample(CHARS, font_length))
+    text = ''.join(random.sample(CHARS, font_length)).strip()
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
     draw = ImageDraw.Draw(img)
