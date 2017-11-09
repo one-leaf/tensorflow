@@ -119,10 +119,10 @@ def getImage():
         text += random.choice(CHARS)
     text=text.strip()
     size = font.getsize(text)
-    img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
+    img=Image.new("L",(size[0]+10,size[1]+10),(255,255,255))
     draw = ImageDraw.Draw(img)
     draw.text((5,5),text,fill='black',font=font, spacing=200)
-    img = img2bwinv(resize(img2gray(np.asarray(img)), image_height))
+    img = img2bwinv(resize(np.asarray(img), image_height))
     return text, img
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
