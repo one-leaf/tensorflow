@@ -116,7 +116,7 @@ def getImage():
     font_name = random.choice(FontNames)
     font = ImageFont.truetype(os.path.join(curr_dir, "fonts", font_name), font_size, index = 0)
     text=''
-    for i in range(font_length)
+    for i in range(font_length):
         text += random.choice(CHARS)
     text=text.strip()
     size = font.getsize(text)
