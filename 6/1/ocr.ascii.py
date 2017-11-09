@@ -87,7 +87,7 @@ def neural_networks():
     layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu,)     
     layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)     
     layer = tf.nn.dropout(layer, keep_prob)             
-    layer = tf.reshape(layer, [batch_size, image_width//2//2, -1])
+    layer = tf.reshape(layer, [batch_size, -1, image_height//2//2*64])
 
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
