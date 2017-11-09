@@ -132,6 +132,8 @@ def getImage():
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
     draw = ImageDraw.Draw(img)
+    fontmode = random.choice(["1", "P", "I", "F", "L"])
+    draw.fontmode=fontmode    
     draw.text((5,5),text,fill='black',font=font, spacing=200)
     img = img2bwinv(resize(img2gray(np.asarray(img)), image_height))
     return text, img

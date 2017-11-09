@@ -7,6 +7,7 @@ from pygame import freetype
 import utils
 import numpy as np
 import cv2
+import random
 
 def pygame_font(text,curr_dir):
     pygame.init()
@@ -47,13 +48,16 @@ def pil_font(text,curr_dir):
     im.save(os.path.join(curr_dir, "test", "pil.png"),dpi=(96,96))
 
 def getImage():
+    CHARS = [chr(c) for c in range(32,126+1)]
     fonts_length = random.randint(30, 40)
-    fonts_size = random.randint(5, 20)
-    font = ImageFont.truetype(os.path.join(curr_dir, "fonts", "simsun.ttc"), fonts_size, index = 0)
+    fonts_size = random.randint(8, 20)
+    font = ImageFont.truetype("simsun.ttc", fonts_size, index = 0)
     text = ''.join(random.sample(CHARS, fonts_length))
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
     draw = ImageDraw.Draw(img)
+    fontmode = random.choice(["1", "P", "I", "F", "L"])
+    draw.fontmode=fontmode
     draw.text((5,5),text,fill='black',font=font, spacing=200)
     return text, np.asarray(img)
 
