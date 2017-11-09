@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 32
+image_height = 16
 
 # LSTM
 # num_hidden = 4

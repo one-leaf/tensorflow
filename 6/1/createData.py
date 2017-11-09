@@ -50,7 +50,7 @@ def pil_font(text,curr_dir):
 def getImage():
     CHARS = [chr(c) for c in range(32,126+1)]
     fonts_length = random.randint(30, 40)
-    fonts_size = 20 #random.randint(8, 20)
+    fonts_size = 9 #random.randint(8, 20)
     font = ImageFont.truetype("simsun.ttc", fonts_size, index = 0)
     text = ''.join(random.sample(CHARS, fonts_length))
     size = font.getsize(text)
@@ -64,7 +64,7 @@ def getImage():
     img = utils.img2gray(img)  
     # img = utils.img2bwinv(img)
     img = utils.dropZeroEdges(255-img)
-    img = utils.resize(img,32)
+    img = utils.resize(img,16)
     return text, img
 
 def getImage2():
