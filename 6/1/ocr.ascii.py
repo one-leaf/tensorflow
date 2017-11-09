@@ -81,17 +81,18 @@ def neural_networks():
     layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
     layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
-    layer = tf.contrib.layers.flatten(layer)
+
+    layer = tf.reshape(layer,(-1, image_height*256//2//2//2//2))
 
     layer = tf.layers.dense(layer, 512, activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
     layer = tf.layers.dropout(layer,drop_prob)
 
-    layer = tf.layers.dense(layer, 512*image_height, activation=tf.nn.relu)
+    layer = tf.layers.dense(layer, 256, activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
     layer = tf.layers.dropout(layer,drop_prob)
 
-    layer = tf.reshape(layer,(-1,512,image_height))
+    layer = tf.reshape(layer,(-1, image_width, 256))
 
     num_hidden = image_height
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
