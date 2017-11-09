@@ -42,33 +42,6 @@ BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
-# 增加层
-def add_layer(inputs, in_size, out_size, activation_function=None):
-    Weights = tf.Variable(tf.truncated_normal([in_size, out_size]))
-    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-    Wx_plus_b = tf.matmul(inputs, Weights) + biases
-    if activation_function is None:
-        outputs = Wx_plus_b
-    else:
-        outputs = activation_function(Wx_plus_b)
-    return outputs
-
-# 增加卷积层
-def add_conv_layer(inputs, patch_size, in_size, out_size, activation_function=None, pool_function=None):
-    Weights = tf.Variable(tf.truncated_normal([patch_size, patch_size, in_size, out_size], stddev=0.1))
-    biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-    layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='SAME')
-    Wconvlayer_plus_b = layer + biases
-    if activation_function is None:
-        convlayer = Wconvlayer_plus_b
-    else:
-        convlayer = activation_function(Wconvlayer_plus_b)
-    if pool_function is None:
-        outputs = convlayer
-    else:
-        outputs = pool_function(convlayer, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-    return outputs
-
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
@@ -77,20 +50,50 @@ def neural_networks():
     # 1维向量 size [batch_size] 等于 np.ones(batch_size)* image_width
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     keep_prob = tf.placeholder(tf.float32, name="keep_prob")
+    drop_prob = 1 - keep_prob
+
     shape = tf.shape(inputs)
     batch_size, image_width = shape[0], shape[1]
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
-    layer = add_conv_layer(layer, 3, 1, 32, activation_function=tf.nn.relu)
-    layer = add_conv_layer(layer, 3, 32, 32, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)
-    layer = tf.nn.dropout(layer, keep_prob)             
-    layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu,)     
-    layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)     
-    layer = tf.nn.dropout(layer, keep_prob) 
-    layer = tf.transpose(layer,(0,1,3,2))
-    layer = tf.reshape(layer, [batch_size, -1, image_height//2//2])
 
-    num_hidden = image_height//2//2
+    layer = tf.layers.conv2d(layer, filters=32, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=32, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
+    layer = tf.contrib.layers.flatten(layer)
+
+    layer = tf.layers.dense(layer, 512, activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    layer = tf.layers.dense(layer, 512*image_height, activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    layer = tf.reshape(layer,(-1,512,image_height))
+
+    num_hidden = image_height
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
@@ -98,11 +101,11 @@ def neural_networks():
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
     layer = tf.reshape(outputs, [-1, 2*num_hidden])
-
-    layer = add_layer(layer, 2*num_hidden, 512, activation_function=tf.nn.relu)
-    layer = tf.nn.dropout(layer, keep_prob)        
+    layer = tf.layers.dense(layer, 512, activation=tf.nn.relu)
+    layer = tf.layers.dropout(layer,drop_prob)
+    
     # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
-    layer = add_layer(layer, 512, num_classes)
+    layer = tf.layers.dense(layer, num_classes)
 
     # 输出对数： [batch_size , max_time , num_classes]
     logits = tf.reshape(layer, [batch_size, -1, num_classes])

@@ -73,7 +73,7 @@ def neural_networks():
     layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
     layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
     layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
-    layer = tf.layers.flatten(layer)
+    layer = tf.contrib.layers.flatten(layer)
 
     layer = tf.layers.dense(layer, 512, activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
