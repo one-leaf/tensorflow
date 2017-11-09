@@ -135,7 +135,7 @@ def getImage():
     fontmode = random.choice(["1", "P", "I", "F", "L"])
     draw.fontmode=fontmode    
     draw.text((5,5),text,fill='black',font=font, spacing=200)
-    img = img2bwinv(resize(img2gray(np.asarray(img)), image_height))
+    img = resize(dropZeroEdges(img2bwinv(img2gray(np.asarray(img)))), image_height)
     return text, img
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
