@@ -123,6 +123,10 @@ def getImage():
     draw = ImageDraw.Draw(img)
     draw.text((5,5),text,fill='black',font=font, spacing=200)
     img = img2bwinv(resize(np.asarray(img), image_height))
+
+    gb = random.randint(1, 6)
+    if gb>1: img = cv2.GaussianBlur(img,(gb,gb),0)
+
     return text, img
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
