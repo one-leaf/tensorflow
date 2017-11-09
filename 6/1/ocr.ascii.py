@@ -99,10 +99,10 @@ def neural_networks():
     outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
     layer = tf.reshape(outputs, [-1, 2*num_hidden])
 
-    layer = add_layer(layer, 2*num_hidden, 1024, activation_function=tf.nn.relu)
+    layer = add_layer(layer, 2*num_hidden, 512, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)        
     # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
-    layer = add_layer(layer, 1024, num_classes)
+    layer = add_layer(layer, 512, num_classes)
 
     # 输出对数： [batch_size , max_time , num_classes]
     logits = tf.reshape(layer, [batch_size, -1, num_classes])
