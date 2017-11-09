@@ -41,7 +41,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 5
 
@@ -267,7 +267,7 @@ def train():
 
     def restore(sess):
         curr_dir = os.path.dirname(__file__)
-        model_dir = os.path.join(curr_dir, "model")
+        model_dir = os.path.join(curr_dir, "model-ascii")
         if not os.path.exists(model_dir): os.mkdir(model_dir)
         saver_prefix = os.path.join(model_dir, "model.ckpt")        
         ckpt = tf.train.get_checkpoint_state(model_dir)
@@ -313,8 +313,3 @@ def train():
 
 if __name__ == '__main__':
     train()
-    # lable,img=getImage()
-    # print(lable)
-    # cv2.imshow(lable,img)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()    
