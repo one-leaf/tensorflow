@@ -15,8 +15,8 @@ curr_dir = os.path.dirname(__file__)
 image_height = 16
 
 # LSTM
-num_hidden = 8
-num_layers = 1
+# num_hidden = 4
+# num_layers = 1
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -86,9 +86,11 @@ def neural_networks():
     layer = tf.nn.dropout(layer, keep_prob)             
     layer = add_conv_layer(layer, 3, 32, 64, activation_function=tf.nn.relu,)     
     layer = add_conv_layer(layer, 3, 64, 64, activation_function=tf.nn.relu, pool_function=tf.nn.avg_pool)     
-    layer = tf.nn.dropout(layer, keep_prob)             
-    layer = tf.reshape(layer, [batch_size, -1, image_height//2//2*64])
+    layer = tf.nn.dropout(layer, keep_prob) 
+    layer = tf.transpose(layer,(0,1,3,2))
+    layer = tf.reshape(layer, [batch_size, -1, image_height//2//2])
 
+    num_hidden = mage_height//2//2
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
@@ -97,10 +99,10 @@ def neural_networks():
     outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
     layer = tf.reshape(outputs, [-1, 2*num_hidden])
 
-    layer = add_layer(layer, 2*num_hidden, 4*num_hidden, activation_function=tf.nn.relu)
+    layer = add_layer(layer, 2*num_hidden, 1024, activation_function=tf.nn.relu)
     layer = tf.nn.dropout(layer, keep_prob)        
     # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
-    layer = add_layer(layer, 4*num_hidden, num_classes)
+    layer = add_layer(layer, 1024, num_classes)
 
     # 输出对数： [batch_size , max_time , num_classes]
     logits = tf.reshape(layer, [batch_size, -1, num_classes])
