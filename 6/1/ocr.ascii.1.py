@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 16
+image_height = 32
 
 # LSTM
 # num_hidden = 4
@@ -111,7 +111,7 @@ def neural_networks():
 FontNames = os.listdir(os.path.join(curr_dir,"fonts"))
 def getImage():
     font_length = random.randint(50, 100)
-    font_size = random.randint(8, 20)
+    font_size = random.randint(9, 20)
     font_name = random.choice(FontNames)
     font = ImageFont.truetype(os.path.join(curr_dir, "fonts", font_name), font_size, index = 0)
     text=''
@@ -125,7 +125,8 @@ def getImage():
     draw.fontmode=fontmode    
     draw.text((5,5),text,fill='black',font=font, spacing=200)
 
-    img = resize(dropZeroEdges(img2bwinv(img2gray(np.asarray(img)))), image_height)
+    # img = resize(dropZeroEdges(img2bwinv(img2gray(np.asarray(img)))), image_height)
+    img = resize(dropZeroEdges(255-img2gray(np.asarray(img))), image_height)
 
     # gb = random.randint(1, 6)
     # if gb>1: img = cv2.GaussianBlur(img,(gb,gb),0)

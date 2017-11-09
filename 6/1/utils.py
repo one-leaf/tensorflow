@@ -65,9 +65,9 @@ def img2gray(img_color):
 # 为了方便计算，需要反色
 # 后面的方法更好一些，会保留一些轮廓信息
 def img2bwinv(img_gray):
-    thresh, img_bw = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV)
+    thresh, img_bw = cv2.threshold(img_gray, 160, 255, cv2.THRESH_BINARY_INV)
     # thresh, img_bw = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
-    #img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 11)
+    # img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 11)
     # 去噪点，实际测试不需要
     # kernel = np.ones((3, 3), np.uint8)
     # open = cv2.morphologyEx(img_bw, cv2.MORPH_OPEN, kernel, iterations=2)
