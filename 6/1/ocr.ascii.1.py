@@ -111,7 +111,7 @@ def neural_networks():
 FontNames = os.listdir(os.path.join(curr_dir,"fonts"))
 def getImage():
     font_length = random.randint(50, 100)
-    font_size = random.randint(9, 20)
+    font_size = random.randint(8, 20)
     font_name = random.choice(FontNames)
     font = ImageFont.truetype(os.path.join(curr_dir, "fonts", font_name), font_size, index = 0)
     text=''
