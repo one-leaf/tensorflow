@@ -40,7 +40,7 @@ MOMENTUM = 0.9
 BATCHES = 64
 BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
-TEST_BATCH_SIZE = 5
+TEST_BATCH_SIZE = 10
 
 # 增加层
 def add_layer(inputs, in_size, out_size, activation_function=None):
