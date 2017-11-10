@@ -89,8 +89,8 @@ def neural_networks():
     layer = tf.layers.max_pooling2d(layer, pool_size=[1,1], strides=1)
     layer = tf.layers.batch_normalization(layer)
 
-    # # [batch_size, image_width/4, image_height/4, 256] => [batch_size * image_width * image_height / 16, 256]
-    layer = tf.reshape(layer,[batch_size, -1, 512])  
+    # [batch_size, image_width/4, image_height/4, 256] => [batch_size,  image_width/4  , 256* image_height / 4]
+    layer = tf.reshape(layer,[batch_size, -1, 512*image_height/4])  
 
     layer = tf.layers.dense(layer, 1024, activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
@@ -101,7 +101,7 @@ def neural_networks():
 
     # 输出对数： [batch_size , max_time , num_classes]
     logits = tf.reshape(layer, [batch_size, -1, num_classes])
-    # 需要变换到 time_major == True [max_time x batch_size x num_classes]
+    # 需要变换到 time_major == True [max_time , batch_size , num_classes]
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
 
     return logits, inputs, labels, seq_len, keep_prob
