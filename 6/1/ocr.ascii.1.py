@@ -90,7 +90,7 @@ def neural_networks():
     layer = tf.layers.batch_normalization(layer)
 
     # [batch_size, image_width/4, image_height/4, 256] => [batch_size,  image_width/4  , 256* image_height / 4]
-    layer = tf.reshape(layer,[batch_size, -1, 512*image_height/4])  
+    layer = tf.reshape(layer,[batch_size, -1, 512*image_height//4])  
 
     layer = tf.layers.dense(layer, 1024, activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
