@@ -8,6 +8,7 @@ import utils
 import numpy as np
 import cv2
 import random
+curr_dir = os.path.dirname(__file__)
 
 def pygame_font(text,curr_dir):
     pygame.init()
@@ -47,25 +48,7 @@ def pil_font(text,curr_dir):
     draw.text( (0,30), u'中国', font=font, fill="Black")
     im.save(os.path.join(curr_dir, "test", "pil.png"),dpi=(96,96))
 
-def getImage():
-    CHARS = [chr(c) for c in range(32,126+1)]
-    fonts_length = random.randint(30, 40)
-    fonts_size = 9 #random.randint(8, 20)
-    font = ImageFont.truetype("simsun.ttc", fonts_size, index = 0)
-    text = ''.join(random.sample(CHARS, fonts_length))
-    size = font.getsize(text)
-    img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
-    draw = ImageDraw.Draw(img)
-    fontmode = random.choice(["1", "P", "I", "F", "L"])
-    draw.fontmode=fontmode
-    draw.text((5,5),text,fill='black',font=font, spacing=200)
-   # img = utils.resize(utils.dropZeroEdges(utils.img2bwinv(utils.img2gray(np.asarray(img)))), 32) 
-    img = np.asarray(img)
-    img = utils.img2gray(img)  
-    # img = utils.img2bwinv(img)
-    img = utils.dropZeroEdges(255-img)
-    img = utils.resize(img,16)
-    return text, img
+
 
 def getImage2():
     img=np.ones((100,1000,3), np.uint8)*255
@@ -78,7 +61,7 @@ def getImage2():
 
 
 def main():
-    lable,img=getImage()
+    lable,img=utils.getImage()
     print(lable)
     cv2.imshow(lable,img)
     cv2.waitKey(0)

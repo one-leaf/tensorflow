@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2gray, img2bwinv, img2vec, dropZeroEdges, resize, save
+from utils import readImgFile, img2gray, img2bwinv, img2vec, dropZeroEdges, resize, save, getImage
 import time
 import random
 import cv2
@@ -108,39 +108,19 @@ def neural_networks():
 
     return logits, inputs, labels, seq_len, keep_prob
 
-FontNames = os.listdir(os.path.join(curr_dir,"fonts"))
-def getImage():
-    font_length = random.randint(50, 100)
-    font_size = random.randint(9, 20)
-    font_name = random.choice(FontNames)
-    font = ImageFont.truetype(os.path.join(curr_dir, "fonts", font_name), font_size, index = 0)
-    text=''
-    for i in range(font_length):
-        text += random.choice(CHARS)
-    text=text.strip()
-    size = font.getsize(text)
-    img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
-    draw = ImageDraw.Draw(img)
-    fontmode = random.choice(["1", "P", "I", "F", "L"])
-    draw.fontmode=fontmode    
-    draw.text((5,5),text,fill='black',font=font, spacing=200)
-
-    # img = resize(dropZeroEdges(img2bwinv(img2gray(np.asarray(img)))), image_height)
-    img = resize(dropZeroEdges(1-(img2gray(np.asarray(img))/255)), image_height)
-
-    # gb = random.randint(1, 6)
-    # if gb>1: img = cv2.GaussianBlur(img,(gb,gb),0)
-
-    return text, img
+FontDir = os.path.join(curr_dir,"fonts")
+FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
-    # batch = random.sample(train_files, batch_size)    
     codes = []
     images = []   
     max_width_image = 0
     for i in range(batch_size):
-        text, image=getImage()
+        font_name = random.choice(FontNames)
+        font_length = random.randint(50, 100)
+        font_size = random.randint(9, 20)        
+        text, image= getImage(CHARS, font_name, image_height, font_length, font_size)
         images.append(image)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
