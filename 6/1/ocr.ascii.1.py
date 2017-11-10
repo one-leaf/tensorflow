@@ -57,47 +57,45 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
-    layer = tf.layers.conv2d(layer, filters=32, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[1,1], strides=1)
     layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.conv2d(layer, filters=32, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.dropout(layer,drop_prob)
-
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.average_pooling2d(layer, pool_size=[2,2], strides=2)
-    layer = tf.layers.dropout(layer,drop_prob)
 
     layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
     layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.dropout(layer,drop_prob)
 
     layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[1,1], strides=1)
     layer = tf.layers.batch_normalization(layer)
+
     layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
     layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.average_pooling2d(layer, pool_size=[2,2], strides=2)
-    layer = tf.layers.dropout(layer,drop_prob)
 
-    # [batch_size, image_width/4, image_height/4, 256] => [batch_size * image_width * image_height / 16, 256]
-    layer = tf.reshape(layer,[-1, 256//2])  
-
-    layer = tf.layers.dense(layer, 256, activation=tf.nn.relu)
+    layer = tf.layers.conv2d(layer, filters=512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[1,1], strides=1)
     layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.dropout(layer,drop_prob)
 
-    layer = tf.layers.dense(layer, 512, activation=tf.nn.relu)
+    layer = tf.layers.conv2d(layer, filters=512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)   
+    layer = tf.layers.max_pooling2d(layer, pool_size=[1,1], strides=1)
     layer = tf.layers.batch_normalization(layer)
-    layer = tf.layers.dropout(layer,drop_prob)
-   
+
+    layer = tf.layers.conv2d(layer, filters=512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)   
+    layer = tf.layers.max_pooling2d(layer, pool_size=[1,1], strides=1)
+    layer = tf.layers.batch_normalization(layer)
+
+    layer = tf.layers.conv2d(layer, filters=512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)   
+    layer = tf.layers.max_pooling2d(layer, pool_size=[1,1], strides=1)
+    layer = tf.layers.batch_normalization(layer)
+
+    # # [batch_size, image_width/4, image_height/4, 256] => [batch_size * image_width * image_height / 16, 256]
+    # layer = tf.reshape(layer,[-1, 256//2])  
+
     layer = tf.layers.dense(layer, 1024, activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
     layer = tf.layers.dropout(layer,drop_prob)
-    
+   
     # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
     layer = tf.layers.dense(layer, num_classes)
 
