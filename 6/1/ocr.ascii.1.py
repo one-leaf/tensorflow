@@ -62,7 +62,7 @@ def neural_networks():
     layer = tf.layers.batch_normalization(layer)
 
     layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.max_pooling2d(layer, pool_size=[1,2], strides=2)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
     layer = tf.layers.batch_normalization(layer)
 
     layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
@@ -70,7 +70,7 @@ def neural_networks():
     layer = tf.layers.batch_normalization(layer)
 
     layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.max_pooling2d(layer, pool_size=[1,2], strides=2)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
     layer = tf.layers.batch_normalization(layer)
 
     layer = tf.layers.conv2d(layer, filters=512, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
@@ -125,6 +125,8 @@ def get_next_batch(batch_size=128):
         text_list = [CHARS.index(char) for char in text]
         codes.append(text_list)
 
+    # 凑成4的整数倍
+    max_width_image = max_width_image + (4 - max_width_image % 4)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -133,7 +135,8 @@ def get_next_batch(batch_size=128):
     labels = [np.asarray(i) for i in codes]
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * max_width_image
+    #因为模型做了2次pool，所以 seq_len 也需要除以4
+    seq_len = np.ones(batch_size) * (max_width_image // 4)
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
@@ -275,8 +278,12 @@ def train():
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
                         keep_prob: 0.95, learning_rate: curr_learning_rate}       
 
+                # b_logits=session.run(logits,feed)
+                # print(train_seq_len[0], b_logits.shape)
+
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
                     session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
+
 
                 train_cost += b_cost * BATCH_SIZE
                 seconds = round(time.time() - start,2)
