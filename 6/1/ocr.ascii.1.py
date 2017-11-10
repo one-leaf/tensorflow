@@ -12,7 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 16
+image_height = 32
 
 # LSTM
 # num_hidden = 4
@@ -90,7 +90,7 @@ def neural_networks():
     layer = tf.layers.batch_normalization(layer)
 
     # # [batch_size, image_width/4, image_height/4, 256] => [batch_size * image_width * image_height / 16, 256]
-    # layer = tf.reshape(layer,[-1, 256//2])  
+    layer = tf.reshape(layer,[batch_size, -1, 512])  
 
     layer = tf.layers.dense(layer, 1024, activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
@@ -116,7 +116,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(FontNames)
-        font_length = random.randint(50, 100)
+        font_length = random.randint(30, 50)
         font_size = random.randint(9, 20)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size)
         images.append(image)
