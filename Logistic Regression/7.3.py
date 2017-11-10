@@ -104,11 +104,11 @@ def neural_networks():
     layer = add_conv_layer(layer, 3, 64, 64, norm=True, activation_function=tf.nn.relu) 
     layer = add_conv_layer(layer, 3, 64, 128, norm=True, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
     image_width = image_height = 28//2//2
-    layer_size = image_width*image_height*128
+    layer_size = image_height*128
 
-    layer =  tf.reshape(layer, [-1,layer_size])
+    layer =  tf.reshape(layer, [-1, layer_size])
     layer = add_layer(layer, layer_size, 128, norm=True, activation_function=tf.nn.relu)
-    layer = tf.reshape(layer, (-1, 1, 128))
+    layer = tf.reshape(layer, (-1, image_width, 128))
 
     num_units = 128
 
