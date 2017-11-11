@@ -40,7 +40,7 @@ MOMENTUM = 0.9
 BATCHES = 64
 BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
-TEST_BATCH_SIZE = 10
+TEST_BATCH_SIZE = 64
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
