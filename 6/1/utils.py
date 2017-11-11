@@ -68,6 +68,7 @@ def img2gray(img_color):
 def img2bwinv(img_gray):
     # thresh, img_bw = cv2.threshold(img_gray, 196, 255, cv2.THRESH_BINARY_INV)
     # thresh, img_bw = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    # img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 3, 2)
     img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 3, 3)
     # 去噪点，实际测试不需要
     # kernel = np.ones((3, 3), np.uint8)
@@ -235,7 +236,14 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11):
 
 def main():
     curr_dir = os.path.dirname(__file__)
-    need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
+    fontName = os.path.join(curr_dir,"fonts","simsun.ttc")
+    ASCII_CHARS = [chr(c) for c in range(32,126+1)]
+    lable,img = getImage(ASCII_CHARS,fontName,32)
+    print(lable)
+    cv2.imshow(lable,img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()    
+    # need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
 
 if __name__ == '__main__':
     main()
