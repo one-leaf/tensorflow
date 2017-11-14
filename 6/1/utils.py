@@ -49,7 +49,7 @@ def clearImg(adaptive_binary_inv):
     _sum=np.sum(adaptive_binary_inv,axis=0)
     _mean = 255 * adaptive_binary_inv.shape[0]
     for i,x in enumerate(_sum):
-        if x>_mean*0.8:
+        if x>_mean*0.95:
             adaptive_binary_inv[:,i]=0
     # 清除横线
     _sum=np.sum(adaptive_binary_inv,axis=1)
@@ -57,6 +57,7 @@ def clearImg(adaptive_binary_inv):
     for i,x in enumerate(_sum):
         if x>_mean*0.8:
             adaptive_binary_inv[i,:]=0
+    return adaptive_binary_inv
 
 # 图片转灰度, 参数是 np.array 类型
 def img2gray(img_color):

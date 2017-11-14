@@ -16,4 +16,5 @@ test/
 fonts/
 *_model/
 model/
+model*/
 .DS_Store
