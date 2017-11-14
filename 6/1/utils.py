@@ -42,6 +42,25 @@ def show(img):
 def save(img,filename):
     cv2.imwrite(filename,img)
 
+
+# img 参数是 np.array 类型 输入是正常灰度图片
+# 用于清除表格线
+def clearLineImg(gray_image):
+    # 清除竖线
+    _sum=np.sum(gray_image,axis=0)
+    _mean = gray_image.shape[0]
+    for i,x in enumerate(_sum):
+        if x<_mean*0.05:
+            gray_image[:,i]=255
+    # 清除横线
+    _sum=np.sum(gray_image,axis=1)
+    _mean = gray_image.shape[1]
+    for i,x in enumerate(_sum):
+        if x<_mean*0.2:
+            gray_image[i,:]=255
+    return gray_image
+
+
 # img 参数是 np.array 类型 输入是二值化并且反色的图片
 # 用于清除表格线
 def clearImg(adaptive_binary_inv):
@@ -67,10 +86,10 @@ def img2gray(img_color):
 # 为了方便计算，需要反色
 # 后面的方法更好一些，会保留一些轮廓信息
 def img2bwinv(img_gray):
-    # thresh, img_bw = cv2.threshold(img_gray, 196, 255, cv2.THRESH_BINARY_INV)
+    thresh, img_bw = cv2.threshold(img_gray, 255, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # thresh, img_bw = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
     # img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 3, 2)
-    img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 3, 3)
+    # img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 5)
     # 去噪点，实际测试不需要
     # kernel = np.ones((3, 3), np.uint8)
     # open = cv2.morphologyEx(img_bw, cv2.MORPH_OPEN, kernel, iterations=2)
