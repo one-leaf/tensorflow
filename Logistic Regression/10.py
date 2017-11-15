@@ -27,7 +27,7 @@ def addDenseNetLayer(inputs, layer_size):
     nodes = []
     layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn = slim.batch_norm) 
     nodes.append(layer)
-    for i in layer_size:
+    for i in range(layer_size):
         layer = slim.conv2d(tf.concat(3,nodes),64,[3,3],normalizer_fn=slim.batch_norm)
         nodes.append(layer)
     return layer    
