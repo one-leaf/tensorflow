@@ -270,6 +270,11 @@ def train():
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
                         keep_prob: 0.95, learning_rate: curr_learning_rate}       
 
+                l=session.run(layer,feed)
+                print(train_inputs.shape)
+                print(l.shape)
+                print(train_seq_len[0])
+
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
                     session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
