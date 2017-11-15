@@ -27,7 +27,7 @@ def addVGGLayer(inputs):
     layer = slim.repeat(inputs, 1, slim.conv2d, 64, [3, 3])
   #  layer = slim.max_pool2d(layer, [2, 2]) 
     layer = slim.repeat(layer, 1, slim.conv2d, 128, [3, 3])
-  #  layer = slim.max_pool2d(layer, [2, 2])
+    layer = slim.max_pool2d(layer, [2, 2])
     layer = slim.repeat(layer, 2, slim.conv2d, 256, [3, 3])
     layer = slim.max_pool2d(layer, [2, 2])
     layer = slim.repeat(layer, 2, slim.conv2d, 512, [3, 3])
@@ -35,8 +35,8 @@ def addVGGLayer(inputs):
     layer = slim.repeat(layer, 2, slim.conv2d, 512, [3, 3])
     layer = slim.max_pool2d(layer, [2, 2])
     layer = slim.conv2d(layer, 4096, [3, 3], padding="SAME")
-    layer = slim.conv2d(layer, 4096, [3, 3])
-    layer = slim.conv2d(layer, 10, [3, 3], activation_fn=None, normalizer_fn=None)
+    layer = slim.conv2d(layer, 4096, [1, 1])
+    layer = slim.conv2d(layer, 10, [1, 1], activation_fn=None, normalizer_fn=None)
     return layer    
 
 # 神经网络定义, CNN
@@ -46,7 +46,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer = addVGGLayer(x_image)
-
+    print(layer.shape)
     prediction = slim.layers.softmax(slim.layers.flatten(layer))
 
     cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
