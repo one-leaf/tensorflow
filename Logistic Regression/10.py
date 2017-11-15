@@ -25,11 +25,11 @@ def getTestImages():
 # 增加 DenseNet 网络 # 采用 64 会内存过大
 def addDenseNetLayer(inputs, layer_size):
     nodes = []
-    layer = slim.conv2d(inputs, 8, [3,3], normalizer_fn = slim.batch_norm) 
+    layer = slim.conv2d(inputs, 16, [3,3], normalizer_fn = slim.batch_norm) 
     nodes.append(layer)
     for i in range(layer_size):
         layer = tf.concat(nodes, axis=3)
-        outputs = slim.conv2d(layer, 8, [3,3],normalizer_fn=slim.batch_norm)
+        outputs = slim.conv2d(layer, 16, [3,3],normalizer_fn=slim.batch_norm)
         nodes.append(outputs)
     return outputs    
 
@@ -48,7 +48,7 @@ def neural_networks():
     prediction = slim.layers.softmax(slim.layers.flatten(layer))
 
     cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
-    optimizer = tf.train.AdamOptimizer(0.0001).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return x, y, prediction, optimizer, cost, accuracy
