@@ -41,7 +41,7 @@ def neural_networks():
 
     layer = slim.conv2d(x_image, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(5):
-        layer = addDenseNetLayer(layer, 5)
+        layer = addDenseNetLayer(layer, 3)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)    
 
     layer = slim.conv2d(layer, 10, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
