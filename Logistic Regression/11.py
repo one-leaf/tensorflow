@@ -90,4 +90,4 @@ if __name__ == '__main__':
     acc1 = sess.run(accuracy, feed_dict={x: test_x[0:5000], y: test_y[0:5000]})
     acc2 = sess.run(accuracy, feed_dict={x: test_x[5000:-1], y: test_y[5000:-1]})
     print("Last accuracy:",(acc1+acc2)/2.0)
-    # Last accuracy: 0.9932
+    # Last accuracy: 0.9917
