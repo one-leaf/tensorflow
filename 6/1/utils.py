@@ -236,16 +236,16 @@ def loadImage(filename,imgtype):
 def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, word_dict=None):
     font = ImageFont.truetype(font_file, font_size, index = 0)
     text=''
-    for i in range(font_length-20):
+    for i in range(font_length//2):
         text += random.choice(CHARS)
-    for i in range(5):
-        j = random.randint(1,len(text)-1)
+    while len(text)<font_length
+        i = random.randint(1,len(text)-1)
         word = random.choice(word_dict)
         _word=""
         for c in word:
             if c in CHARS:
                 _word += c
-        text = text[:j]+_word.strip()+text[j:]
+        text = text[:i]+_word.strip()+text[i:]
     text=text.strip()    
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
