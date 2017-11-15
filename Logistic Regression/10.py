@@ -28,9 +28,9 @@ def addDenseNetLayer(inputs, layer_size):
     layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn = slim.batch_norm) 
     nodes.append(layer)
     for i in range(layer_size):
-        layer = slim.conv2d(tf.concat(3,nodes),64,[3,3],normalizer_fn=slim.batch_norm)
-        nodes.append(layer)
-    return layer    
+        outpus = slim.conv2d(tf.concat(3,nodes),64,[3,3],normalizer_fn=slim.batch_norm)
+        nodes.append(outpus)
+    return outpus    
 
 # 神经网络定义, CNN
 def neural_networks():
