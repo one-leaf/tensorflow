@@ -25,11 +25,11 @@ def getTestImages():
 # 增加 DenseNet 网络
 def addDenseNetLayer(inputs, layer_size):
     nodes = []
-    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn = slim.batch_norm) 
+    layer = slim.conv2d(inputs, 8, [3,3], normalizer_fn = slim.batch_norm) 
     nodes.append(layer)
     for i in range(layer_size):
         layer = tf.concat(nodes, axis=3)
-        outputs = slim.conv2d(layer, 64, [3,3],normalizer_fn=slim.batch_norm)
+        outputs = slim.conv2d(layer, 8, [3,3],normalizer_fn=slim.batch_norm)
         nodes.append(outputs)
     return outputs    
 
@@ -41,7 +41,7 @@ def neural_networks():
 
     layer = slim.conv2d(x_image, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(5):
-        layer = addDenseNetLayer(layer, 3)
+        layer = addDenseNetLayer(layer, 5)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)    
 
     layer = slim.conv2d(layer, 10, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
