@@ -238,7 +238,7 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, wo
     text=''
     for i in range(font_length//2):
         text += random.choice(CHARS)
-    while len(text)<font_length
+    while len(text)<font_length:
         i = random.randint(1,len(text)-1)
         word = random.choice(word_dict)
         _word=""
