@@ -48,7 +48,7 @@ def neural_networks():
     prediction = slim.layers.softmax(slim.layers.flatten(layer))
 
     cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
-    optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
+    optimizer = tf.train.AdamOptimizer(0.0001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     return x, y, prediction, optimizer, cost, accuracy
