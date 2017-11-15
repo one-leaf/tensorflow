@@ -240,7 +240,12 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, wo
         text += random.choice(CHARS)
     for i in range(5):
         j = random.randint(1,len(text)-1)
-        text = text[:j]+random.choice(word_dict).strip()+text[j:]
+        word = random.choice(word_dict)
+        _word=""
+        for c in word:
+            if c in CHARS:
+                _word += c
+        text = text[:j]+_word.strip()+text[j:]
     text=text.strip()    
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
