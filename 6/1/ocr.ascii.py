@@ -71,13 +71,16 @@ def neural_networks():
     for i in range(5):
         for j in range(5):
             layer = addHighwayLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)    
+        if i%2==0:
+            layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
+        else:  
+            layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm) 
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
-    layer = tf.reshape(layer,[batch_size, -1, 64])
+    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height])
 
-    num_hidden = 64
+    num_hidden = 16
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
@@ -117,8 +120,8 @@ def get_next_batch(batch_size=128):
         text_list = [CHARS.index(char) for char in text]
         codes.append(text_list)
 
-    # 凑成32的整数倍
-    max_width_image = max_width_image + (32 - max_width_image % 32)
+    # 凑成4的整数倍
+    max_width_image = max_width_image + (4 - max_width_image % 4)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -128,7 +131,7 @@ def get_next_batch(batch_size=128):
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
     #因为模型做了2次pool，所以 seq_len 也需要除以4
-    seq_len = np.ones(batch_size) * (max_width_image // 32)
+    seq_len = np.ones(batch_size) * (max_width_image // 4)
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
@@ -270,10 +273,10 @@ def train():
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len,
                         keep_prob: 0.95, learning_rate: curr_learning_rate}       
 
-                l=session.run(layer,feed)
-                print(train_inputs.shape)
-                print(l.shape)
-                print(train_seq_len[0])
+                # l=session.run(layer,feed)
+                # print(train_inputs.shape)
+                # print(l.shape)
+                # print(train_seq_len[0])
 
                 b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
                     session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
