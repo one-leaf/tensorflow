@@ -22,7 +22,7 @@ def getValidationImages():
 def getTestImages():
     return mnist.test.images, mnist.test.labels
 
-# 增加 DenseNet 网络
+# 增加 DenseNet 网络 # 采用 64 会内存过大
 def addDenseNetLayer(inputs, layer_size):
     nodes = []
     layer = slim.conv2d(inputs, 8, [3,3], normalizer_fn = slim.batch_norm) 
