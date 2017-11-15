@@ -34,7 +34,7 @@ def addVGGLayer(inputs):
     layer = slim.max_pool2d(layer, [2, 2])
     layer = slim.repeat(layer, 2, slim.conv2d, 512, [3, 3])
     layer = slim.max_pool2d(layer, [2, 2])
-    layer = slim.conv2d(layer, 4096, [7, 7], padding="SAME")
+    layer = slim.conv2d(layer, 4096, [3, 3], padding="SAME")
     layer = slim.conv2d(layer, 4096, [1, 1])
     layer = slim.conv2d(layer, 10, [1, 1], activation_fn=None, normalizer_fn=None)
     return layer    
