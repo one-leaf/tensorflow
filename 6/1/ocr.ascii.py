@@ -78,7 +78,7 @@ def neural_networks():
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
-    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height])
+    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height//2//2])
 
     num_hidden = 16
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
