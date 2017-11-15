@@ -22,14 +22,15 @@ def getValidationImages():
 def getTestImages():
     return mnist.test.images, mnist.test.labels
 
-# 增加 Highway 网络
-def addHighwayLayer(inputs):
-    H = slim.conv2d(inputs, 64, [3,3])
-    T = slim.conv2d(inputs, 64, [3,3], 
-        biases_initializer = tf.constant_initializer(-1.0),
-        activation_fn=tf.nn.sigmoid)    
-    outputs = H * T + inputs * (1.0 - T)
-    return outputs    
+# 增加 DenseNet 网络
+def addDenseNetLayer(inputs, layer_size):
+    nodes = []
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn = slim.batch_norm) 
+    nodes.append(layer)
+    for i in layer_size:
+        layer = slim.conv2d(tf.concat(3,nodes),64,[3,3],normalizer_fn=slim.batch_norm)
+        nodes.append(layer)
+    return layer    
 
 # 神经网络定义, CNN
 def neural_networks():
@@ -39,8 +40,7 @@ def neural_networks():
 
     layer = slim.conv2d(x_image, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(5):
-        for j in range(5):
-            layer = addHighwayLayer(layer)
+        layer = addDenseNetLayer(layer, 5)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)    
 
     layer = slim.conv2d(layer, 10, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
