@@ -9,7 +9,6 @@ import time
 import random
 import cv2
 from PIL import Image, ImageDraw, ImageFont
-import tensorflow.contrib.slim as slim
 
 curr_dir = os.path.dirname(__file__)
 
@@ -43,15 +42,6 @@ BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 10
 
-# 增加 Highway 网络
-def addHighwayLayer(inputs):
-    H = slim.conv2d(inputs, 64, [3,3])
-    T = slim.conv2d(inputs, 64, [3,3], 
-        biases_initializer = tf.constant_initializer(-1.0),
-        activation_fn=tf.nn.sigmoid)    
-    outputs = H * T + inputs * (1.0 - T)
-    return outputs    
-
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
@@ -67,36 +57,67 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
-    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
-    for i in range(5):
-        for j in range(5):
-            layer = addHighwayLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)    
+    layer = tf.layers.conv2d(layer, filters=32, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=32, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
 
-    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
-    
-    layer = tf.reshape(layer,[batch_size, -1, 64])
+    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.average_pooling2d(layer, pool_size=[2,2], strides=2)
+    layer = tf.layers.dropout(layer,drop_prob)
 
-    num_hidden = 64
+    layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=128, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.conv2d(layer, filters=256, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.average_pooling2d(layer, pool_size=[2,2], strides=2)
+
+    # [batch_size, image_width/4, image_height/4, 256] => [batch_size * image_width * image_height / 16, 256]
+    layer = tf.reshape(layer,[-1, 256])  
+
+    #[batch_size * image_width, 128]
+    layer = tf.layers.dense(layer, 128, activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    #[batch_size * image_width, 64]
+    layer = tf.layers.dense(layer, 64, activation=tf.nn.relu)
+    layer = tf.layers.batch_normalization(layer)
+    layer = tf.layers.dropout(layer,drop_prob)
+
+    #[batch_size, image_width*8, 8]
+    layer = tf.reshape(layer,[batch_size, -1, 8])
+
+    num_hidden = 8
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
-    lstm_layer = tf.reshape(outputs, [-1, 2*num_hidden])
-    lstm_layer = tf.layers.dense(lstm_layer, 512, activation=tf.nn.relu)
-    lstm_layer = tf.layers.dropout(lstm_layer,drop_prob)
+    layer = tf.reshape(outputs, [-1, 2*num_hidden])
+    layer = tf.layers.dense(layer, 512, activation=tf.nn.relu)
+    layer = tf.layers.dropout(layer,drop_prob)
     
     # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
-    lstm_layer = tf.layers.dense(lstm_layer, num_classes)
+    layer = tf.layers.dense(layer, num_classes)
 
     # 输出对数： [batch_size , max_time , num_classes]
-    logits = tf.reshape(lstm_layer, [batch_size, -1, num_classes])
+    logits = tf.reshape(layer, [batch_size, -1, num_classes])
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
 
-    return logits, inputs, labels, seq_len, keep_prob, layer
+    return logits, inputs, labels, seq_len, keep_prob
 
 FontDir = os.path.join(curr_dir,"fonts")
 FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
@@ -108,7 +129,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(FontNames)
-        font_length = random.randint(20, 30)
+        font_length = random.randint(50, 100)
         font_size = random.randint(9, 20)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size)
         images.append(image)
@@ -125,7 +146,7 @@ def get_next_batch(batch_size=128):
     labels = [np.asarray(i) for i in codes]
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * max_width_image * image_height
+    seq_len = np.ones(batch_size) * max_width_image
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
@@ -182,7 +203,7 @@ def train():
     curr_learning_rate = 1e-4
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
-    logits, inputs, labels, seq_len, keep_prob, layer = neural_networks()
+    logits, inputs, labels, seq_len, keep_prob = neural_networks()
 
     # If time_major == True (default), this will be a Tensor shaped: [max_time x batch_size x num_classes]
     # 返回 A 1-D float Tensor, size [batch], containing the negative log probabilities.

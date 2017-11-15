@@ -1,6 +1,7 @@
 # coding=utf-8
 '''
 集成WEB服务
+gunicorn -b 0.0.0.0:8080 web_ascii:app
 '''
 from flask import Flask, request, Response
 import numpy as np
