@@ -104,7 +104,7 @@ def neural_networks():
 FontDir = os.path.join(curr_dir,"fonts")
 FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
 
-eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt")).readlines() 
+eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
     codes = []
