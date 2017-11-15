@@ -46,7 +46,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer = addVGGLayer(x_image)
-    print(layer.shape)
+
     prediction = slim.layers.softmax(slim.layers.flatten(layer))
 
     cost = tf.reduce_mean(-tf.reduce_sum(y * tf.log(prediction), reduction_indices=[1]))
@@ -89,4 +89,4 @@ if __name__ == '__main__':
 
     acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y})
     print("Last accuracy:",acc)
-    # Last accuracy: 0.9782
+    # Last accuracy: 0.9932
