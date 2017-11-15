@@ -104,6 +104,7 @@ def neural_networks():
 FontDir = os.path.join(curr_dir,"fonts")
 FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
 
+eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt")).readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
     codes = []
@@ -113,7 +114,7 @@ def get_next_batch(batch_size=128):
         font_name = random.choice(FontNames)
         font_length = random.randint(30, 40)
         font_size = random.randint(9, 20)        
-        text, image= getImage(CHARS, font_name, image_height, font_length, font_size)
+        text, image= getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
         images.append(image)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]

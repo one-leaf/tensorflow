@@ -233,12 +233,14 @@ def loadImage(filename,imgtype):
 #            print(split_image.shape)
     return result_images   
 
-
-def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11):
+def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, word_dict=None):
     font = ImageFont.truetype(font_file, font_size, index = 0)
     text=''
-    for i in range(font_length):
+    for i in range(font_length-20):
         text += random.choice(CHARS)
+    for i in range(5):
+        j = random.randint(1,len(text)-1)
+        text = text[:j]+random.choice(word_dict).strip()+text[j:]
     text=text.strip()    
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
@@ -257,8 +259,9 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11):
 def main():
     curr_dir = os.path.dirname(__file__)
     fontName = os.path.join(curr_dir,"fonts","simsun.ttc")
+    eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
-    lable,img = getImage(ASCII_CHARS,fontName,32)
+    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list)
     print(lable)
     cv2.imshow(lable,img)
     cv2.waitKey(0)
