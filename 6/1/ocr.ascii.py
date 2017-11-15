@@ -71,7 +71,7 @@ def neural_networks():
     for i in range(5):
         for j in range(5):
             layer = addHighwayLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)    
+        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2] normalizer_fn=slim.batch_norm)    
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
@@ -108,7 +108,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(FontNames)
-        font_length = random.randint(20, 30)
+        font_length = random.randint(30, 40)
         font_size = random.randint(9, 20)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size)
         images.append(image)
@@ -117,6 +117,8 @@ def get_next_batch(batch_size=128):
         text_list = [CHARS.index(char) for char in text]
         codes.append(text_list)
 
+    # 凑成32的整数倍
+    max_width_image = max_width_image + (32 - max_width_image % 32)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -125,7 +127,8 @@ def get_next_batch(batch_size=128):
     labels = [np.asarray(i) for i in codes]
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * max_width_image * image_height
+    #因为模型做了2次pool，所以 seq_len 也需要除以4
+    seq_len = np.ones(batch_size) * (max_width_image // 32)
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
