@@ -22,12 +22,12 @@ def getValidationImages():
 def getTestImages():
     return mnist.test.images, mnist.test.labels
 
-# 增加 VGG 网络 
+# 增加 VGG 网络 由于图片尺寸过小，关闭2个pool
 def addVGGLayer(inputs):
     layer = slim.repeat(inputs, 1, slim.conv2d, 64, [3, 3])
-    layer = slim.max_pool2d(layer, [2, 2])
+  #  layer = slim.max_pool2d(layer, [2, 2]) 
     layer = slim.repeat(layer, 1, slim.conv2d, 128, [3, 3])
-    layer = slim.max_pool2d(layer, [2, 2])
+  #  layer = slim.max_pool2d(layer, [2, 2])
     layer = slim.repeat(layer, 2, slim.conv2d, 256, [3, 3])
     layer = slim.max_pool2d(layer, [2, 2])
     layer = slim.repeat(layer, 2, slim.conv2d, 512, [3, 3])
