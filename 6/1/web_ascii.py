@@ -9,7 +9,7 @@ import tensorflow as tf
 import os, time
 # from PIL import Image
 import json
-import ocr_ascii_nolstm as ocr
+import ocr_ascii as ocr
 import utils, cv2
 try:
     from StringIO import StringIO
