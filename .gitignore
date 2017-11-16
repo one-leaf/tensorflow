@@ -4,6 +4,7 @@
 *.npz
 *.pickle
 .ideas/
+.vscode/
 __pycache__/
 checkpoints/
 summaries/
