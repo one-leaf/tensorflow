@@ -33,7 +33,7 @@ def init():
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     # restore sess
-    model_dir = os.path.join(curr_dir, "model-ascii")
+    model_dir = os.path.join(curr_dir, "model-ascii-nolstm")
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
     ckpt = tf.train.get_checkpoint_state(model_dir)
     saver = tf.train.Saver()
@@ -46,16 +46,14 @@ curr_dir = os.path.dirname(__file__)
 session, inputs, seq_len, input_keep_prob, decoded, log_prob = init()
 
 def scan(file):
-    img = Image.open(file.stream)
-    image = np.array(img)
-    image = utils.img2gray(image)
+    img_array = np.asarray(bytearray(file.stream.read()), dtype=np.uint8)
+    image = cv2.imdecode(img_array,0)
     split_images = utils.splitImg(image)
     
     ocr_texts = []
 
     for i, split_image in enumerate(split_images):
-        # image = utils.img2bwinv(split_image)
-        image = 1 - split_image/255.
+        image = utils.img2bwinv(split_image)
         image = utils.clearImg(image)
         image = utils.dropZeroEdges(image)  
         image = utils.resize(image, ocr.image_height)
