@@ -99,7 +99,7 @@ def neural_networks():
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
     logits = tf.transpose(logits, (1, 0, 2), name="logits")
 
-    return logits, inputs, labels, seq_len, keep_prob, layer
+    return logits, inputs, labels, seq_len, keep_prob
 
 FontDir = os.path.join(curr_dir,"fonts")
 FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
@@ -189,7 +189,7 @@ def train():
     curr_learning_rate = 1e-3
     learning_rate = tf.placeholder(tf.float32, shape=[])                                            
 
-    logits, inputs, labels, seq_len, keep_prob, layer = neural_networks()
+    logits, inputs, labels, seq_len, keep_prob = neural_networks()
 
     # If time_major == True (default), this will be a Tensor shaped: [max_time x batch_size x num_classes]
     # 返回 A 1-D float Tensor, size [batch], containing the negative log probabilities.
