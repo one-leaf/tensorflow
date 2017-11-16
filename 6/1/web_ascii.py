@@ -7,10 +7,11 @@ from flask import Flask, request, Response
 import numpy as np
 import tensorflow as tf
 import os, time
-# from PIL import Image
+from PIL import Image
 import json
 import ocr_ascii as ocr
 import utils, cv2
+
 try:
     from StringIO import StringIO
 except ImportError:
