@@ -236,7 +236,7 @@ def loadImage(filename,imgtype):
 def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, word_dict=None):
     font = ImageFont.truetype(font_file, font_size, index = 0)
     text=''
-    for i in range(font_length//2):
+    for i in range(font_length*2//3):
         text += random.choice(CHARS)
     while len(text)<font_length:
         i = random.randint(1,len(text)-1)
