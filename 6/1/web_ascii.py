@@ -108,4 +108,5 @@ def single_digit():
         return 'No file upload'
 
 if __name__ == '__main__':
+    os.environ['CUDA_VISIBLE_DEVICES'] = ''    
     app.run(host='0.0.0.0',port=8080)
