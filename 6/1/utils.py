@@ -250,7 +250,7 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
 
     font = ImageFont.truetype(font_file, font_size, index = 0)
     size = font.getsize(text)
-    img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
+    img=Image.new("RGBA",(size[0]+10,size[1]+10),(255,255,255))
     draw = ImageDraw.Draw(img)
     fontmode = random.choice(["1", "P", "I", "F", "L"])
     draw.fontmode=fontmode
