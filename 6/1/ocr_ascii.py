@@ -41,7 +41,7 @@ MOMENTUM = 0.9
 BATCHES = 64
 BATCH_SIZE = 128
 TRAIN_SIZE = BATCHES * BATCH_SIZE
-TEST_BATCH_SIZE = 10
+TEST_BATCH_SIZE = 100
 
 # 增加 Highway 网络
 def addHighwayLayer(inputs):
