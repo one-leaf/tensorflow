@@ -260,10 +260,10 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
     img = 1 - img2gray(img)/255.   
     #img = img2bwinv(img)
     img = dropZeroEdges(img)
-    filter = random.uniform(0.5,1)
-    img = img * filter   
-    # imin, imax = img.min(), img.max()
-    # img = (img - imin)/(imax - imin)
+    filter = np.random.uniform(0, 0.1, img.shape)
+    img = img + filter   
+    imin, imax = img.min(), img.max()
+    img = (img - imin)/(imax - imin)
     random_hight = round(image_height*random.uniform(0.5,1))
     img = resize(img, random_hight)
     pad_size = (image_height-random_hight)//2
