@@ -260,14 +260,16 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
     img = 1 - img2gray(img)/255.   
     #img = img2bwinv(img)
     img = dropZeroEdges(img)
-    filter = np.random.uniform(0, 0.2, img.shape)
-    img = img + filter   
+
+    # 添加噪点
+    filter = np.random.random(img.shape) - 0.8
+    filter = np.maximum(filter, 0) 
+    img = img + filter * 2.5
     imin, imax = img.min(), img.max()
     img = (img - imin)/(imax - imin)
-    random_hight = round(image_height*random.uniform(0.5,1))
-    img = resize(img, random_hight)
-    pad_size = (image_height-random_hight)//2
-    img = np.pad(img,((pad_size,0),(0,0)), 'constant', constant_values=(0,))
+
+    img = resize(img, image_height)
+
     return text, img
 
 def main():
