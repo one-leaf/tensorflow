@@ -250,16 +250,29 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
 
     font = ImageFont.truetype(font_file, font_size, index = 0)
     size = font.getsize(text)
-    img=Image.new("RGBA",(size[0]+20,size[1]+20),(255,255,255))
+    img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
     draw = ImageDraw.Draw(img)
     fontmode = random.choice(["1", "P", "I", "F", "L"])
     draw.fontmode=fontmode
-    draw.text((10,10),text,fill='black',font=font)
+    draw.text((50,50),text,fill='black',font=font)
  
-    # 做轻微的旋转 +- 1度
-    rot = img.rotate((random.random()-0.5)*2, expand=1)
-    img=Image.new("RGBA",(size[0]+20,size[1]+20),(255,255,255))
-    img.paste(rot,rot)
+    # # 做轻微的旋转 +- 1度
+    # rot = img.rotate((random.random()-0.5)*2, expand=1)
+    # img=Image.new("RGBA",(size[0]+20,size[1]+20),(255,255,255))
+    # img.paste(rot,rot)
+
+    params = [
+        1 - float(random.randint(1,2)) / 1000,
+        0,
+        0,
+        0,
+        1 - float(random.randint(1,10)) /1000,
+        float(random.randint(1,2)) / 5000,
+        0.0002,
+        float(random.randint(1,2)) / 5000
+    ]
+    img = img.transform((size[0]+100,size[1]+100), Image.PERSPECTIVE, params)
+
 
    # img = utils.resize(utils.dropZeroEdges(utils.img2bwinv(utils.img2gray(np.asarray(img)))), 32) 
     img = np.asarray(img)
