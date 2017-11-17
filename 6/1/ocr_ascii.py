@@ -10,6 +10,7 @@ import random
 import cv2
 from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
+import math
 
 curr_dir = os.path.dirname(__file__)
 
@@ -42,7 +43,7 @@ BATCHES = 64
 BATCH_SIZE = 32
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 100
-
+POOL_COUNT = 8
 # 增加 Highway 网络
 def addHighwayLayer(inputs):
     H = slim.conv2d(inputs, 64, [3,3])
@@ -71,14 +72,14 @@ def neural_networks():
     for i in range(5):
         for j in range(5):
             layer = addHighwayLayer(layer)
-        if i<4:
+        if i<math.log(POOL_COUNT,2):
             layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
         else:  
             layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm) 
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
-    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height//16])
+    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height//POOL_COUNT])
 
     num_hidden = 16
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
@@ -123,7 +124,7 @@ def get_next_batch(batch_size=128):
         codes.append(text_list)
 
     # 凑成4的整数倍
-    max_width_image = max_width_image + (4 - max_width_image % 16)
+    max_width_image = max_width_image + (POOL_COUNT - max_width_image % POOL_COUNT)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -133,7 +134,7 @@ def get_next_batch(batch_size=128):
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
     #因为模型做了2次pool，所以 seq_len 也需要除以4
-    seq_len = np.ones(batch_size) * (max_width_image // 8)
+    seq_len = np.ones(batch_size) * (max_width_image // POOL_COUNT)
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
