@@ -245,7 +245,7 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
         for c in word:
             if c in CHARS:
                 _word += c
-        text = text[:i]+_word.strip()+text[i:]
+        text = text[:i]+" "+_word.strip()+" "+text[i:]
     text=text.strip()
 
     font = ImageFont.truetype(font_file, font_size, index = 0)
