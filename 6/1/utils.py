@@ -250,11 +250,17 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
 
     font = ImageFont.truetype(font_file, font_size, index = 0)
     size = font.getsize(text)
-    img=Image.new("RGBA",(size[0]+10,size[1]+10),(255,255,255))
+    img=Image.new("RGBA",(size[0]+20,size[1]+20),(255,255,255))
     draw = ImageDraw.Draw(img)
     fontmode = random.choice(["1", "P", "I", "F", "L"])
     draw.fontmode=fontmode
-    draw.text((5,5),text,fill='black',font=font)
+    draw.text((10,10),text,fill='black',font=font)
+ 
+    # 做轻微的旋转 +- 1度
+    rot = img.rotate((random.random()-0.5)*2, expand=1)
+    img=Image.new("RGBA",(size[0]+20,size[1]+20),(255,255,255))
+    img.paste(rot,rot)
+
    # img = utils.resize(utils.dropZeroEdges(utils.img2bwinv(utils.img2gray(np.asarray(img)))), 32) 
     img = np.asarray(img)
     img = 1 - img2gray(img)/255.   
@@ -262,7 +268,7 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
     img = dropZeroEdges(img)
 
     # 添加噪点
-    filter = np.random.random(img.shape) - 0.7
+    filter = np.random.random(img.shape) - 0.8
     filter = np.maximum(filter, 0) 
     img = img + filter * 2
     imin, imax = img.min(), img.max()
