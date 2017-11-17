@@ -234,6 +234,26 @@ def loadImage(filename,imgtype):
 #            print(split_image.shape)
     return result_images   
 
+def renderFontBypyGame(font_file, font_size, text, antialias = True):
+    pygame.init()
+    freetype.init()
+    font = freetype.Font(font_file, font_size)
+    font.antialiased = antialias 
+    rtext = font.render(text, (0, 0, 0), (255, 255, 255))[0]       
+    data = pygame.image.tostring(rtext, 'RGBA')
+    img = Image.frombytes("RGBA",rtext.get_size(),data)
+    return img
+
+def renderFontByPIL(font_file, font_size, text):
+    font = ImageFont.truetype(font_file, font_size, index = 0)
+    size = font.getsize(text)
+    img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
+    draw = ImageDraw.Draw(img)
+    fontmode = random.choice(["1", "P", "I", "F", "L"])
+    draw.fontmode=fontmode
+    draw.text((50,50),text,fill='black',font=font)
+    return img
+
 def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, word_dict=None):
     text=''
     for i in range(font_length*2//3):
@@ -248,17 +268,17 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
         text = text[:i]+" "+_word.strip()+" "+text[i:]
     text=text.strip()
 
-    font = ImageFont.truetype(font_file, font_size, index = 0)
-    size = font.getsize(text)
-    img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
-    draw = ImageDraw.Draw(img)
-    fontmode = random.choice(["1", "P", "I", "F", "L"])
-    draw.fontmode=fontmode
-    draw.text((50,50),text,fill='black',font=font)
- 
+    r= random.random()
+    if r>0.9:
+        img = renderFontBypyGame(font_file, font_size, text, True)
+    elif r>0.8 and r<0.9:
+        img = renderFontBypyGame(font_file, font_size, text, False)        
+    else:
+        img = renderFontByPIL(font_file, font_size, text)
+
     # 做轻微的旋转 +- 1.5度
     rot = img.rotate((random.random()-0.5)*3, expand=1)
-    img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
+    img=Image.new("RGBA",img.size,(255,255,255))
     img.paste(rot,rot)
 
     # 轻微扭曲
