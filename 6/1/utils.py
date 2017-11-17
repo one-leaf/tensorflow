@@ -234,7 +234,7 @@ def loadImage(filename,imgtype):
 #            print(split_image.shape)
     return result_images   
 
-def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, word_dict=None):
+def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, word_dict=None):
     text=''
     for i in range(font_length*2//3):
         text += random.choice(CHARS)
@@ -260,16 +260,22 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, wo
     img = 1 - img2gray(img)/255.   
     #img = img2bwinv(img)
     img = dropZeroEdges(img)
-    filter = np.random.uniform(0.8, 1, img.shape)
+    filter = np.random.uniform(0.7, 1, img.shape)
     img = img * filter   
     # imin, imax = img.min(), img.max()
     # img = (img - imin)/(imax - imin)
-    img = resize(img, image_height)
+    random_hight = round(image_height*random.uniform(0.5,1))
+    img = resize(img, random_hight)
+    pad_size = (image_height-random_hight)//2
+    img = np.pad(img,((pad_size,0),(0,0)), 'constant', constant_values=(0,))
     return text, img
 
 def main():
     curr_dir = os.path.dirname(__file__)
-    fontName = os.path.join(curr_dir,"fonts","simsun.ttc")
+    FontDir = os.path.join(curr_dir,"fonts")
+    FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]    
+    # fontName = os.path.join(curr_dir,"fonts","simsun.ttc")
+    fontName = random.choice(FontNames)
     eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
     lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list)

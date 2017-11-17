@@ -13,7 +13,7 @@ import tensorflow.contrib.slim as slim
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 16
+image_height = 32
 
 # LSTM
 # num_hidden = 4
