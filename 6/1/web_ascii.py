@@ -66,11 +66,11 @@ def scan(file):
         utils.save(image,os.path.join(curr_dir,"test","%s.png"%i))
         image = image / 255.
         maxImageWidth = image.shape[1]
-        maxImageWidth = maxImageWidth + (4 - maxImageWidth % 4)
+        maxImageWidth = maxImageWidth + (ocr.POOL_COUNT - maxImageWidth % ocr.POOL_COUNT)
         image_vec = utils.img2vec(image,ocr.image_height,maxImageWidth)
         ocr_inputs = np.zeros([1, maxImageWidth, ocr.image_height])
         ocr_inputs[0,:] = np.transpose(image_vec.reshape((ocr.image_height,maxImageWidth)))         
-        ocr_seq_len = np.ones(ocr_inputs.shape[0]) * maxImageWidth // 4
+        ocr_seq_len = np.ones(ocr_inputs.shape[0]) * maxImageWidth // ocr.POOL_COUNT
         feed = {inputs: ocr_inputs, seq_len: ocr_seq_len,  input_keep_prob: 1.0}
         start = time.time()
         decoded_list = session.run(decoded[0], feed)
