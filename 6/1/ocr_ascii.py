@@ -71,14 +71,14 @@ def neural_networks():
     for i in range(5):
         for j in range(5):
             layer = addHighwayLayer(layer)
-        if i<5:
+        if i<4:
             layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
         else:  
             layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm) 
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
-    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height//32])
+    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height//16])
 
     num_hidden = 16
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
@@ -123,7 +123,7 @@ def get_next_batch(batch_size=128):
         codes.append(text_list)
 
     # 凑成4的整数倍
-    max_width_image = max_width_image + (4 - max_width_image % 32)
+    max_width_image = max_width_image + (4 - max_width_image % 16)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
