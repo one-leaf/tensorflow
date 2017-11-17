@@ -13,7 +13,7 @@ import tensorflow.contrib.slim as slim
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 32
+image_height = 24
 
 # LSTM
 # num_hidden = 4
@@ -39,7 +39,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 50
+BATCH_SIZE = 64
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = 100
 
