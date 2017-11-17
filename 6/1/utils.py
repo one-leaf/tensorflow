@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from PIL import Image, ImageDraw, ImageFont
-
+from pygame import freetype
+import pygame
 
 # 按高度缩放图片,img_shape=(height,width)
 def resize(img,height=28):
@@ -234,7 +235,6 @@ def loadImage(filename,imgtype):
     return result_images   
 
 def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, word_dict=None):
-    font = ImageFont.truetype(font_file, font_size, index = 0)
     text=''
     for i in range(font_length*2//3):
         text += random.choice(CHARS)
@@ -246,7 +246,9 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, wo
             if c in CHARS:
                 _word += c
         text = text[:i]+_word.strip()+text[i:]
-    text=text.strip()    
+    text=text.strip()
+
+    font = ImageFont.truetype(font_file, font_size, index = 0)
     size = font.getsize(text)
     img=Image.new("RGB",(size[0]+10,size[1]+10),(255,255,255))
     draw = ImageDraw.Draw(img)
