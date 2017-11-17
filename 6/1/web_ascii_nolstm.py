@@ -18,6 +18,7 @@ except ImportError:
     from io import StringIO
 
 def init():
+    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'    
 #    logits, inputs, labels, seq_len, input_keep_prob = ocr.neural_networks()
     global_step = tf.Variable(0, trainable=False)
     curr_learning_rate = 1e-5
