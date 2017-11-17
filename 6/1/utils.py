@@ -262,9 +262,9 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
     img = dropZeroEdges(img)
 
     # 添加噪点
-    filter = np.random.random(img.shape) - 0.8
+    filter = np.random.random(img.shape) - 0.7
     filter = np.maximum(filter, 0) 
-    img = img + filter * 2.5
+    img = img + filter * 2
     imin, imax = img.min(), img.max()
     img = (img - imin)/(imax - imin)
 
