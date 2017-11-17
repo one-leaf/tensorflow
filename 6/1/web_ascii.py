@@ -64,7 +64,7 @@ def scan(file):
         image = utils.dropZeroEdges(image)  
         image = utils.resize(image, ocr.image_height)
         utils.save(image,os.path.join(curr_dir,"test","%s.png"%i))
-        image = image /255.
+        image = image / 255.
         maxImageWidth = image.shape[1]
         maxImageWidth = maxImageWidth + (4 - maxImageWidth % 4)
         image_vec = utils.img2vec(image,ocr.image_height,maxImageWidth)
