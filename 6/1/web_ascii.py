@@ -53,13 +53,13 @@ def scan(file):
     img = Image.open(file.stream)
     image = np.array(img)
     image = utils.img2gray(image)
+    image = utils.clearLineImg(image)    
     split_images = utils.splitImg(image)
     
     ocr_texts = []
 
     for i, split_image in enumerate(split_images):
         # image = utils.img2bwinv(split_image)
-        image = utils.clearLineImg(image)
         image = 1 - split_image/255.
         image = utils.dropZeroEdges(image)  
         image = utils.resize(image, ocr.image_height)
