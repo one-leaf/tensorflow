@@ -257,7 +257,6 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, wo
     draw.text((5,5),text,fill='black',font=font)
     if fontmode=="L":
         for i in range(random.randint(0,3)):
-            print('re draw')
             draw.text((5,5),text,fill='black',font=font)
    # img = utils.resize(utils.dropZeroEdges(utils.img2bwinv(utils.img2gray(np.asarray(img)))), 32) 
     img = np.asarray(img)
