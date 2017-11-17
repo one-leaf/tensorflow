@@ -260,8 +260,10 @@ def getImage(CHARS, font_file, image_height=16, font_length=50, font_size=11, wo
     img = 1 - img2gray(img)/255.   
     #img = img2bwinv(img)
     img = dropZeroEdges(img)
-    filter = np.random.uniform(0.5, 1, img.shape)
-    img = img * filter    
+    filter = np.random.uniform(0.8, 1, img.shape)
+    img = img * filter   
+    # imin, imax = img.min(), img.max()
+    # img = (img - imin)/(imax - imin)
     img = resize(img, image_height)
     return text, img
 
