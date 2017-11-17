@@ -4,6 +4,7 @@
 gunicorn -b 0.0.0.0:8080 web_ascii:app
 '''
 from flask import Flask, request, Response
+
 import numpy as np
 import tensorflow as tf
 import os, time
@@ -18,6 +19,8 @@ except ImportError:
     from io import StringIO
 
 def init():
+    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'    
+
 #    logits, inputs, labels, seq_len, input_keep_prob = ocr.neural_networks()
     global_step = tf.Variable(0, trainable=False)
     curr_learning_rate = 1e-5
@@ -108,5 +111,4 @@ def single_digit():
         return 'No file upload'
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'    
     app.run(host='0.0.0.0',port=8080)

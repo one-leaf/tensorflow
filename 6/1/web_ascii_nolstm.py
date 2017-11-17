@@ -4,6 +4,7 @@
 gunicorn -b 0.0.0.0:8080 web_ascii:app
 '''
 from flask import Flask, request, Response
+
 import numpy as np
 import tensorflow as tf
 import os, time
