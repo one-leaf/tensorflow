@@ -43,7 +43,7 @@ BATCHES = 64
 BATCH_SIZE = 20
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = round(math.power(2,5))
+POOL_COUNT = round(math.pow(2,5))
 
 # 增加残差网络
 def addResLayer(inputs):
