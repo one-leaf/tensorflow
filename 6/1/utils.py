@@ -277,8 +277,9 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
         img = renderFontByPIL(font_file, font_size, text)
 
     # 做轻微的旋转 +- 1.5度
+    w,h=img.size
     rot = img.rotate((random.random()-0.5)*3, expand=1)
-    img=Image.new("RGBA",img.size,(255,255,255))
+    img=Image.new("RGBA",(w+50,h+50),(255,255,255))
     img.paste(rot,rot)
 
     # 轻微扭曲
