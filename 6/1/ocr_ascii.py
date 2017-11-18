@@ -84,7 +84,7 @@ def neural_networks():
     
     layer = tf.reshape(layer,[batch_size, -1, 64 * image_height//POOL_COUNT])
 
-    num_hidden = 8
+    num_hidden = 16
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
@@ -92,7 +92,7 @@ def neural_networks():
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
     lstm_layer = tf.reshape(outputs, [-1, 2*num_hidden])
-    lstm_layer = tf.layers.dense(lstm_layer, 256, activation=tf.nn.relu)
+    lstm_layer = tf.layers.dense(lstm_layer, 512, activation=tf.nn.relu)
     lstm_layer = tf.layers.dropout(lstm_layer,drop_prob)
     
     # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
@@ -114,7 +114,7 @@ def get_next_batch(batch_size=128):
     codes = []
     images = []   
     max_width_image = 0
-    font_min_length = random.randint(10, 30)
+    font_min_length = random.randint(10, 20)
     for i in range(batch_size):
         font_name = random.choice(FontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
