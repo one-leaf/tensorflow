@@ -43,7 +43,8 @@ BATCHES = 64
 BATCH_SIZE = 20
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = round(math.pow(2,5))
+POOL_COUNT = 3
+POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 
 # 增加残差网络
 def addResLayer(inputs):
@@ -72,8 +73,8 @@ def neural_networks():
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
-    for i in range(5):
-        for j in range(5):
+    for i in range(POOL_COUNT):
+        for j in range(10):
             layer = addResLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
@@ -124,7 +125,7 @@ def get_next_batch(batch_size=128):
         codes.append(text_list)
 
     # 凑成4的整数倍
-    max_width_image = max_width_image + (POOL_COUNT - max_width_image % POOL_COUNT)
+    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -134,7 +135,7 @@ def get_next_batch(batch_size=128):
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
     #因为模型做了2次pool，所以 seq_len 也需要除以4
-    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_COUNT * POOL_COUNT)
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
