@@ -75,7 +75,7 @@ def neural_networks():
     for i in range(5):
         for j in range(5):
             layer = addResLayer(layer)
-            layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
+        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
@@ -134,7 +134,8 @@ def get_next_batch(batch_size=128):
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
     #因为模型做了2次pool，所以 seq_len 也需要除以4
-    seq_len = np.ones(batch_size) * (max_width_image // POOL_COUNT) * (image_height // POOL_COUNT)
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_COUNT * POOL_COUNT)
+    print(seq_len)
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
