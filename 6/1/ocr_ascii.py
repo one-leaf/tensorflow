@@ -112,7 +112,7 @@ def get_next_batch(batch_size=128):
     codes = []
     images = []   
     max_width_image = 0
-    font_min_length = random.randint(40, 50)
+    font_min_length = random.randint(50, 60)
     for i in range(batch_size):
         font_name = random.choice(FontNames)
         font_length = random.randint(font_min_length-3, font_min_length+3)
