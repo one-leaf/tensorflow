@@ -44,17 +44,14 @@ BATCH_SIZE = 24
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 8
-
-# 增加残差网络
-def addResLayer(inputs):
-    layer = slim.batch_norm(inputs, activation_fn=None)
-    layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [3,3],activation_fn=None)
-    layer = slim.batch_norm(layer, activation_fn=None)
-    layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [3,3],activation_fn=None)
-    outputs = inputs + layer
-    return outputs      
+# 增加 Highway 网络
+def addHighwayLayer(inputs):
+    H = slim.conv2d(inputs, 64, [3,3])
+    T = slim.conv2d(inputs, 64, [3,3], 
+        biases_initializer = tf.constant_initializer(-1.0),
+        activation_fn=tf.nn.sigmoid)    
+    outputs = H * T + inputs * (1.0 - T)
+    return outputs    
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
@@ -71,14 +68,14 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
-    layer = slim.conv2d(x_image, 64, [3,3], normalizer_fn=slim.batch_norm)
+    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(5):
         for j in range(5):
-            layer = addResLayer(layer)
+            layer = addHighwayLayer(layer)
         if i<math.log(POOL_COUNT,2):
             layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
         else:  
-            layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)   
+            layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm) 
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
