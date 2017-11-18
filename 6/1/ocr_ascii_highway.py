@@ -43,13 +43,13 @@ BATCHES = 64
 BATCH_SIZE = 24
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = 8
+POOL_COUNT = 3
+POOL_SIZE  = round(math.pow(2,POOL_COUNT))
+
 # 增加 Highway 网络
 def addHighwayLayer(inputs):
     H = slim.conv2d(inputs, 64, [3,3])
-    T = slim.conv2d(inputs, 64, [3,3], 
-        biases_initializer = tf.constant_initializer(-1.0),
-        activation_fn=tf.nn.sigmoid)    
+    T = slim.conv2d(inputs, 64, [3,3], biases_initializer = tf.constant_initializer(-1.0), activation_fn=tf.nn.sigmoid)    
     outputs = H * T + inputs * (1.0 - T)
     return outputs    
 
@@ -69,19 +69,16 @@ def neural_networks():
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
-    for i in range(5):
-        for j in range(5):
+    for i in range(POOL_COUNT):
+        for j in range(10):
             layer = addHighwayLayer(layer)
-        if i<math.log(POOL_COUNT,2):
-            layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
-        else:  
-            layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm) 
+        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
-    layer = tf.reshape(layer,[batch_size, -1, 64 * image_height//POOL_COUNT])
+    layer = tf.reshape(layer,[batch_size, -1, 64])
 
-    num_hidden = 16
+    num_hidden = 64
     cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
@@ -124,7 +121,7 @@ def get_next_batch(batch_size=128):
         codes.append(text_list)
 
     # 凑成4的整数倍
-    max_width_image = max_width_image + (POOL_COUNT - max_width_image % POOL_COUNT)
+    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -134,7 +131,7 @@ def get_next_batch(batch_size=128):
     #labels转成稀疏矩阵
     sparse_labels = sparse_tuple_from(labels)
     #因为模型做了2次pool，所以 seq_len 也需要除以4
-    seq_len = np.ones(batch_size) * (max_width_image // POOL_COUNT)
+    seq_len = np.ones(batch_size) * (max_width_image * image_height) // (POOL_SIZE * POOL_SIZE)
     return inputs, sparse_labels, seq_len
 
 # 转化一个序列列表为稀疏矩阵    
@@ -254,7 +251,7 @@ def train():
 
     def restore(sess):
         curr_dir = os.path.dirname(__file__)
-        model_dir = os.path.join(curr_dir, "model-ascii")
+        model_dir = os.path.join(curr_dir, "model_ascii_highway")
         if not os.path.exists(model_dir): os.mkdir(model_dir)
         saver_prefix = os.path.join(model_dir, "model.ckpt")        
         ckpt = tf.train.get_checkpoint_state(model_dir)

@@ -10,7 +10,7 @@ import tensorflow as tf
 import os, time
 from PIL import Image
 import json
-import ocr_ascii as ocr
+import ocr_ascii_highway as ocr
 import utils, cv2
 
 try:
@@ -37,7 +37,7 @@ def init():
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
     # restore sess
-    model_dir = os.path.join(curr_dir, "model-ascii")
+    model_dir = os.path.join(curr_dir, "model_ascii_highway")
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
     ckpt = tf.train.get_checkpoint_state(model_dir)
     saver = tf.train.Saver()
