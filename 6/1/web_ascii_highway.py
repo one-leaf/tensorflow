@@ -70,7 +70,7 @@ def scan(file):
         image_vec = utils.img2vec(image,ocr.image_height,maxImageWidth)
         ocr_inputs = np.zeros([1, maxImageWidth, ocr.image_height])
         ocr_inputs[0,:] = np.transpose(image_vec.reshape((ocr.image_height,maxImageWidth)))         
-        ocr_seq_len = np.ones(batch_size) * (max_width_image * image_height) // (POOL_SIZE * POOL_SIZE)
+        ocr_seq_len = np.ones(ocr_inputs.shape[0]) * (max_width_image * image_height) // (POOL_SIZE * POOL_SIZE)
         feed = {inputs: ocr_inputs, seq_len: ocr_seq_len,  input_keep_prob: 1.0}
         start = time.time()
         decoded_list = session.run(decoded[0], feed)
