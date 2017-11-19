@@ -256,16 +256,17 @@ def renderFontByPIL(font_file, font_size, text):
 
 def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, word_dict=None):
     text=''
-    for i in range(font_length*2//3):
-        text += random.choice(CHARS)
-    while len(text)<font_length:
-        i = random.randint(1,len(text)-1)
-        word = random.choice(word_dict)
-        _word=""
-        for c in word:
-            if c in CHARS:
-                _word += c
-        text = text[:i]+" "+_word.strip()+" "+text[i:]
+    if random.random()>0.8:
+        for i in range(font_length):
+            text += random.choice(CHARS)
+    else:
+        while len(text)<font_length:
+            word = random.choice(word_dict)
+            _word=""
+            for c in word:
+                if c in CHARS:
+                    _word += c
+            text = text+" "+_word.strip()
     text=text.strip()
 
     r= random.random()
