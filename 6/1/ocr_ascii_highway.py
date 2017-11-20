@@ -74,28 +74,28 @@ def neural_networks():
             layer = addHighwayLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
-    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, num_classes, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
     
-    layer = tf.reshape(layer,[batch_size, -1, 64])
+    layer = tf.reshape(layer,[batch_size, -1, num_classes])
 
-    num_hidden = 64
-    cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
-    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-    cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
-    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
-    outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
-    lstm_layer = tf.reshape(outputs, [-1, 2*num_hidden])
-    lstm_layer = tf.layers.dense(lstm_layer, 512, activation=tf.nn.relu)
-    lstm_layer = tf.layers.dropout(lstm_layer,drop_prob)
+    # num_hidden = 64
+    # cell_fw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
+    # cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    # cell_bw = tf.contrib.rnn.BasicLSTMCell(num_hidden, forget_bias=1.0, state_is_tuple=True)
+    # cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
+    # outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, 2*num_hidden]
+    # lstm_layer = tf.reshape(outputs, [-1, 2*num_hidden])
+    # lstm_layer = tf.layers.dense(lstm_layer, 512, activation=tf.nn.relu)
+    # lstm_layer = tf.layers.dropout(lstm_layer,drop_prob)
     
-    # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
-    lstm_layer = tf.layers.dense(lstm_layer, num_classes)
+    # # 这里不需要再加上 tf.nn.softmax 层，因为ctc_loss会加
+    # lstm_layer = tf.layers.dense(lstm_layer, num_classes)
 
     # 输出对数： [batch_size , max_time , num_classes]
-    logits = tf.reshape(lstm_layer, [batch_size, -1, num_classes])
+    # layer = tf.reshape(lstm_layer, [batch_size, -1, num_classes])
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
-    logits = tf.transpose(logits, (1, 0, 2), name="logits")
+    logits = tf.transpose(layer, (1, 0, 2), name="logits")
 
     return logits, inputs, labels, seq_len, keep_prob
 
