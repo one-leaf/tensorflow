@@ -256,7 +256,7 @@ def renderFontByPIL(font_file, font_size, text):
 
 def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, word_dict=None):
     text=''
-    if random.random()>0.8:
+    if random.random()>0.5
         for i in range(font_length):
             text += random.choice(CHARS)
     else:
