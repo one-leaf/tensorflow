@@ -239,25 +239,25 @@ def renderFontBypyGame(font_file, font_size, text, antialias = True):
     freetype.init()
     try:
         font = freetype.Font(font_file, font_size)
+        font.antialiased = antialias 
+        rtext = font.render(text, (0, 0, 0), (255, 255, 255))[0]       
+        data = pygame.image.tostring(rtext, 'RGBA')
+        img = Image.frombytes("RGBA",rtext.get_size(),data)
     except:
         raise Exception("Error font %s" % font_file)        
-    font.antialiased = antialias 
-    rtext = font.render(text, (0, 0, 0), (255, 255, 255))[0]       
-    data = pygame.image.tostring(rtext, 'RGBA')
-    img = Image.frombytes("RGBA",rtext.get_size(),data)
     return img
 
 def renderFontByPIL(font_file, font_size, text):
     try:
         font = ImageFont.truetype(font_file, font_size, index = 0)
+        size = font.getsize(text)
+        img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
+        draw = ImageDraw.Draw(img)
+        fontmode = random.choice(["1", "P", "I", "F", "L"])
+        draw.fontmode=fontmode
+        draw.text((50,50),text,fill='black',font=font)
     except:
         raise Exception("Error font %s" % font_file)    
-    size = font.getsize(text)
-    img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
-    draw = ImageDraw.Draw(img)
-    fontmode = random.choice(["1", "P", "I", "F", "L"])
-    draw.fontmode=fontmode
-    draw.text((50,50),text,fill='black',font=font)
     return img
 
 def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, word_dict=None):
