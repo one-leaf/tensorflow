@@ -330,7 +330,7 @@ def main():
     lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list)
     print(lable)
     plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
-    plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
+    # plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
     plt.show()
     
     #cv2.imshow(lable,img)
