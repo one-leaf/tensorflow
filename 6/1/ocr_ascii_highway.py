@@ -39,7 +39,7 @@ num_classes = len(CHARS) + 1
 REPORT_STEPS = 500
 MOMENTUM = 0.9
 
-BATCHES = 64
+BATCHES = 32
 BATCH_SIZE = 10
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
@@ -108,7 +108,7 @@ def get_next_batch(batch_size=128):
     codes = []
     images = []   
     max_width_image = 0
-    font_min_length = random.randint(50, 60)
+    font_min_length = random.randint(100, 110)
     for i in range(batch_size):
         font_name = random.choice(FontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
