@@ -329,9 +329,13 @@ def main():
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
     lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list)
     print(lable)
-    cv2.imshow(lable,img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()    
+    plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
+    plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
+    plt.show()
+    
+    #cv2.imshow(lable,img)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()    
     # need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
 
 if __name__ == '__main__':
