@@ -70,13 +70,13 @@ def neural_networks():
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(POOL_COUNT):
-        for j in range(10):
+        for j in range(3):
             layer = addHighwayLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
-
-    layer = slim.conv2d(layer, num_classes, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
-    
-    layer = tf.reshape(layer,[batch_size, -1, num_classes])
+        for j in range(3):
+            layer = addHighwayLayer(layer)
+   
+    layer = tf.reshape(layer,[batch_size, -1, 64])  #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, 64]
 
     num_hidden = 128
     with tf.variable_scope('RNN1'):
@@ -85,19 +85,20 @@ def neural_networks():
         cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
-        outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, num_hidden]
-    layer = tf.reshape(outputs, [-1, num_hidden])    
-    layer = tf.layers.dense(outputs, num_hidden, activation=tf.nn.relu)
-    layer = tf.reshape(outputs, [batch_size, -1, num_hidden])    
+        outputs = tf.concat(outputs, axis=2) #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, num_hidden]
+        layer = tf.reshape(outputs, [-1, num_hidden])    
+    
+    layer = tf.layers.dense(layer, num_hidden, activation=tf.nn.relu)
+    layer = tf.reshape(layer, [batch_size, -1, num_hidden])    
+
     with tf.variable_scope('RNN2'):
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
         cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
-        outputs = tf.concat(outputs, axis=2) #[batch_size, image_width, num_hidden]
-
-    layer = tf.reshape(outputs, [-1, num_hidden])
+        outputs = tf.concat(outputs, axis=2) #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, num_hidden]
+        layer = tf.reshape(outputs, [-1, num_hidden])
     # layer = tf.layers.dense(layer, 512, activation=tf.nn.relu)
     # layer = tf.layers.dropout(layer,drop_prob)
     
