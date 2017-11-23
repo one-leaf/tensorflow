@@ -59,13 +59,13 @@ def clearLineImg(gray_image):
     adaptive_binary_inv=img2bwinv(gray_image)
     # 清除竖线
     _sum=np.sum(adaptive_binary_inv,axis=0)
-    _mean = adaptive_binary_inv.shape[0]
+    _mean = 255 * adaptive_binary_inv.shape[0]
     for i,x in enumerate(_sum):
         if x>_mean*0.95:
             gray_image[:,i]=255
     # 清除横线
     _sum=np.sum(adaptive_binary_inv,axis=1)
-    _mean = adaptive_binary_inv.shape[1]
+    _mean = 255 * adaptive_binary_inv.shape[1]
     for i,x in enumerate(_sum):
         if x>_mean*0.8:
             gray_image[i,:]=255
