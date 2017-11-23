@@ -120,14 +120,14 @@ for name in os.listdir(FontDir):
         fontName.lower().endswith('ttc') or \
         fontName.lower().endswith('otf'):
         FontNames.append(fontName)
-        
+
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
     codes = []
     images = []   
     max_width_image = 0
-    font_min_length = random.randint(50, 60)
+    font_min_length = random.randint(10, 60)
     for i in range(batch_size):
         font_name = random.choice(FontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
