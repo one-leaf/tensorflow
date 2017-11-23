@@ -121,9 +121,9 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     vector = vector / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
 
-# 清除边缘，输入参数黑白反射
+# 清除边缘，输入参数黑白反色
 def dropZeroEdges(img_bw_inv):
-    true_points = np.argwhere(img_bw_inv)
+    true_points = np.argwhere(img_bw_inv>10)
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
     return img_bw_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
