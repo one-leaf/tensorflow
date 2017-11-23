@@ -52,6 +52,17 @@ def show(img):
 def save(img,filename):
     cv2.imwrite(filename,img)
 
+# 清除背景色
+def clearBackgroundColor(gray_image, replace_Color=255):
+    f_img = gray_image.flatten().astype(int)
+    counts = np.bincount(f_img)
+    c = np.argmax(counts)
+    v = f_img[c]
+    if v!=replace_Color:
+        img = gray_image - v
+        zero_mask = img == 0
+        gray_image[zero_mask] = replace_Color
+    return gray_image
 
 # img 参数是 np.array 类型 输入是正常灰度图片
 # 用于清除表格线
@@ -121,13 +132,9 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     vector = vector / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
 
-# 清除边缘，输入参数黑白反色
+# 清除边缘,需要反色
 def dropZeroEdges(img_bw_inv):
-    f_img = img_bw_inv.flatten()
-    counts = np.bincount(f_img)
-    c = np.argmax(counts)
-    v = f_img[c]
-    true_points = np.argwhere(img_bw_inv >= v)
+    true_points = np.argwhere(img_bw_inv)
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
     return img_bw_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
@@ -301,7 +308,6 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=16, wo
          img = renderFontBypyGame(font_file, font_size, text, False)        
     else:
        img = renderFontByPIL(font_file, font_size, text)
-    
     # 缩放一下
     img = trim(img)
     w,h=img.size
@@ -330,6 +336,8 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=16, wo
 
    # img = utils.resize(utils.dropZeroEdges(utils.img2bwinv(utils.img2gray(np.asarray(img)))), 32) 
     img = np.asarray(img)
+    img = clearBackgroundColor(img)
+   
     img = 1 - img2gray(img)/255.   
     #img = img2bwinv(img)
     img = dropZeroEdges(img)
@@ -372,5 +380,5 @@ def main():
     # need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
 
 if __name__ == '__main__':
-    while True:
-        main()
+    # while True:
+    main()
