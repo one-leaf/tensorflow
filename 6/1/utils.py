@@ -3,9 +3,18 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import random
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageChops
 from pygame import freetype
 import pygame
+
+# 删除边框
+def trim(img):
+    bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
+    diff = ImageChops.difference(img, bg)
+    diff = ImageChops.add(diff, diff, 2.0, -100)
+    bbox = diff.getbbox()
+    if bbox:
+        return img.crop(bbox)
 
 # 按高度缩放图片,img_shape=(height,width)
 def resize(img,height=28):
@@ -260,11 +269,16 @@ def renderFontByPIL(font_file, font_size, text):
     except:
         raise Exception("Error font %s" % font_file)    
 
-def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, word_dict=None):
+def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=16, word_dict=None):
+    print(font_file,font_size)
     text=''
-    if random.random()>0.5:
+    n = random.random()
+    if n<0.1:
         for i in range(font_length):
-            text += random.choice(CHARS)
+            text += random.choice("1234567890-./$,:()+-*=><")
+    elif n<0.5 and n>=0.1:
+        for i in range(font_length):
+            text += random.choice(CHARS)        
     else:
         while len(text)<font_length:
             word = random.choice(word_dict)
@@ -277,17 +291,24 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
 
     r= random.random()
     if r>0.9:
-        img = renderFontBypyGame(font_file, font_size, text, True)
+       img = renderFontBypyGame(font_file, font_size, text, True)
     elif r>0.8 and r<0.9:
-        img = renderFontBypyGame(font_file, font_size, text, False)        
+         img = renderFontBypyGame(font_file, font_size, text, False)        
     else:
-        img = renderFontByPIL(font_file, font_size, text)
+       img = renderFontByPIL(font_file, font_size, text)
+    
+    # 缩放一下
+    img = trim(img)
+    w,h=img.size
+    _h = round(h + (image_height - h) * random.random())
+    _w = round(w * _h / h)
+    img.resize((_h,_w), Image.ANTIALIAS)
 
     # 做轻微的旋转 +- 1.5度
-    w,h=img.size
-    rot = img.rotate((random.random()-0.5)*3, expand=1)
-    img=Image.new("RGBA",(w+50,h+50),(255,255,255))
-    img.paste(rot,rot)
+    # w,h=img.size
+    # rot = img.rotate((random.random()-0.5)*3, expand=1)
+    # img=Image.new("RGBA",(w+50,h+50),(255,255,255))
+    # img.paste(rot,rot)
 
     # 轻微扭曲
     # params = [
@@ -316,14 +337,21 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=11, wo
     img = (img - imin)/(imax - imin)
 
     img = resize(img, image_height)
-
     return text, img
 
 def main():
     curr_dir = os.path.dirname(__file__)
     FontDir = os.path.join(curr_dir,"fonts")
-    FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]    
+    FontNames = []    
     # fontName = os.path.join(curr_dir,"fonts","simsun.ttc")
+    for name in os.listdir(FontDir):
+        fontName = os.path.join(FontDir, name)
+        if fontName.lower().endswith('ttf') or \
+           fontName.lower().endswith('ttc') or \
+           fontName.lower().endswith('otf'):
+           FontNames.append(fontName)
+
+
     fontName = random.choice(FontNames)
     eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
@@ -339,4 +367,5 @@ def main():
     # need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
 
 if __name__ == '__main__':
-    main()
+    while True:
+        main()
