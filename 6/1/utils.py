@@ -263,7 +263,10 @@ def renderFontBypyGame(font_file, font_size, text, antialias = True):
         font.antialiased = antialias 
         rtext = font.render(text, (0, 0, 0), (255, 255, 255))[0]       
         data = pygame.image.tostring(rtext, 'RGBA')
-        img = Image.frombytes("RGBA",rtext.get_size(),data)
+        _img = Image.frombytes("RGBA",rtext.get_size(),data)
+        size = _img.size
+        img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
+        img.paste(_img,(50,50))
         return img
     except:
         raise Exception("Error font %s" % font_file)        
@@ -281,8 +284,9 @@ def renderFontByPIL(font_file, font_size, text):
     except:
         raise Exception("Error font %s" % font_file)    
 
-def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, word_dict=None):
-    # print(font_file,font_size)
+def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, word_dict=None, is_Debug=False):
+    if is_Debug:
+        print(font_file,font_size)
     text=''
     n = random.random()
     if n<0.1:
@@ -305,9 +309,12 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
     if r>0.9:
        img = renderFontBypyGame(font_file, font_size, text, True)
     elif r>0.8 and r<0.9:
-         img = renderFontBypyGame(font_file, font_size, text, False)        
+       img = renderFontBypyGame(font_file, font_size, text, False)        
     else:
        img = renderFontByPIL(font_file, font_size, text)
+
+    if is_Debug:
+        return text, img
     # 缩放一下
     img = trim(img)
     w,h=img.size
@@ -368,7 +375,7 @@ def main():
     fontName = random.choice(FontNames)
     eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
-    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list)
+    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list,is_Debug=True)
     print(lable)
     plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
     # plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
