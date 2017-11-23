@@ -56,17 +56,18 @@ def save(img,filename):
 # img 参数是 np.array 类型 输入是正常灰度图片
 # 用于清除表格线
 def clearLineImg(gray_image):
+    adaptive_binary_inv=img2bwinv(gray_image)
     # 清除竖线
-    _sum=np.sum(gray_image,axis=0)
-    _mean = gray_image.shape[0]
+    _sum=np.sum(adaptive_binary_inv,axis=0)
+    _mean = adaptive_binary_inv.shape[0]
     for i,x in enumerate(_sum):
-        if x<_mean*0.05:
+        if x>_mean*0.95:
             gray_image[:,i]=255
     # 清除横线
-    _sum=np.sum(gray_image,axis=1)
-    _mean = gray_image.shape[1]
+    _sum=np.sum(adaptive_binary_inv,axis=1)
+    _mean = adaptive_binary_inv.shape[1]
     for i,x in enumerate(_sum):
-        if x<_mean*0.2:
+        if x>_mean*0.8:
             gray_image[i,:]=255
     return gray_image
 
