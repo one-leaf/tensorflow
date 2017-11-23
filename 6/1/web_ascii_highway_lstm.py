@@ -60,7 +60,7 @@ def scan(file):
 
     for i, split_image in enumerate(split_images):
         # image = utils.img2bwinv(split_image)
-        image = utils.clearLineImg(image)    
+        image = utils.clearLineImg(split_image)    
         image = 255. - split_image
         image = utils.dropZeroEdges(image)  
         image = utils.resize(image, ocr.image_height)
