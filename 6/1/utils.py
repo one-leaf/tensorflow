@@ -123,9 +123,10 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
 
 # 清除边缘，输入参数黑白反色
 def dropZeroEdges(img_bw_inv):
-    counts = np.bincount(img_bw_inv)
+    f_img = img_bw_inv.flatten()
+    counts = np.bincount(f_img)
     c = np.argmax(counts)
-    v = img_bw_inv[c]
+    v = f_img[c]
     true_points = np.argwhere(img_bw_inv >= v)
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
