@@ -100,7 +100,13 @@ def neural_networks():
     return logits, inputs, labels, seq_len, keep_prob
 
 FontDir = os.path.join(curr_dir,"fonts")
-FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
+FontNames = []    
+for name in os.listdir(FontDir):
+    fontName = os.path.join(FontDir, name)
+    if fontName.lower().endswith('ttf') or \
+        fontName.lower().endswith('ttc') or \
+        fontName.lower().endswith('otf'):
+        FontNames.append(fontName)
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
