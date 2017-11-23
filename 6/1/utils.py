@@ -282,7 +282,7 @@ def renderFontByPIL(font_file, font_size, text):
         raise Exception("Error font %s" % font_file)    
 
 def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, word_dict=None):
-    print(font_file,font_size)
+    # print(font_file,font_size)
     text=''
     n = random.random()
     if n<0.1:
