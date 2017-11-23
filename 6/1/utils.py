@@ -281,8 +281,8 @@ def renderFontByPIL(font_file, font_size, text):
     except:
         raise Exception("Error font %s" % font_file)    
 
-def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=16, word_dict=None):
-    # print(font_file,font_size)
+def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, word_dict=None):
+    print(font_file,font_size)
     text=''
     n = random.random()
     if n<0.1:
@@ -380,5 +380,5 @@ def main():
     # need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
 
 if __name__ == '__main__':
-    # while True:
-    main()
+    while True:
+        main()
