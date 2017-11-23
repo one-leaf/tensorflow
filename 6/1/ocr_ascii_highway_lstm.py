@@ -88,7 +88,7 @@ def neural_networks():
         outputs = tf.concat(outputs, axis=2) #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, num_hidden]
         layer = tf.reshape(outputs, [-1, num_hidden])    
     
-    layer = tf.layers.dense(layer, num_hidden, activation=tf.nn.relu)
+    layer = tf.layers.dense(layer, num_hidden)
     layer = tf.reshape(layer, [batch_size, -1, num_hidden])    
 
     with tf.variable_scope('RNN2'):
