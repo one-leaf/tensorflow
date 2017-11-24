@@ -320,9 +320,9 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
     text=text.strip()
 
     r= random.random()
-    if r>0.9:
+    if r>=0.8:
        img = renderFontBypyGame(font_file, font_size, text, True)
-    elif r>0.8 and r<0.9:
+    elif r>0.6 and r<0.8:
        img = renderFontBypyGame(font_file, font_size, text, False)        
     else:
        img = renderFontByPIL(font_file, font_size, text)
