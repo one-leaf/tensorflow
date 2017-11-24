@@ -109,12 +109,13 @@ def get_next_batch(batch_size=128):
             max_width_image = image.shape[0]
         to_image=utils.renderNormalFontByPIL(ConsolasFont,64,text)
         to_image=utils.trim(to_image)
-        
-        _w = round(to_image.shape[0]*image_height/to_image.shape[1])
+
+        w,h=to_image.size
+        _w = round(w*image_height/h)
         _h = image_height
         if _w>max_width_image:
             _w=max_width_image
-            _h=round(to_image.shape[1]*max_width_image/to_image.shape[0])
+            _h=round(h*max_width_image/w)
 
         to_image=to_image.resize((_w, _h), Image.ANTIALIAS)
         to_image=np.asarray(to_image)
