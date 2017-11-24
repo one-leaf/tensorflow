@@ -146,7 +146,7 @@ def train():
         saver = tf.train.Saver(max_to_keep=5)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model ...")
-            saver.restore(sess, ckpt.model_checkpoint_path)    
+            saver.restore(session, ckpt.model_checkpoint_path)    
         while True:
             for batch in range(BATCHES):
                 start = time.time()                
