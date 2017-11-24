@@ -382,11 +382,11 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
     img = dropZeroEdges(img)
 
     # 添加噪点
-    filter = np.random.random(img.shape) - 0.8
-    filter = np.maximum(filter, 0) 
-    img = img + filter * 2
-    imin, imax = img.min(), img.max()
-    img = (img - imin)/(imax - imin)
+    # filter = np.random.random(img.shape) - 0.8
+    # filter = np.maximum(filter, 0) 
+    # img = img + filter * 2
+    # imin, imax = img.min(), img.max()
+    # img = (img - imin)/(imax - imin)
 
     img = resize(img, image_height)
     return text, img
@@ -407,7 +407,7 @@ def main():
     fontName = random.choice(FontNames)
     eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
-    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list,is_Debug=False)
+    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list,is_Debug=True)
     print(lable)
     plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
     # plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
