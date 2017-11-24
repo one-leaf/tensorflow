@@ -99,9 +99,10 @@ def get_next_batch(batch_size=128):
         images.append(image)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
-        to_image=utils.renderNormalFontByPIL(ConsolasFont,32,text)
+        to_image=utils.renderNormalFontByPIL(ConsolasFont,64,text)
         to_image=utils.trim(to_image)
         to_image=np.asarray(to_image)
+        to_image=utils.resize(to_image,height=32)
         to_image=utils.img2gray(to_image)
         to_images.append(to_image)
 
