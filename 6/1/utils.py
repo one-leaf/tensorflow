@@ -274,8 +274,13 @@ def renderFontBypyGame(font_file, font_size, text, antialias = True):
         font.antialiased = antialias 
         styles = [freetype.STYLE_DEFAULT,freetype.STYLE_NORMAL,freetype.STYLE_OBLIQUE,
                     freetype.STYLE_STRONG,freetype.STYLE_UNDERLINE,freetype.STYLE_WIDE]
-        style =random.choice(styles)
-        rtext = font.render(text, (0, 0, 0), (255, 255, 255), style=style)[0]       
+        while True:
+            try:
+                style =random.choice(styles)
+                rtext = font.render(text, (0, 0, 0), (255, 255, 255), style=style)[0]
+                break
+            except:
+                print("rechoise font style for",font_file)           
         data = pygame.image.tostring(rtext, 'RGBA')
         _img = Image.frombytes("RGBA",rtext.get_size(),data)
         size = _img.size
