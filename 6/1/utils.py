@@ -289,6 +289,17 @@ def renderFontByPIL(font_file, font_size, text):
     except:
         raise Exception("Error font %s" % font_file)    
 
+def renderNormalFontByPIL(font_file, font_size, text):
+    try:
+        font = ImageFont.truetype(font_file, font_size, index = 0)
+        size = font.getsize(text)
+        img=Image.new("RGBA",(size[0]+100,size[1]+100),(255,255,255))
+        draw = ImageDraw.Draw(img)
+        draw.text((50,50),text,fill='black',font=font)
+        return img
+    except:
+        raise Exception("Error font %s" % font_file) 
+
 def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, word_dict=None, is_Debug=False):
     if is_Debug:
         print(font_file,font_size)

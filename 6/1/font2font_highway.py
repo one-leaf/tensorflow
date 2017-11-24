@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2gray, img2bwinv, img2vec, dropZeroEdges, resize, save, getImage
+import utils
 import time
 import random
 import cv2
@@ -76,52 +76,86 @@ def neural_networks():
     loss  = tf.reduce_sum(tf.square(predictions - labels))
 
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE_INITIAL)
-    train_op = slim.learning.create_train_op(total_loss, optimizer)
+    train_op = optimizer.minimize(loss)
 
     return inputs, labels, predictions, keep_prob, loss, train_op
 
 FontDir = os.path.join(curr_dir,"fonts")
-FontNames = sorted([os.path.join(FontDir, name) for name in os.listdir(FontDir)])
-num_classes = len(FontNames)
+FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
+ConsolasFont = os.path.join(curr_dir,"fonts","Consolas.ttf")
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
     images = []   
-    font_names = []
+    to_images = []
     max_width_image = 0
     font_min_length = random.randint(50, 60)
     for i in range(batch_size):
         font_name = random.choice(FontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
         font_size = random.randint(9, 64)        
-        text, image= getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
+        text, image= utils.getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
         images.append(image)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
-        font_names.append(FontNames.index(font_name))
+        to_image=utils.renderNormalFontByPIL(ConsolasFont,32,text)
+        to_image=utils.trim(to_image)
+        to_image=np.asarray(to_image)
+        to_image=utils.img2gray(to_image)
+        to_images.append(to_image)
 
-    # 凑成4的整数倍
-    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
-        image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
+        image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.transpose(image_vec)
 
-    return inputs, font_names
+    labels = np.zeros([batch_size, max_width_image, image_height])
+    for i in range(len(to_images)):
+        image_vec = utils.img2vec(to_images[i], height=image_height, width=max_width_image, flatten=False)
+        labels[i,:] = np.transpose(image_vec)
+    return inputs, labels
 
 def train():
     inputs, labels, predictions, keep_prob, loss, train_op = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
-    model_dir = os.path.join(curr_dir, "model_fontnames_highway")
+    model_dir = os.path.join(curr_dir, "model_font2font_highway")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
+    saver_prefix = os.path.join(model_dir, "model.ckpt")        
 
-    slim.learning.train(train_op, my_log_dir)                                   
+    global_step = tf.Variable(0, trainable=False)
+    init = tf.global_variables_initializer()
+    with tf.Session() as session:
+        session.run(init)
+        ckpt = tf.train.get_checkpoint_state(model_dir)
+        saver = tf.train.Saver(max_to_keep=5)
+        if ckpt and ckpt.model_checkpoint_path:
+            print("Restore Model ...")
+            saver.restore(sess, ckpt.model_checkpoint_path)    
+        while True:
+            for batch in range(BATCHES):
+                start = time.time()                
+                train_inputs, train_labels = get_next_batch(BATCH_SIZE)             
+                feed = {inputs: train_inputs, labels: train_labels, keep_prob: 0.95}
+                b_loss, b_labels, b_predictions,  steps,  _ = \
+                    session.run([loss, labels, predictions, global_step, train_op], feed)
 
-    
+                seconds = round(time.time() - start,2)
+                print("step:", steps, "cost:", b_loss, "batch seconds:", seconds)
+                if np.isnan(b_loss) or np.isinf(b_loss):
+                    print("Error: cost is nan or inf")
+                    train_labels_list = decode_sparse_tensor(train_labels)
+                    for i, train_label in enumerate(train_labels_list):
+                        print(i,list_to_chars(train_label))
+                    return   
+                
+                if seconds > 60: 
+                    print('Exit for long time')
+                    return
 
-    
 
+            saver.save(session, checkpoint_path, global_step=steps)
+                
 if __name__ == '__main__':
     train()
