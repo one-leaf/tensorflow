@@ -84,7 +84,13 @@ def neural_networks():
     return inputs, labels, predictions, keep_prob, loss, train_op
 
 FontDir = os.path.join(curr_dir,"fonts")
-FontNames = [os.path.join(FontDir, name) for name in os.listdir(FontDir)]
+FontNames = []    
+for name in os.listdir(FontDir):
+    fontName = os.path.join(FontDir, name)
+    if fontName.lower().endswith('ttf') or \
+        fontName.lower().endswith('ttc') or \
+        fontName.lower().endswith('otf'):
+        FontNames.append(fontName)
 ConsolasFont = os.path.join(curr_dir,"fonts","Consolas.ttf")
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
@@ -105,11 +111,11 @@ def get_next_batch(batch_size=128):
         to_image=utils.renderNormalFontByPIL(ConsolasFont,64,text)
         to_image=utils.trim(to_image)
         to_image=np.asarray(to_image)
-        to_image=utils.resize(to_image,height=32)
+        to_image=utils.resize(to_image, height=image_height)
         to_image=utils.img2gray(to_image)
         to_images.append(to_image)
-        
-    max_width_image = max_width_image * 32
+
+    max_width_image = max_width_image * image_height
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
