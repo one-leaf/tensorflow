@@ -80,10 +80,7 @@ def neural_networks():
     _predictions = tf.reshape(predictions,(batch_size,-1))
     loss = tf.reduce_mean(tf.reduce_sum(tf.square(_predictions - _labels)))
 
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE_INITIAL)
-    train_op = optimizer.minimize(loss)
-
-    return inputs, labels, predictions, keep_prob, loss, train_op
+    return inputs, labels, predictions, keep_prob, loss
 
 FontDir = os.path.join(curr_dir,"fonts")
 FontNames = []    
@@ -130,14 +127,17 @@ def get_next_batch(batch_size=128):
     return inputs, labels
 
 def train():
-    inputs, labels, predictions, keep_prob, loss, train_op = neural_networks()
+    global_step = tf.Variable(0, trainable=False)
+    inputs, labels, predictions, keep_prob, loss = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, "model_font2font_highway")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
 
-    global_step = tf.Variable(0, trainable=False)
+    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE_INITIAL)
+    train_op = optimizer.minimize(loss, global_step=global_step)
+   
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
