@@ -42,8 +42,7 @@ BATCHES = 64
 BATCH_SIZE = 10
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = 3
-POOL_SIZE  = round(math.pow(2,POOL_COUNT))
+
 
 # 增加 Highway 网络
 def addHighwayLayer(inputs):
@@ -55,7 +54,8 @@ def addHighwayLayer(inputs):
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
-    labels = tf.placeholder(tf.int32,[None], name="labels")
+    labels = tf.placeholder(tf.float32, [None, None, image_height], name="labels")
+    
     keep_prob = tf.placeholder(tf.float32, name="keep_prob")
     drop_prob = 1 - keep_prob
 
@@ -65,23 +65,16 @@ def neural_networks():
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
-    for i in range(POOL_COUNT):
-        for j in range(10):
+    for i in range(5):
+        for j in range(5):
             layer = addHighwayLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
+        layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
 
-    # prediction = slim.layers.softmax(slim.layers.flatten(layer))
+    layer = tf.layers.dense(layer, 64, activation=tf.nn.relu)
+    predictions = tf.layers.dense(layer, image_height, activation=tf.nn.relu)
+    loss  = tf.reduce_sum(tf.square(predictions - labels))
 
-    layer = tf.reshape(layer,[batch_size, 64 * image_width * image_height // POOL_SIZE // POOL_SIZE])
-    layer = slim.fully_connected(layer, 512, normalizer_fn=slim.batch_norm)
-    layer = slim.fully_connected(layer, num_classes, normalizer_fn=slim.batch_norm, activation_fn=None)
-
-    predictions = slim.layers.softmax(layer)
-
-    target = tf.one_hot(tf.cast(labels, tf.int32), num_classes, 1, 0)
-
-    loss = tf.losses.softmax_cross_entropy(target, predictions) 
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE_INITIAL)
     train_op = slim.learning.create_train_op(total_loss, optimizer)
 
