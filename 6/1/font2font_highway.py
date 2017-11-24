@@ -115,7 +115,7 @@ def get_next_batch(batch_size=128):
         to_image=to_image / 255
         to_images.append(to_image)
 
-    max_width_image = max_width_image * (image_height+8)
+    max_width_image = max_width_image * (image_height+10)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
