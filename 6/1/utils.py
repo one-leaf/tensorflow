@@ -323,7 +323,7 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
     # 缩放一下
     img = trim(img)
     w,h=img.size
-    print(img.size)
+    # print(img.size)
     _h = round(9 + image_height * random.random() * 0.5)
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
