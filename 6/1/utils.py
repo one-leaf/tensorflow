@@ -252,39 +252,12 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
         images.append((img,(_x,_y,_w,_h)))
     return images
 
-# 装载图片，并分解为待识别图像
-def loadImage(filename,imgtype):
-    img = cv2.imread(filename, 0)
-    if img.shape != (1123,794):
-        raise "不是进口商检单"
-
-    result_images =[]
-
-    if imgtype==0:        
-        images = getGrids(img,1000,h=210)
-    elif imgtype==1:            
-        images = getGrids(img,1000,h=158)
-
-    # 按 rect 的 x 排序
-    sorted_images = sorted(images, key = lambda image: image[1][0])
-    for img,rect in sorted_images:
-        split_images = splitImg(img)
-        
-        b_w_split_images = []
-        for split_image in split_images:
-            b_w_split_images.append(img2bwinv(split_image))
-        result_images.append(b_w_split_images)        
-
-#            show(split_image)
-#            print(split_image.shape)
-    return result_images   
-
-def renderFontBypyGame(font_file, font_size, text, antialias = True):
+def renderFontBypyGame(font_file, font_size, text):
     pygame.init()
     freetype.init()
     try:
         font = freetype.Font(font_file, font_size)
-        font.antialiased = antialias 
+        font.antialiased = random.random()>0.5 
         styles = [freetype.STYLE_DEFAULT,freetype.STYLE_NORMAL,freetype.STYLE_OBLIQUE,
                     freetype.STYLE_STRONG,freetype.STYLE_UNDERLINE,freetype.STYLE_WIDE]
         while True:
@@ -337,11 +310,9 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
             text = text+" "+_word.strip()
     text=text.strip()
 
-    r= random.random()
-    if r>=0.8:
-       img = renderFontBypyGame(font_file, font_size, text, True)
-    elif r>0.6 and r<0.8:
-       img = renderFontBypyGame(font_file, font_size, text, False)        
+    r = random.random()
+    if r>=0.5:
+       img = renderFontBypyGame(font_file, font_size, text)        
     else:
        img = renderFontByPIL(font_file, font_size, text)
 
@@ -403,20 +374,21 @@ def main():
            fontName.lower().endswith('otf'):
            FontNames.append(fontName)
 
-
     fontName = random.choice(FontNames)
     eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
-    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list,is_Debug=True)
+    lable,img = getImage(ASCII_CHARS,fontName,image_height=32, font_length=50, \
+            font_size=64,word_dict=eng_world_list,is_Debug=False)
     print(lable)
-    plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
-    # plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
+    #plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
+
+    plt.imshow(img, cmap = 'gray',)
+    plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
     plt.show()
     
-    #cv2.imshow(lable,img)
-    #cv2.waitKey(0)
-    #cv2.destroyAllWindows()    
-    # need_ocr_images = loadImage(os.path.join(curr_dir,'test','0.jpg'))
+    # cv2.imshow(lable,np.asarray(img))
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()    
 
 if __name__ == '__main__':
     while True:

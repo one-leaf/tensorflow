@@ -10,20 +10,20 @@ import cv2
 import random
 curr_dir = os.path.dirname(__file__)
 
-def pygame_font(text,curr_dir):
+def pygame_font(text):
     pygame.init()
     font = pygame.font.Font(os.path.join(curr_dir, "fonts", "simsun.ttc"), 9)
     rtext = font.render(text, False, (0, 0, 0), (255, 255, 255))
-    pygame.image.save(rtext, os.path.join(curr_dir, "data", "pygame.png"))
+    pygame.image.save(rtext, os.path.join(curr_dir, "test", "pygame1.png"))
 
 # 这个最接近windows下的字体渲染
-def pygame_freetype_font(text,curr_dir):
+def pygame_freetype_font(text):
     pygame.init()
     freetype.init()
     # font =  freetype.SysFont("simsun",9)
     font = freetype.Font(os.path.join(curr_dir, "fonts", "SIMSUN.TTC"), 9)
     font.antialiased = False
-    surf = font.render("中国", fgcolor=(0, 0, 0), bgcolor=(255, 255, 255))[0]
+    surf = font.render(text, fgcolor=(0, 0, 0), bgcolor=(255, 255, 255))[0]
     # im_str = pygame.image.tostring(surf, 'RGB')
     # print(type(imgdata))
     # cv_image = cv2.cv.CreateImageHeader(surf.get_size(), cv.IPL_DEPTH_8U, 3)
@@ -36,7 +36,7 @@ def pygame_freetype_font(text,curr_dir):
     # image = np.fromstring(im_str, np.uint8)
     #utils.show(img_np)
     
-    pygame.image.save(surf, os.path.join(curr_dir, "test", "pygame.png"))
+    pygame.image.save(surf, os.path.join(curr_dir, "test", "pygame2.png"))
 
 def pil_font(text,curr_dir):
     font = ImageFont.truetype(os.path.join(curr_dir, "fonts", "simsun.ttc"),16,index = 0)
@@ -61,11 +61,15 @@ def getImage2():
 
 
 def main():
-    lable,img=utils.getImage()
-    print(lable)
-    cv2.imshow(lable,img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()    
+    # lable,img=utils.getImage()
+    # print(lable)
+    # cv2.imshow(lable,img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+    # 
+    text = u"中华人asdeuy21983923hbd3-k"
+    pygame_font(text)
+    pygame_freetype_font(text)    
 
 if __name__ == '__main__':
     main()
