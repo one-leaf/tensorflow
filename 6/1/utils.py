@@ -54,18 +54,19 @@ def save(img,filename):
 
 # 清除背景色
 def clearBackgroundColor(gray_image, replace_Color=255):
+    print("clearBackgroundColor")
     f_img = gray_image.flatten().astype(int)
     counts = np.bincount(f_img)
     c = np.argmax(counts)
     v = f_img[c]
     same = 0
-    if v == gray_image.getpixel((0,0)):
+    if v == gray_image[0,0,0]:
         same+=1
-    if v == gray_image.getpixel((0,gray_image.size[1])):
+    if v == gray_image[0,-1,0]:
         same+=1
-    if v == gray_image.getpixel((gray_image.size[0],0)):
+    if v == gray_image[-1,0,0]:
         same+=1
-    if v == gray_image.getpixel(gray_image.size):
+    if v == gray_image[-1,-1,0]:
         same+=1
     if v!=replace_Color and same>=3:
         img = gray_image - v
@@ -384,7 +385,7 @@ def main():
     fontName = random.choice(FontNames)
     eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
-    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list,is_Debug=True)
+    lable,img = getImage(ASCII_CHARS,fontName,32,word_dict=eng_world_list,is_Debug=False)
     print(lable)
     plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
     # plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
