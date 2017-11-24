@@ -56,9 +56,10 @@ def save(img,filename):
 def clearBackgroundColor(gray_image, replace_Color=255):
     f_img = gray_image.flatten().astype(int)
     counts = np.bincount(f_img)
-    c = np.argmax(counts)
-    v = f_img[c]
+    v = np.argmax(counts)
     same = 0
+    if v== replace_Color:
+        return gray_image
     if len(gray_image.shape) == 3:
         if v == gray_image[0,0,0]: same+=1
         if v == gray_image[0,-1,0]: same+=1
@@ -69,7 +70,7 @@ def clearBackgroundColor(gray_image, replace_Color=255):
         if v == gray_image[0,-1]: same+=1
         if v == gray_image[-1,0]: same+=1
         if v == gray_image[-1,-1]: same+=1        
-    if v!=replace_Color and same>=3:
+    if same>=3:
         img = gray_image - v
         zero_mask = img == 0
         gray_image[zero_mask] = replace_Color
@@ -77,7 +78,7 @@ def clearBackgroundColor(gray_image, replace_Color=255):
 
 # img 参数是 np.array 类型 输入是正常灰度图片
 # 用于清除表格线
-def clearLineImg(gray_image):
+def clearImgGray(gray_image):
     adaptive_binary_inv=img2bwinv(gray_image)
     # 清除竖线
     _sum=np.sum(adaptive_binary_inv,axis=0)
@@ -91,7 +92,8 @@ def clearLineImg(gray_image):
     for i,x in enumerate(_sum):
         if x>_mean*0.8:
             gray_image[i,:]=255
-    return gray_image
+
+    return dropZeroEdgesGray(gray_image)
 
 
 # img 参数是 np.array 类型 输入是二值化并且反色的图片
@@ -109,7 +111,7 @@ def clearImg(adaptive_binary_inv):
     for i,x in enumerate(_sum):
         if x>_mean*0.8:
             adaptive_binary_inv[i,:]=0
-    return adaptive_binary_inv
+    return dropZeroEdges(adaptive_binary_inv)
 
 # 图片转灰度, 参数是 np.array 类型
 def img2gray(img_color):
@@ -143,12 +145,22 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     vector = vector / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
 
-# 清除边缘,需要反色
-def dropZeroEdges(img_bw_inv):
-    true_points = np.argwhere(img_bw_inv)
+# 清除边缘 输入为灰度图片
+def dropZeroEdgesGray(img_gray):
+    img=img2bwinv(img_gray)
+    true_points = np.argwhere(img)
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
-    return img_bw_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
+    if top_left[0] == bottom_right[0] and top_left[1] == bottom_right[1] : return img
+    return img_gray[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
+
+# 清除边缘 输入为反色图片
+def dropZeroEdges(img_inv):
+    true_points = np.argwhere(img_inv)
+    top_left = true_points.min(axis=0)
+    bottom_right = true_points.max(axis=0)
+    if top_left[0] == bottom_right[0] and top_left[1] == bottom_right[1] : return img_inv
+    return img_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
 
 # 图片分割，按水平投影分割
 # img_gray 传入的灰度图像
@@ -161,7 +173,6 @@ def splitImg(img_gray):
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
     peek_ranges = extract_peek_ranges_from_array(h_sum,3,5)
-
     images=[]
     for i, peek_range in enumerate(peek_ranges):
         x = 0
@@ -180,7 +191,7 @@ def splitImg(img_gray):
             if s==0:
                 w -= 1
             else:
-                break
+                break    
         images.append(img_gray[y: y + h , x: x + w ])
     return images
     
@@ -195,7 +206,7 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
         if val > minimun_val and start_i is None:
             start_i = i
         elif val > minimun_val and start_i is not None:
-            pass
+            end_i = i
         elif val < minimun_val and start_i is not None:
             end_i = i
             if end_i - start_i >= minimun_range:
@@ -206,6 +217,8 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
             pass
         else:
             raise ValueError("cannot parse this case...")
+    if start_i is not None and end_i is not None:
+        peek_ranges.append((start_i, end_i))
     return peek_ranges
 
 def readImgFile(filename):

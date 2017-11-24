@@ -53,7 +53,7 @@ def scan(file):
     img = Image.open(file.stream)
     image = np.array(img)
     image = utils.img2gray(image)
-    image = utils.clearLineImg(image)    
+    image = utils.clearImgGray(image)    
     split_images = utils.splitImg(image)
     
     ocr_texts = []
