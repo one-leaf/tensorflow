@@ -112,6 +112,7 @@ def get_next_batch(batch_size=128):
         to_image=np.asarray(to_image)
         to_image=utils.resize(to_image, height=image_height)
         to_image=utils.img2gray(to_image)
+        to_image=to_image / 255
         to_images.append(to_image)
 
     max_width_image = max_width_image * (image_height+8)
