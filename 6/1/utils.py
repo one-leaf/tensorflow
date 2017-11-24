@@ -54,7 +54,6 @@ def save(img,filename):
 
 # 清除背景色
 def clearBackgroundColor(gray_image, replace_Color=255):
-    print("clearBackgroundColor")
     f_img = gray_image.flatten().astype(int)
     counts = np.bincount(f_img)
     c = np.argmax(counts)
