@@ -272,7 +272,10 @@ def renderFontBypyGame(font_file, font_size, text, antialias = True):
     try:
         font = freetype.Font(font_file, font_size)
         font.antialiased = antialias 
-        rtext = font.render(text, (0, 0, 0), (255, 255, 255))[0]       
+        styles = [freetype.STYLE_DEFAULT,freetype.STYLE_NORMAL,freetype.STYLE_OBLIQUE,
+                    freetype.STYLE_STRONG,freetype.STYLE_UNDERLINE,freetype.STYLE_WIDE]
+        style =random.choice(styles)
+        rtext = font.render(text, (0, 0, 0), (255, 255, 255), style=style)[0]       
         data = pygame.image.tostring(rtext, 'RGBA')
         _img = Image.frombytes("RGBA",rtext.get_size(),data)
         size = _img.size
@@ -302,7 +305,7 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
     n = random.random()
     if n<0.1:
         for i in range(font_length):
-            text += random.choice("1234567890-./$,:()+-*=><")
+            text += random.choice("123456789012345678901234567890-./$,:()+-*=><")
     elif n<0.5 and n>=0.1:
         for i in range(font_length):
             text += random.choice(CHARS)        
