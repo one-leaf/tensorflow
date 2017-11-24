@@ -318,12 +318,16 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
 
     if is_Debug:
         return text, img
+
+
     # 缩放一下
     img = trim(img)
     w,h=img.size
-    _h = round(h + (image_height - h) * random.random())
+    print(img.size)
+    _h = round(9 + image_height * random.random() * 0.5)
     _w = round(w * _h / h)
-    img.resize((_h,_w), Image.ANTIALIAS)
+    img = img.resize((_w,_h), Image.ANTIALIAS)
+
 
     # 做轻微的旋转 +- 1.5度
     # w,h=img.size
