@@ -109,9 +109,11 @@ def get_next_batch(batch_size=128):
             max_width_image = images.shape[0]
         to_image=utils.renderNormalFontByPIL(ConsolasFont,64,text)
         to_image=utils.trim(to_image)
-        to_image=to_image.resize((max_width_image,font_length), Image.ANTIALIAS).
+        _w = round(to_image.shape[0]*image_height/to_image.shape[1])
+        if _w>max_width_image: _w=max_width_image
+        to_image=to_image.resize((_w,image_height), Image.ANTIALIAS).
         to_image=np.asarray(to_image)
-        to_image=utils.resize(to_image, height=image_height)
+        #to_image=utils.resize(to_image, height=image_height)
         to_image=utils.img2gray(to_image)
         to_image=to_image / 255
         to_images.append(to_image)
