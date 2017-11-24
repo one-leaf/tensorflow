@@ -58,7 +58,16 @@ def clearBackgroundColor(gray_image, replace_Color=255):
     counts = np.bincount(f_img)
     c = np.argmax(counts)
     v = f_img[c]
-    if v!=replace_Color:
+    same = 0
+    if v == gray_image.getpixel((0,0)):
+        same+=1
+    if v == gray_image.getpixel((0,gray_image.size[1])):
+        same+=1
+    if v == gray_image.getpixel((gray_image.size[0],0)):
+        same+=1
+    if v == gray_image.getpixel(gray_image.size):
+        same+=1
+    if v!=replace_Color and same>=3:
         img = gray_image - v
         zero_mask = img == 0
         gray_image[zero_mask] = replace_Color
