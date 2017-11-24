@@ -168,7 +168,7 @@ def train():
                     return
 
 
-            saver.save(session, checkpoint_path, global_step=steps)
+            saver.save(session, saver_prefix, global_step=steps)
                 
 if __name__ == '__main__':
     train()
