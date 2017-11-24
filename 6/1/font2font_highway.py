@@ -105,11 +105,18 @@ def get_next_batch(batch_size=128):
         font_size = random.randint(9, 64)        
         text, image= utils.getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
         images.append(image)
-        if images.shape[0] > max_width_image: 
-            max_width_image = images.shape[0]
+        if image.shape[0] > max_width_image: 
+            max_width_image = image.shape[0]
         to_image=utils.renderNormalFontByPIL(ConsolasFont,64,text)
         to_image=utils.trim(to_image)
-        to_image=to_image.resize((max_width_image, image_height), Image.ANTIALIAS)
+        
+        _w = round(to_image.shape[0]*image_height/to_image.shape[1])
+        _h = image_height
+        if _w>max_width_image:
+            _w=max_width_image
+            _h=round(to_image.shape[1]*max_width_image/to_image.shape[0])
+
+        to_image=to_image.resize((_w, _h), Image.ANTIALIAS)
         to_image=np.asarray(to_image)
         #to_image=utils.resize(to_image, height=image_height)
         to_image=utils.img2gray(to_image)
