@@ -73,7 +73,10 @@ def neural_networks():
 
     layer = tf.layers.dense(layer, 64, activation=tf.nn.relu)
     predictions = tf.layers.dense(layer, image_height, activation=tf.nn.relu)
-    loss  = tf.reduce_sum(tf.square(predictions - labels))
+
+    _labels = tf.reshape(labels,(batch_size,-1))
+    _predictions = tf.reshape(predictions,(batch_size,-1))
+    loss = tf.reduce_mean(tf.reduce_sum(tf.square(_predictions - _labels)))
 
     optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE_INITIAL)
     train_op = optimizer.minimize(loss)
