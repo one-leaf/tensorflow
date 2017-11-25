@@ -47,13 +47,13 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 
 # 增加残差网络
-def addResLayer(inputs):
+def addResLayer(inputs, rate=3):
     layer = slim.batch_norm(inputs, activation_fn=None)
     layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [3,3],activation_fn=None)
+    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
     layer = slim.batch_norm(layer, activation_fn=None)
     layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [3,3],activation_fn=None)
+    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
     outputs = inputs + layer
     return outputs       
 
@@ -74,10 +74,10 @@ def neural_networks():
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(POOL_COUNT):
-        for j in range(5):
-            layer = addResLayer(layer)
-        layer = slim.conv2d(layer, 64, [5,5], stride=[2, 2], normalizer_fn=slim.batch_norm)  
-        for j in range(5):
+        for j in range(3):
+            layer = addResLayer(layer,rate=5)
+        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
+        for j in range(6):
             layer = addResLayer(layer)
    
     layer = tf.reshape(layer,[batch_size, -1, 64])  #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, 64]
