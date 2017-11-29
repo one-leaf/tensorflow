@@ -11,7 +11,7 @@ import cv2
 from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
 import math
-import urllib,json
+import urllib,json,io
 
 curr_dir = os.path.dirname(__file__)
 
@@ -155,7 +155,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     params['fontsize'] = font_size
     params['fontmode'] = random.choice([0,1,2,4,8])
     r = http('http://192.168.2.113:8888/',params)
-    img = Image.open(r)
+    img = Image.open(io.BytesIO(r))
     if is_Debug:
         return text, img
 
