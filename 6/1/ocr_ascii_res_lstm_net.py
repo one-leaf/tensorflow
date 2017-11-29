@@ -121,9 +121,9 @@ def http(url,param=None):
     if param !=None:
         paramurl = urllib.parse.urlencode(param)
         url = "%s?%s"%(url,paramurl)
-        r = urllib.request.urlopen(url)
+        r = urllib.request.urlopen(url, timeout=30)
     else:    
-        r = urllib.request.urlopen(url)
+        r = urllib.request.urlopen(url, timeout=30)
     return r.read()
 
 r = http('http://192.168.2.113:8888/')
