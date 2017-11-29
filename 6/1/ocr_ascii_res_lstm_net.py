@@ -158,6 +158,8 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     params['fontname'] = font_name
     params['fontsize'] = font_size
     params['fontmode'] = random.choice([0,1,2,4,8])
+    params['fonthint'] = random.choice([0,1,2,3,4,5])
+    
     r = http('http://192.168.2.113:8888/',params)
     _img = Image.open(io.BytesIO(r))
     img=Image.new("RGB",_img.size,(255,255,255))
