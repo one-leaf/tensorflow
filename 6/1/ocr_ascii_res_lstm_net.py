@@ -117,6 +117,15 @@ def neural_networks():
 
     return logits, inputs, labels, seq_len, keep_prob
 
+def http(url,param=None):
+    if param !=None:
+        paramurl = urllib.parse.urlencode(param)
+        url = "%s?%s"%(url,paramurl)
+        r = urllib.request.urlopen(url)
+    else:    
+        r = urllib.request.urlopen(url)
+    return r.read()
+
 r = http('http://192.168.2.113:8888/')
 fonts = json.loads(r.decode('utf-8'))
 ENGFontNames = fonts['eng']
