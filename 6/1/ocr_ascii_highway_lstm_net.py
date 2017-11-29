@@ -115,8 +115,9 @@ def neural_networks():
 
 def http(url,param=None):
     if param !=None:
-        paramurl = urllib.parse.urlencode(param).encode('utf-8')
-        r = urllib.request.urlopen("%s?%s"%(url,paramurl))
+        paramurl = urllib.parse.urlencode(param)
+        url = "%s?%s"%(url,paramurl)
+        r = urllib.request.urlopen(url)
     else:    
         r = urllib.request.urlopen(url)
     return r.read()
