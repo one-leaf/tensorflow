@@ -54,13 +54,16 @@ def scan(file):
     image = np.array(img)
     image = utils.img2gray(image)
     image = utils.clearImgGray(image)    
+    utils.save(image, os.path.join(curr_dir,"test","src.png"))
     split_images = utils.splitImg(image)
     
     ocr_texts = []
 
     for i, split_image in enumerate(split_images):
         # image = utils.img2bwinv(split_image)
-        image = 255. - split_image
+        image = utils.clearImgGray(split_image)
+        image = utils.clearBackgroundColor(image, 255)    
+        image = 255. - image
         image = utils.dropZeroEdges(image)  
         image = utils.resize(image, ocr.image_height)
         utils.save(image,os.path.join(curr_dir,"test","%s.png"%i))
@@ -91,7 +94,7 @@ def index():
         <body>
             <form action="/ocr" method="post" enctype="multipart/form-data">
                 选择一个文件上传来 OCR （支持全部Windows字体和各种字号）: <br/>
-                1. 只能是 白底 黑字<br/>
+                加了表格线消除和背景色移除，不过字体需要有颜色，不能是纯白色。<br/>
                 <br/>
                 <br/>
                 <input type="file" name="file" id="file"> <br/><br/>
