@@ -155,16 +155,15 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     params['fontsize'] = font_size
     params['fontmode'] = random.choice([0,1,2,4,8])
     r = http('http://192.168.2.113:8888/',params)
-    img = Image.open(io.BytesIO(r))
-    r, g, b, a = img.split()
-    img = Image.merge("RGB", (r, g, b))
+    _img = Image.open(io.BytesIO(r))
+    img=Image.new("RGB",_img.size,(255,255,255))
+    img.paste(_img,(0,0),_img)
     img = utils.trim(img)
     w,h = img.size
     _h = random.randint(9,64)
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
     img = np.asarray(img)
-    img.flags.writeable = True 
     img = utils.clearBackgroundColor(img)
     img = 1 - utils.img2gray(img)/255.   
     img = utils.dropZeroEdges(img)

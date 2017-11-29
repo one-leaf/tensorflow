@@ -48,6 +48,10 @@ def show(img):
     cv2.imshow('image', img)
     cv2.waitKey(0)
 
+def pltshow(img):
+    plt.imshow(img)
+    plt.show()
+
 # 保存图片
 def save(img,filename):
     cv2.imwrite(filename,img)
