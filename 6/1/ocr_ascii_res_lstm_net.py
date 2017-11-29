@@ -182,7 +182,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     font_min_length = random.randint(10, 80)
     for i in range(batch_size):
-        font_name = random.choice(FontNames)
+        font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
         font_size = random.randint(14, 64)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
