@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils
+import utils
 import time
 import random
 import cv2
