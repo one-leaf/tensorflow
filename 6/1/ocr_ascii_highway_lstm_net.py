@@ -165,7 +165,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     img.flags.writeable = True 
     img = utils.clearBackgroundColor(img)
     img = 1 - utils.img2gray(img)/255.   
-    img = dutils.ropZeroEdges(img)
+    img = utils.ropZeroEdges(img)
     img = utils.resize(img, image_height)
     return text, img
 
