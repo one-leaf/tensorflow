@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-import utils
+from utils
 import time
 import random
 import cv2
@@ -47,12 +47,16 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 
-# 增加 Highway 网络
-def addHighwayLayer(inputs):
-    H = slim.conv2d(inputs, 64, [3,3])
-    T = slim.conv2d(inputs, 64, [3,3], biases_initializer = tf.constant_initializer(-1.0), activation_fn=tf.nn.sigmoid)    
-    outputs = H * T + inputs * (1.0 - T)
-    return outputs    
+# 增加残差网络
+def addResLayer(inputs, rate=3):
+    layer = slim.batch_norm(inputs, activation_fn=None)
+    layer = tf.nn.relu(layer)
+    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
+    layer = slim.batch_norm(layer, activation_fn=None)
+    layer = tf.nn.relu(layer)
+    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
+    outputs = inputs + layer
+    return outputs       
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
@@ -72,10 +76,10 @@ def neural_networks():
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(POOL_COUNT):
         for j in range(3):
-            layer = addHighwayLayer(layer)
+            layer = addResLayer(layer,rate=5)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
-        for j in range(3):
-            layer = addHighwayLayer(layer)
+        for j in range(6):
+            layer = addResLayer(layer)
    
     layer = tf.reshape(layer,[batch_size, -1, 64])  #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, 64]
 
@@ -112,15 +116,6 @@ def neural_networks():
     logits = tf.transpose(layer, (1, 0, 2), name="logits")
 
     return logits, inputs, labels, seq_len, keep_prob
-
-def http(url,param=None):
-    if param !=None:
-        paramurl = urllib.parse.urlencode(param)
-        url = "%s?%s"%(url,paramurl)
-        r = urllib.request.urlopen(url)
-    else:    
-        r = urllib.request.urlopen(url)
-    return r.read()
 
 r = http('http://192.168.2.113:8888/')
 fonts = json.loads(r.decode('utf-8'))
@@ -178,7 +173,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     font_min_length = random.randint(10, 80)
     for i in range(batch_size):
-        font_name = random.choice(AllFontNames)
+        font_name = random.choice(FontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
         font_size = random.randint(14, 64)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
@@ -319,7 +314,7 @@ def train():
 
     def restore(sess):
         curr_dir = os.path.dirname(__file__)
-        model_dir = os.path.join(curr_dir, "model_ascii_highway_lstm")
+        model_dir = os.path.join(curr_dir, "model_ascii_res_lstm")
         if not os.path.exists(model_dir): os.mkdir(model_dir)
         saver_prefix = os.path.join(model_dir, "model.ckpt")        
         ckpt = tf.train.get_checkpoint_state(model_dir)
