@@ -156,8 +156,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     params['fontmode'] = random.choice([0,1,2,4,8])
     r = http('http://192.168.2.113:8888/',params)
     img = Image.open(io.BytesIO(r))
-    if is_Debug:
-        return text, img
+    return text, img
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
