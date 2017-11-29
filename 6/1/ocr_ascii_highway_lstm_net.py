@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-from utils import readImgFile, img2gray, img2bwinv, img2vec, dropZeroEdges, resize, save, getImage
+import utils
 import time
 import random
 import cv2
@@ -156,6 +156,16 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     params['fontmode'] = random.choice([0,1,2,4,8])
     r = http('http://192.168.2.113:8888/',params)
     img = Image.open(io.BytesIO(r))
+    img = utils.trim(img)
+    w,h=img.size
+    _h = random.randint(9,64)
+    _w = round(w * _h / h)
+    img = img.resize((_w,_h), Image.ANTIALIAS)
+    img = np.asarray(img)
+    img = utils.clearBackgroundColor(img)
+    img = 1 - utils.img2gray(img)/255.   
+    img = dutils.ropZeroEdges(img)
+    img = utils.resize(img, image_height)
     return text, img
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
@@ -180,7 +190,7 @@ def get_next_batch(batch_size=128):
     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
-        image_vec = img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
+        image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.transpose(image_vec)
 
     labels = [np.asarray(i) for i in codes]
