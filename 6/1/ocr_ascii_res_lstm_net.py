@@ -174,9 +174,9 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     img = 1 - utils.img2gray(img)/255.   
     img = utils.dropZeroEdges(img)
 
-    filter = np.random.random(img.shape) - 0.7
+    filter = np.random.random(img.shape) - 0.9
     filter = np.maximum(filter, 0) 
-    img = img + filter
+    img = img + filter * 5
     imin, imax = img.min(), img.max()
     img = (img - imin)/(imax - imin)
     
