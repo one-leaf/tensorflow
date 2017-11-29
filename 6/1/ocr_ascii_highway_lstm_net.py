@@ -11,6 +11,7 @@ import cv2
 from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
 import math
+import urllib,json
 
 curr_dir = os.path.dirname(__file__)
 
@@ -112,14 +113,50 @@ def neural_networks():
 
     return logits, inputs, labels, seq_len, keep_prob
 
-FontDir = os.path.join(curr_dir,"fonts")
-FontNames = []    
-for name in os.listdir(FontDir):
-    fontName = os.path.join(FontDir, name)
-    if fontName.lower().endswith('ttf') or \
-        fontName.lower().endswith('ttc') or \
-        fontName.lower().endswith('otf'):
-        FontNames.append(fontName)
+def http(url,param=None):
+    if param !=None:
+        paramurl = urllib.parse.urlencode(param).encode('utf-8')
+        r = urllib.request.urlopen("%s?%s"%(url,paramurl))
+    else:    
+        r = urllib.request.urlopen(url)
+    return r.read()
+
+r = http('http://192.168.2.113:8888/')
+fonts = json.loads(r.decode('utf-8'))
+ENGFontNames = fonts['eng']
+print("EngFontNames", ENGFontNames)
+CHIFontNames = fonts['chi']
+print("CHIFontNames", CHIFontNames)
+AllFontNames = ENGFontNames + CHIFontNames
+
+def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
+    text=''
+    n = random.random()
+    if n<0.1:
+        for i in range(font_length):
+            text += random.choice("123456789012345678901234567890-./$,:()+-*=><")
+    elif n<0.5 and n>=0.1:
+        for i in range(font_length):
+            text += random.choice(CHARS)        
+    else:
+        while len(text)<font_length:
+            word = random.choice(word_dict)
+            _word=""
+            for c in word:
+                if c in CHARS:
+                    _word += c
+            text = text+" "+_word.strip()
+    text = text.strip()
+
+    params= {}
+    params['text'] = text
+    params['fontname'] = font_name
+    params['fontsize'] = font_size
+    params['fontmode'] = random.choice([0,1,2,4,8])
+    r = http('http://192.168.2.113:8888/',params)
+    img = Image.open(r)
+    if is_Debug:
+        return text, img
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
@@ -129,7 +166,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     font_min_length = random.randint(10, 80)
     for i in range(batch_size):
-        font_name = random.choice(FontNames)
+        font_name = random.choice(ENGFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
         font_size = random.randint(14, 64)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
