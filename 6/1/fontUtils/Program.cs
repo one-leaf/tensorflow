@@ -73,10 +73,15 @@ namespace RenderFontHttpServer
                 {
                     Socket s = listener.AcceptSocket();
                     NetworkStream ns = new NetworkStream(s);
+                    s.ReceiveTimeout = 30;
+                    s.SendTimeout = 30;
+                    ns.ReadTimeout = 30;
+                    ns.WriteTimeout = 30;
                     try
                     {
                         StreamReader sr = new StreamReader(ns);
-                        //Console.WriteLine("Connect");
+                        
+                        Console.WriteLine("{0} {1}" ,DateTime.Now.ToString(),(s.RemoteEndPoint as IPEndPoint).Address);
                         Request req = new Request(sr);
                         //Console.WriteLine("req");
 
