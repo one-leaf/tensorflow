@@ -162,6 +162,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
     img = np.asarray(img)
+    img.flags.writeable = True 
     img = utils.clearBackgroundColor(img)
     img = 1 - utils.img2gray(img)/255.   
     img = dutils.ropZeroEdges(img)
