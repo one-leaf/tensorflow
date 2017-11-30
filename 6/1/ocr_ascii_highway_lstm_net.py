@@ -114,14 +114,12 @@ def neural_networks():
     return logits, inputs, labels, seq_len, keep_prob
 
 def http(url,param=None):
+    if param != None:
+        paramurl = urllib.parse.urlencode(param)
+        url = "%s?%s"%(url,paramurl)
     for i in range(3):
         try:
-            if param !=None:
-                paramurl = urllib.parse.urlencode(param)
-                _url = "%s?%s"%(url,paramurl)
-                r = urllib.request.urlopen(_url, timeout=10)
-            else:    
-                r = urllib.request.urlopen(url, timeout=10)
+            r = urllib.request.urlopen(url, timeout=10)
             return r.read()
         except:
             pass
