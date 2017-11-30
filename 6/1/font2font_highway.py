@@ -186,7 +186,6 @@ def get_next_batch(batch_size=128):
             max_width_image = image.shape[1]
         if to_image.shape[1] > max_width_image: 
             max_width_image = to_image.shape[1]      
-
     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
@@ -196,7 +195,7 @@ def get_next_batch(batch_size=128):
     labels = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(to_images)):
         image_vec = utils.img2vec(to_images[i], height=image_height, width=max_width_image, flatten=False)
-        labels[i,:] = np.transpose(image_vec)
+        labels[i,:] = np.transpose(image_vec)   
     return inputs, labels
 
 def train():
@@ -222,7 +221,7 @@ def train():
         while True:
             for batch in range(BATCHES):
                 start = time.time()                
-                train_inputs, train_labels = get_next_batch(BATCH_SIZE)             
+                train_inputs, train_labels = get_next_batch(BATCH_SIZE)     
                 feed = {inputs: train_inputs, labels: train_labels, keep_prob: 0.95}
                 b_loss, b_labels, b_predictions,  steps,  _ = \
                     session.run([loss, labels, predictions, global_step, train_op], feed)
@@ -245,12 +244,12 @@ def train():
                     feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
                     b_predictions = session.run([predictions], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)    
-                    #utils.pltshow(test_inputs[0])   
-                   # utils.pltshow(test_labels[0])  
-                    #utils.pltshow(b_predictions)             
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), test_inputs[0]*255)
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), test_labels[0]*255)
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), b_predictions*255)
+                    #utils.pltshow(np.transpose(test_inputs[0]))   
+                   # utils.pltshow(np.transpose(test_labels[0]))  
+                    #utils.pltshow(np.transpose(b_predictions)))             
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), np.transpose(b_predictions*255))
 
 
             saver.save(session, saver_prefix, global_step=steps)
