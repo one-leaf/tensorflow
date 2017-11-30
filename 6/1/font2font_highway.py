@@ -173,7 +173,7 @@ def get_next_batch(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
-        font_size = random.randint(9, 64)      
+        font_size = random.randint(9, 32)      
         text = getRedomText(CHARS, eng_world_list, font_length)          
         image= getImage(CHARS, font_name, font_length, font_size, noise = True)
         image=utils.resize(image, height=image_height)
