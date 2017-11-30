@@ -72,8 +72,8 @@ def neural_networks():
         layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)  
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
 
-    layer = tf.layers.dense(layer, 64, activation=tf.nn.relu) #(batch_size, image_width, image_height, 64)
-    layer = tf.reshape(layer,(-1,image_height*64))
+    layer = tf.layers.dense(layer, 16, activation=tf.nn.relu) #(batch_size, image_width, image_height, 64)
+    layer = tf.reshape(layer,(-1,image_height*16))
     predictions = tf.layers.dense(layer, image_height)
     predictions = tf.reshape(predictions,(batch_size,image_width,image_height))
 
