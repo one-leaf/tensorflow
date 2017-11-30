@@ -15,7 +15,7 @@ import urllib,json,io
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 24
+image_height = 32
 
 # LSTM
 # num_hidden = 4
@@ -71,12 +71,12 @@ def neural_networks():
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(3):
-        for j in range(5):
+        for j in range(10):
             layer = addResLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
+        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
-    layer = tf.layers.dense(layer, 64, activation=tf.nn.relu) #(batch_size, image_width, image_height, 64)
-    layer = tf.reshape(layer,(-1,image_height*64))
+    layer = tf.layers.dense(layer, 64, activation=tf.nn.relu) #(batch_size, image_width//8, image_height//8, 64)
+    layer = tf.reshape(layer,(-1,image_height))
     predictions = tf.layers.dense(layer, image_height)
     predictions = tf.reshape(predictions,(batch_size,image_width,image_height))
 
