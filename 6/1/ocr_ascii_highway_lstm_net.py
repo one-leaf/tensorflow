@@ -166,7 +166,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     img.paste(_img,(0,0),_img)
     img = utils.trim(img)
     w,h = img.size
-    _h = random.randint(9,64)
+    _h = random.randint(9,48)
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
     img = np.asarray(img)
