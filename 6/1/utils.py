@@ -146,7 +146,7 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     vector = np.pad(img,((0,height-h),(0,width-w)), 'constant', constant_values=(value,))  # 在图像上补齐
     if flatten:
         vector = vector.flatten()
-    vector = vector / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
+    # vector = vector / 255 # 数据扁平化  (vector.flatten()-128)/128  mean为0
     return vector
 
 # 清除边缘 输入为灰度图片

@@ -11,6 +11,7 @@ import cv2
 from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
 import math
+import urllib,json,io
 
 curr_dir = os.path.dirname(__file__)
 
@@ -73,7 +74,7 @@ def neural_networks():
 
     layer = tf.layers.dense(layer, 64, activation=tf.nn.relu) #(batch_size, image_width, image_height, 64)
     layer = tf.reshape(layer,(-1,image_height*64))
-    predictions = tf.layers.dense(layer, image_height, activation=tf.nn.relu)
+    predictions = tf.layers.dense(layer, image_height)
     predictions = tf.reshape(predictions,(batch_size,image_width,image_height))
 
     _labels = tf.reshape(labels,(batch_size,-1))
@@ -82,15 +83,85 @@ def neural_networks():
 
     return inputs, labels, predictions, keep_prob, loss
 
-FontDir = os.path.join(curr_dir,"fonts")
-FontNames = []    
-for name in os.listdir(FontDir):
-    fontName = os.path.join(FontDir, name)
-    if fontName.lower().endswith('ttf') or \
-        fontName.lower().endswith('ttc') or \
-        fontName.lower().endswith('otf'):
-        FontNames.append(fontName)
-ConsolasFont = os.path.join(curr_dir,"fonts","Consolas.ttf")
+def http(url,param=None):
+    if param !=None:
+        paramurl = urllib.parse.urlencode(param)
+        url = "%s?%s"%(url,paramurl)
+        r = urllib.request.urlopen(url, timeout=30)
+    else:    
+        r = urllib.request.urlopen(url, timeout=30)
+    return r.read()
+
+r = http('http://192.168.2.113:8888/')
+fonts = json.loads(r.decode('utf-8'))
+ENGFontNames = fonts['eng']
+print("EngFontNames", ENGFontNames)
+CHIFontNames = fonts['chi']
+print("CHIFontNames", CHIFontNames)
+AllFontNames = ENGFontNames + CHIFontNames
+
+def getRedomText(CHARS, word_dict, font_length):
+    text=''
+    n = random.random()
+    if n<0.1:
+        for i in range(font_length):
+            text += random.choice("123456789012345678901234567890-./$,:()+-*=><")
+    elif n<0.5 and n>=0.1:
+        for i in range(font_length):
+            text += random.choice(CHARS)        
+    else:
+        while len(text)<font_length:
+            word = random.choice(word_dict)
+            _word=""
+            for c in word:
+                if c in CHARS:
+                    _word += c
+            text = text+" "+_word.strip()
+    text = text.strip()
+    return text
+
+def getImage(text, font_name, font_length, font_size, noise=False, fontmode=None, fonthint=None):
+    params= {}
+    params['text'] = text
+    params['fontname'] = font_name
+    params['fontsize'] = font_size
+    # params['fontmode'] = random.choice([0,1,2,4,8])
+    if fontmode == None:
+        params['fontmode'] = random.choice([0,1,2,4])
+    else:
+        params['fontmode'] = fontmode
+    if fonthint == None:
+        params['fonthint'] = random.choice([0,1,2,3,4,5])
+    else:
+        params['fonthint'] = fonthint
+    
+    r = http('http://192.168.2.113:8888/',params)
+    _img = Image.open(io.BytesIO(r))
+    img=Image.new("RGB",_img.size,(255,255,255))
+    img.paste(_img,(0,0),_img)
+    img = utils.trim(img)
+    
+    if noise:
+        w,h = img.size
+        _h = random.randint(9,64)
+        _w = round(w * _h / h)
+        img = img.resize((_w,_h), Image.ANTIALIAS)
+        img = np.asarray(img)
+        img = 1 - utils.img2gray(img)/255.   
+        img = utils.dropZeroEdges(img)
+
+        filter = np.random.random(img.shape) - 0.9
+        filter = np.maximum(filter, 0) 
+        img = img + filter * 5
+        imin, imax = img.min(), img.max()
+        img = (img - imin)/(imax - imin)
+    else:
+        img = np.asarray(img)
+        img = utils.img2gray(img) 
+        img = utils.img2bwinv(img)
+        img = img / 255.
+        img = utils.dropZeroEdges(img)
+    return img
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
@@ -100,29 +171,22 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     font_min_length = random.randint(10, 20)
     for i in range(batch_size):
-        font_name = random.choice(FontNames)
+        font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
-        font_size = random.randint(9, 64)        
-        text, image= utils.getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
+        font_size = random.randint(9, 64)      
+        text = getRedomText(CHARS, eng_world_list, font_length)          
+        image= getImage(CHARS, font_name, font_length, font_size, noise = True)
+        image=utils.resize(image, height=image_height)
         images.append(image)
+
+        to_image=getImage(CHARS, font_name, font_length, 24, noise = False, fontmode = 0, fonthint = 0)
+        to_image=utils.resize(to_image, height=image_height)
+        to_images.append(to_image)
+
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
-        to_image=utils.renderNormalFontByPIL(ConsolasFont,64,text)
-        to_image=utils.trim(to_image)
-
-        w,h=to_image.size
-        _w = round(w*image_height/h)
-        _h = image_height
-        if _w>max_width_image:
-            _w=max_width_image
-            _h=round(h*max_width_image/w)
-
-        to_image=to_image.resize((_w, _h), Image.ANTIALIAS)
-        to_image=np.asarray(to_image)
-        #to_image=utils.resize(to_image, height=image_height)
-        to_image=utils.img2gray(to_image)
-        to_image=to_image / 255
-        to_images.append(to_image)
+        if to_image.shape[1] > max_width_image: 
+            max_width_image = to_image.shape[1]      
 
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
