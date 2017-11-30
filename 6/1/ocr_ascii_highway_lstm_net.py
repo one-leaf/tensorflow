@@ -166,7 +166,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     img.paste(_img,(0,0),_img)
     img = utils.trim(img)
     w,h = img.size
-    _h = random.randint(9,48)
+    _h = random.randint(9,64)
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
     img = np.asarray(img)
@@ -193,7 +193,7 @@ def get_next_batch(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
-        font_size = random.randint(9, 64)        
+        font_size = random.randint(9, 48)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
         images.append(image)
         if image.shape[1] > max_width_image: 
