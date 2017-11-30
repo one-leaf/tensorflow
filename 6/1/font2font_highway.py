@@ -66,7 +66,7 @@ def neural_networks():
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
-    for i in range(5):
+    for i in range(3):
         for j in range(5):
             layer = addHighwayLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)  
