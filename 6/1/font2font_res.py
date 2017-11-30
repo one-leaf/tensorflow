@@ -71,7 +71,7 @@ def neural_networks():
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(3):
-        for j in range(5):
+        for j in range(10):
             layer = addResLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
@@ -176,13 +176,13 @@ def get_next_batch(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
-        font_size = random.randint(9, 32)      
+        font_size = random.randint(9, 64)      
         text = getRedomText(CHARS, eng_world_list, font_length)          
-        image= getImage(CHARS, font_name, font_length, font_size, noise = True)
+        image= getImage(text, font_name, font_length, font_size, noise = True)
         image=utils.resize(image, height=image_height)
         images.append(image)
 
-        to_image=getImage(CHARS, font_name, font_length, image_height, noise = False, fontmode = 0, fonthint = 0)
+        to_image=getImage(text, font_name, font_length, image_height, noise = False, fontmode = 0, fonthint = 0)
         to_image=utils.resize(to_image, height=image_height)
         to_images.append(to_image)
 
