@@ -244,10 +244,13 @@ def train():
                     test_inputs, test_labels = get_next_batch(1)             
                     feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
                     b_predictions = session.run([predictions], feed)                     
-                    b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)                   
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), test_inputs[0])
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), test_labels[0])
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), b_predictions)
+                    b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)    
+                    utils.pltshow(test_inputs[0])   
+                    utils.pltshow(test_labels[0])  
+                    utils.pltshow(b_predictions)             
+                   # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), test_inputs[0])
+                   # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), test_labels[0])
+                   # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), b_predictions)
 
 
             saver.save(session, saver_prefix, global_step=steps)
