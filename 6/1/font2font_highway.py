@@ -15,7 +15,7 @@ import urllib,json,io
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 32
+image_height = 24
 
 # LSTM
 # num_hidden = 4
@@ -39,7 +39,7 @@ LEARNING_RATE_INITIAL = 1e-4
 REPORT_STEPS = 500
 MOMENTUM = 0.9
 
-BATCHES = 64
+BATCHES = 10
 BATCH_SIZE = 10
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
