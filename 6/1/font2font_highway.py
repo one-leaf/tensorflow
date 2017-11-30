@@ -70,6 +70,7 @@ def neural_networks():
     for i in range(POOL_COUNT):
         for j in range(2):
             layer = addHighwayLayer(layer)
+        layer = tf.layers.dropout(layer, drop_prob)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
     predictions = slim.conv2d(layer, POOL_SIZE*POOL_SIZE, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
