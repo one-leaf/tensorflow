@@ -196,7 +196,7 @@ def train():
     inputs, labels, predictions, keep_prob, loss = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
-    model_dir = os.path.join(curr_dir, "model_font2font_highway")
+    model_dir = os.path.join(curr_dir, "model_font2font_srcnn")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
 
