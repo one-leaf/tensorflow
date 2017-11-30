@@ -179,7 +179,7 @@ def get_next_batch(batch_size=128):
         image=utils.resize(image, height=image_height)
         images.append(image)
 
-        to_image=getImage(CHARS, font_name, font_length, 24, noise = False, fontmode = 0, fonthint = 0)
+        to_image=getImage(CHARS, font_name, font_length, image_height, noise = False, fontmode = 0, fonthint = 0)
         to_image=utils.resize(to_image, height=image_height)
         to_images.append(to_image)
 
