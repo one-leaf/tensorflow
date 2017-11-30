@@ -114,13 +114,18 @@ def neural_networks():
     return logits, inputs, labels, seq_len, keep_prob
 
 def http(url,param=None):
-    if param !=None:
-        paramurl = urllib.parse.urlencode(param)
-        url = "%s?%s"%(url,paramurl)
-        r = urllib.request.urlopen(url, timeout=30)
-    else:    
-        r = urllib.request.urlopen(url, timeout=30)
-    return r.read()
+    for i in range(3):
+        try:
+            if param !=None:
+                paramurl = urllib.parse.urlencode(param)
+                url = "%s?%s"%(url,paramurl)
+                r = urllib.request.urlopen(url, timeout=10)
+            else:    
+                r = urllib.request.urlopen(url, timeout=10)
+            return r.read()
+        except:
+            pass
+    raise Exception("can't open %s"%url)     
 
 r = http('http://192.168.2.113:8888/')
 fonts = json.loads(r.decode('utf-8'))
