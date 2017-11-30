@@ -45,12 +45,16 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 
 
-# 增加 Highway 网络
-def addHighwayLayer(inputs):
-    H = slim.conv2d(inputs, 64, [3,3])
-    T = slim.conv2d(inputs, 64, [3,3], biases_initializer = tf.constant_initializer(-1.0), activation_fn=tf.nn.sigmoid)    
-    outputs = H * T + inputs * (1.0 - T)
-    return outputs    
+# 增加残差网络
+def addResLayer(inputs, rate=3):
+    layer = slim.batch_norm(inputs, activation_fn=None)
+    layer = tf.nn.relu(layer)
+    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
+    layer = slim.batch_norm(layer, activation_fn=None)
+    layer = tf.nn.relu(layer)
+    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
+    outputs = inputs + layer
+    return outputs     
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
@@ -68,12 +72,11 @@ def neural_networks():
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(3):
         for j in range(5):
-            layer = addHighwayLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)  
-    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+            layer = addResLayer(layer)
+        layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
 
-    layer = tf.layers.dense(layer, 8, activation=tf.nn.relu) #(batch_size, image_width, image_height, 64)
-    layer = tf.reshape(layer,(-1,image_height*8))
+    layer = tf.layers.dense(layer, 64, activation=tf.nn.relu) #(batch_size, image_width, image_height, 64)
+    layer = tf.reshape(layer,(-1,image_height*64))
     predictions = tf.layers.dense(layer, image_height)
     predictions = tf.reshape(predictions,(batch_size,image_width,image_height))
 
