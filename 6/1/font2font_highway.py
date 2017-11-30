@@ -36,7 +36,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 LEARNING_RATE_INITIAL = 1e-4
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 5
+REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 64
@@ -245,12 +245,12 @@ def train():
                     feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
                     b_predictions = session.run([predictions], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)    
-                    utils.pltshow(test_inputs[0])   
-                    utils.pltshow(test_labels[0])  
-                    utils.pltshow(b_predictions)             
-                   # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), test_inputs[0])
-                   # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), test_labels[0])
-                   # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), b_predictions)
+                    #utils.pltshow(test_inputs[0])   
+                   # utils.pltshow(test_labels[0])  
+                    #utils.pltshow(b_predictions)             
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), test_inputs[0]*255)
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), test_labels[0]*255)
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), b_predictions*255)
 
 
             saver.save(session, saver_prefix, global_step=steps)
