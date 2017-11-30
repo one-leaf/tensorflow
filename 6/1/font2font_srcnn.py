@@ -46,16 +46,6 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 
-# 增加残差网络
-def addResLayer(inputs, rate=3):
-    layer = slim.batch_norm(inputs, activation_fn=None)
-    layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
-    layer = slim.batch_norm(layer, activation_fn=None)
-    layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [rate,rate],activation_fn=None)
-    outputs = inputs + layer
-    return outputs     
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
@@ -70,16 +60,13 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
-    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
-    for i in range(POOL_COUNT):
-        for j in range(10):
-            layer = addResLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
+    layer = slim.conv2d(layer, 64, [9,9], normalizer_fn=slim.batch_norm)
+    layer = tf.nn.relu(layer)    
+    layer = slim.conv2d(layer, 32, [1,1], normalizer_fn=slim.batch_norm)
+    layer = tf.nn.relu(layer)    
+    layer = slim.conv2d(layer, 1,  [5,5], normalizer_fn=slim.batch_norm) 
 
-    layer = tf.layers.dense(layer, 64, activation=tf.nn.relu) #(batch_size, image_width//8, image_height//8, 64)
-    layer = tf.reshape(layer,(-1,image_height))
-    predictions = tf.layers.dense(layer, image_height)
-    predictions = tf.reshape(predictions,(batch_size,image_width,image_height))
+    predictions = tf.reshape(layer,(batch_size,image_width,image_height))
 
     _labels = tf.reshape(labels,(batch_size,-1))
     _predictions = tf.reshape(predictions,(batch_size,-1))
