@@ -72,7 +72,7 @@ def neural_networks():
             layer = addHighwayLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
 
-    predictions = slim.conv2d(layer, POOL_SIZE, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+    predictions = slim.conv2d(layer, POOL_SIZE*POOL_SIZE, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
 
     _predictions = tf.layers.flatten(predictions)
     _labels = tf.layers.flatten(labels)
