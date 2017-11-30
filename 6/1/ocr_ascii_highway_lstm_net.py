@@ -118,8 +118,8 @@ def http(url,param=None):
         try:
             if param !=None:
                 paramurl = urllib.parse.urlencode(param)
-                url = "%s?%s"%(url,paramurl)
-                r = urllib.request.urlopen(url, timeout=10)
+                _url = "%s?%s"%(url,paramurl)
+                r = urllib.request.urlopen(_url, timeout=10)
             else:    
                 r = urllib.request.urlopen(url, timeout=10)
             return r.read()
