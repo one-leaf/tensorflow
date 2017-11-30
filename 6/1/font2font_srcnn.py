@@ -66,8 +66,8 @@ def neural_networks():
     layer = tf.nn.relu(layer)    
     predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=slim.batch_norm, activation_fn=None) 
 
-    _predictions = tf.layer.flatten(layer)
-    _labels = tf.layer.flatten(labels)
+    _predictions = tf.layers.flatten(layer)
+    _labels = tf.layers.flatten(labels)
     loss = tf.reduce_mean(tf.reduce_sum(tf.square(_predictions - _labels)))
 
     return inputs, labels, predictions, keep_prob, loss
