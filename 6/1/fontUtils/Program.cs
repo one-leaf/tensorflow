@@ -62,7 +62,7 @@ namespace RenderFontHttpServer
         private Thread serverThread;
         TcpListener listener;
 
-        public void start(int port, Func<Request, Response> reqProc)
+        public void start(int port )
         {
             IPAddress ipAddr = IPAddress.Any;
             listener = new TcpListener(ipAddr, port);
@@ -72,45 +72,66 @@ namespace RenderFontHttpServer
                 while (true)
                 {
                     Socket s = listener.AcceptSocket();
-                    NetworkStream ns = new NetworkStream(s);
-                    s.ReceiveTimeout = 30;
-                    s.SendTimeout = 30;
-                    ns.ReadTimeout = 30;
-                    ns.WriteTimeout = 30;
-                    try
-                    {
-                        StreamReader sr = new StreamReader(ns);
-                        
-                        Console.WriteLine("{0} {1}" ,DateTime.Now.ToString(),(s.RemoteEndPoint as IPEndPoint).Address);
-                        Request req = new Request(sr);
-                        //Console.WriteLine("req");
-
-                        Response resp = reqProc(req);
-                        //Console.WriteLine("resp");
-
-                        StreamWriter sw = new StreamWriter(ns);
-                        sw.WriteLine("HTTP/1.0 {0}", resp.status);
-                        sw.WriteLine("Content-Type: {0}", resp.contentType);
-                        foreach (string k in resp.headers.Keys)
-                            sw.WriteLine("{0}: {1}", k, resp.headers[k]);
-                        sw.WriteLine("Content-Length: {0}", resp.data.Length);
-                        sw.WriteLine();
-                        sw.Flush();
-                        s.Send(resp.data);
-                        s.Shutdown(SocketShutdown.Both);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-
-                    }
-                    finally { 
-                        ns.Close();
-                    }
+                    ThreadPool.QueueUserWorkItem(threadProc, s);
                 }
             });
             serverThread.Start();
         }
+
+        private Response reqProc(Request req)
+        {
+            if (req.url == "/")
+            {
+                return getAllFonts();
+            }
+            else
+            {
+                return getImage(req.url);
+            }
+        }
+
+        private void threadProc(object obj)
+        {
+            Socket s = (Socket)obj;
+            NetworkStream ns = new NetworkStream(s);
+            s.ReceiveTimeout = 30;
+            s.SendTimeout = 30;
+            ns.ReadTimeout = 30;
+            ns.WriteTimeout = 30;
+            try
+            {
+                StreamReader sr = new StreamReader(ns);
+
+                Console.WriteLine("{0} {1}", DateTime.Now.ToString(), (s.RemoteEndPoint as IPEndPoint).Address);
+                Request req = new Request(sr);
+                //Console.WriteLine("req");
+
+                Response resp = reqProc(req);
+                //Console.WriteLine("resp");
+
+                StreamWriter sw = new StreamWriter(ns);
+                sw.WriteLine("HTTP/1.0 {0}", resp.status);
+                sw.WriteLine("Content-Type: {0}", resp.contentType);
+                foreach (string k in resp.headers.Keys)
+                    sw.WriteLine("{0}: {1}", k, resp.headers[k]);
+                sw.WriteLine("Content-Length: {0}", resp.data.Length);
+                sw.WriteLine();
+                sw.Flush();
+                s.Send(resp.data);
+                s.Shutdown(SocketShutdown.Both);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+
+            }
+            finally
+            {
+                ns.Close();
+            }
+
+        }
+
 
         public void stop()
         {
@@ -154,18 +175,7 @@ namespace RenderFontHttpServer
         static void Main(string[] args)
         {
             Program p = new Program();
-            p.start(8888, (req)=>
-            {
-               // Console.WriteLine("{0} {1}",req.method, req.url);
-                if (req.url == "/")
-                {
-                    return p.getAllFonts();
-                }
-                else
-                {
-                    return p.getImage(req.url);
-                }
-            });
+            p.start(8888);
             Console.WriteLine("press any key to exit.");
             Console.Read();
             p.stop();

@@ -118,13 +118,16 @@ def neural_networks():
     return logits, inputs, labels, seq_len, keep_prob
 
 def http(url,param=None):
-    if param !=None:
+    if param != None:
         paramurl = urllib.parse.urlencode(param)
         url = "%s?%s"%(url,paramurl)
-        r = urllib.request.urlopen(url, timeout=30)
-    else:    
-        r = urllib.request.urlopen(url, timeout=30)
-    return r.read()
+    for i in range(3):
+        try:
+            r = urllib.request.urlopen(url, timeout=10)
+            return r.read()
+        except:
+            pass
+    raise Exception("can't open %s"%url)           
 
 r = http('http://192.168.2.113:8888/')
 fonts = json.loads(r.decode('utf-8'))
@@ -171,7 +174,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
     img = np.asarray(img)
-    img = utils.clearBackgroundColor(img)
+  #  img = utils.clearBackgroundColor(img)
     img = 1 - utils.img2gray(img)/255.   
     img = utils.dropZeroEdges(img)
 
@@ -194,7 +197,7 @@ def get_next_batch(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
-        font_size = random.randint(9, 64)        
+        font_size = random.randint(9, 48)        
         text, image= getImage(CHARS, font_name, image_height, font_length, font_size, eng_world_list)
         images.append(image)
         if image.shape[1] > max_width_image: 
