@@ -69,7 +69,7 @@ def neural_networks():
     _predictions = tf.layers.dense(predictions, image_height)
 
     _predictions = tf.layers.flatten(_predictions)
-    _labels = tf.layers.flatten(_labels)
+    _labels = tf.layers.flatten(labels)
     loss = tf.reduce_mean(tf.square(_predictions - _labels))
 
     return inputs, labels, predictions, keep_prob, loss
