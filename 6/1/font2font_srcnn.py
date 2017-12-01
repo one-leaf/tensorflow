@@ -229,7 +229,15 @@ def train():
                 if seconds > 60: 
                     print('Exit for long time')
                     return
-
+                
+                if steps > 0 and steps % REPORT_STEPS == 0:
+                    test_inputs, test_labels = get_next_batch(1)             
+                    feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
+                    b_predictions = session.run([predictions], feed)                     
+                    b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)             
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), np.transpose(b_predictions*255))
 
             saver.save(session, saver_prefix, global_step=steps)
                 
