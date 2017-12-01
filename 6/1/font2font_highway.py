@@ -68,12 +68,12 @@ def neural_networks():
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(POOL_COUNT):
-        for j in range(5):
+        for j in range(3):
             layer = addHighwayLayer(layer)
         layer = tf.layers.dropout(layer, drop_prob)
-        layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
+        layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
 
-    predictions = slim.conv2d(layer, POOL_SIZE*POOL_SIZE, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+    predictions = slim.conv2d(layer, 1, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
 
     _predictions = tf.layers.flatten(predictions)
     _labels = tf.layers.flatten(labels)
@@ -178,7 +178,7 @@ def get_next_batch(batch_size=128):
         image=utils.resize(image, height=image_height)
         images.append(image)
 
-        to_image=getImage(text, font_name, font_length, image_height, noise = False, fontmode = font_mode, fonthint = 1)
+        to_image=getImage(text, font_name, font_length, image_height, noise = False, fontmode = font_mode, fonthint = 0)
         to_image=utils.resize(to_image, height=image_height)
         to_images.append(to_image)
 
@@ -243,13 +243,13 @@ def train():
                     test_inputs, test_labels = get_next_batch(1)             
                     feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
                     b_predictions = session.run([predictions], feed)                     
-                    b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)    
-                    #utils.pltshow(np.transpose(test_inputs[0]))   
-                   # utils.pltshow(np.transpose(test_labels[0]))  
-                    #utils.pltshow(np.transpose(b_predictions)))             
+                    b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
+                    _pred = np.transpose(b_predictions)
+                    imin, imax = _pred.min(), _pred.max()
+                    _pred = (_pred - imin)/(imax - imin)          
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), np.transpose(b_predictions*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
 
             saver.save(session, saver_prefix, global_step=steps)

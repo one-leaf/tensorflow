@@ -15,7 +15,7 @@ import urllib,json,io
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 24
+image_height = 32
 
 # LSTM
 # num_hidden = 4
@@ -60,14 +60,19 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
-    layer = slim.conv2d(layer, 64, [9,9], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 64, [9,9], normalizer_fn=None, activation_fn=None)
     layer = tf.nn.relu(layer)    
-    layer = slim.conv2d(layer, 32, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 32, [1,1], normalizer_fn=None, activation_fn=None)
     layer = tf.nn.relu(layer)    
-    predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=slim.batch_norm, activation_fn=None) 
-    _predictions = tf.layers.flatten(predictions)
-    _labels = tf.layers.flatten(labels)
-    loss = tf.reduce_mean(tf.reduce_sum(tf.square(_predictions - _labels)))
+    predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=None, activation_fn=None) 
+    
+    _labels = tf.reshape(labels, (batch_size, image_width, image_height, 1))
+    _predictions = slim.avg_pool2d(predictions, [2,2], [2,2], padding='SAME')
+    _labels = slim.avg_pool2d(_labels, [2,2], [2,2], padding='SAME')
+
+    _predictions = tf.layers.flatten(_predictions)
+    _labels = tf.layers.flatten(_labels)
+    loss = tf.reduce_sum(tf.reduce_mean(tf.square(_predictions - _labels), 0))
 
     return inputs, labels, predictions, keep_prob, loss
 
@@ -161,13 +166,14 @@ def get_next_batch(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
-        font_size = random.randint(9, 64)      
+        font_size = random.randint(9, 64)    
+        font_mode = random.choice([0,1,2,4])      
         text = getRedomText(CHARS, eng_world_list, font_length)          
-        image= getImage(text, font_name, font_length, font_size, noise = True)
+        image= getImage(text, font_name, font_length, font_size, noise = True, fontmode = font_mode)
         image=utils.resize(image, height=image_height)
         images.append(image)
 
-        to_image=getImage(text, font_name, font_length, image_height, noise = False, fontmode = 0, fonthint = 0)
+        to_image=getImage(text, font_name, font_length, image_height, noise = False, fontmode = font_mode, fonthint = 0)
         to_image=utils.resize(to_image, height=image_height)
         to_images.append(to_image)
 
@@ -229,6 +235,17 @@ def train():
                     print('Exit for long time')
                     return
 
+                if steps > 0 and steps % REPORT_STEPS == 0:
+                    test_inputs, test_labels = get_next_batch(1)             
+                    feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
+                    b_predictions = session.run([predictions], feed)                     
+                    b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
+                    _pred = np.transpose(b_predictions)
+                    imin, imax = _pred.min(), _pred.max()
+                    _pred = (_pred - imin)/(imax - imin)          
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
             saver.save(session, saver_prefix, global_step=steps)
                 

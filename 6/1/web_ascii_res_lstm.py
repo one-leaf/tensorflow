@@ -10,7 +10,7 @@ import tensorflow as tf
 import os, time
 from PIL import Image
 import json
-import ocr_ascii_res_lstm as ocr
+import ocr_ascii_res_lstm_net as ocr
 import utils, cv2
 
 try:
