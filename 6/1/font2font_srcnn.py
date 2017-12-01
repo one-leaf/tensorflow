@@ -66,9 +66,9 @@ def neural_networks():
     layer = tf.nn.relu(layer)    
     predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=None, activation_fn=None)  
 
-    _predictions = tf.layers.flatten(predictions)
-    _predictions = tf.layers.dense(_predictions, image_width*image_height)
+    _predictions = tf.layers.dense(predictions, image_height)
 
+    _predictions = tf.layers.flatten(_predictions)
     _labels = tf.layers.flatten(_labels)
     loss = tf.reduce_mean(tf.square(_predictions - _labels))
 
