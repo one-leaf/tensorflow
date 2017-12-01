@@ -60,11 +60,11 @@ def neural_networks():
 
     layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
 
-    layer = slim.conv2d(layer, 64, [9,9], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 64, [9,9], normalizer_fn=None, activation_fn=None)
     layer = tf.nn.relu(layer)    
-    layer = slim.conv2d(layer, 32, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 32, [1,1], normalizer_fn=None, activation_fn=None)
     layer = tf.nn.relu(layer)    
-    predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=slim.batch_norm, activation_fn=None) 
+    predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=None, activation_fn=None) 
     _predictions = tf.layers.flatten(predictions)
     _labels = tf.layers.flatten(labels)
     loss = tf.reduce_mean(tf.square(_predictions - _labels))
@@ -229,7 +229,7 @@ def train():
                 if seconds > 60: 
                     print('Exit for long time')
                     return
-                
+
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     test_inputs, test_labels = get_next_batch(1)             
                     feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
