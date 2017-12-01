@@ -64,13 +64,14 @@ def neural_networks():
     layer = tf.nn.relu(layer)    
     layer = slim.conv2d(layer, 32, [1,1], normalizer_fn=None, activation_fn=None)
     layer = tf.nn.relu(layer)    
-    predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=None, activation_fn=None)  
+    predictions = slim.conv2d(layer, 1,  [5,5], normalizer_fn=None, activation_fn=None) 
+    
+    _labels = tf.reshape(labels, (batch_size, image_width, image_height, 1))
+    _predictions = slim.avg_pool2d(predictions, [3,3], [2,2], padding='SAME')
+    _labels = slim.avg_pool2d(_labels, [3,3], [2,2], padding='SAME')
 
-    _predictions = tf.reshape(predictions, (-1, image_height))
-    _predictions = tf.layers.dense(_predictions, image_height)
-    _predictions = tf.reshape(_predictions,(batch_size,-1))
-    #_predictions = tf.layers.flatten(_predictions)
-    _labels = tf.layers.flatten(labels)
+    _predictions = tf.layers.flatten(_predictions)
+    _labels = tf.layers.flatten(_labels)
     loss = tf.reduce_mean(tf.square(_predictions - _labels))
 
     return inputs, labels, predictions, keep_prob, loss
