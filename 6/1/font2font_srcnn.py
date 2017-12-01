@@ -68,8 +68,8 @@ def neural_networks():
 
     _predictions = tf.reshape(predictions, (-1, image_height))
     _predictions = tf.layers.dense(_predictions, image_height)
-
-    _predictions = tf.layers.flatten(_predictions)
+    _predictions = tf.reshape(_predictions,(batch_size,-1))
+    #_predictions = tf.layers.flatten(_predictions)
     _labels = tf.layers.flatten(labels)
     loss = tf.reduce_mean(tf.square(_predictions - _labels))
 
