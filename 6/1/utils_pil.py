@@ -71,6 +71,10 @@ def convert_to_rgb(img):
             img = img.convert('RGB')
     return img
 
+# RGB to L
+def convert_to_gray(img):
+    return img.convert('L')
+
 def main():
     img = getImage("abced12323","Arial",16)
     show(img)    

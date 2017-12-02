@@ -112,12 +112,15 @@ def get_next_batch(batch_size=128):
         text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)          
         image = utils_font.get_font_image_from_url(text, font_name ,font_size, fontmode = font_mode)
         image = utils_font.add_noise(image)   
+        image = utils_pil.convert_to_gray(image)
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
         images.append(image)
 
         to_image = utils_font.get_font_image_from_url(text, font_name ,image_height, fontmode = font_mode, fonthint = 0)
-        to_image = np.asarray(to_image)     
+        to_image = utils_pil.convert_to_gray(to_image)
+        to_image = np.asarray(to_image)   
+        to_image = utils.img2bwinv(to_image)  
         to_image = utils.resize(to_image, height=image_height)
         to_images.append(to_image)
 
