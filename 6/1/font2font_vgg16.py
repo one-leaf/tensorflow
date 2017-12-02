@@ -97,52 +97,6 @@ print("EngFontNames", ENGFontNames)
 print("CHIFontNames", CHIFontNames)
 AllFontNames = ENGFontNames + CHIFontNames
 
-
-
-def getImage(text, font_name, font_length, font_size, noise=False, fontmode=None, fonthint=None):
-    params= {}
-    params['text'] = text
-    params['fontname'] = font_name
-    params['fontsize'] = font_size
-    # params['fontmode'] = random.choice([0,1,2,4,8])
-    if fontmode == None:
-        params['fontmode'] = random.choice([0,1,2,4])
-    else:
-        params['fontmode'] = fontmode
-    if fonthint == None:
-        params['fonthint'] = random.choice([0,1,2,3,4,5])
-    else:
-        params['fonthint'] = fonthint
-    
-    r = http('http://192.168.2.113:8888/',params)
-    _img = Image.open(io.BytesIO(r))
-    img=Image.new("RGB",_img.size,(255,255,255))
-    img.paste(_img,(0,0),_img)
-    img = utils.trim(img)
-    
-    if noise:
-        w,h = img.size
-        _h = random.randint(9, image_height)
-        _w = round(w * _h / h)
-        img = img.resize((_w,_h), Image.ANTIALIAS)
-        img = np.asarray(img)
-        # img = 1 - utils.img2gray(img)/255.   
-        img = 255 - utils.img2gray(img)   
-        img = utils.dropZeroEdges(img)
-
-        filter = np.random.random(img.shape) - 0.9
-        filter = np.maximum(filter, 0) 
-        img = img + filter * 5
-        imin, imax = img.min(), img.max()
-        img = (img - imin)/(imax - imin)
-    else:
-        img = np.asarray(img)
-        img = utils.img2gray(img) 
-        img = utils.img2bwinv(img)
-        # img = img / 255.
-        img = utils.dropZeroEdges(img)
-    return img
-
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
