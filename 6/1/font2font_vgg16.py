@@ -117,7 +117,7 @@ def get_next_batch(batch_size=128):
         rate =  (8. + random.randint(1, font_size-8)) / font_size
         image = utils_pil.resize(image, rate)
         image = np.asarray(image)     
-        image = utils.resize(image, height=image_heightr)
+        image = utils.resize(image, height=image_height)
         image = 255. - image 
         images.append(image)
 
