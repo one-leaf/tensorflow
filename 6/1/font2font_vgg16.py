@@ -114,7 +114,7 @@ def get_next_batch(batch_size=128):
         image = utils_font.get_font_image_from_url(text, font_name ,font_size, fontmode = font_mode, fonthint = font_hint )
         image = utils_font.add_noise(image)   
         image = utils_pil.convert_to_gray(image)
-        rate =  (8. + random.randint(1, font_size-8)) / font_size
+        rate =  random.randint(9, 33) / font_size
         image = utils_pil.resize(image, rate)
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
