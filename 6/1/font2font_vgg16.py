@@ -63,7 +63,6 @@ def vgg16(inputs, drop_prob, numclass):
     net = slim.max_pool2d(net, [2, 2], padding="SAME", stride=1, scope='pool4')
     net = slim.repeat(net, 3, slim.conv2d, 64, [3, 3], scope='conv5')
     net = slim.max_pool2d(net, [2, 2], padding="SAME", stride=1, scope='pool5')
-    #net = tf.reshape(net,(-1,512))
     net = slim.fully_connected(net, 64, scope='fc6')
     net = slim.dropout(net, drop_prob, scope='dropout6')
     net = slim.fully_connected(net, 64, scope='fc7')
