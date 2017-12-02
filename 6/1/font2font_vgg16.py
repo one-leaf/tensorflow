@@ -116,12 +116,14 @@ def get_next_batch(batch_size=128):
         image = utils_pil.convert_to_gray(image)
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
+        # image = 255. - image 
         images.append(image)
 
         to_image = utils_font.get_font_image_from_url(text, font_name ,image_height, fontmode = font_mode, fonthint = font_hint)
         to_image = utils_pil.convert_to_gray(to_image)
         to_image = np.asarray(to_image)   
         to_image = utils.resize(to_image, height=image_height)
+        # to_image = 255. - to_image
         to_images.append(to_image)
 
         if image.shape[1] > max_width_image: 
