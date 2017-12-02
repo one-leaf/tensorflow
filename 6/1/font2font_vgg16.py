@@ -154,7 +154,8 @@ def getImage(text, font_name, font_length, font_size, noise=False, fontmode=None
         _w = round(w * _h / h)
         img = img.resize((_w,_h), Image.ANTIALIAS)
         img = np.asarray(img)
-        img = 1 - utils.img2gray(img)/255.   
+        # img = 1 - utils.img2gray(img)/255.   
+        img = 255 - utils.img2gray(img)   
         img = utils.dropZeroEdges(img)
 
         filter = np.random.random(img.shape) - 0.9
@@ -166,7 +167,7 @@ def getImage(text, font_name, font_length, font_size, noise=False, fontmode=None
         img = np.asarray(img)
         img = utils.img2gray(img) 
         img = utils.img2bwinv(img)
-        img = img / 255.
+        # img = img / 255.
         img = utils.dropZeroEdges(img)
     return img
 
@@ -255,9 +256,12 @@ def train():
                     b_predictions = session.run([predictions], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
                     _pred = np.transpose(b_predictions)        
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred)
 
             saver.save(session, saver_prefix, global_step=steps)
                 
