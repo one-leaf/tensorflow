@@ -54,16 +54,16 @@ def vgg16(inputs, drop_prob, numclass):
                       weights_initializer=tf.truncated_normal_initializer(0.0, 0.01),
                       weights_regularizer=slim.l2_regularizer(0.0005)):
     net = slim.repeat(inputs, 2, slim.conv2d, 64, [3, 3], scope='conv1')
-    net = slim.max_pool2d(net, [2, 2], padding="SAME", scope='pool1')
+    net = slim.max_pool2d(net, [2, 2], padding="SAME", stride=1, scope='pool1')
     net = slim.repeat(net, 2, slim.conv2d, 128, [3, 3], scope='conv2')
-    net = slim.max_pool2d(net, [2, 2], padding="SAME", scope='pool2')
+    net = slim.max_pool2d(net, [2, 2], padding="SAME", stride=1, scope='pool2')
     net = slim.repeat(net, 3, slim.conv2d, 256, [3, 3], scope='conv3')
-    net = slim.max_pool2d(net, [2, 2], padding="SAME", scope='pool3')
+    net = slim.max_pool2d(net, [2, 2], padding="SAME", stride=1, scope='pool3')
     net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv4')
     net = slim.max_pool2d(net, [2, 2], padding="SAME", stride=1, scope='pool4')
     net = slim.repeat(net, 3, slim.conv2d, 512, [3, 3], scope='conv5')
     net = slim.max_pool2d(net, [2, 2], padding="SAME", stride=1, scope='pool5')
-    net = tf.reshape(net,(-1,512))
+    #net = tf.reshape(net,(-1,512))
     net = slim.fully_connected(net, 4096, scope='fc6')
     net = slim.dropout(net, drop_prob, scope='dropout6')
     net = slim.fully_connected(net, 4096, scope='fc7')
@@ -83,7 +83,7 @@ def neural_networks():
     batch_size, image_width = shape[0], shape[1]
 
     layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
-    predictions = vgg16(layer, drop_prob, POOL_SIZE * POOL_SIZE)
+    predictions = vgg16(layer, drop_prob, 1)
     predictions = tf.reshape(predictions, (batch_size, image_width, image_height, 1 ))
     _predictions = tf.layers.flatten(predictions)
     _labels = tf.layers.flatten(labels)
