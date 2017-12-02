@@ -39,7 +39,7 @@ def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=
     r = http('http://192.168.2.113:8888/',params)
     img = Image.open(io.BytesIO(r))
     img = utils_pil.convert_to_rgb(img)
-    img = trim(img)
+    img = utils_pil.trim(img)
     return img
 
 # 获得随机字符串
@@ -109,7 +109,7 @@ def get_font_image_and_text_from_local(CHARS, font_file, font_length=30, font_si
     else:
        img = renderFontByPIL(font_file, font_size, text, random_font_mode=True)
     img = utils_pil.convert_to_rgb(img)
-    img = trim(img) 
+    img = utils_pil.trim(img) 
     return text, img
 
 def get_font_image_and_text_from_url(CHARS, font_name, font_length=30, font_size=12, word_dict=None):
