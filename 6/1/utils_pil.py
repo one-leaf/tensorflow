@@ -56,7 +56,14 @@ def trim(img):
 # 图片缩放
 def resize(img, width, height):
     return img.resize((width, height),Image.ANTIALIAS) 
-        
+
+# 图片缩放
+def resize(img, rate):
+    width, height = img.size
+    width = round(width*rate)
+    height = round(height*rate)
+    return img.resize((width, height),Image.ANTIALIAS) 
+
 # RGBA to RGB
 def convert_to_rgb(img):
     mode = img.mode
