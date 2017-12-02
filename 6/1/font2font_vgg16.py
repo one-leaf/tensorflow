@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
 import math
 import urllib,json,io
+import utils_pil, utils_font
 
 curr_dir = os.path.dirname(__file__)
 
@@ -90,42 +91,13 @@ def neural_networks():
 
     return inputs, labels, predictions, keep_prob, loss
 
-def http(url,param=None):
-    if param !=None:
-        paramurl = urllib.parse.urlencode(param)
-        url = "%s?%s"%(url,paramurl)
-        r = urllib.request.urlopen(url, timeout=30)
-    else:    
-        r = urllib.request.urlopen(url, timeout=30)
-    return r.read()
 
-r = http('http://192.168.2.113:8888/')
-fonts = json.loads(r.decode('utf-8'))
-ENGFontNames = fonts['eng']
+ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
-CHIFontNames = fonts['chi']
 print("CHIFontNames", CHIFontNames)
 AllFontNames = ENGFontNames + CHIFontNames
 
-def getRedomText(CHARS, word_dict, font_length):
-    text=''
-    n = random.random()
-    if n<0.1:
-        for i in range(font_length):
-            text += random.choice("123456789012345678901234567890-./$,:()+-*=><")
-    elif n<0.5 and n>=0.1:
-        for i in range(font_length):
-            text += random.choice(CHARS)        
-    else:
-        while len(text)<font_length:
-            word = random.choice(word_dict)
-            _word=""
-            for c in word:
-                if c in CHARS:
-                    _word += c
-            text = text+" "+_word.strip()
-    text = text.strip()
-    return text
+
 
 def getImage(text, font_name, font_length, font_size, noise=False, fontmode=None, fonthint=None):
     params= {}
@@ -183,13 +155,16 @@ def get_next_batch(batch_size=128):
         font_length = random.randint(font_min_length-5, font_min_length+5)
         font_size = random.randint(9, 64)    
         font_mode = random.choice([0,1,2,4])      
-        text = getRedomText(CHARS, eng_world_list, font_length)          
-        image= getImage(text, font_name, font_length, font_size, noise = True, fontmode = font_mode)
-        image=utils.resize(image, height=image_height)
+        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)          
+        image = utils_font.get_font_image_from_url(text, font_name ,font_size, fontmode = font_mode)
+        image = utils_font.add_noise(image)   
+        image = np.asarray(image)     
+        image = utils.resize(image, height=image_height)
         images.append(image)
 
-        to_image=getImage(text, font_name, font_length, image_height, noise = False, fontmode = font_mode, fonthint = 0)
-        to_image=utils.resize(to_image, height=image_height)
+        to_image = utils_font.get_font_image_from_url(text, font_name ,image_height, fontmode = font_mode, fonthint = 0)
+        to_image = np.asarray(to_image)     
+        to_image = utils.resize(to_image, height=image_height)
         to_images.append(to_image)
 
         if image.shape[1] > max_width_image: 

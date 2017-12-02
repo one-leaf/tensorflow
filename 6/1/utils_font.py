@@ -3,6 +3,7 @@ import urllib.parse , urllib.request
 import random
 import utils_pil
 from PIL import Image
+import json
 
 def http(url,param=None):
     if param !=None:
@@ -13,8 +14,15 @@ def http(url,param=None):
         r = urllib.request.urlopen(url, timeout=30)
     return r.read()
 
+def get_font_names_from_url():
+    r = http('http://192.168.2.113:8888/')
+    fonts = json.loads(r.decode('utf-8'))
+    ENGFontNames = fonts['eng']
+    CHIFontNames = fonts['chi']
+    return ENGFontNames, CHIFontNames
+
 # 从字体服务器上获取字体图片
-def get_font_image_from_url(text, font_name, font_size, noise=False, fontmode=None, fonthint=None):
+def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=None):
     params= {}
     params['text'] = text
     params['fontname'] = font_name
@@ -90,7 +98,7 @@ def get_font_image_from_pil(font_file, font_size, text, random_font_mode=False):
             draw.fontmode=fontmode
         draw.text((50,50),text,fill='black',font=font)
         return img
-    except:t
+    except:
         raise Exception("Error font %s" % font_file)    
 
 def get_font_image_and_text_from_local(CHARS, font_file, font_length=30, font_size=12, word_dict=None):
