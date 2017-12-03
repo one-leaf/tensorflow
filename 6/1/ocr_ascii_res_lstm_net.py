@@ -127,7 +127,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     img  = utils_pil.convert_to_gray(img)
 
     w,h  = img.size
-    _h = random.randint(9,64)
+    _h = random.randint(9, image_height)
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
     img = np.asarray(img)
