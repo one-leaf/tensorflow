@@ -74,7 +74,7 @@ def neural_networks():
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(POOL_COUNT):
-        for j in range(5):
+        for j in range(3):
             layer = addResLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
         
