@@ -124,7 +124,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     text = utils_font.get_random_text(CHARS, word_dict, font_length)
     img  = utils_font.get_font_image_from_url(text, font_name ,font_size)
     img  = utils_font.add_noise(img)   
-    img  = utils_pil.convert_to_rgb(img)
+    img  = utils_pil.convert_to_gray(img)
 
     w,h  = img.size
     _h = random.randint(9,64)
@@ -132,7 +132,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     img = img.resize((_w,_h), Image.ANTIALIAS)
     img = np.asarray(img)
   #  img = utils.clearBackgroundColor(img)
-    img = 1 - utils.img2gray(img)/255.   
+    img = 1 - img/255.   
     img = utils.dropZeroEdges(img)
 
     filter = np.random.random(img.shape) - 0.9
