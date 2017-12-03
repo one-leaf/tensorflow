@@ -124,7 +124,7 @@ def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
     text = utils_font.get_random_text(CHARS, word_dict, font_length)
     img  = utils_font.get_font_image_from_url(text, font_name ,font_size)
     img  = utils_font.add_noise(img)   
-    img  = utils_pil.convert_to_gray(img)
+    img  = utils_pil.convert_to_rgb(img)
 
     w,h  = img.size
     _h = random.randint(9,64)
