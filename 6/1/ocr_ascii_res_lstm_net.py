@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 import os
-import utils
+import utils, utils_pil, utils_font
 import time
 import random
 import cv2
@@ -115,59 +115,18 @@ def neural_networks():
 
     return logits, inputs, labels, seq_len, keep_prob
 
-def http(url,param=None):
-    if param != None:
-        paramurl = urllib.parse.urlencode(param)
-        url = "%s?%s"%(url,paramurl)
-    for i in range(3):
-        try:
-            r = urllib.request.urlopen(url, timeout=10)
-            return r.read()
-        except:
-            pass
-    raise Exception("can't open %s"%url)           
-
-r = http('http://192.168.2.113:8888/')
-fonts = json.loads(r.decode('utf-8'))
-ENGFontNames = fonts['eng']
+ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
-CHIFontNames = fonts['chi']
 print("CHIFontNames", CHIFontNames)
 AllFontNames = ENGFontNames + CHIFontNames
 
 def getImage(CHARS, font_name, image_height, font_length, font_size, word_dict):
-    text=''
-    n = random.random()
-    if n<0.1:
-        for i in range(font_length):
-            text += random.choice("123456789012345678901234567890-./$,:()+-*=><")
-    elif n<0.5 and n>=0.1:
-        for i in range(font_length):
-            text += random.choice(CHARS)        
-    else:
-        while len(text)<font_length:
-            word = random.choice(word_dict)
-            _word=""
-            for c in word:
-                if c in CHARS:
-                    _word += c
-            text = text+" "+_word.strip()
-    text = text.strip()
+    text = utils_font.get_random_text(CHARS, word_dict, font_length)
+    img  = utils_font.get_font_image_from_url(text, font_name ,font_size)
+    img  = utils_font.add_noise(img)   
+    img  = utils_pil.convert_to_gray(img)
 
-    params= {}
-    params['text'] = text
-    params['fontname'] = font_name
-    params['fontsize'] = font_size
-    # params['fontmode'] = random.choice([0,1,2,4,8])
-    params['fontmode'] = random.choice([0,1,2,4])
-    params['fonthint'] = random.choice([0,1,2,3,4,5])
-    
-    r = http('http://192.168.2.113:8888/',params)
-    _img = Image.open(io.BytesIO(r))
-    img=Image.new("RGB",_img.size,(255,255,255))
-    img.paste(_img,(0,0),_img)
-    img = utils.trim(img)
-    w,h = img.size
+    w,h  = img.size
     _h = random.randint(9,64)
     _w = round(w * _h / h)
     img = img.resize((_w,_h), Image.ANTIALIAS)
