@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 draw_point_count = 100
-radom_data_count = 5
+radom_data_count = 1
 
 def true_data(batch_size):
     a = np.random.uniform(1,2,size=batch_size)[:,np.newaxis] # a=[[...]]
@@ -15,15 +15,21 @@ def true_data(batch_size):
 
 with tf.variable_scope("G"):
     g_in = tf.placeholder(tf.float32, [None, radom_data_count])
-    g_1 = tf.layers.dense(g_in, 256, tf.nn.relu)
-    g_out = tf.layers.dense(g_1, draw_point_count)
+    g = tf.layers.dense(g_in, 64, tf.nn.relu)
+    g = tf.sin(g)
+    g = tf.layers.dense(g, 64, tf.nn.relu)
+    g = tf.cos(g)
+    g = tf.layers.dense(g, 64, tf.nn.relu)
+    g = tf.pow(g, 2)
+    g = tf.layers.dense(g, 64, tf.nn.relu)
+    g_out = tf.layers.dense(g, draw_point_count)
 
 with tf.variable_scope("D"):
     true_in = tf.placeholder(tf.float32,[None, draw_point_count])
-    d_1     = tf.layers.dense(true_in, 256, tf.nn.relu, name='1')
+    d_1     = tf.layers.dense(true_in, 64, tf.nn.relu, name='1')
     prob_1  = tf.layers.dense(d_1, 1, tf.nn.sigmoid, name='out')    # 0~1
 
-    d_2     = tf.layers.dense(g_out, 256, tf.nn.relu, name='1', reuse=True)
+    d_2     = tf.layers.dense(g_out, 64, tf.nn.relu, name='1', reuse=True)
     prob_2  = tf.layers.dense(d_2, 1, tf.nn.sigmoid, name='out', reuse=True)    #0~1
 
 d_loss = -tf.reduce_mean(tf.log(prob_1) + tf.log(1-prob_2))     #-00 ~ 0  0~-00  => prob1 -> 1 prob2 -> 0 
