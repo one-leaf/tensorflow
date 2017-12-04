@@ -34,7 +34,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 # CHARS = ASCII_CHARS
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-2
+LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 200
@@ -119,7 +119,7 @@ def get_next_batch(batch_size=128):
         image = utils_pil.resize(image, rate)
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
-        image = 255. - image 
+        image = (255. - image) / 255.
         images.append(image)
 
         # to_image = utils_font.get_font_image_from_url(text, font_name ,image_height, fontmode = font_mode, fonthint = font_hint)
@@ -127,6 +127,7 @@ def get_next_batch(batch_size=128):
         to_image = np.asarray(to_image)   
         to_image = utils.resize(to_image, height=image_height)
         to_image = utils.img2bwinv(to_image)
+        image = image / 255.        
         to_images.append(to_image)
 
         if image.shape[1] > max_width_image: 
@@ -193,12 +194,12 @@ def train():
                     b_predictions = session.run([predictions], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
                     _pred = np.transpose(b_predictions)        
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred)
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred)
 
             saver.save(session, saver_prefix, global_step=steps)
                 
