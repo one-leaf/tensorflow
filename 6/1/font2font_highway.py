@@ -46,7 +46,7 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-MODEL_SAVE_NAME = "model_font2font_res"
+MODEL_SAVE_NAME = "model_font2font_highway"
 
 # 增加 Highway 网络
 def addHighwayLayer(inputs):
