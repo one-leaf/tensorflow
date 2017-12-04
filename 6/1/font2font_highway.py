@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
 import math
 import urllib,json,io
+import utils_pil, utils_font
 
 curr_dir = os.path.dirname(__file__)
 
@@ -33,18 +34,19 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 # CHARS = ASCII_CHARS
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-4
+LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 500
+REPORT_STEPS = 200
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
+MODEL_SAVE_NAME = "model_font2font_res"
 
 # 增加 Highway 网络
 def addHighwayLayer(inputs):
@@ -64,16 +66,20 @@ def neural_networks():
     shape = tf.shape(inputs)
     batch_size, image_width = shape[0], shape[1]
 
-    layer = tf.reshape(inputs, [batch_size,image_width,image_height,1])
+    layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
 
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
     for i in range(POOL_COUNT):
-        for j in range(3):
+        for j in range(5):
             layer = addHighwayLayer(layer)
-        layer = tf.layers.dropout(layer, drop_prob)
         layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
+        
+    predictions = slim.conv2d(layer, 1, [3,3], normalizer_fn = None, activation_fn = None)
+    predictions = tf.reshape(predictions, (batch_size, image_width, image_height, 1 ))
 
-    predictions = slim.conv2d(layer, 1, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+    # _labels = tf.reshape(labels, (batch_size, image_width, image_height, 1 ))
+    # _predictions = slim.repeat(predictions, 2, slim.max_pool2d, [2, 2])
+    # _labels = slim.repeat(_labels, 2, slim.max_pool2d, [2, 2])
 
     _predictions = tf.layers.flatten(predictions)
     _labels = tf.layers.flatten(labels)
@@ -81,85 +87,11 @@ def neural_networks():
 
     return inputs, labels, predictions, keep_prob, loss
 
-def http(url,param=None):
-    if param !=None:
-        paramurl = urllib.parse.urlencode(param)
-        url = "%s?%s"%(url,paramurl)
-        r = urllib.request.urlopen(url, timeout=30)
-    else:    
-        r = urllib.request.urlopen(url, timeout=30)
-    return r.read()
 
-r = http('http://192.168.2.113:8888/')
-fonts = json.loads(r.decode('utf-8'))
-ENGFontNames = fonts['eng']
+ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
-CHIFontNames = fonts['chi']
 print("CHIFontNames", CHIFontNames)
 AllFontNames = ENGFontNames + CHIFontNames
-
-def getRedomText(CHARS, word_dict, font_length):
-    text=''
-    n = random.random()
-    if n<0.1:
-        for i in range(font_length):
-            text += random.choice("123456789012345678901234567890-./$,:()+-*=><")
-    elif n<0.5 and n>=0.1:
-        for i in range(font_length):
-            text += random.choice(CHARS)        
-    else:
-        while len(text)<font_length:
-            word = random.choice(word_dict)
-            _word=""
-            for c in word:
-                if c in CHARS:
-                    _word += c
-            text = text+" "+_word.strip()
-    text = text.strip()
-    return text
-
-def getImage(text, font_name, font_length, font_size, noise=False, fontmode=None, fonthint=None):
-    params= {}
-    params['text'] = text
-    params['fontname'] = font_name
-    params['fontsize'] = font_size
-    # params['fontmode'] = random.choice([0,1,2,4,8])
-    if fontmode == None:
-        params['fontmode'] = random.choice([0,1,2,4])
-    else:
-        params['fontmode'] = fontmode
-    if fonthint == None:
-        params['fonthint'] = random.choice([0,1,2,3,4,5])
-    else:
-        params['fonthint'] = fonthint
-    
-    r = http('http://192.168.2.113:8888/',params)
-    _img = Image.open(io.BytesIO(r))
-    img=Image.new("RGB",_img.size,(255,255,255))
-    img.paste(_img,(0,0),_img)
-    img = utils.trim(img)
-    
-    if noise:
-        w,h = img.size
-        _h = random.randint(9, image_height)
-        _w = round(w * _h / h)
-        img = img.resize((_w,_h), Image.ANTIALIAS)
-        img = np.asarray(img)
-        img = 1 - utils.img2gray(img)/255.   
-        img = utils.dropZeroEdges(img)
-
-        filter = np.random.random(img.shape) - 0.9
-        filter = np.maximum(filter, 0) 
-        img = img + filter * 5
-        imin, imax = img.min(), img.max()
-        img = (img - imin)/(imax - imin)
-    else:
-        img = np.asarray(img)
-        img = utils.img2gray(img) 
-        img = utils.img2bwinv(img)
-        img = img / 255.
-        img = utils.dropZeroEdges(img)
-    return img
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
@@ -171,21 +103,33 @@ def get_next_batch(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(font_min_length-5, font_min_length+5)
-        font_size = random.randint(9, 64)  
-        font_mode = random.choice([0,1,2,4])    
-        text = getRedomText(CHARS, eng_world_list, font_length)          
-        image= getImage(text, font_name, font_length, font_size, noise = True, fontmode = font_mode )
-        image=utils.resize(image, height=image_height)
+        font_size = random.randint(image_height, 64)    
+        font_mode = random.choice([0,1,2,4]) 
+        font_hint = random.choice([0,1,2,3,4,5])     
+        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)          
+        image = utils_font.get_font_image_from_url(text, font_name ,font_size, fontmode = font_mode, fonthint = font_hint )
+        to_image = image.copy()
+        image = utils_font.add_noise(image)   
+        image = utils_pil.convert_to_gray(image)
+        rate =  random.randint(8, 17) / font_size
+        image = utils_pil.resize(image, rate)
+        image = np.asarray(image)     
+        image = utils.resize(image, height=image_height)
+        image = 255. - image 
         images.append(image)
 
-        to_image=getImage(text, font_name, font_length, image_height, noise = False, fontmode = font_mode, fonthint = 0)
-        to_image=utils.resize(to_image, height=image_height)
+        # to_image = utils_font.get_font_image_from_url(text, font_name ,image_height, fontmode = font_mode, fonthint = font_hint)
+        to_image = utils_pil.convert_to_gray(to_image)
+        to_image = np.asarray(to_image)   
+        to_image = utils.resize(to_image, height=image_height)
+        to_image = utils.img2bwinv(to_image)
         to_images.append(to_image)
 
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
         if to_image.shape[1] > max_width_image: 
             max_width_image = to_image.shape[1]      
+
     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
@@ -195,7 +139,7 @@ def get_next_batch(batch_size=128):
     labels = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(to_images)):
         image_vec = utils.img2vec(to_images[i], height=image_height, width=max_width_image, flatten=False)
-        labels[i,:] = np.transpose(image_vec)   
+        labels[i,:] = np.transpose(image_vec)
     return inputs, labels
 
 def train():
@@ -203,7 +147,7 @@ def train():
     inputs, labels, predictions, keep_prob, loss = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
-    model_dir = os.path.join(curr_dir, "model_font2font_highway")
+    model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
 
@@ -221,7 +165,7 @@ def train():
         while True:
             for batch in range(BATCHES):
                 start = time.time()                
-                train_inputs, train_labels = get_next_batch(BATCH_SIZE)     
+                train_inputs, train_labels = get_next_batch(BATCH_SIZE)             
                 feed = {inputs: train_inputs, labels: train_labels, keep_prob: 0.95}
                 b_loss, b_labels, b_predictions,  steps,  _ = \
                     session.run([loss, labels, predictions, global_step, train_op], feed)
@@ -244,15 +188,15 @@ def train():
                     feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
                     b_predictions = session.run([predictions], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
-                    _pred = np.transpose(b_predictions)
-                    # imin, imax = _pred.min(), _pred.max()
-                    # _pred = (_pred - imin)/(imax - imin)          
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
-
+                    _pred = np.transpose(b_predictions)        
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred)
 
             saver.save(session, saver_prefix, global_step=steps)
-
+                
 if __name__ == '__main__':
     train()
