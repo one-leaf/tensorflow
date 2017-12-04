@@ -127,7 +127,7 @@ def get_next_batch(batch_size=128):
         to_image = np.asarray(to_image)   
         to_image = utils.resize(to_image, height=image_height)
         to_image = utils.img2bwinv(to_image)
-        image = image / 255.        
+        to_image = to_image / 255.        
         to_images.append(to_image)
 
         if image.shape[1] > max_width_image: 
