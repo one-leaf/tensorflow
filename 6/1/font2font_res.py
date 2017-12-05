@@ -106,7 +106,8 @@ def get_next_batch(batch_size=128):
     font_min_length = random.randint(10, 20)
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_length = random.randint(font_min_length-5, font_min_length+5)
+        # font_length = random.randint(font_min_length-5, font_min_length+5)
+        font_length = random.randint(3, 5)
         font_size = random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
