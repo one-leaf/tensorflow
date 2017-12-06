@@ -88,6 +88,8 @@ def SRGAN_d(input_images, is_train=True, reuse=False):
     df_dim = 64
     lrelu = lambda x: tl.act.lrelu(x, 0.2)
     with tf.variable_scope("SRGAN_d", reuse=reuse):
+        
+
         tl.layers.set_name_reuse(reuse)
         net_in = InputLayer(input_images, name='input/images')
         net_h0 = Conv2d(net_in, df_dim, (4, 4), (2, 2), act=lrelu,
