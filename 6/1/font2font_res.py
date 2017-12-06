@@ -78,7 +78,7 @@ def neural_networks():
             layer = addResLayer(layer)
         layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
         
-    predictions = slim.conv2d(layer, 1, [3,3], normalizer_fn = None, activation_fn = None)
+    predictions = slim.conv2d(layer, 1, [1,1], normalizer_fn = None, activation_fn = tf.nn.tanh)
     predictions = tf.reshape(predictions, (batch_size, image_width, image_height, 1 ))
 
     # _labels = tf.reshape(labels, (batch_size, image_width, image_height, 1 ))
