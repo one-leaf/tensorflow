@@ -157,25 +157,13 @@ def neural_networks():
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
 
-    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(mse_loss, var_list=g_vars)
+    global_step = tf.Variable(0, trainable=False)
+    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(mse_loss, global_step=global_step, var_list=g_vars)
 
-    g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, var_list=g_vars)
-    d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, var_list=d_vars)
+    g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
+    d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
-
-        
-    predictions = slim.conv2d(layer, 1, [3,3], normalizer_fn = None, activation_fn = None)
-    predictions = tf.reshape(predictions, (batch_size, image_width, image_height, 1 ))
-
-    # _labels = tf.reshape(labels, (batch_size, image_width, image_height, 1 ))
-    # _predictions = slim.repeat(predictions, 2, slim.max_pool2d, [2, 2])
-    # _labels = slim.repeat(_labels, 2, slim.max_pool2d, [2, 2])
-
-    _predictions = tf.layers.flatten(predictions)
-    _labels = tf.layers.flatten(labels)
-    loss = tf.reduce_mean(tf.square(_predictions - _labels))
-
-    return inputs, labels, predictions, keep_prob, loss
+    return inputs, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, g_loss, mse_loss, vgg_loss, g_gan_loss, g_optim
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -236,7 +224,7 @@ def get_next_batch(batch_size=128):
 
 def train():
     global_step = tf.Variable(0, trainable=False)
-    inputs, labels, predictions, keep_prob, loss = neural_networks()
+    inputs, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, g_loss, mse_loss, vgg_loss, g_gan_loss, g_optim = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -254,31 +242,41 @@ def train():
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model ...")
             saver.restore(session, ckpt.model_checkpoint_path)    
+
+        # initialize G
+        while True:
+            for batch in range(BATCHES):
+                start = time.time() 
+                train_inputs, train_labels = get_next_batch(BATCH_SIZE)
+                errM, _ , steps= sess.run([mse_loss, g_optim_init, global_step], {inputs: train_inputs, labels: train_labels})
+                print("%4d time: %4.4fs, mse: %.8f " % (steps, time.time() - step_time, errM))
+            if steps > 20000: break
+            saver.save(session, saver_prefix, global_step=steps)
+
+        # train GAN (SRGAN)
         while True:
             for batch in range(BATCHES):
                 start = time.time()                
-                train_inputs, train_labels = get_next_batch(BATCH_SIZE)             
-                feed = {inputs: train_inputs, labels: train_labels, keep_prob: 0.95}
-                b_loss, b_labels, b_predictions,  steps,  _ = \
-                    session.run([loss, labels, predictions, global_step, train_op], feed)
+                train_inputs, train_labels = get_next_batch(BATCH_SIZE)  
 
-                seconds = round(time.time() - start,2)
-                print("step:", steps, "cost:", b_loss, "batch seconds:", seconds)
-                if np.isnan(b_loss) or np.isinf(b_loss):
+                ## update D
+                errD, _ = sess.run([d_loss, d_optim], {inputs: train_inputs, labels: train_labels})
+                ## update G
+                errG, errM, errV, errA, _, steps = sess.run([g_loss, mse_loss, vgg_loss, g_gan_loss, g_optim, global_step], {inputs: train_inputs, labels: train_labels})
+                print("%4d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f vgg: %.6f adv: %.6f)" % (steps, time.time() - step_time, errD, errG, errM, errV, errA))
+
+                if np.isnan(d_loss) or np.isinf(d_loss) or np.isnan(g_loss) or np.isinf(g_loss) or np.isnan(g_gan_loss) or np.isinf(g_gan_loss):
                     print("Error: cost is nan or inf")
-                    train_labels_list = decode_sparse_tensor(train_labels)
-                    for i, train_label in enumerate(train_labels_list):
-                        print(i,list_to_chars(train_label))
                     return   
                 
-                if seconds > 60: 
+                if time.time() - step_time > 60: 
                     print('Exit for long time')
                     return
 
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     test_inputs, test_labels = get_next_batch(1)             
-                    feed = {inputs: test_inputs, labels: test_labels, keep_prob: 1}
-                    b_predictions = session.run([predictions], feed)                     
+                    feed = {inputs: test_inputs, labels: test_labels}
+                    b_predictions = session.run([net_g], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
                     _pred = np.transpose(b_predictions)        
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
