@@ -87,12 +87,7 @@ def neural_networks():
 
     _predictions = tf.layers.flatten(predictions)
     _labels = tf.layers.flatten(labels)
-    loss = tf.square(_predictions - _labels)
-    fill = tf.ones_like(loss) * 0
-    loss_filled = tf.where(tf.is_finite(loss), loss, fill)
-    finite_count = tf.reduce_sum(tf.cast(tf.is_finite(loss), tf.float32))
-    mse = tf.reduce_sum(loss_filled) / finite_count
-    loss = mse/2.
+    loss = tf.losses.mean_squared_error(_predictions, _labels)
     return inputs, labels, predictions, keep_prob, loss
 
 

@@ -59,10 +59,7 @@ def addResLayer(inputs):
     outputs = inputs + layer
     return outputs 
 
-def SRGAN_g(inputs, is_train=False, reuse=False):
-    """ Generator in Photo-Realistic Single Image Super-Resolution Using a Generative Adversarial Network
-    feature maps (n) and stride (s) feature maps (n) and stride (s)
-    """        
+def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:
         layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         temp = layer
@@ -73,80 +70,59 @@ def SRGAN_g(inputs, is_train=False, reuse=False):
         layer = slim.batch_norm(layer, activation_fn=None)
         layer = layer + temp        
         # B residual blacks end
-
         layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
         layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
         layer = slim.conv2d(layer, 1,   [1,1], activation_fn=tf.nn.tanh)
-
         return layer
 
-
-def SRGAN_d(input_images, is_train=True, reuse=False):
-    w_init = tf.random_normal_initializer(stddev=0.02)
-    b_init = None # tf.constant_initializer(value=0.0)
-    gamma_init=tf.random_normal_initializer(1., 0.02)
+def SRGAN_d(inputs, reuse=False):
     df_dim = 64
-    lrelu = lambda x: tl.act.lrelu(x, 0.2)
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        
+        layer = inputs
+        for n in (1,2,4,8,16,32,16,8):
+            layer = slim.conv2d(layer, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+            layer = slim.batch_norm(layer, activation_fn = tf.nn.relu)
+        net = layer
+        for n in (2,2,8):
+            net = slim.conv2d(net, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+            net = slim.batch_norm(net, activation_fn = tf.nn.relu)            
+        net = tf.nn.relu(net + layer)
+        net = tf.contrib.layers.flatten(net)
+        logits = slim.fully_connected(net, 1, activation_fn=tf.identity)
+        net_ho = tf.nn.sigmoid(logits)
+        return net_ho, logits
 
-        tl.layers.set_name_reuse(reuse)
-        net_in = InputLayer(input_images, name='input/images')
-        net_h0 = Conv2d(net_in, df_dim, (4, 4), (2, 2), act=lrelu,
-                padding='SAME', W_init=w_init, name='h0/c')
+def vgg19(inputs, reuse = False):
+    layer = inputs
+    with tf.variable_scope("VGG19", reuse=reuse):
+        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
+        layer = slim.conv2d(layer, 128, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 128, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
+        conv = layer
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
 
-        net_h1 = Conv2d(net_h0, df_dim*2, (4, 4), (2, 2), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='h1/c')
-        net_h1 = BatchNormLayer(net_h1, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='h1/bn')
-        net_h2 = Conv2d(net_h1, df_dim*4, (4, 4), (2, 2), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='h2/c')
-        net_h2 = BatchNormLayer(net_h2, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='h2/bn')
-        net_h3 = Conv2d(net_h2, df_dim*8, (4, 4), (2, 2), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='h3/c')
-        net_h3 = BatchNormLayer(net_h3, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='h3/bn')
-        net_h4 = Conv2d(net_h3, df_dim*16, (4, 4), (2, 2), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='h4/c')
-        net_h4 = BatchNormLayer(net_h4, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='h4/bn')
-        net_h5 = Conv2d(net_h4, df_dim*32, (4, 4), (2, 2), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='h5/c')
-        net_h5 = BatchNormLayer(net_h5, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='h5/bn')
-        net_h6 = Conv2d(net_h5, df_dim*16, (1, 1), (1, 1), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='h6/c')
-        net_h6 = BatchNormLayer(net_h6, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='h6/bn')
-        net_h7 = Conv2d(net_h6, df_dim*8, (1, 1), (1, 1), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='h7/c')
-        net_h7 = BatchNormLayer(net_h7, is_train=is_train,
-                gamma_init=gamma_init, name='h7/bn')
-
-        net = Conv2d(net_h7, df_dim*2, (1, 1), (1, 1), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='res/c')
-        net = BatchNormLayer(net, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='res/bn')
-        net = Conv2d(net, df_dim*2, (3, 3), (1, 1), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='res/c2')
-        net = BatchNormLayer(net, act=lrelu, is_train=is_train,
-                gamma_init=gamma_init, name='res/bn2')
-        net = Conv2d(net, df_dim*8, (3, 3), (1, 1), act=None,
-                padding='SAME', W_init=w_init, b_init=b_init, name='res/c3')
-        net = BatchNormLayer(net, is_train=is_train,
-                gamma_init=gamma_init, name='res/bn3')
-        net_h8 = ElementwiseLayer(layer=[net_h7, net],
-                combine_fn=tf.add, name='res/add')
-        net_h8.outputs = tl.act.lrelu(net_h8.outputs, 0.2)
-
-        net_ho = FlattenLayer(net_h8, name='ho/flatten')
-        net_ho = DenseLayer(net_ho, n_units=1, act=tf.identity,
-                W_init = w_init, name='ho/dense')
-        logits = net_ho.outputs
-        net_ho.outputs = tf.nn.sigmoid(net_ho.outputs)
-
-    return net_ho, logits
+        layer = tf.contrib.layers.flatten(layer)   
+        layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
+        layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
+        layer = slim.fully_connected(layer, 1000, activation_fn=tf.identity)   
+        return layer, conv
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
@@ -160,12 +136,33 @@ def neural_networks():
     batch_size, image_width = shape[0], shape[1]
 
     layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
+    layer_labels = tf.reshape(labels, (batch_size, image_width, image_height, 1))
 
-    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm)
-    for i in range(POOL_COUNT):
-        for j in range(3):
-            layer = addResLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], stride=[1, 1], normalizer_fn=slim.batch_norm)  
+    net_g = SRGAN_g(layer, reuse = False)
+    net_d, logits_real = SRGAN_d(layer_labels, reuse = False)
+    _,     logits_fake = SRGAN_d(net_g, reuse = True)
+
+    net_vgg, vgg_target_emb = vgg19(layer_labels, reuse = False)
+    _, vgg_predict_emb      = vgg19(net_g, reuse = True)
+
+    d_loss1 = tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
+    d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
+    d_loss  = d_loss1 + d_loss2
+
+    g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_real))
+    mse_loss   = tf.losses.mean_squared_error(net_g, layer_labels)
+    vgg_loss   = 2e-6 * tf.losses.mean_squared_error(vgg_target_emb, vgg_predict_emb)
+    g_loss     = g_gan_loss + mse_loss + vgg_loss
+    
+    g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
+    d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
+
+    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(mse_loss, var_list=g_vars)
+
+    g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, var_list=g_vars)
+    d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, var_list=d_vars)
+
+
         
     predictions = slim.conv2d(layer, 1, [3,3], normalizer_fn = None, activation_fn = None)
     predictions = tf.reshape(predictions, (batch_size, image_width, image_height, 1 ))
