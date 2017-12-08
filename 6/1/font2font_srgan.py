@@ -160,7 +160,7 @@ def neural_networks():
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
 
-    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(mse_loss, global_step=global_step, var_list=g_vars)
+    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_gan_mse_loss, global_step=global_step, var_list=g_vars)
 
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
