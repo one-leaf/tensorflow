@@ -87,7 +87,7 @@ def SRGAN_d(inputs, reuse=False):
             net = slim.conv2d(net, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
             net = slim.batch_norm(net, activation_fn = tf.nn.relu)            
         net = tf.nn.relu(net + layer)
-        net = tf.contrib.layers.flatten(net)
+        #net = tf.contrib.layers.flatten(net)
         logits = slim.fully_connected(net, 1, activation_fn=tf.identity)
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
