@@ -128,7 +128,7 @@ def vgg19(inputs, reuse = False):
         cell_bw = tf.contrib.rnn.GRUCell(8)
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
         outputs = tf.concat(outputs, axis=2)
-        layer = tf.reshape(outputs, [-1, 1000*num_hidden])    
+        layer = tf.reshape(outputs, [-1, 1000*16])    
         layer = slim.fully_connected(layer, CLASSES_NUMBER , activation_fn=tf.identity)    
    
         return layer, conv
