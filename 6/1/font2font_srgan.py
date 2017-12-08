@@ -120,7 +120,7 @@ def vgg19(inputs, reuse = False):
         layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
 
         #layer = tf.contrib.layers.flatten(layer)  
-        layer = tf.reshape(layer, 256)
+        layer = tf.reshape(layer, (-1,256))
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 1000, activation_fn=tf.identity)   
