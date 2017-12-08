@@ -88,7 +88,7 @@ def SRGAN_d(inputs, reuse=False):
             net = slim.conv2d(net, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
             net = slim.batch_norm(net, activation_fn = tf.nn.relu)            
         net = tf.nn.relu(net + layer)
-        net = tf.reshape(net,(-1, df_dim * 8))
+        net = tf.reshape(net, [-1, df_dim * 8])
         logits = slim.fully_connected(net, 1, activation_fn=tf.identity)
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
@@ -117,10 +117,20 @@ def vgg19(inputs, reuse = False):
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
-        layer = tf.reshape(layer, (-1,512))
+        layer = tf.reshape(layer, [-1,512])
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
-        layer = slim.fully_connected(layer, CLASSES_NUMBER, activation_fn=tf.identity)    
+        layer = slim.fully_connected(layer, 1000, activation_fn=tf.nn.relu)    
+        layer = tf.reshape(layer,[batch_size, -1, 1000]) 
+
+        layer = tf.transpose(logits, (0, 2, 1)) 
+        cell_fw = tf.contrib.rnn.GRUCell(8)
+        cell_bw = tf.contrib.rnn.GRUCell(8)
+        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
+        outputs = tf.concat(outputs, axis=2)
+        layer = tf.reshape(outputs, [-1, 1000*num_hidden])    
+        layer = slim.fully_connected(layer, CLASSES_NUMBER , activation_fn=tf.identity)    
+   
         return layer, conv
 
 def neural_networks():
