@@ -232,10 +232,7 @@ def train():
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     saver_prefix = os.path.join(model_dir, "model.ckpt")        
-
-    optimizer = tf.train.AdamOptimizer(learning_rate=LEARNING_RATE_INITIAL)
-    train_op = optimizer.minimize(loss, global_step=global_step)
-   
+ 
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
