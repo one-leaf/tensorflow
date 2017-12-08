@@ -127,7 +127,7 @@ def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
     targets = tf.placeholder(tf.float32, [None, None, image_height], name="targets")
-    labels = tf.placeholder(tf.int32, [None, 1], name="labels") 
+    labels = tf.placeholder(tf.int32, [None], name="labels") 
 
     shape = tf.shape(inputs)
     batch_size, image_width = shape[0], shape[1]
