@@ -124,10 +124,17 @@ def vgg19(inputs, reuse = False):
         
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
+        layer = tf.reshape(layer, [batch_size, -1, 1000])
+
+        used = tf.sign(tf.reduce_max(tf.abs(layer), 2))
+        sequence_length = tf.reduce_sum(used, 1)
+        sequence_length = tf.cast(sequence_length, tf.int32)
+        output, state = tf.nn.dynamic_rnn(tf.contrib.rnn.GRUCell(8), layer, dtype=tf.float32, sequence_length=sequence_length)
 
         # 抽样
-        index = tf.range(0, batch_size) * image_width
-        layer = tf.reshape(layer, [-1, 1000])
+        index = tf.range(0, batch_size) * image_width + (sequence_length-1) 
+        out_size = int(output.get_shape()[2])
+        layer = tf.reshape(output, [-1, out_size])
         layer = tf.gather(layer, index)
         layer = slim.fully_connected(layer, CLASSES_NUMBER, activation_fn=None)    
 
