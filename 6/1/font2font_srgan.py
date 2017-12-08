@@ -128,6 +128,7 @@ def neural_networks():
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
     targets = tf.placeholder(tf.float32, [None, None, image_height], name="targets")
     labels = tf.placeholder(tf.int32, [None], name="labels") 
+    global_step = tf.Variable(0, trainable=False)
 
     shape = tf.shape(inputs)
     batch_size, image_width = shape[0], shape[1]
@@ -159,7 +160,6 @@ def neural_networks():
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
 
-    global_step = tf.Variable(0, trainable=False)
     g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(mse_loss, global_step=global_step, var_list=g_vars)
 
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
@@ -247,7 +247,7 @@ def get_next_batch(batch_size=128):
     return inputs, labels
 
 def train():
-    global_step = tf.Variable(0, trainable=False)
+    
     inputs, targets, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, \
         g_loss, g_gan_mse_loss, g_gan_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim = neural_networks()
 
