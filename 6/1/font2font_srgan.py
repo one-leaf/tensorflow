@@ -165,7 +165,7 @@ def neural_networks():
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
-    return inputs, targets, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, 
+    return inputs, targets, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, \
             g_loss, g_gan_mse_loss, g_gan_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim
 
 
@@ -248,7 +248,7 @@ def get_next_batch(batch_size=128):
 
 def train():
     global_step = tf.Variable(0, trainable=False)
-    inputs, targets, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, 
+    inputs, targets, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, \
         g_loss, g_gan_mse_loss, g_gan_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
