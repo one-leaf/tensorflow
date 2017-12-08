@@ -247,7 +247,7 @@ def train():
             for batch in range(BATCHES):
                 start = time.time() 
                 train_inputs, train_labels = get_next_batch(BATCH_SIZE)
-                errM, _ , steps= sess.run([mse_loss, g_optim_init, global_step], {inputs: train_inputs, labels: train_labels})
+                errM, _ , steps= session.run([mse_loss, g_optim_init, global_step], {inputs: train_inputs, labels: train_labels})
                 print("%4d time: %4.4fs, mse: %.8f " % (steps, time.time() - step_time, errM))
             if steps > 20000: break
             saver.save(session, saver_prefix, global_step=steps)
@@ -259,9 +259,9 @@ def train():
                 train_inputs, train_labels = get_next_batch(BATCH_SIZE)  
 
                 ## update D
-                errD, _ = sess.run([d_loss, d_optim], {inputs: train_inputs, labels: train_labels})
+                errD, _ = session.run([d_loss, d_optim], {inputs: train_inputs, labels: train_labels})
                 ## update G
-                errG, errM, errV, errA, _, steps = sess.run([g_loss, mse_loss, vgg_loss, g_gan_loss, g_optim, global_step], {inputs: train_inputs, labels: train_labels})
+                errG, errM, errV, errA, _, steps = session.run([g_loss, mse_loss, vgg_loss, g_gan_loss, g_optim, global_step], {inputs: train_inputs, labels: train_labels})
                 print("%4d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f vgg: %.6f adv: %.6f)" % (steps, time.time() - step_time, errD, errG, errM, errV, errA))
 
                 if np.isnan(d_loss) or np.isinf(d_loss) or np.isnan(g_loss) or np.isinf(g_loss) or np.isnan(g_gan_loss) or np.isinf(g_gan_loss):
