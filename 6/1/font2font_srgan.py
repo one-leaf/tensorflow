@@ -153,20 +153,20 @@ def neural_networks():
     d_loss  = d_loss1 + d_loss2
 
     g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_real))
-    g_gan_mse_loss   = tf.losses.mean_squared_error(net_g, layer_targets)
-    g_gan_vgg_loss   = 2e-6 * tf.losses.mean_squared_error(vgg_target_emb, vgg_predict_emb)
-    g_loss     = g_gan_loss + g_gan_mse_loss + g_gan_vgg_loss
+    g_mse_loss   = tf.losses.mean_squared_error(net_g, layer_targets)
+    g_vgg_loss   = 2e-6 * tf.losses.mean_squared_error(vgg_target_emb, vgg_predict_emb)
+    g_loss     = g_gan_loss + g_mse_loss + g_vgg_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
 
-    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_gan_mse_loss, global_step=global_step, var_list=g_vars)
+    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_mse_loss, global_step=global_step, var_list=g_vars)
 
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
-    return inputs, targets, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, \
-            g_loss, g_gan_mse_loss, g_gan_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim
+    return inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
+            g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -248,8 +248,8 @@ def get_next_batch(batch_size=128):
 
 def train():
     
-    inputs, targets, labels, global_step, mse_loss, g_optim_init, d_loss, d_optim, \
-        g_loss, g_gan_mse_loss, g_gan_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim = neural_networks()
+    inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
+        g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -280,7 +280,7 @@ def train():
             for batch in range(BATCHES):
                 start = time.time() 
                 train_inputs, train_labels = get_next_batch(BATCH_SIZE)
-                errM, _ , steps= session.run([mse_loss, g_optim_init, global_step], {inputs: train_inputs, targets: train_labels})
+                errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], {inputs: train_inputs, targets: train_labels})
                 print("%8d time: %4.4fs, mse: %.8f " % (steps, time.time() - start, errM))
             saver.save(session, saver_prefix, global_step=steps)
 
@@ -293,7 +293,7 @@ def train():
                 ## update D
                 errD, _ = session.run([d_loss, d_optim], {inputs: train_inputs, targets: train_labels})
                 ## update G
-                errG, errM, errV, errA, _, steps = session.run([g_loss, mse_loss, vgg_loss, g_gan_loss, g_optim, global_step],
+                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, global_step],
                      {inputs: train_inputs, targets: train_labels})
                 print("%8d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f vgg: %.6f adv: %.6f)" % (steps, time.time() - start, errD, errG, errM, errV, errA))
 
