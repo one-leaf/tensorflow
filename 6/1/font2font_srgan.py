@@ -121,6 +121,9 @@ def vgg19(inputs, reuse = False):
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 1000, activation_fn=tf.nn.relu)    
+        
+        shape = tf.shape(inputs)
+        batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer,[batch_size, -1, 1000]) 
 
         layer = tf.transpose(logits, (0, 2, 1)) 
