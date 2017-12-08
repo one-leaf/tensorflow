@@ -179,6 +179,7 @@ eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8"
 def get_vgg_next_batch(batch_size=128):
     images = []  
     labels = []
+    max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         # font_length = random.randint(font_min_length-5, font_min_length+5)        
@@ -193,7 +194,14 @@ def get_vgg_next_batch(batch_size=128):
         image = (255. - image) / 255.
         images.append(image)
         labels.append(CHARS.index(text))
-    return image, labels
+        if image.shape[1] > max_width_image: 
+            max_width_image = image.shape[1]
+            
+    inputs = np.zeros([batch_size, max_width_image, image_height])
+    for i in range(len(images)):
+        image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
+        inputs[i,:] = np.transpose(image_vec)                   
+    return inputs, labels
     
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
