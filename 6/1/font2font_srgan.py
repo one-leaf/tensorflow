@@ -196,7 +196,9 @@ def get_vgg_next_batch(batch_size=128):
         font_size = random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5]) 
-        text  = random.choice(CHARS)   
+        text= ''
+        while text.strip() == '':
+            text = random.choice(CHARS)   
         image = utils_font.get_font_image_from_url(text, font_name ,font_size)
         image = utils_pil.convert_to_gray(image)
         image = np.asarray(image)     
