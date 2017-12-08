@@ -136,8 +136,8 @@ def neural_networks():
     layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
     layer_targets = tf.reshape(targets, (batch_size, image_width, image_height, 1))
 
-    vgg_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='VGG19')
     net_vgg, _ = vgg19(layer, reuse = False)
+    vgg_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='VGG19')
     vgg_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(logits=net_vgg, labels=labels)
     vgg_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(vgg_loss, global_step=global_step, var_list=vgg_vars)
 
