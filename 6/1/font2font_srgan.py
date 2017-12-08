@@ -249,7 +249,7 @@ def train():
                 train_inputs, train_labels = get_next_batch(BATCH_SIZE)
                 errM, _ , steps= session.run([mse_loss, g_optim_init, global_step], {inputs: train_inputs, labels: train_labels})
                 print("%4d time: %4.4fs, mse: %.8f " % (steps, time.time() - step_time, errM))
-            if steps > 20000: break
+            if steps > 200000: break
             saver.save(session, saver_prefix, global_step=steps)
 
         # train GAN (SRGAN)
