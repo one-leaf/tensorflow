@@ -126,7 +126,7 @@ def vgg19(inputs, reuse = False):
         batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer,[batch_size, -1, 1000]) 
 
-        layer = tf.transpose(logits, (0, 2, 1)) 
+        layer = tf.transpose(layer, (0, 2, 1)) 
         cell_fw = tf.contrib.rnn.GRUCell(8)
         cell_bw = tf.contrib.rnn.GRUCell(8)
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
