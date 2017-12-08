@@ -41,7 +41,7 @@ REPORT_STEPS = 200
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -249,7 +249,7 @@ def train():
                 train_inputs, train_labels = get_next_batch(BATCH_SIZE)
                 errM, _ , steps= session.run([mse_loss, g_optim_init, global_step], {inputs: train_inputs, labels: train_labels})
                 print("%8d time: %4.4fs, mse: %.8f " % (steps, time.time() - start, errM))
-            if steps > 1000: break
+            if steps > 100: break
             saver.save(session, saver_prefix, global_step=steps)
 
         # train GAN (SRGAN)
