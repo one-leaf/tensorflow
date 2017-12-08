@@ -291,7 +291,7 @@ def train():
                 start = time.time() 
                 train_inputs, train_labels = get_vgg_next_batch(BATCH_SIZE)
                 errM, _ , steps= session.run([vgg_loss, vgg_optim, global_step], {inputs: train_inputs, labels: train_labels})
-                print("%8d time: %4.4fs, mse: %.8f " % (steps, time.time() - start, errM))
+                print("%8d time: %4.4fs, vgg_loss: %.8f " % (steps, time.time() - start, errM))
             saver.save(session, saver_prefix, global_step=steps)                
 
         # initialize G
@@ -300,7 +300,7 @@ def train():
                 start = time.time() 
                 train_inputs, train_labels = get_next_batch(BATCH_SIZE)
                 errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], {inputs: train_inputs, targets: train_labels})
-                print("%8d time: %4.4fs, mse: %.8f " % (steps, time.time() - start, errM))
+                print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
             saver.save(session, saver_prefix, global_step=steps)
 
         # train GAN (SRGAN)
