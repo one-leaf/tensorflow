@@ -124,16 +124,13 @@ def vgg19(inputs, reuse = False):
         
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
-        layer = tf.reshape(layer,[batch_size, -1, 1000]) 
 
-        layer = tf.transpose(layer, (0, 2, 1)) 
-        cell_fw = tf.contrib.rnn.GRUCell(8)
-        cell_bw = tf.contrib.rnn.GRUCell(8)
-        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-        outputs = tf.concat(outputs, axis=2)
-        layer = tf.reshape(outputs, [-1, 1000*16])    
-        layer = slim.fully_connected(layer, CLASSES_NUMBER , activation_fn=tf.identity)    
-   
+        # 抽样
+        index = tf.range(0, batch_size) * image_width
+        layer = tf.reshape(layer, [-1, 1000])
+        layer = tf.gather(layer, index)
+        layer = slim.fully_connected(layer, CLASSES_NUMBER, activation_fn=None)    
+
         return layer, conv
 
 def neural_networks():
