@@ -107,7 +107,7 @@ def Highway(inputs, reuse = False):
             for j in range(16):
                 layer = addHighwayLayer(layer)
             layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
-        layer = slim.conv2d(layer, num_classes, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, CLASSES_NUMBER, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
 
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
