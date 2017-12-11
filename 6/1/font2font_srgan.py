@@ -238,7 +238,6 @@ def get_next_batch(batch_size=128):
     return inputs, targets, sparse_labels, seq_len
 
 def train():
-    
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
         g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, \
         highway_loss, highway_optim, seq_len = neural_networks()
@@ -259,7 +258,7 @@ def train():
 
         while True:
             # train highway19
-            for batch in range(BATCHES * 3):
+            for batch in range(BATCHES):
                 start = time.time() 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
@@ -271,7 +270,7 @@ def train():
             saver.save(session, saver_prefix, global_step=steps)                
 
             # initialize G
-            for batch in range(BATCHES * 2):
+            for batch in range(BATCHES):
                 start = time.time() 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
