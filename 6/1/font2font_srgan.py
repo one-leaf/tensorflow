@@ -101,7 +101,7 @@ def SRGAN_d(inputs, reuse=False):
         return net_ho, logits
 
 def Highway(inputs, reuse = False):
-    with tf.variable_scope("Highway", reuse=reuse):
+    with tf.variable_scope("HIGHWAY", reuse=reuse):
         layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm)
         for i in range(POOL_COUNT):
             for j in range(16):
@@ -129,18 +129,18 @@ def neural_networks():
     layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
     layer_targets = tf.reshape(targets, (batch_size, image_width, image_height, 1))
 
-    net_vgg, _ = vgg19(layer, reuse = False)
+    net_highway, _ = Highway(layer, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None])
-    vgg_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='VGG19')
-    vgg_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_vgg, sequence_length=seq_len))
-    vgg_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(vgg_loss, global_step=global_step, var_list=vgg_vars)
+    highway_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY')
+    highway_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_highway, sequence_length=seq_len))
+    highway_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(highway_loss, global_step=global_step, var_list=highway_vars)
 
     net_g = SRGAN_g(layer, reuse = False)
     net_d, logits_real = SRGAN_d(layer_targets, reuse = False)
     _,     logits_fake = SRGAN_d(net_g, reuse = True)
 
-    _, vgg_target_emb   = vgg19(layer_targets, reuse = True)
-    _, vgg_predict_emb  = vgg19(net_g, reuse = True)
+    _, highway_target_emb   = Highway(layer_targets, reuse = True)
+    _, highway_predict_emb  = Highway(net_g, reuse = True)
 
     d_loss1 = tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
     d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
@@ -148,8 +148,8 @@ def neural_networks():
 
     g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_real))
     g_mse_loss   = tf.losses.mean_squared_error(net_g, layer_targets)
-    g_vgg_loss   = 2e-6 * tf.losses.mean_squared_error(vgg_target_emb, vgg_predict_emb)
-    g_loss     = g_gan_loss + g_mse_loss + g_vgg_loss
+    g_highway_loss   = 2e-6 * tf.losses.mean_squared_error(highway_target_emb, highway_predict_emb)
+    g_loss     = g_gan_loss + g_mse_loss + g_highway_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
@@ -160,7 +160,7 @@ def neural_networks():
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
     return inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
-            g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim, seq_len
+            g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, highway_loss, highway_optim, seq_len
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -239,8 +239,8 @@ def get_next_batch(batch_size=128):
 def train():
     
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
-        g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, \
-        vgg_loss, vgg_optim, seq_len = neural_networks()
+        g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, \
+        highway_loss, highway_optim, seq_len = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -257,13 +257,13 @@ def train():
             saver.restore(session, ckpt.model_checkpoint_path)    
 
         while True:
-            # train vgg19
+            # train highway19
             for batch in range(BATCHES * 3):
                 start = time.time() 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
-                errM, _ , steps= session.run([vgg_loss, vgg_optim, global_step], feed)
-                print("%8d time: %4.4fs, vgg_loss: %.8f " % (steps, time.time() - start, errM))
+                errM, _ , steps= session.run([highway_loss, highway_optim, global_step], feed)
+                print("%8d time: %4.4fs, highway_loss: %.8f " % (steps, time.time() - start, errM))
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return                   
@@ -289,8 +289,8 @@ def train():
                 ## update D
                 errD, _ = session.run([d_loss, d_optim], feed)
                 ## update G
-                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, global_step], feed)
-                print("%8d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f vgg: %.6f adv: %.6f)" % (steps, time.time() - start, errD, errG, errM, errV, errA))
+                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
+                print("%8d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errD, errG, errM, errV, errA))
 
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
                     print("Error: cost is nan or inf")
