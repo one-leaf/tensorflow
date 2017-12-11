@@ -294,8 +294,8 @@ def train():
                     b_predictions = session.run([net_g], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
                     _pred = np.transpose(b_predictions)        
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(train_inputs[0]*255))
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
             saver.save(session, saver_prefix, global_step=steps)
