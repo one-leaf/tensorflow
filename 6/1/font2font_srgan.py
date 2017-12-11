@@ -292,7 +292,7 @@ def train():
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
-                    b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
+                    b_predictions = np.reshape(b_predictions[0],train_targets[0].shape)   
                     _pred = np.transpose(b_predictions)        
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(train_inputs[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
