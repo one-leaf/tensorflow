@@ -78,8 +78,8 @@ def SRGAN_g(inputs, reuse=False):
         layer = slim.batch_norm(layer, activation_fn=None)
         layer = layer + temp        
         # B residual blacks end
-        layer = slim.conv2d(layer, 64, [3,3], activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 64, [3,3], activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
         layer = slim.conv2d(layer, 1,   [1,1], activation_fn=tf.nn.tanh)
         return layer
 
