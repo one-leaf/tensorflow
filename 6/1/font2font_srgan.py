@@ -45,7 +45,7 @@ BATCHES = 64
 BATCH_SIZE = 8
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = 3
+POOL_COUNT = 5
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_font2font_srgan"
 
@@ -121,22 +121,12 @@ def vgg19(inputs, reuse = False):
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 1000, activation_fn=tf.nn.relu)    
-        
+
+        layer = slim.fully_connected(layer, CLASSES_NUMBER)    
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
-        layer = tf.reshape(layer, [batch_size, -1, 1000])
-
-        used = tf.sign(tf.reduce_max(tf.abs(layer), 2))
-        sequence_length = tf.reduce_sum(used, 1)
-        sequence_length = tf.cast(sequence_length, tf.int32)
-        output, state = tf.nn.dynamic_rnn(tf.contrib.rnn.GRUCell(8), layer, dtype=tf.float32, sequence_length=sequence_length)
-
-        # 抽样
-        index = tf.range(0, batch_size) * image_width + (sequence_length-1) 
-        out_size = int(output.get_shape()[2])
-        layer = tf.reshape(output, [-1, out_size])
-        layer = tf.gather(layer, index)
-        layer = slim.fully_connected(layer, CLASSES_NUMBER, activation_fn=None)    
+        layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
+        layer = tf.transpose(layer, (1, 0, 2))       
 
         return layer, conv
 
@@ -144,7 +134,7 @@ def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
     targets = tf.placeholder(tf.float32, [None, None, image_height], name="targets")
-    labels = tf.placeholder(tf.int32, [None], name="labels") 
+    labels = tf.sparse_placeholder(tf.int32, name="labels")
     global_step = tf.Variable(0, trainable=False)
 
     shape = tf.shape(inputs)
@@ -154,8 +144,9 @@ def neural_networks():
     layer_targets = tf.reshape(targets, (batch_size, image_width, image_height, 1))
 
     net_vgg, _ = vgg19(layer, reuse = False)
+    seq_len = tf.placeholder(tf.int32, [None])
     vgg_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='VGG19')
-    vgg_loss  = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=net_vgg, labels=labels))
+    vgg_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_vgg, sequence_length=seq_len))
     vgg_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(vgg_loss, global_step=global_step, var_list=vgg_vars)
 
     net_g = SRGAN_g(layer, reuse = False)
@@ -183,7 +174,7 @@ def neural_networks():
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
     return inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
-            g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim
+            g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim, seq_len
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -193,44 +184,25 @@ AllFontNames = ENGFontNames + CHIFontNames
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 
-def get_vgg_next_batch(batch_size=128):
-    images = []  
-    labels = []
-    max_width_image = 0
-    for i in range(batch_size):
-        font_name = random.choice(AllFontNames)
-        # font_length = random.randint(font_min_length-5, font_min_length+5)        
-        font_size = random.randint(image_height, 64)    
-        font_mode = random.choice([0,1,2,4]) 
-        font_hint = random.choice([0,1,2,3,4,5]) 
-        text= ''
-        while text.strip() == '':
-            text = random.choice(CHARS)   
-        image = utils_font.get_font_image_from_url(text, font_name ,font_size)
-        image = utils_pil.convert_to_gray(image)
-        image = np.asarray(image)     
-        image = utils.resize(image, height=image_height)
-        image = (255. - image) / 255.
-        images.append(image)
-        labels.append(CHARS.index(text))
-        if image.shape[1] > max_width_image: 
-            max_width_image = image.shape[1]
-            
-    inputs = np.zeros([batch_size, max_width_image, image_height])
-    for i in range(len(images)):
-        image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
-        inputs[i,:] = np.transpose(image_vec)                   
-    return inputs, labels
-    
+# 转化一个序列列表为稀疏矩阵    
+def sparse_tuple_from(sequences, dtype=np.int32):
+    indices = []
+    values = []
+    for n, seq in enumerate(sequences):
+        indices.extend(zip([n] * len(seq), range(len(seq))))
+        values.extend(seq)
+    indices = np.asarray(indices, dtype=np.int64)
+    values = np.asarray(values, dtype=dtype)
+    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
+    return indices, values, shape
+
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
     images = []   
     to_images = []
     max_width_image = 0
-    font_min_length = random.randint(10, 20)
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        # font_length = random.randint(font_min_length-5, font_min_length+5)
         font_length = random.randint(3, 5)
         font_size = random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
@@ -266,16 +238,21 @@ def get_next_batch(batch_size=128):
         image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.transpose(image_vec)
 
-    labels = np.zeros([batch_size, max_width_image, image_height])
+    targets = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(to_images)):
         image_vec = utils.img2vec(to_images[i], height=image_height, width=max_width_image, flatten=False)
-        labels[i,:] = np.transpose(image_vec)
-    return inputs, labels
+        targets[i,:] = np.transpose(image_vec)
+
+    labels = [np.asarray(i) for i in codes]
+    sparse_labels = sparse_tuple_from(labels)
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)                
+    return inputs, targets, sparse_labels, seq_len
 
 def train():
     
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
-        g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, vgg_loss, vgg_optim = neural_networks()
+        g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, net_g, \
+        vgg_loss, vgg_optim, seq_len = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -291,52 +268,45 @@ def train():
             print("Restore Model ...")
             saver.restore(session, ckpt.model_checkpoint_path)    
 
-        steps = session.run(global_step)
-        # train vgg19
-        while steps < 100000:
-            for batch in range(BATCHES):
+        while True:
+            # train vgg19
+            for batch in range(BATCHES * 3):
                 start = time.time() 
-                train_inputs, train_labels = get_vgg_next_batch(BATCH_SIZE)
-                errM, _ , steps= session.run([vgg_loss, vgg_optim, global_step], {inputs: train_inputs, labels: train_labels})
+                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                errM, _ , steps= session.run([vgg_loss, vgg_optim, global_step], feed)
                 print("%8d time: %4.4fs, vgg_loss: %.8f " % (steps, time.time() - start, errM))
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return                   
             saver.save(session, saver_prefix, global_step=steps)                
 
-        # initialize G
-        while steps < 200000:
-            for batch in range(BATCHES):
+            # initialize G
+            for batch in range(BATCHES * 2):
                 start = time.time() 
-                train_inputs, train_labels = get_next_batch(BATCH_SIZE)
-                errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], {inputs: train_inputs, targets: train_labels})
+                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
                 print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
             if np.isnan(errM) or np.isinf(errM) :
                 print("Error: cost is nan or inf")
                 return                    
             saver.save(session, saver_prefix, global_step=steps)
 
-        # train GAN (SRGAN)
-        while True:
+            # train GAN (SRGAN)
             for batch in range(BATCHES):
                 start = time.time()                
-                train_inputs, train_labels = get_next_batch(BATCH_SIZE)  
-
+                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                 ## update D
-                errD, _ = session.run([d_loss, d_optim], {inputs: train_inputs, targets: train_labels})
+                errD, _ = session.run([d_loss, d_optim], feed)
                 ## update G
-                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, global_step],
-                     {inputs: train_inputs, targets: train_labels})
+                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_vgg_loss, g_gan_loss, g_optim, global_step], feed)
                 print("%8d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f vgg: %.6f adv: %.6f)" % (steps, time.time() - start, errD, errG, errM, errV, errA))
 
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
                     print("Error: cost is nan or inf")
                     return   
-                
-                if time.time() - start > 60: 
-                    print('Exit for long time')
-                    return
-
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     test_inputs, test_labels = get_next_batch(1)             
                     feed = {inputs: test_inputs, targets: test_labels}
@@ -346,9 +316,6 @@ def train():
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(test_inputs[0]))
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(test_labels[0]))
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred)
 
             saver.save(session, saver_prefix, global_step=steps)
                 
