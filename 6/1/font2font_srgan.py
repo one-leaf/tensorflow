@@ -290,7 +290,7 @@ def train():
 
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
-                    feed = {inputs: test_inputs, targets: test_labels}
+                    feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
                     b_predictions = np.reshape(b_predictions[0],test_labels[0].shape)   
                     _pred = np.transpose(b_predictions)        
