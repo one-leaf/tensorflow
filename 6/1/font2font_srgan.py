@@ -45,7 +45,7 @@ BATCHES = 64
 BATCH_SIZE = 8
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = 5
+POOL_COUNT = 2
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_font2font_srgan"
 
@@ -105,18 +105,18 @@ def vgg19(inputs, reuse = False):
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=1)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=1)
         conv = layer
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
         layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
+        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=1)
         layer = tf.reshape(layer, [-1,512])
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
         layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
