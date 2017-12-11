@@ -42,7 +42,7 @@ REPORT_STEPS = 200
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 8
+BATCH_SIZE = 16
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -191,7 +191,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_length = random.randint(3, 5)
+        font_length = random.randint(8, 10)
         font_size = random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
