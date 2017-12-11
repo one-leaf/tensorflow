@@ -45,7 +45,7 @@ BATCHES = 64
 BATCH_SIZE = 8
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = 2
+POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_font2font_srgan"
 
@@ -59,6 +59,13 @@ def addResLayer(inputs):
     layer = slim.conv2d(layer, 64, [3,3],activation_fn=None)
     outputs = inputs + layer
     return outputs 
+
+# 增加 Highway 网络
+def addHighwayLayer(inputs):
+    H = slim.conv2d(inputs, 64, [3,3])
+    T = slim.conv2d(inputs, 64, [3,3], biases_initializer = tf.constant_initializer(-1.0), activation_fn=tf.nn.sigmoid)    
+    outputs = H * T + inputs * (1.0 - T)
+    return outputs    
 
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:
@@ -93,36 +100,15 @@ def SRGAN_d(inputs, reuse=False):
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
 
-def vgg19(inputs, reuse = False):
-    with tf.variable_scope("VGG19", reuse=reuse):
-        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
-        layer = slim.conv2d(layer, 128, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 128, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=2)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=1)
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=1)
-        conv = layer
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 512, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-        layer = slim.max_pool2d(layer, [2, 2], padding="SAME", stride=1)
-        layer = tf.reshape(layer, [-1,512])
-        layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
-        layer = slim.fully_connected(layer, 4096, activation_fn=tf.nn.relu)   
-        layer = slim.fully_connected(layer, 1000, activation_fn=tf.nn.relu)    
+def Highway(inputs, reuse = False):
+    with tf.variable_scope("Highway", reuse=reuse):
+        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm)
+        for i in range(POOL_COUNT):
+            for j in range(16):
+                layer = addHighwayLayer(layer)
+            layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
+        layer = slim.conv2d(layer, num_classes, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
 
-        layer = slim.fully_connected(layer, CLASSES_NUMBER)    
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
