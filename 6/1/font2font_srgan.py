@@ -38,7 +38,7 @@ CLASSES_NUMBER = len(CHARS) + 2
 LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 200
+REPORT_STEPS = 400
 MOMENTUM = 0.9
 
 BATCHES = 64
@@ -257,44 +257,37 @@ def train():
             saver.restore(session, ckpt.model_checkpoint_path)    
 
         while True:
-            # train highway19
             for batch in range(BATCHES):
-                start = time.time() 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+
+                # train highway19
+                start = time.time() 
                 errM, _ , steps= session.run([highway_loss, highway_optim, global_step], feed)
                 print("%8d time: %4.4fs, highway_loss: %.8f " % (steps, time.time() - start, errM))
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return                   
-            saver.save(session, saver_prefix, global_step=steps)                
 
-            # initialize G
-            for batch in range(BATCHES):
+                # initialize G
                 start = time.time() 
-                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                 errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
                 print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-            if np.isnan(errM) or np.isinf(errM) :
-                print("Error: cost is nan or inf")
-                return                    
-            saver.save(session, saver_prefix, global_step=steps)
+                if np.isnan(errM) or np.isinf(errM) :
+                    print("Error: cost is nan or inf")
+                    return                    
 
-            # train GAN (SRGAN)
-            for batch in range(BATCHES):
+                # train GAN (SRGAN)
                 start = time.time()                
-                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                 ## update D
                 errD, _ = session.run([d_loss, d_optim], feed)
                 ## update G
                 errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
                 print("%8d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errD, errG, errM, errV, errA))
-
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
                     print("Error: cost is nan or inf")
-                    return   
+                    return 
+
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: test_inputs, targets: test_labels}
