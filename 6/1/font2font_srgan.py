@@ -209,7 +209,7 @@ def get_next_batch(batch_size=128):
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
         text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-        codes.append(text_list)          
+        codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name ,font_size, fontmode = font_mode, fonthint = font_hint )
         to_image = image.copy()
         image = utils_font.add_noise(image)   
