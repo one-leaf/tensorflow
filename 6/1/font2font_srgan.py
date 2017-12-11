@@ -1,5 +1,4 @@
 # coding=utf-8
-# 中文OCR学习，尝试多层
 
 import tensorflow as tf
 import numpy as np
@@ -17,10 +16,6 @@ import utils_pil, utils_font
 curr_dir = os.path.dirname(__file__)
 
 image_height = 32
-
-# LSTM
-# num_hidden = 4
-# num_layers = 1
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -109,12 +104,10 @@ def Highway(inputs, reuse = False):
             layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
         conv = layer
         layer = slim.conv2d(layer, CLASSES_NUMBER, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
-
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
         layer = tf.transpose(layer, (1, 0, 2))       
-
         return layer, conv
 
 def neural_networks():
@@ -147,9 +140,9 @@ def neural_networks():
     d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = d_loss1 + d_loss2
 
-    g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_real))
+    g_gan_loss = tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_real))
     g_mse_loss   = tf.losses.mean_squared_error(net_g, layer_targets)
-    g_highway_loss   = 2e-6 * tf.losses.mean_squared_error(highway_target_emb, highway_predict_emb)
+    g_highway_loss  = tf.losses.mean_squared_error(highway_target_emb, highway_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_highway_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
