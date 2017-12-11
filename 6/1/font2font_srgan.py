@@ -200,6 +200,7 @@ def sparse_tuple_from(sequences, dtype=np.int32):
 def get_next_batch(batch_size=128):
     images = []   
     to_images = []
+    codes = []
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
@@ -207,7 +208,8 @@ def get_next_batch(batch_size=128):
         font_size = random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
-        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)          
+        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+        codes.append(text_list)          
         image = utils_font.get_font_image_from_url(text, font_name ,font_size, fontmode = font_mode, fonthint = font_hint )
         to_image = image.copy()
         image = utils_font.add_noise(image)   
