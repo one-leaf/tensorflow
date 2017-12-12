@@ -253,7 +253,7 @@ def train():
 
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*8)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                
                 # # train G
@@ -271,6 +271,9 @@ def train():
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return   
+
+                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
 
                 # train GAN (SRGAN)
                 start = time.time()                
