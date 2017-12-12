@@ -286,7 +286,7 @@ def train():
                     print("Error: cost is nan or inf")
                     return 
 
-                if steps > 0 and steps % REPORT_STEPS == 0:
+                if steps > 0 and steps % REPORT_STEPS < 2:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
