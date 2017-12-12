@@ -186,7 +186,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_length = random.randint(8, 10)
+        font_length = random.randint(13, 15)
         font_size = random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
@@ -253,7 +253,7 @@ def train():
 
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*8)
+                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*4)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                
                 # # train G
