@@ -123,15 +123,17 @@ def neural_networks():
     layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
     layer_targets = tf.reshape(targets, (batch_size, image_width, image_height, 1))
 
-    net_highway, _ = Highway(layer, reuse = False)
+    net_g = SRGAN_g(layer, reuse = False)
+    net_d, logits_real = SRGAN_d(layer_targets, reuse = False)
+    _,     logits_fake = SRGAN_d(net_g, reuse = True)
+
+    net_highway, _ = Highway(net_g, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None])
     highway_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY')
     highway_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_highway, sequence_length=seq_len))
     highway_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(highway_loss, global_step=global_step, var_list=highway_vars)
-
-    net_g = SRGAN_g(layer, reuse = False)
-    net_d, logits_real = SRGAN_d(layer_targets, reuse = False)
-    _,     logits_fake = SRGAN_d(net_g, reuse = True)
+    highway_decoded, _ = tf.nn.ctc_beam_search_decoder(net_highway, seq_len, beam_width=10, merge_repeated=False)
+    highway_acc = tf.reduce_mean(tf.edit_distance(tf.cast(highway_decoded[0], tf.int32), labels))
 
     _, highway_target_emb   = Highway(layer_targets, reuse = True)
     _, highway_predict_emb  = Highway(net_g, reuse = True)
@@ -154,7 +156,7 @@ def neural_networks():
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
     return inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
-            g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, highway_loss, highway_optim, seq_len
+            g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, highway_loss, highway_optim, seq_len, highway_acc
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -233,7 +235,7 @@ def get_next_batch(batch_size=128):
 def train():
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
         g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, \
-        highway_loss, highway_optim, seq_len = neural_networks()
+        highway_loss, highway_optim, seq_len, highway_acc = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -253,22 +255,22 @@ def train():
             for batch in range(BATCHES):
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+               
+                # # train G
+                # start = time.time() 
+                # errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                # print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                # if np.isnan(errM) or np.isinf(errM) :
+                #     print("Error: cost is nan or inf")
+                #     return                    
 
-                # train highway19
+                # train highway
                 start = time.time() 
-                errM, _ , steps= session.run([highway_loss, highway_optim, global_step], feed)
-                print("%8d time: %4.4fs, highway_loss: %.8f " % (steps, time.time() - start, errM))
+                errM, acc, _ , steps= session.run([highway_loss, highway_acc, highway_optim, global_step], feed)
+                print("%8d time: %4.4fs, highway_loss: %.8f, highway_acc: %.8f " % (steps, time.time() - start, errM, acc))
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
-                    return                   
-
-                # initialize G
-                start = time.time() 
-                errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                if np.isnan(errM) or np.isinf(errM) :
-                    print("Error: cost is nan or inf")
-                    return                    
+                    return   
 
                 # train GAN (SRGAN)
                 start = time.time()                
