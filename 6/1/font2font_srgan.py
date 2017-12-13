@@ -264,11 +264,11 @@ def train():
         ckpt = tf.train.get_checkpoint_state(model_D_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model D...")
-            d_saver.restore(session, os.path.join(model_dir, "D.ckpt")    
+            d_saver.restore(session, os.path.join(model_dir, "D.ckpt"))    
         ckpt = tf.train.get_checkpoint_state(model_G_dir)
         if ckpt and ckpt.model_checkpoint_path:           
             print("Restore Model G...")
-            g_saver.restore(session, os.path.join(model_dir, "G.ckpt")    
+            g_saver.restore(session, os.path.join(model_dir, "G.ckpt"))    
 
         while True:
             for batch in range(BATCHES):
