@@ -248,9 +248,9 @@ def train():
         
         ckpt = tf.train.get_checkpoint_state(model_dir)
         # saver = tf.train.Saver(max_to_keep=5)
-        h_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY'))
-        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'))
-        d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'))
+        h_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY', max_to_keep=5))
+        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g', max_to_keep=5))
+        d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d', max_to_keep=5))
 
 
         if ckpt and ckpt.model_checkpoint_path:
@@ -310,6 +310,7 @@ def train():
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
+            print("save model ...")
             h_saver.save(session, os.path.join(model_dir, "H.ckpt"), global_step=steps)
             d_saver.save(session, os.path.join(model_dir, "D.ckpt"), global_step=steps)
             g_saver.save(session, os.path.join(model_dir, "G.ckpt"), global_step=steps)
