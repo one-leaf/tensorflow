@@ -291,7 +291,7 @@ def train():
                 errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
                 print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
               
-                for i in range(2):
+                for i in range(3):
                     start = time.time()                                
                     ## update G
                     errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
@@ -300,7 +300,7 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
-                if steps > 0 and steps % REPORT_STEPS < 4:
+                if steps > 0 and steps % REPORT_STEPS < 5:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
