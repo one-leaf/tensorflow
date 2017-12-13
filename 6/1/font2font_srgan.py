@@ -254,9 +254,11 @@ def train():
 
 
         if ckpt and ckpt.model_checkpoint_path:
-            print("Restore Model ...")
-            highway_saver.restore(session, ckpt.model_checkpoint_path)    
+            print("Restore Model H...")
+            h_saver.restore(session, ckpt.model_checkpoint_path)    
+            print("Restore Model G...")
             g_saver.restore(session, ckpt.model_checkpoint_path)    
+            print("Restore Model D...")
             d_saver.restore(session, ckpt.model_checkpoint_path)    
 
         while True:
@@ -264,14 +266,13 @@ def train():
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*4)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                
-                # train G
-                start = time.time() 
-                errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                if np.isnan(errM) or np.isinf(errM) :
-                    print("Error: cost is nan or inf")
-                    return                    
-                #g_saver.save(session, "g.ckpt", global_step=steps)
+                # # train G
+                # start = time.time() 
+                # errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                # print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                # if np.isnan(errM) or np.isinf(errM) :
+                #     print("Error: cost is nan or inf")
+                #     return                    
 
                 # train highway
                 start = time.time() 
@@ -280,7 +281,6 @@ def train():
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return   
-                highway_saver.save(session, "Highway.ckpt", global_step=steps)
 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
@@ -295,10 +295,8 @@ def train():
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
                     print("Error: cost is nan or inf")
                     return 
-                g_saver.save(session, "G.ckpt", global_step=steps)
-                d_saver.save(session, "D.ckpt", global_step=steps)
 
-                if steps > 0 and steps % REPORT_STEPS < 4:
+                if steps > 0 and steps % REPORT_STEPS < 3:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
@@ -308,7 +306,9 @@ def train():
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
-            saver.save(session, saver_prefix, global_step=steps)
+            h_saver.save(session, "H.ckpt", global_step=steps)
+            d_saver.save(session, "D.ckpt", global_step=steps)
+            g_saver.save(session, "G.ckpt", global_step=steps)
                 
 if __name__ == '__main__':
     train()
