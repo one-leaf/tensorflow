@@ -82,15 +82,14 @@ def SRGAN_d(inputs, reuse=False):
     df_dim = 64
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer = inputs
-        for n in (1,2,4,8,16,32,16,8):
+        for n in (1,2,4,8,16,8):
             layer = slim.conv2d(layer, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-            layer = slim.batch_norm(layer, activation_fn = tf.nn.relu)
+            layer = slim.batch_norm(layer, activation_fn = None)
         net = layer
-        for n in (2,2,8):
+        for n in (1,2,4,8):
             net = slim.conv2d(net, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-            net = slim.batch_norm(net, activation_fn = tf.nn.relu)            
+            net = slim.batch_norm(net, activation_fn = None)            
         net = tf.nn.relu(net + layer)
-        # net = tf.reshape(net, [-1, df_dim * 8])
         logits = slim.fully_connected(net, 1, activation_fn=tf.identity)
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
