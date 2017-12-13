@@ -37,7 +37,7 @@ REPORT_STEPS = 200
 MOMENTUM = 0.9
 
 BATCHES = 64
-BATCH_SIZE = 4
+BATCH_SIZE = 8
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -273,24 +273,25 @@ def train():
 
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*4)
-                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
-               
-                # # train G
-                # start = time.time() 
-                # errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                # print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                # if np.isnan(errM) or np.isinf(errM) :
-                #     print("Error: cost is nan or inf")
-                #     return                    
+                for i in range(3):
+                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*2)
+                    feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                
+                    # # train G
+                    # start = time.time() 
+                    # errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                    # print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                    # if np.isnan(errM) or np.isinf(errM) :
+                    #     print("Error: cost is nan or inf")
+                    #     return                    
 
-                # train highway
-                start = time.time() 
-                errM, acc, _ , steps= session.run([highway_loss, highway_acc, highway_optim, global_step], feed)
-                print("%d time: %4.4fs, highway_loss: %.8f, highway_acc: %.8f " % (steps, time.time() - start, errM, acc))
-                if np.isnan(errM) or np.isinf(errM) :
-                    print("Error: cost is nan or inf")
-                    return   
+                    # train highway
+                    start = time.time() 
+                    errM, acc, _ , steps= session.run([highway_loss, highway_acc, highway_optim, global_step], feed)
+                    print("%d time: %4.4fs, highway_loss: %.8f, highway_acc: %.8f " % (steps, time.time() - start, errM, acc))
+                    if np.isnan(errM) or np.isinf(errM) :
+                        print("Error: cost is nan or inf")
+                        return   
 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
@@ -310,7 +311,7 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
-                if steps > 0 and steps % REPORT_STEPS < 5:
+                if steps > 0 and steps % REPORT_STEPS < 7:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
