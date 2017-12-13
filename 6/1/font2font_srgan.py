@@ -274,7 +274,7 @@ def train():
         while True:
             for batch in range(BATCHES):
                 for i in range(3):
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*4)
+                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE*3)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                 
                     # # train G
