@@ -142,7 +142,7 @@ def neural_networks():
     d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = 1e-3*(d_loss1 + d_loss2)
 
-    g_gan_loss = 1e-3*tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_real))
+    g_gan_loss = 1e-3*tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
     g_mse_loss = tf.losses.mean_squared_error(net_g, layer_targets)
     g_highway_loss = tf.losses.mean_squared_error(highway_target_emb, highway_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_highway_loss
@@ -155,7 +155,7 @@ def neural_networks():
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
-    return inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
+    return inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
             g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, highway_loss, highway_optim, seq_len, highway_acc
 
 
@@ -233,7 +233,7 @@ def get_next_batch(batch_size=128):
     return inputs, targets, sparse_labels, seq_len
 
 def train():
-    inputs, targets, labels, global_step, g_optim_init, d_loss, d_optim, \
+    inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
         g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, \
         highway_loss, highway_optim, seq_len, highway_acc = neural_networks()
 
@@ -277,7 +277,7 @@ def train():
                 # train highway
                 start = time.time() 
                 errM, acc, _ , steps= session.run([highway_loss, highway_acc, highway_optim, global_step], feed)
-                print("%8d time: %4.4fs, highway_loss: %.8f, highway_acc: %.8f " % (steps, time.time() - start, errM, acc))
+                print("%d time: %4.4fs, highway_loss: %.8f, highway_acc: %.8f " % (steps, time.time() - start, errM, acc))
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return   
@@ -288,10 +288,13 @@ def train():
                 # train GAN (SRGAN)
                 start = time.time()                
                 ## update D
-                errD, _ = session.run([d_loss, d_optim], feed)
+                errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
+                print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+              
+                start = time.time()                                
                 ## update G
                 errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
-                print("%8d time: %4.4fs, d_loss: %.8f g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errD, errG, errM, errV, errA))
+                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
                     print("Error: cost is nan or inf")
                     return 
