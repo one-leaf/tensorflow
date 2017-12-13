@@ -257,6 +257,10 @@ def train():
         d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'), max_to_keep=5)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), max_to_keep=5)
 
+        ckpt = tf.train.get_checkpoint_state(model_G_dir)
+        if ckpt and ckpt.model_checkpoint_path:           
+            print("Restore Model G...")
+            g_saver.restore(session, os.path.join(model_dir, "G.ckpt"))   
         ckpt = tf.train.get_checkpoint_state(model_H_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model H...")
@@ -265,10 +269,7 @@ def train():
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model D...")
             d_saver.restore(session, os.path.join(model_dir, "D.ckpt"))    
-        ckpt = tf.train.get_checkpoint_state(model_G_dir)
-        if ckpt and ckpt.model_checkpoint_path:           
-            print("Restore Model G...")
-            g_saver.restore(session, os.path.join(model_dir, "G.ckpt"))    
+ 
 
         while True:
             for batch in range(BATCHES):
