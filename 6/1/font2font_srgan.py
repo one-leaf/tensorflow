@@ -239,26 +239,36 @@ def train():
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
+    model_H_dir = os.path.join(model_dir, "H")
+    model_D_dir = os.path.join(model_dir, "D")
+    model_G_dir = os.path.join(model_dir, "G")
+    if not os.path.exists(model_H_dir): os.mkdir(model_H_dir)
+    if not os.path.exists(model_D_dir): os.mkdir(model_D_dir)
+    if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)
+    
+
     # saver_prefix = os.path.join(model_dir, "model.ckpt")        
  
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
         
-        ckpt = tf.train.get_checkpoint_state(model_dir)
-        # saver = tf.train.Saver(max_to_keep=5)
         h_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY'), max_to_keep=5)
-        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), max_to_keep=5)
         d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'), max_to_keep=5)
+        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), max_to_keep=5)
 
-
+        ckpt = tf.train.get_checkpoint_state(model_H_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model H...")
-            h_saver.restore(session, ckpt.model_checkpoint_path)    
-            print("Restore Model G...")
-            g_saver.restore(session, ckpt.model_checkpoint_path)    
+            h_saver.restore(session, os.path.join(model_dir, "H.ckpt"))   
+        ckpt = tf.train.get_checkpoint_state(model_D_dir)
+        if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model D...")
-            d_saver.restore(session, ckpt.model_checkpoint_path)    
+            d_saver.restore(session, os.path.join(model_dir, "D.ckpt")    
+        ckpt = tf.train.get_checkpoint_state(model_G_dir)
+        if ckpt and ckpt.model_checkpoint_path:           
+            print("Restore Model G...")
+            g_saver.restore(session, os.path.join(model_dir, "G.ckpt")    
 
         while True:
             for batch in range(BATCHES):
@@ -310,9 +320,9 @@ def train():
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
             print("save model ...")
-            h_saver.save(session, os.path.join(model_dir, "H.ckpt"), global_step=steps)
-            d_saver.save(session, os.path.join(model_dir, "D.ckpt"), global_step=steps)
-            g_saver.save(session, os.path.join(model_dir, "G.ckpt"), global_step=steps)
+            h_saver.save(session, os.path.join(model_H_dir, "H.ckpt"), global_step=steps)
+            d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
+            g_saver.save(session, os.path.join(model_G_dir, "G.ckpt"), global_step=steps)
                 
 if __name__ == '__main__':
     train()
