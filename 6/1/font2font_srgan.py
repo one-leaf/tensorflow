@@ -245,11 +245,19 @@ def train():
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
+        
         ckpt = tf.train.get_checkpoint_state(model_dir)
-        saver = tf.train.Saver(max_to_keep=5)
+        # saver = tf.train.Saver(max_to_keep=5)
+        highway_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY'))
+        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'))
+        d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'))
+
+
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model ...")
-            saver.restore(session, ckpt.model_checkpoint_path)    
+            highway_saver.restore(session, ckpt.model_checkpoint_path)    
+            g_saver.restore(session, ckpt.model_checkpoint_path)    
+            d_saver.restore(session, ckpt.model_checkpoint_path)    
 
         while True:
             for batch in range(BATCHES):
@@ -263,6 +271,7 @@ def train():
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return                    
+                #g_saver.save(session, "g.ckpt", global_step=steps)
 
                 # train highway
                 start = time.time() 
@@ -271,6 +280,7 @@ def train():
                 if np.isnan(errM) or np.isinf(errM) :
                     print("Error: cost is nan or inf")
                     return   
+                highway_saver.save(session, "Highway.ckpt", global_step=steps)
 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
@@ -285,6 +295,8 @@ def train():
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
                     print("Error: cost is nan or inf")
                     return 
+                g_saver.save(session, "G.ckpt", global_step=steps)
+                d_saver.save(session, "D.ckpt", global_step=steps)
 
                 if steps > 0 and steps % REPORT_STEPS < 4:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
