@@ -240,7 +240,7 @@ def train():
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    saver_prefix = os.path.join(model_dir, "model.ckpt")        
+    # saver_prefix = os.path.join(model_dir, "model.ckpt")        
  
     init = tf.global_variables_initializer()
     with tf.Session() as session:
@@ -309,7 +309,7 @@ def train():
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
-            h_saver.save(session, "H.ckpt", global_step=steps)
+            h_saver.save(session, os.path.join(model_dir, "H.ckpt"), global_step=steps)
             d_saver.save(session, "D.ckpt", global_step=steps)
             g_saver.save(session, "G.ckpt", global_step=steps)
                 
