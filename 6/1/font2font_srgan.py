@@ -324,9 +324,11 @@ def train():
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
-            print("save model ...")
+            print("save model h ...")
             h_saver.save(session, os.path.join(model_H_dir, "H.ckpt"), global_step=steps)
+            print("save model d ...")
             d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
+            print("save model g ...")
             g_saver.save(session, os.path.join(model_G_dir, "G.ckpt"), global_step=steps)
                 
 if __name__ == '__main__':
