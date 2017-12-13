@@ -291,15 +291,16 @@ def train():
                 errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
                 print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
               
-                start = time.time()                                
-                ## update G
-                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
-                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
-                if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
-                    print("Error: cost is nan or inf")
-                    return 
+                for i in range(2):
+                    start = time.time()                                
+                    ## update G
+                    errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
+                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                    if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA) or np.isnan(errD) or np.isinf(errD):
+                        print("Error: cost is nan or inf")
+                        return 
 
-                if steps > 0 and steps % REPORT_STEPS < 3:
+                if steps > 0 and steps % REPORT_STEPS < 4:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
@@ -310,8 +311,8 @@ def train():
                     cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
             h_saver.save(session, os.path.join(model_dir, "H.ckpt"), global_step=steps)
-            d_saver.save(session, "D.ckpt", global_step=steps)
-            g_saver.save(session, "G.ckpt", global_step=steps)
+            d_saver.save(session, os.path.join(model_dir, "D.ckpt"), global_step=steps)
+            g_saver.save(session, os.path.join(model_dir, "G.ckpt"), global_step=steps)
                 
 if __name__ == '__main__':
     train()
