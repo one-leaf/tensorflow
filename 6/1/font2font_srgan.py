@@ -248,7 +248,7 @@ def train():
         
         ckpt = tf.train.get_checkpoint_state(model_dir)
         # saver = tf.train.Saver(max_to_keep=5)
-        highway_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY'))
+        h_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY'))
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'))
         d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'))
 
