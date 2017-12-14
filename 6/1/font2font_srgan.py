@@ -263,7 +263,7 @@ def train():
         while True:
             for batch in range(BATCHES):
                 for i in range(10):
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(16)
+                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(8)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
 
                     # train highway
