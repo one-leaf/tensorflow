@@ -135,49 +135,10 @@ def get_next_batch(batch_size=128):
 
     labels = [np.asarray(i) for i in codes]
     #labels转成稀疏矩阵
-    sparse_labels = sparse_tuple_from(labels)
+    sparse_labels = utils.sparse_tuple_from(labels)
     #因为模型做了2次pool，所以 seq_len 也需要除以4
     seq_len = np.ones(batch_size) * (max_width_image * image_height) // (POOL_SIZE * POOL_SIZE)
     return inputs, sparse_labels, seq_len
-
-# 转化一个序列列表为稀疏矩阵    
-def sparse_tuple_from(sequences, dtype=np.int32):
-    indices = []
-    values = []
-    
-    for n, seq in enumerate(sequences):
-        indices.extend(zip([n] * len(seq), range(len(seq))))
-        values.extend(seq)
- 
-    indices = np.asarray(indices, dtype=np.int64)
-    values = np.asarray(values, dtype=dtype)
-    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
-
-    return indices, values, shape
-
-def decode_sparse_tensor(sparse_tensor):
-    decoded_indexes = list()
-    current_i = 0
-    current_seq = []
-    for offset, i_and_index in enumerate(sparse_tensor[0]):
-        i = i_and_index[0]
-        if i != current_i:
-            decoded_indexes.append(current_seq)
-            current_i = i
-            current_seq = list()
-        current_seq.append(offset)
-    decoded_indexes.append(current_seq)
-    result = []
-    for index in decoded_indexes:
-        result.append(decode_a_seq(index, sparse_tensor))
-    return result
-    
-def decode_a_seq(indexes, spars_tensor):
-    decoded = []
-    for m in indexes:
-        str = spars_tensor[1][m]
-        decoded.append(str)
-    return decoded
 
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
@@ -228,8 +189,8 @@ def train():
     init = tf.global_variables_initializer()
 
     def report_accuracy(decoded_list, test_labels):
-        original_list = decode_sparse_tensor(test_labels)
-        detected_list = decode_sparse_tensor(decoded_list)
+        original_list = utils.decode_sparse_tensor(test_labels)
+        detected_list = utils.decode_sparse_tensor(decoded_list)
         if len(original_list) != len(detected_list):
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                   " test and detect length desn't match")
@@ -292,7 +253,7 @@ def train():
                 print("step:", steps, "cost:", b_cost, "batch seconds:", seconds, "learning rate:", b_learning_rate, "width:", train_seq_len[0])
                 if np.isnan(b_cost) or np.isinf(b_cost):
                     print("Error: cost is nan or inf")
-                    train_labels_list = decode_sparse_tensor(train_labels)
+                    train_labels_list = utils.decode_sparse_tensor(train_labels)
                     for i, train_label in enumerate(train_labels_list):
                         print(i,list_to_chars(train_label))
                     return   

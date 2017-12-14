@@ -64,6 +64,8 @@ def get_random_text(CHARS, word_dict, font_length):
     return text
 
 def get_font_image_from_pygame(font_file, font_size, text):
+    import pygame
+    from pygame import freetype
     pygame.init()
     freetype.init()
     try:

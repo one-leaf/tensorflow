@@ -4,8 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from PIL import Image, ImageDraw, ImageFont, ImageChops
-from pygame import freetype
-import pygame
 
 # 删除边框
 def trim(img):
@@ -42,6 +40,46 @@ def vec2text(char_set,vec):
         char_idx = c % char_set_len
         text.append(char_set[char_idx])
     return "".join(text)
+
+# 转化一个序列列表为稀疏矩阵    
+def sparse_tuple_from(sequences, dtype=np.int32):
+    indices = []
+    values = []
+    
+    for n, seq in enumerate(sequences):
+        indices.extend(zip([n] * len(seq), range(len(seq))))
+        values.extend(seq)
+ 
+    indices = np.asarray(indices, dtype=np.int64)
+    values = np.asarray(values, dtype=dtype)
+    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
+
+    return indices, values, shape
+
+def decode_sparse_tensor(sparse_tensor):
+    decoded_indexes = list()
+    current_i = 0
+    current_seq = []
+    for offset, i_and_index in enumerate(sparse_tensor[0]):
+        i = i_and_index[0]
+        if i != current_i:
+            decoded_indexes.append(current_seq)
+            current_i = i
+            current_seq = list()
+        current_seq.append(offset)
+    decoded_indexes.append(current_seq)
+    result = []
+    for index in decoded_indexes:
+        result.append(decode_a_seq(index, sparse_tensor))
+    return result
+    
+def decode_a_seq(indexes, spars_tensor):
+    decoded = []
+    for m in indexes:
+        str = spars_tensor[1][m]
+        decoded.append(str)
+    return decoded
+
 
 # 显示图片,esc 关闭，参数是 np.array 类型
 def show(img):
@@ -257,6 +295,8 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
     return images
 
 def renderFontBypyGame(font_file, font_size, text):
+    from pygame import freetype
+    import pygame
     pygame.init()
     freetype.init()
     try:
