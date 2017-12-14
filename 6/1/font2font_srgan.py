@@ -293,17 +293,19 @@ def train():
                         print("Error: cost is nan or inf")
                         return   
   
+                for i in range(4):
+                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
+                    feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                    start = time.time()                                
+                    ## update G
+                    errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
+                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                    if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                        print("Error: cost is nan or inf")
+                        return 
 
                 train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                 feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
-
-                start = time.time()                                
-                ## update G
-                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
-                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
-                if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
-                    print("Error: cost is nan or inf")
-                    return 
 
                 # train GAN (SRGAN)
                 start = time.time()                
@@ -314,7 +316,7 @@ def train():
                     print("Error: cost is nan or inf")
                     return 
 
-                if steps > 0 and steps % REPORT_STEPS < 7:
+                if steps > 0 and steps % REPORT_STEPS < 10:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
