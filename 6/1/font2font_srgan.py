@@ -237,10 +237,7 @@ def train():
     model_G_dir = os.path.join(model_dir, "G")
     if not os.path.exists(model_H_dir): os.mkdir(model_H_dir)
     if not os.path.exists(model_D_dir): os.mkdir(model_D_dir)
-    if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)
-    
-
-    # saver_prefix = os.path.join(model_dir, "model.ckpt")        
+    if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
  
     init = tf.global_variables_initializer()
     with tf.Session() as session:
@@ -263,7 +260,6 @@ def train():
             print("Restore Model D...")
             d_saver.restore(session, ckpt.model_checkpoint_path)    
  
-
         while True:
             for batch in range(BATCHES):
                 for i in range(10):
