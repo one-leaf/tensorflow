@@ -165,6 +165,9 @@ AllFontNames = ENGFontNames + CHIFontNames
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 
+def list_to_chars(list):
+    return "".join([CHARS[v] for v in list])
+
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
     images = []   
