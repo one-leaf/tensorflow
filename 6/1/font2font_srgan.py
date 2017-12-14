@@ -280,7 +280,7 @@ def train():
                     # train G
                     start = time.time() 
                     errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                    print("%8d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
                     if np.isnan(errM) or np.isinf(errM) :
                         print("Error: cost is nan or inf")
                         return                    
