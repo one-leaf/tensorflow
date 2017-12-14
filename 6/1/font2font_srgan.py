@@ -44,19 +44,8 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_font2font_srgan"
 
-# 增加残差网络
-def addResLayer(inputs):
-    layer = slim.batch_norm(inputs, activation_fn=None)
-    layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [3,3], activation_fn=None)
-    layer = slim.batch_norm(layer, activation_fn=None)
-    layer = tf.nn.relu(layer)
-    layer = slim.conv2d(layer, 64, [3,3],activation_fn=None)
-    outputs = inputs + layer
-    return outputs 
-
-# 增加 Highway 网络
-def addHighwayLayer(inputs):
+# 增加 res 网络
+def addresLayer(inputs):
     H = slim.conv2d(inputs, 64, [3,3])
     T = slim.conv2d(inputs, 64, [3,3], biases_initializer = tf.constant_initializer(-1.0), activation_fn=tf.nn.sigmoid)    
     outputs = H * T + inputs * (1.0 - T)
@@ -94,15 +83,20 @@ def SRGAN_d(inputs, reuse=False):
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
 
-def Highway(inputs, reuse = False):
-    with tf.variable_scope("HIGHWAY", reuse=reuse):
-        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm)
+def RES(inputs, reuse = False):
+    with tf.variable_scope("RES", reuse=reuse):
+        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+
         for i in range(POOL_COUNT):
             for j in range(16):
-                layer = addHighwayLayer(layer)
+                layer = addResLayer(layer)
             layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
         conv = layer
-        layer = slim.conv2d(layer, CLASSES_NUMBER, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+
+        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], activation_fn=tf.nn.tanh)
+
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
@@ -126,16 +120,16 @@ def neural_networks():
     net_d, logits_real = SRGAN_d(layer_targets, reuse = False)
     _,     logits_fake = SRGAN_d(net_g, reuse = True)
 
-    net_highway, _ = Highway(layer_targets, reuse = False)
+    net_res, _ = RES(layer_targets, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None])
-    highway_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY')
-    highway_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_highway, sequence_length=seq_len))
-    highway_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(highway_loss, global_step=global_step, var_list=highway_vars)
-    highway_decoded, _ = tf.nn.ctc_beam_search_decoder(net_highway, seq_len, beam_width=10, merge_repeated=False)
-    highway_acc = tf.reduce_mean(tf.edit_distance(tf.cast(highway_decoded[0], tf.int32), labels))
+    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
+    res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
+    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
+    res_acc = tf.reduce_mean(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels))
 
-    _, highway_target_emb   = Highway(layer_targets, reuse = True)
-    _, highway_predict_emb  = Highway(net_g, reuse = True)
+    _, res_target_emb   = RES(layer_targets, reuse = True)
+    _, res_predict_emb  = RES(net_g, reuse = True)
 
     d_loss1 = 1e-3*tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
     d_loss2 = 1e-3*tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
@@ -143,8 +137,8 @@ def neural_networks():
 
     g_gan_loss = 1e-3*tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
     g_mse_loss = tf.losses.mean_squared_error(net_g, layer_targets)
-    g_highway_loss = tf.losses.mean_squared_error(highway_target_emb, highway_predict_emb)
-    g_loss     = g_gan_loss + g_mse_loss + g_highway_loss
+    g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
+    g_loss     = g_gan_loss + g_mse_loss + g_res_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
@@ -155,7 +149,7 @@ def neural_networks():
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
     return inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
-            g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, highway_loss, highway_optim, seq_len, highway_acc, highway_decoded
+            g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, res_loss, res_optim, seq_len, res_acc, res_decoded
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -226,16 +220,16 @@ def get_next_batch(batch_size=128):
 
 def train():
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
-        g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, \
-        highway_loss, highway_optim, seq_len, highway_acc, highway_decoded = neural_networks()
+        g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, \
+        res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_H_dir = os.path.join(model_dir, "H")
+    model_R_dir = os.path.join(model_dir, "R")
     model_D_dir = os.path.join(model_dir, "D")
     model_G_dir = os.path.join(model_dir, "G")
-    if not os.path.exists(model_H_dir): os.mkdir(model_H_dir)
+    if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_D_dir): os.mkdir(model_D_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
  
@@ -243,7 +237,7 @@ def train():
     with tf.Session() as session:
         session.run(init)
         
-        h_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY'), max_to_keep=5)
+        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), max_to_keep=5)
         d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'), max_to_keep=5)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), max_to_keep=5)
 
@@ -253,8 +247,8 @@ def train():
             g_saver.restore(session, ckpt.model_checkpoint_path)   
         ckpt = tf.train.get_checkpoint_state(model_H_dir)
         if ckpt and ckpt.model_checkpoint_path:
-            print("Restore Model H...")
-            h_saver.restore(session, ckpt.model_checkpoint_path)   
+            print("Restore Model R...")
+            r_saver.restore(session, ckpt.model_checkpoint_path)   
         ckpt = tf.train.get_checkpoint_state(model_D_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model D...")
@@ -266,10 +260,10 @@ def train():
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(8)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
 
-                    # train highway
+                    # train res
                     start = time.time() 
-                    errM, acc, _ , steps= session.run([highway_loss, highway_acc, highway_optim, global_step], feed)
-                    print("%d time: %4.4fs, highway_loss: %.8f, highway_acc: %.8f " % (steps, time.time() - start, errM, acc))
+                    errM, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                    print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errM, acc))
                     if np.isnan(errM) or np.isinf(errM) :
                         print("Error: cost is nan or inf")
                         return   
@@ -291,8 +285,8 @@ def train():
 
                     start = time.time()                                
                     ## update G
-                    errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
-                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f highway: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                    errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
                     if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
                         print("Error: cost is nan or inf")
                         return 
@@ -316,7 +310,7 @@ def train():
 
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)  
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
-                    decoded_list = session.run(highway_decoded[0], feed)          
+                    decoded_list = session.run(res_decoded[0], feed)          
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
                     if len(original_list) != len(detected_list):
@@ -336,8 +330,8 @@ def train():
                     print("Test Accuracy:", acc / len(original_list))
 
 
-            print("save model h ...")
-            h_saver.save(session, os.path.join(model_H_dir, "H.ckpt"), global_step=steps)
+            print("save model r ...")
+            r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
             print("save model d ...")
             d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
             print("save model g ...")
