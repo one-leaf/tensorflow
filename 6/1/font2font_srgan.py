@@ -45,7 +45,7 @@ POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_font2font_srgan"
 
 # 增加 res 网络
-def addresLayer(inputs):
+def addResLayer(inputs):
     H = slim.conv2d(inputs, 64, [3,3])
     T = slim.conv2d(inputs, 64, [3,3], biases_initializer = tf.constant_initializer(-1.0), activation_fn=tf.nn.sigmoid)    
     outputs = H * T + inputs * (1.0 - T)
