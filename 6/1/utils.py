@@ -4,8 +4,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 from PIL import Image, ImageDraw, ImageFont, ImageChops
-from pygame import freetype
-import pygame
 
 # 删除边框
 def trim(img):
@@ -257,6 +255,8 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
     return images
 
 def renderFontBypyGame(font_file, font_size, text):
+    from pygame import freetype
+    import pygame
     pygame.init()
     freetype.init()
     try:
