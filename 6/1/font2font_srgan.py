@@ -284,7 +284,19 @@ def train():
                     if np.isnan(errM) or np.isinf(errM) :
                         print("Error: cost is nan or inf")
                         return   
-  
+
+                    # train G
+                    start = time.time() 
+                    errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                    if np.isnan(errM) or np.isinf(errM) :
+                        print("Error: cost is nan or inf")
+                        return    
+
+                    if i > 0: continue
+
+                    # train GAN (SRGAN)
+
                     start = time.time()                                
                     ## update G
                     errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
@@ -293,17 +305,6 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
-                    if i > 0: continue
-
-                    # train G
-                    start = time.time() 
-                    errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                    if np.isnan(errM) or np.isinf(errM) :
-                        print("Error: cost is nan or inf")
-                        return      
-
-                    # train GAN (SRGAN)
                     start = time.time()                
                     ## update D
                     errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
