@@ -318,10 +318,12 @@ def train():
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
                     b_predictions = np.reshape(b_predictions[0],train_targets[0].shape)   
-                    _pred = np.transpose(b_predictions)        
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(train_inputs[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
+                    _pred = np.transpose(b_predictions)   
+                    _img = np.vstack((np.transpose(train_inputs[0]*255),np.transpose(train_targets[0]*255),_pred*255)) 
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s.png"%steps), _img)   
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(train_inputs[0]*255))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
+                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
 
             print("save model h ...")
             h_saver.save(session, os.path.join(model_H_dir, "H.ckpt"), global_step=steps)
