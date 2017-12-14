@@ -124,3 +124,12 @@ def add_noise(img):
     img = utils_pil.random_color(img)
     img = utils_pil.random_contrast(img)
     return img
+
+if __name__ == '__main__':
+    c,e =get_font_names_from_url()
+    a=c+e
+    for font_name in a:
+        img = get_font_image_from_url("GHLlIiMmNnWwZzOoQqAaBbDd1234567890",font_name,36)
+        print(font_name,img.size)
+        img = utils_pil.resize_by_height(img,32)
+        utils_pil.show(img)
