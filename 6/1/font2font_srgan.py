@@ -330,11 +330,11 @@ def train():
                     print("Test Accuracy:", acc / len(original_list))
 
 
-            print("save model r ...")
+            print("Save Model R ...")
             r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
-            print("save model d ...")
+            print("Save Model D ...")
             d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
-            print("save model g ...")
+            print("Save Model G ...")
             g_saver.save(session, os.path.join(model_G_dir, "G.ckpt"), global_step=steps)
                 
 if __name__ == '__main__':
