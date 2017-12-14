@@ -276,14 +276,6 @@ def train():
                 for i in range(5):
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
-                
-                    # train G
-                    start = time.time() 
-                    errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                    if np.isnan(errM) or np.isinf(errM) :
-                        print("Error: cost is nan or inf")
-                        return                    
 
                     # train highway
                     start = time.time() 
@@ -293,9 +285,6 @@ def train():
                         print("Error: cost is nan or inf")
                         return   
   
-                for i in range(4):
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-                    feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                     start = time.time()                                
                     ## update G
                     errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, global_step], feed)
@@ -304,19 +293,26 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
-                train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
-                feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                    if i > 0: continue
 
-                # train GAN (SRGAN)
-                start = time.time()                
-                ## update D
-                errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
-                print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
-                if np.isnan(errD) or np.isinf(errD):
-                    print("Error: cost is nan or inf")
-                    return 
+                    # train G
+                    start = time.time() 
+                    errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                    if np.isnan(errM) or np.isinf(errM) :
+                        print("Error: cost is nan or inf")
+                        return      
 
-                if steps > 0 and steps % REPORT_STEPS < 15:
+                    # train GAN (SRGAN)
+                    start = time.time()                
+                    ## update D
+                    errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
+                    print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                    if np.isnan(errD) or np.isinf(errD):
+                        print("Error: cost is nan or inf")
+                        return 
+
+                if steps > 0 and steps % REPORT_STEPS < 12:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
