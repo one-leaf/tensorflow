@@ -155,7 +155,7 @@ def neural_networks():
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
     return inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
-            g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, highway_loss, highway_optim, seq_len, highway_acc
+            g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, highway_loss, highway_optim, seq_len, highway_acc, highway_decoded
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -164,18 +164,6 @@ print("CHIFontNames", CHIFontNames)
 AllFontNames = ENGFontNames + CHIFontNames
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
-
-# 转化一个序列列表为稀疏矩阵    
-def sparse_tuple_from(sequences, dtype=np.int32):
-    indices = []
-    values = []
-    for n, seq in enumerate(sequences):
-        indices.extend(zip([n] * len(seq), range(len(seq))))
-        values.extend(seq)
-    indices = np.asarray(indices, dtype=np.int64)
-    values = np.asarray(values, dtype=dtype)
-    shape = np.asarray([len(sequences), np.asarray(indices).max(0)[1] + 1], dtype=np.int64)
-    return indices, values, shape
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch(batch_size=128):
@@ -229,14 +217,14 @@ def get_next_batch(batch_size=128):
         targets[i,:] = np.transpose(image_vec)
 
     labels = [np.asarray(i) for i in codes]
-    sparse_labels = sparse_tuple_from(labels)
+    sparse_labels = utils.sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)                
     return inputs, targets, sparse_labels, seq_len
 
 def train():
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
         g_loss, g_mse_loss, g_highway_loss, g_gan_loss, g_optim, net_g, \
-        highway_loss, highway_optim, seq_len, highway_acc = neural_networks()
+        highway_loss, highway_optim, seq_len, highway_acc, highway_decoded = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -322,10 +310,29 @@ def train():
                     b_predictions = np.reshape(b_predictions[0],train_targets[0].shape)   
                     _pred = np.transpose(b_predictions)   
                     _img = np.vstack((np.transpose(train_inputs[0]), _pred, np.transpose(train_targets[0]))) 
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s.png"%steps), _img * 255)   
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_input.png"%steps), np.transpose(train_inputs[0]*255))
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_label.png"%steps), np.transpose(train_targets[0]*255))
-                    # cv2.imwrite(os.path.join(curr_dir,"test","%s_pred.png"%steps), _pred*255)
+                    cv2.imwrite(os.path.join(curr_dir,"test","%s.png"%steps), _img * 255) 
+
+                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)  
+                    feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                    decoded_list = session.run(highway_decoded[0], feed)          
+                    original_list = utils.decode_sparse_tensor(train_labels)
+                    detected_list = utils.decode_sparse_tensor(decoded_list)
+                    if len(original_list) != len(detected_list):
+                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+                            " test and detect length desn't match")
+                    print("T/F: original(length) <-------> detectcted(length)")
+                    acc = 0.
+                    for idx in range(min(len(original_list),len(detected_list))):
+                        number = original_list[idx]
+                        detect_number = detected_list[idx]  
+                        hit = (number == detect_number)          
+                        print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
+                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+                        # 计算莱文斯坦比
+                        import Levenshtein
+                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                    print("Test Accuracy:", acc / len(original_list))
+
 
             print("save model h ...")
             h_saver.save(session, os.path.join(model_H_dir, "H.ckpt"), global_step=steps)
