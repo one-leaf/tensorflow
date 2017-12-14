@@ -37,7 +37,7 @@ REPORT_STEPS = 200
 MOMENTUM = 0.9
 
 BATCHES = 10
-BATCH_SIZE = 6
+BATCH_SIZE = 5
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -185,7 +185,7 @@ def get_next_batch(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_length = random.randint(13, 15)
+        font_length = random.randint(25, 30)
         font_size = random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
@@ -273,7 +273,7 @@ def train():
 
         while True:
             for batch in range(BATCHES):
-                for i in range(5):
+                for i in range(10):
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
 
@@ -312,7 +312,7 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
-                if steps > 0 and steps % REPORT_STEPS < 12:
+                if steps > 0 and steps % REPORT_STEPS < 22:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run([net_g], feed)                     
