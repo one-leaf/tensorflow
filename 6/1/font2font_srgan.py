@@ -126,7 +126,7 @@ def neural_networks():
     net_d, logits_real = SRGAN_d(layer_targets, reuse = False)
     _,     logits_fake = SRGAN_d(net_g, reuse = True)
 
-    net_highway, _ = Highway(net_g, reuse = False)
+    net_highway, _ = Highway(layer_targets, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None])
     highway_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='HIGHWAY')
     highway_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_highway, sequence_length=seq_len))
