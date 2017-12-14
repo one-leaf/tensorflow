@@ -294,7 +294,7 @@ def train():
                         return   
   
                 for i in range(4):
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE * 2)
+                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(BATCH_SIZE)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                     start = time.time()                                
                     ## update G
