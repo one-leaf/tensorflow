@@ -44,12 +44,12 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_font2font_srgan"
 
-# 增加 res 网络
+# 增加残差网络
 def addResLayer(inputs):
-    H = slim.conv2d(inputs, 64, [3,3])
-    T = slim.conv2d(inputs, 64, [3,3], biases_initializer = tf.constant_initializer(-1.0), activation_fn=tf.nn.sigmoid)    
-    outputs = H * T + inputs * (1.0 - T)
-    return outputs    
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    outputs = inputs + layer
+    return outputs      
 
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:
@@ -58,8 +58,7 @@ def SRGAN_g(inputs, reuse=False):
         # B residual blocks
         for i in range(16):
             layer = addResLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = None, activation_fn = None)
-        layer = slim.batch_norm(layer, activation_fn=None)
+        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = None)
         layer = layer + temp        
         # B residual blacks end
         layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
@@ -71,13 +70,11 @@ def SRGAN_d(inputs, reuse=False):
     df_dim = 64
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer = inputs
-        for n in (1,2,4,8,16,8):
-            layer = slim.conv2d(layer, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-            layer = slim.batch_norm(layer, activation_fn = None)
+        for n in (1,2,4,8,16,16,8):
+            layer = slim.conv2d(layer, df_dim * n, [3,3], normalizer_fn = slim.batch_norm, activation_fn = tf.nn.relu)
         net = layer
-        for n in (1,2,4,8):
-            net = slim.conv2d(net, df_dim * n, [3,3], normalizer_fn = None, activation_fn = tf.nn.relu)
-            net = slim.batch_norm(net, activation_fn = None)            
+        for n in (2,2,4,8):
+            net = slim.conv2d(net, df_dim * n, [3,3], normalizer_fn = slim.batch_norm, activation_fn = tf.nn.relu)
         net = tf.nn.relu(net + layer)
         logits = slim.fully_connected(net, 1, activation_fn=tf.identity)
         net_ho = tf.nn.sigmoid(logits)
@@ -93,9 +90,9 @@ def RES(inputs, reuse = False):
             layer = slim.conv2d(layer, 64, [3,3], stride=[2, 2], normalizer_fn=slim.batch_norm)  
         conv = layer
 
-        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], activation_fn=tf.nn.tanh)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, CLASSES_NUMBER, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
 
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
