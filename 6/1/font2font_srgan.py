@@ -33,7 +33,7 @@ CLASSES_NUMBER = len(CHARS) + 1
 LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 200
+REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 20
@@ -304,8 +304,7 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
-                # if steps > 0 and steps % REPORT_STEPS < 13:
-                if True:
+                if steps > 0 and steps % REPORT_STEPS < 13:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)             
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run(net_g, feed) 
