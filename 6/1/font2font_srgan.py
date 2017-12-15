@@ -176,8 +176,8 @@ def get_next_batch(batch_size=128):
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
         # text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-        text = random.sample(CHARS, 5)
-        text = text+text+text+text+text
+        text = random.sample(CHARS, 12)
+        text = text+text
         random.shuffle(text)
         text = "".join(text).strip()
         codes.append([CHARS.index(char) for char in text])          
