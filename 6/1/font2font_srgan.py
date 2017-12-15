@@ -157,6 +157,11 @@ ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
 print("CHIFontNames", CHIFontNames)
 AllFontNames = ENGFontNames + CHIFontNames
+AllFontNames.remove("方正兰亭超细黑简体")
+AllFontNames.remove("幼圆")
+AllFontNames.remove("方正舒体")
+AllFontNames.remove("方正姚体")
+AllFontNames.remove("Impact")
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 
@@ -175,11 +180,11 @@ def get_next_batch(batch_size=128):
         font_size = 36 #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
-        # text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-        text = random.sample(CHARS, 12)
-        text = text+text
-        random.shuffle(text)
-        text = "".join(text).strip()
+        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+        # text = random.sample(CHARS, 12)
+        # text = text+text
+        # random.shuffle(text)
+        # text = "".join(text).strip()
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, fontmode = font_mode, fonthint = font_hint )
         image = utils_pil.resize_by_height(image, image_height)
