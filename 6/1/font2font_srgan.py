@@ -175,7 +175,10 @@ def get_next_batch(batch_size=128):
         font_size = 36 #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
-        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+        # text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+        text = random.sample(CHARS, 5)
+        text = text+text+text+text+text
+        text = "".join(random.shuffle(text)).strip()
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, fontmode = font_mode, fonthint = font_hint )
         image = utils_pil.resize_by_height(image, image_height)
