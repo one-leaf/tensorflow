@@ -305,15 +305,15 @@ def train():
                         return 
 
                 if steps > 0 and steps % REPORT_STEPS < 13:
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(1)             
+                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)             
                     feed = {inputs: train_inputs, targets: train_targets}
-                    b_predictions = session.run([net_g], feed)                     
-                    b_predictions = np.reshape(b_predictions[0],train_targets[0].shape)   
-                    _pred = np.transpose(b_predictions)   
-                    _img = np.vstack((np.transpose(train_inputs[0]), _pred, np.transpose(train_targets[0]))) 
-                    cv2.imwrite(os.path.join(curr_dir,"test","%s.png"%steps), _img * 255) 
+                    b_predictions = session.run([net_g], feed) 
+                    for i in range(4):                    
+                        _predictions = np.reshape(b_predictions[i],train_targets[i].shape)   
+                        _pred = np.transpose(_predictions)   
+                        _img = np.vstack((np.transpose(train_inputs[i]), _pred, np.transpose(train_targets[i]))) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)  
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
                     decoded_list = session.run(res_decoded[0], feed)          
                     original_list = utils.decode_sparse_tensor(train_labels)
