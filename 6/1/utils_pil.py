@@ -65,11 +65,14 @@ def resize(img, rate):
     return img.resize((width, height),Image.ANTIALIAS) 
 
 # 图片缩放
-def resize_by_height(img, high):
+def resize_by_height(img, high, antialias=True):
     width, height = img.size
     width = round(width*high/height)
-    return img.resize((width, high),Image.ANTIALIAS) 
-
+    if antialias:
+        return img.resize((width, high),Image.ANTIALIAS)
+    else: 
+        return img.resize((width, high))
+    
 # RGBA to RGB
 def convert_to_rgb(img):
     mode = img.mode

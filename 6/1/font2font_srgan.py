@@ -181,8 +181,8 @@ def get_next_batch(batch_size=128):
         image = utils_font.add_noise(image)   
         image = utils_pil.convert_to_gray(image)            
         _h =  random.randint(8, image_height // random.choice([1,1.5,2,2.5]))
-        image = utils_pil.resize_by_height(image, _h)
-        image = utils_pil.resize_by_height(image, image_height)        
+        image = utils_pil.resize_by_height(image, _h, random.random()>0.5)
+        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)        
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
         image = (255. - image) / 255.
