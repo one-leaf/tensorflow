@@ -124,7 +124,7 @@ def neural_networks():
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len, time_major=False))
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
-    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
+    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, time_major=False, merge_repeated=False)
     res_acc = tf.reduce_mean(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels))
 
     _, res_target_emb   = RES(layer_targets, reuse = True)
