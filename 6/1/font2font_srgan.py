@@ -116,7 +116,8 @@ def neural_networks():
     net_d, logits_real = SRGAN_d(layer_targets, reuse = False)
     _,     logits_fake = SRGAN_d(net_g, reuse = True)
 
-    net_res, _ = RES(layer_targets, reuse = False)
+    # net_res, _ = RES(layer_targets, reuse = False)
+    net_res, _ = RES(net_g, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None])
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
