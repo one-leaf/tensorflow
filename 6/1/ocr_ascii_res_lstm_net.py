@@ -257,9 +257,9 @@ def train():
     # decoded, log_prob = tf.nn.ctc_greedy_decoder(logits, seq_len, merge_repeated=False)
     decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, beam_width=10, merge_repeated=False)
     # decoded, log_prob = tf.nn.ctc_beam_search_decoder(logits, seq_len, merge_repeated=False)
-    
-    
-    acc = tf.reduce_mean(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels), name="acc")
+       
+    acc = tf.reduce_sum(tf.edit_distance(tf.cast(decoded[0], tf.int32), labels, normalize=False))
+    acc = 1 - acc / tf.to_float(tf.size(labels.values))
 
     init = tf.global_variables_initializer()
 
@@ -270,7 +270,7 @@ def train():
             print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                   " test and detect length desn't match")
         print("T/F: original(length) <-------> detectcted(length)")
-        acc = 0.
+        _acc = 0.
         for idx in range(min(len(original_list),len(detected_list))):
             number = original_list[idx]
             detect_number = detected_list[idx]  
@@ -279,8 +279,8 @@ def train():
             print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
             # 计算莱文斯坦比
             import Levenshtein
-            acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-        print("Test Accuracy:", acc / len(original_list))
+            _acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+        print("Test Accuracy:", _acc / len(original_list))
 
     def do_report():
         test_inputs,test_labels,test_seq_len = get_next_batch(TEST_BATCH_SIZE)
@@ -320,12 +320,12 @@ def train():
                 # print(l.shape)
                 # print(train_seq_len[0])
 
-                b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
-                    session.run([loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
+                b_acc, b_loss, b_labels, b_logits, b_seq_len, b_cost, steps, b_learning_rate, _ = \
+                    session.run([acc, loss, labels, logits, seq_len, cost, global_step, learning_rate, optimizer], feed)
 
                 train_cost += b_cost * BATCH_SIZE
                 seconds = round(time.time() - start,2)
-                print("step:", steps, "cost:", b_cost, "batch seconds:", seconds, "learning rate:", b_learning_rate, "width:", train_seq_len[0])
+                print("step:", steps, "cost:", b_cost, "batch seconds:", seconds, "acc:", b_acc, "width:", train_seq_len[0])
                 if np.isnan(b_cost) or np.isinf(b_cost):
                     print("Error: cost is nan or inf")
                     train_labels_list = decode_sparse_tensor(train_labels)
