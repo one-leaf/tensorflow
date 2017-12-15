@@ -308,7 +308,7 @@ def train():
                 if True:
                     train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)             
                     feed = {inputs: train_inputs, targets: train_targets}
-                    b_predictions = session.run([net_g], feed) 
+                    b_predictions = session.run(net_g, feed) 
                     print(b_predictions.shape)
                     print(train_inputs.shape)
                     print(train_targets.shape)
