@@ -57,7 +57,7 @@ def neural_networks():
 
     layer = x_image
     for i in range(2):
-        for j in range(5):
+        for j in range(3):
             input  = layer
             layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
             layer = tf.layers.batch_normalization(layer)
@@ -66,7 +66,6 @@ def neural_networks():
             layer = input + layer
         layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
     layer = tf.layers.conv2d(layer, filters=10, kernel_size=[7, 7], activation=None)
-    
     prediction = tf.contrib.layers.flatten(layer)
 
     cost = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=prediction)
@@ -90,7 +89,7 @@ if __name__ == '__main__':
     plt_acc=[]
 
     step = 0
-    while mnist.train.epochs_completed < 8:
+    while mnist.train.epochs_completed < 2:
         batch_x, batch_y= getBatch(100)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, drop_prob: 0.25})
         if step % 10 == 0 :

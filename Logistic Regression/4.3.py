@@ -57,7 +57,7 @@ def neural_networks():
 
     layer = x_image
     for i in range(2):
-        for j in range(5):
+        for j in range(3):
             input  = layer
             layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
             layer = tf.layers.batch_normalization(layer)
