@@ -73,7 +73,7 @@ def neural_networks():
   
     layer = tf.layers.conv2d(layer, filters=10, kernel_size=[1, 1], activation=tf.nn.relu)
     # print(layer.shape)
-    prediction = tf.nn.softmax(layer) 
+    # prediction = tf.nn.softmax(layer) 
     prediction = tf.reduce_mean(prediction,axis=1)
     prediction = tf.reduce_mean(prediction,axis=1)
     # print(prediction.shape)
