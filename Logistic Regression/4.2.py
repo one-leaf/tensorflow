@@ -56,7 +56,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer = x_image
-    for i in range(10):
+    for i in range(5):
         input  = layer
         layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
         layer = tf.layers.batch_normalization(layer)
