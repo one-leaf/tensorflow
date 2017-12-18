@@ -92,7 +92,7 @@ def RES(inputs, reuse = False):
 
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
 
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
