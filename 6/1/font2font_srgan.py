@@ -78,7 +78,7 @@ def SRGAN_d(inputs, reuse=False):
         layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
         layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu) 
         layer = slim.conv2d(layer, 1,   [1,1], activation_fn=tf.nn.tanh)               
-        logits = slim.fully_connected(net, 1, activation_fn=tf.identity)
+        logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
 
