@@ -71,9 +71,15 @@ def neural_networks():
     layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
     layer = tf.layers.batch_normalization(layer)
   
-    layer = tf.layers.conv2d(layer, filters=10, kernel_size=[28, 28], activation=tf.nn.relu)
-    prediction = tf.contrib.layers.flatten(layer)
+    layer = tf.layers.conv2d(layer, filters=10, kernel_size=[1, 1], activation=tf.nn.relu)
+    # print(layer.shape)
+    prediction = tf.nn.softmax(layer) 
+    prediction = tf.reduce_mean(prediction,axis=1)
+    prediction = tf.reduce_mean(prediction,axis=1)
+    # print(prediction.shape)
     
+    #tf.contrib.layers.flatten(layer)
+
     cost = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=prediction)
     optimizer = tf.train.AdamOptimizer(0.0001).minimize(cost)
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
