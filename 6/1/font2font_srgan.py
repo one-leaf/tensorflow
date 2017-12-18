@@ -61,9 +61,9 @@ def SRGAN_g(inputs, reuse=False):
         layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = None)
         layer = layer + temp        
         # B residual blacks end
-        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 1,   [1,1], activation_fn=tf.nn.tanh)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
 def SRGAN_d(inputs, reuse=False):
@@ -75,9 +75,9 @@ def SRGAN_d(inputs, reuse=False):
         for i in range(16):
             layer = addResLayer(layer)
         layer = layer + temp
-        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], activation_fn=tf.nn.relu) 
-        layer = slim.conv2d(layer, 1,   [1,1], activation_fn=tf.nn.tanh)               
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)               
         logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
