@@ -78,7 +78,7 @@ def neural_networks():
     # prediction = tf.reduce_mean(prediction,axis=1)
     # print(prediction.shape)
     
-    #tf.contrib.layers.flatten(layer)
+    prediction = tf.contrib.layers.flatten(layer)
 
     cost = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=prediction)
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
