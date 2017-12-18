@@ -55,21 +55,26 @@ def neural_networks():
     drop_prob = tf.placeholder(tf.float32) 
     x_image = tf.reshape(x, [-1,28,28,1])
 
-    layer = tf.layers.conv2d(x_image, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
+    layer = x_image
+    for i in range(10):
+        input  = layer
+        layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+        layer = tf.layers.batch_normalization(layer)
+        layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+        layer = tf.layers.batch_normalization(layer)
+        layer = input + layer
 
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
+    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    # layer = tf.layers.batch_normalization(layer)
 
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
+    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    # layer = tf.layers.batch_normalization(layer)
 
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.batch_normalization(layer)
+    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+    # layer = tf.layers.batch_normalization(layer)
   
     layer = tf.layers.conv2d(layer, filters=10, kernel_size=[28, 28], activation=tf.identity)
     # print(layer.shape)
