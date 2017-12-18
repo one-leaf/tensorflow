@@ -66,11 +66,6 @@ def neural_networks():
             layer = input + layer
         layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
     layer = tf.layers.conv2d(layer, filters=10, kernel_size=[7, 7], activation=None)
-    # print(layer.shape)
-    # prediction = tf.nn.softmax(layer) 
-    # prediction = tf.reduce_mean(layer,axis=1)
-    # prediction = tf.reduce_mean(prediction,axis=1)
-    # print(prediction.shape)
     
     prediction = tf.contrib.layers.flatten(layer)
 
