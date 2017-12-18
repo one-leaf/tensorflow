@@ -107,6 +107,6 @@ if __name__ == '__main__':
             plt.pause(0.1)
         step += 1
 
-    acc = sess.run(accuracy, feed_dict={x: test_x, y: test_y, drop_prob: 0})
+    acc = sess.run(accuracy, feed_dict={x: test_x[:100], y: test_y[:100], drop_prob: 0})
     print("Last accuracy:",acc)
     # Last accuracy: 0.9921
