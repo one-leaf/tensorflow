@@ -56,27 +56,16 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer = x_image
-    for i in range(5):
-        input  = layer
-        layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-        layer = tf.layers.batch_normalization(layer)
-        layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-        layer = tf.layers.batch_normalization(layer)
-        layer = input + layer
-
-    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    # layer = tf.layers.batch_normalization(layer)
-
-    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    # layer = tf.layers.batch_normalization(layer)
-
-    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    # layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    # layer = tf.layers.batch_normalization(layer)
-  
-    layer = tf.layers.conv2d(layer, filters=10, kernel_size=[28, 28], activation=tf.identity)
+    for i in range(2):
+        for j in range(5):
+            input  = layer
+            layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+            layer = tf.layers.batch_normalization(layer)
+            layer = tf.layers.conv2d(layer, filters=64, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
+            layer = tf.layers.batch_normalization(layer)
+            layer = input + layer
+        layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
+    layer = tf.layers.conv2d(layer, filters=10, kernel_size=[7, 7], activation=tf.identity)
     # print(layer.shape)
     # prediction = tf.nn.softmax(layer) 
     # prediction = tf.reduce_mean(layer,axis=1)
