@@ -66,7 +66,7 @@ def neural_networks():
             layer = input + layer
         layer = tf.layers.max_pooling2d(layer, pool_size=[2,2], strides=2)
     layer = tf.layers.conv2d(layer, filters=10, kernel_size=[3, 3], padding="same", activation=tf.nn.relu)
-    layer = tf.layers.average_pooling2d(layer,pool_size=[7,7],strides=7)
+    layer = tf.layers.average_pooling2d(layer, pool_size=[7,7], strides=7)
     prediction = tf.contrib.layers.flatten(layer)
 
     cost = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=prediction)
