@@ -444,15 +444,13 @@ def train():
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
                     feed = {inputs: train_inputs}
-                    b_predictions = session.run(net_g, feed) 
+                    b_predictions, decoded_list = session.run([net_g, res_decoded[0]], feed) 
                     for i in range(4):                    
                         _predictions = np.reshape(b_predictions[i],train_inputs[i].shape)   
                         _pred = np.transpose(_predictions)   
                         _img = np.vstack((np.transpose(train_inputs[i]), _pred)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
-
-                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
-                    decoded_list = session.run(res_decoded[0], feed)          
+        
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
                     if len(original_list) != len(detected_list):
