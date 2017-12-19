@@ -382,15 +382,14 @@ def train():
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
 
                     # train G
-                    # start = time.time() 
-                    # errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                    # print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                    # if np.isnan(errM) or np.isinf(errM) :
-                    #     print("Error: cost is nan or inf")
-                    #     return    
+                    start = time.time() 
+                    errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                    if np.isnan(errM) or np.isinf(errM) :
+                        print("Error: cost is nan or inf")
+                        return    
 
                     # train GAN (SRGAN)
-
                     start = time.time()                                
                     ## update G
                     errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
