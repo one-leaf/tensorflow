@@ -448,7 +448,7 @@ def train():
                     for i in range(4):                    
                         _predictions = np.reshape(b_predictions[i],train_inputs[i].shape)   
                         _pred = np.transpose(_predictions)   
-                        _img = np.vstack((np.transpose(train_inputs[i]), _pred, np.transpose(train_targets[i]))) 
+                        _img = np.vstack((np.transpose(train_inputs[i]), _pred)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
                     feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
