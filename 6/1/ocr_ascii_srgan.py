@@ -274,7 +274,10 @@ def get_next_batch_for_res(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(25, 30)
-        font_size = random.randint(8, 64)    
+        if random.random()>0.5:
+            font_size = random.randint(8, 49)    
+        else:
+            font_size = random.randint(8, 15) 
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
         text = random.sample(CHARS, 12)
