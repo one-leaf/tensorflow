@@ -310,7 +310,7 @@ def get_next_batch(batch_size=128):
             max_width_image = image.shape[1]
         if to_image.shape[1] > max_width_image: 
             max_width_image = to_image.shape[1]      
-        info = info+"font_name: %s font_length: %s font_mode: %s font_hint: %s text: %s resize: %s\r" % \
+        info = info+"font_name: %s font_length: %s font_mode: %s font_hint: %s text: %s resize: %s\n\r" % \
                  (font_name, font_length, font_mode, font_hint, text, _h)
     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
