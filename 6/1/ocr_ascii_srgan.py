@@ -37,7 +37,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 20
-BATCH_SIZE = 1
+BATCH_SIZE = 4
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -46,7 +46,7 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 
 # 模型来源，有改动 http://ethereon.github.io/netscope/#/gist/db945b393d40bfa26006
 # 取消了pool1,增加了3次pool，删除了最后的avg和fc层
-def RESNET50(inputs, need_pool=True):
+def RESNET50(inputs):
     # 1
     layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     # 2a
@@ -69,7 +69,7 @@ def RESNET50(inputs, need_pool=True):
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.relu(templayer+layer)
     # 3a
-    if need_pool: layer = slim.max_pool2d(layer,[2,2])
+    layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
     layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -95,7 +95,7 @@ def RESNET50(inputs, need_pool=True):
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.relu(templayer+layer)
     # 4a
-    if need_pool: layer = slim.max_pool2d(layer,[2,2])
+    layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -133,7 +133,7 @@ def RESNET50(inputs, need_pool=True):
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.relu(templayer+layer) 
     # 5a        
-    if need_pool: layer = slim.max_pool2d(layer,[2,2])
+    layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -154,24 +154,42 @@ def RESNET50(inputs, need_pool=True):
     layer = tf.nn.relu(templayer+layer)
     return layer    
 
+# 增加残差网络
+def addResLayer(inputs):
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    outputs = inputs + layer
+    return outputs  
+
+# 参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:
-        layer = RESNET50(inputs, need_pool=False)
-        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        temp = layer
+        # B residual blocks
+        for i in range(16):
+            layer = addResLayer(layer)
+        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = None)
+        layer = layer + temp        
+        # B residual blacks end
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        layer = RESNET50(inputs, need_pool=True)
-        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)               
+        layer = RESNET50(inputs)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
+        layer = slim.fully_connected(layer, 1014, activation_fn=tf.nn.relu)
         logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
         net_ho = tf.nn.sigmoid(logits)
         return net_ho, logits
 
-# resnet50
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer = RESNET50(inputs, need_pool=True)
+        layer = RESNET50(inputs)
         conv = layer
         layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         shape = tf.shape(inputs)
