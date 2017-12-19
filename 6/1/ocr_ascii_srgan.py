@@ -185,8 +185,7 @@ def SRGAN_d(inputs, reuse=False):
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.fully_connected(layer, 1024, activation_fn=tf.nn.relu)
         logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
-        net_ho = tf.nn.sigmoid(logits)
-        return net_ho, logits
+        return logits
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
@@ -211,8 +210,8 @@ def neural_networks():
     layer_targets = tf.reshape(targets, (batch_size, image_width, image_height, 1))
 
     net_g = SRGAN_g(layer, reuse = False)
-    net_d, logits_real = SRGAN_d(layer_targets, reuse = False)
-    _,     logits_fake = SRGAN_d(net_g, reuse = True)
+    logits_real = SRGAN_d(layer_targets, reuse = False)
+    logits_fake = SRGAN_d(net_g, reuse = True)
 
     # net_res, _ = RES(layer_targets, reuse = False)
     net_res, _ = RES(net_g, reuse = False)
