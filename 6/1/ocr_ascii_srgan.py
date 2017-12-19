@@ -281,7 +281,7 @@ def get_next_batch_for_res(batch_size=128):
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,3,4,5])     #删除了2
         text = random.sample(CHARS, 12)
-        text = text+text+"  "
+        text = text+text+[" "," "]
         random.shuffle(text)
         text = "".join(text).strip()
         codes.append([CHARS.index(char) for char in text])          
