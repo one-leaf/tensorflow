@@ -266,20 +266,17 @@ eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8"
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
 
-# 生成一个训练batch ,每一个批次采用最大图片宽度
-def get_next_batch(batch_size=128):
+def get_next_batch_for_res(batch_size=128):
     images = []   
-    to_images = []
     codes = []
     max_width_image = 0
     info = ""
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(25, 30)
-        font_size = 36 #random.randint(image_height, 64)    
+        font_size = random.randint(8, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
-        # text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
         text = random.sample(CHARS, 12)
         text = text+text
         random.shuffle(text)
@@ -287,21 +284,55 @@ def get_next_batch(batch_size=128):
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
         image = utils_pil.resize_by_height(image, image_height)
-        to_image = image.copy()
-
-        _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
-        image = utils_font.get_font_image_from_url(text, font_name, _h, font_mode, font_hint )
         image = utils_font.add_noise(image)   
-        image = utils_pil.convert_to_gray(image)            
-        # image = utils_pil.resize_by_height(image, _h, random.random()>0.5)
-        
+        image = utils_pil.convert_to_gray(image)                   
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)        
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
         image = (255. - image) / 255.
         images.append(image)
+        if image.shape[1] > max_width_image: 
+            max_width_image = image.shape[1]
+        info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
+    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    inputs = np.zeros([batch_size, max_width_image, image_height])
+    for i in range(len(images)):
+        image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
+        inputs[i,:] = np.transpose(image_vec)
 
-        # to_image = utils_font.get_font_image_from_url(text, font_name ,image_height, fontmode = font_mode, fonthint = font_hint)
+    labels = [np.asarray(i) for i in codes]
+    sparse_labels = utils.sparse_tuple_from(labels)
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)                
+    return inputs, sparse_labels, seq_len, info
+     
+
+# 生成一个训练batch ,每一个批次采用最大图片宽度
+def get_next_batch_for_srgan(batch_size=128):
+    images = []   
+    to_images = []
+    max_width_image = 0
+    for i in range(batch_size):
+        font_name = random.choice(AllFontNames)
+        font_length = random.randint(25, 30)
+        font_size = 36 #random.randint(image_height, 64)    
+        font_mode = random.choice([0,1,2,4]) 
+        font_hint = random.choice([0,1,2,3,4,5])     
+        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+        codes.append([CHARS.index(char) for char in text])          
+        image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
+        image = utils_pil.resize_by_height(image, image_height)
+        to_image = image.copy()
+
+        _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
+        image = utils_font.add_noise(image)   
+        image = utils_pil.convert_to_gray(image)            
+        image = utils_pil.resize_by_height(image, _h)        
+        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)        
+        image = np.asarray(image)
+        image = utils.resize(image, height=image_height)
+        image = (255. - image) / 255.
+        images.append(image)
+
         to_image = utils_pil.convert_to_gray(to_image)
         to_image = np.asarray(to_image)   
         to_image = utils.resize(to_image, height=image_height)
@@ -313,7 +344,7 @@ def get_next_batch(batch_size=128):
             max_width_image = image.shape[1]
         if to_image.shape[1] > max_width_image: 
             max_width_image = to_image.shape[1]      
-        info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
+
     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
@@ -325,10 +356,7 @@ def get_next_batch(batch_size=128):
         image_vec = utils.img2vec(to_images[i], height=image_height, width=max_width_image, flatten=False)
         targets[i,:] = np.transpose(image_vec)
 
-    labels = [np.asarray(i) for i in codes]
-    sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)                
-    return inputs, targets, sparse_labels, seq_len, info
+    return inputs, targets
 
 def train():
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
@@ -369,8 +397,8 @@ def train():
         while True:
             for batch in range(BATCHES):
                 for i in range(10):
-                    train_inputs, train_targets, train_labels, train_seq_len, train_info = get_next_batch(8)
-                    feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
+                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
 
                     # train res
                     start = time.time() 
@@ -385,8 +413,8 @@ def train():
 
                     if i > 0: continue
 
-                    train_inputs, train_targets, train_labels, train_seq_len, _ = get_next_batch(4)
-                    feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                    train_inputs, train_targets = get_next_batch_for_srgan(4)
+                    feed = {inputs: train_inputs, targets: train_targets}
 
                     # train G
                     start = time.time() 
@@ -414,17 +442,17 @@ def train():
                         return 
 
                 if steps > 0 and steps % REPORT_STEPS < 12:
-                    train_inputs, train_targets, train_labels, train_seq_len, train_info = get_next_batch(4)   
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
-                    feed = {inputs: train_inputs, targets: train_targets}
+                    feed = {inputs: train_inputs}
                     b_predictions = session.run(net_g, feed) 
                     for i in range(4):                    
-                        _predictions = np.reshape(b_predictions[i],train_targets[i].shape)   
+                        _predictions = np.reshape(b_predictions[i],train_inputs[i].shape)   
                         _pred = np.transpose(_predictions)   
                         _img = np.vstack((np.transpose(train_inputs[i]), _pred, np.transpose(train_targets[i]))) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
-                    feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
+                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
                     decoded_list = session.run(res_decoded[0], feed)          
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
