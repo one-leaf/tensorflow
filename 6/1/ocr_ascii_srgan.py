@@ -231,8 +231,8 @@ def neural_networks():
     _, res_predict_emb  = RES(net_g, reuse = True)
 
     d_loss1 = 1e-3*tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
-    d_loss2 = 1e-3*tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
-    d_loss  = d_loss1 - d_loss2
+    d_loss2 = 1e-3*tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
+    d_loss  = d_loss1 + d_loss2
 
     g_gan_loss = 1e-3*tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
     g_mse_loss = tf.losses.mean_squared_error(net_g, layer_targets)
