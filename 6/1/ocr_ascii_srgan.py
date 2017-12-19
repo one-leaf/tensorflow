@@ -55,19 +55,19 @@ def RESNET50(inputs, need_pool=True):
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     templayer = slim.conv2d(templayer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 2b
     templayer = layer
     layer = slim.conv2d(layer, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 2c
     templayer = layer
     layer = slim.conv2d(layer, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 3a
     if need_pool: layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
@@ -75,25 +75,25 @@ def RESNET50(inputs, need_pool=True):
     layer = slim.conv2d(layer, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     templayer = slim.conv2d(templayer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 3b
     templayer = layer
     layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 3c
     templayer = layer
     layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 3d
     templayer = layer
     layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 4a
     if need_pool: layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
@@ -101,37 +101,37 @@ def RESNET50(inputs, need_pool=True):
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     templayer = slim.conv2d(templayer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 4b
     templayer = layer
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 4c
     templayer = layer
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 4d
     templayer = layer
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)        
+    layer = tf.nn.relu(templayer+layer)        
     # 4e
     templayer = layer
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer) 
+    layer = tf.nn.relu(templayer+layer) 
     # 4f  
     templayer = layer
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer) 
+    layer = tf.nn.relu(templayer+layer) 
     # 5a        
     if need_pool: layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
@@ -139,19 +139,19 @@ def RESNET50(inputs, need_pool=True):
     layer = slim.conv2d(layer, 512, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     templayer = slim.conv2d(templayer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 5b
     templayer = layer
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     # 5c
     templayer = layer
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.relu(templayer+layer)
+    layer = tf.nn.relu(templayer+layer)
     return layer    
 
 def SRGAN_g(inputs, reuse=False):    
