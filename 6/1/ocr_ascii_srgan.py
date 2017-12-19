@@ -37,7 +37,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 20
-BATCH_SIZE = 4
+BATCH_SIZE = 1
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -260,11 +260,11 @@ def get_next_batch(batch_size=128):
         font_size = 36 #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     
-        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-        # text = random.sample(CHARS, 12)
-        # text = text+text
-        # random.shuffle(text)
-        # text = "".join(text).strip()
+        # text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+        text = random.sample(CHARS, 12)
+        text = text+text
+        random.shuffle(text)
+        text = "".join(text).strip()
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, fontmode = font_mode, fonthint = font_hint )
         image = utils_pil.resize_by_height(image, image_height)
