@@ -5,13 +5,8 @@ import utils_pil
 from PIL import Image
 import json
 
-def http(url,param=None):
-    if param !=None:
-        paramurl = urllib.parse.urlencode(param)
-        url = "%s?%s"%(url,paramurl)
-        r = urllib.request.urlopen(url, timeout=30)
-    else:    
-        r = urllib.request.urlopen(url, timeout=30)
+def http(url):
+    r = urllib.request.urlopen(url, timeout=30)
     return r.read()
 
 def get_font_names_from_url():
@@ -21,8 +16,7 @@ def get_font_names_from_url():
     CHIFontNames = fonts['chi']
     return ENGFontNames, CHIFontNames
 
-# 从字体服务器上获取字体图片
-def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=None):
+def get_font_url(text,  font_name, font_size, fontmode=None, fonthint=None):
     params= {}
     params['text'] = text
     params['fontname'] = font_name
@@ -36,7 +30,13 @@ def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=
         params['fonthint'] = random.choice([0,1,2,3,4,5])
     else:
         params['fonthint'] = fonthint  
-    r = http('http://192.168.2.113:8888/',params)
+    paramurl = urllib.parse.urlencode(param)
+    url = "http://192.168.2.113:8888/?%s"%paramurl
+    return url
+
+# 从字体服务器上获取字体图片
+def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=None):
+    r = http(get_font_url(text, font_name, font_size, fontmode, fonthint))
     img = Image.open(io.BytesIO(r))
     img = utils_pil.convert_to_rgb(img)
     img = utils_pil.trim(img)
