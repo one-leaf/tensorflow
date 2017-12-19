@@ -134,6 +134,7 @@ def RESNET50(inputs):
     layer = tf.nn.relu(templayer+layer) 
     # 5a        
     layer = slim.max_pool2d(layer,[2,2])
+    conv = layer
     templayer = layer
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 512, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -152,7 +153,7 @@ def RESNET50(inputs):
     layer = slim.conv2d(layer, 512, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.relu(templayer+layer)
-    return layer    
+    return layer, conv    
 
 # 增加残差网络
 def addResLayer(inputs):
@@ -179,7 +180,7 @@ def SRGAN_g(inputs, reuse=False):
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        layer = RESNET50(inputs)
+        layer, _ = RESNET50(inputs)
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.fully_connected(layer, 1014, activation_fn=tf.nn.relu)
@@ -189,8 +190,7 @@ def SRGAN_d(inputs, reuse=False):
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer = RESNET50(inputs)
-        conv = layer
+        layer, conv = RESNET50(inputs)
         layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
