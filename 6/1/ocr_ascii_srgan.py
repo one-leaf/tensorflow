@@ -408,7 +408,7 @@ def train():
                     if np.isnan(errM) or np.isinf(errM) :
                         print("Error: cost is nan or inf")
                         return                       
-                    if errM > 10 :  print(train_info)
+                    if errM > 15 :  print(train_info)
 
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
