@@ -30,7 +30,7 @@ def get_font_url(text,  font_name, font_size, fontmode=None, fonthint=None):
         params['fonthint'] = random.choice([0,1,2,3,4,5])
     else:
         params['fonthint'] = fonthint  
-    paramurl = urllib.parse.urlencode(param)
+    paramurl = urllib.parse.urlencode(params)
     url = "http://192.168.2.113:8888/?%s"%paramurl
     return url
 
