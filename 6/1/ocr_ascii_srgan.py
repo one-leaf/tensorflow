@@ -279,7 +279,7 @@ def get_next_batch_for_res(batch_size=128):
         else:
             font_size = random.randint(8, 15) 
         font_mode = random.choice([0,1,2,4]) 
-        font_hint = random.choice([0,1,2,3,4,5])     
+        font_hint = random.choice([0,1,3,4,5])     #删除了2
         text = random.sample(CHARS, 12)
         text = text+text
         random.shuffle(text)
@@ -319,7 +319,7 @@ def get_next_batch_for_srgan(batch_size=128):
         font_length = random.randint(25, 30)
         font_size = 36 #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
-        font_hint = random.choice([0,1,2,3,4,5])     
+        font_hint = random.choice([0,1,3,4,5])     #删除了2
         text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
         image = utils_pil.resize_by_height(image, image_height)
