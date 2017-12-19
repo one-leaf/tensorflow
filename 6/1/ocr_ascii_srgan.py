@@ -172,8 +172,8 @@ def SRGAN_d(inputs, reuse=False):
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
         layer = RESNET50(inputs, need_pool=True)
+        conv = layer
         layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
