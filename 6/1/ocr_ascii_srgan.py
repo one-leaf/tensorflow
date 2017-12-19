@@ -272,6 +272,7 @@ def get_next_batch(batch_size=128):
     to_images = []
     codes = []
     max_width_image = 0
+    info = ""
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(25, 30)
@@ -309,7 +310,8 @@ def get_next_batch(batch_size=128):
             max_width_image = image.shape[1]
         if to_image.shape[1] > max_width_image: 
             max_width_image = to_image.shape[1]      
-
+        info = info+"font_name: %s font_length: %s font_mode: %s font_hint: %s text: %s resize: %s\r" % \
+                 (font_name, font_length, font_mode, font_hint, text, text)
     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
@@ -324,7 +326,7 @@ def get_next_batch(batch_size=128):
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)                
-    return inputs, targets, sparse_labels, seq_len
+    return inputs, targets, sparse_labels, seq_len, info
 
 def train():
     inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
@@ -365,7 +367,7 @@ def train():
         while True:
             for batch in range(BATCHES):
                 for i in range(10):
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(8)
+                    train_inputs, train_targets, train_labels, train_seq_len, train_info = get_next_batch(8)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
 
                     # train res
@@ -375,10 +377,13 @@ def train():
                     if np.isnan(errM) or np.isinf(errM) :
                         print("Error: cost is nan or inf")
                         return   
+                    
+                    if errM > 10 :
+                        print(train_info)
 
                     if i > 0: continue
 
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)
+                    train_inputs, train_targets, train_labels, train_seq_len, _ = get_next_batch(4)
                     feed = {inputs: train_inputs, targets: train_targets, labels: train_labels, seq_len: train_seq_len}
 
                     # train G
@@ -407,7 +412,8 @@ def train():
                         return 
 
                 if steps > 0 and steps % REPORT_STEPS < 12:
-                    train_inputs, train_targets, train_labels, train_seq_len = get_next_batch(4)             
+                    train_inputs, train_targets, train_labels, train_seq_len, train_info = get_next_batch(4)   
+                    print(train_info)          
                     feed = {inputs: train_inputs, targets: train_targets}
                     b_predictions = session.run(net_g, feed) 
                     for i in range(4):                    
