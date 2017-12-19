@@ -260,6 +260,7 @@ AllFontNames.remove("幼圆")
 AllFontNames.remove("方正舒体")
 AllFontNames.remove("方正姚体")
 AllFontNames.remove("Impact")
+AllFontNames.remove("Gabriola")
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 
