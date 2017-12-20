@@ -173,7 +173,7 @@ def RESNET50(inputs, isKeepSize=False):
 
 # 参考 https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/slim/python/slim/nets/inception_v3.py
 def INCEPTIONV3(inputs):
-    with arg_scope([slim.conv2d, slim.max_pool2d, slim.avg_pool2d], stride=1, padding='SAME'):
+    with slim.arg_scope([slim.conv2d, slim.max_pool2d, slim.avg_pool2d], stride=1, padding='SAME'):
         # mixed_5b
         net    = inputs
         layer0 = slim.conv2d(net,    64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
