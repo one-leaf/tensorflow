@@ -286,10 +286,9 @@ def get_next_batch_for_res(batch_size=128):
         text = "".join(text).strip()
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-        image = utils_pil.resize_by_height(image, image_height)
+        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
         image = utils_font.add_noise(image)   
         image = utils_pil.convert_to_gray(image)                   
-        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)        
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
         image = (255. - image) / 255.
