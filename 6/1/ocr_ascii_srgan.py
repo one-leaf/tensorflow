@@ -542,7 +542,7 @@ def train():
  
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_targets = get_next_batch_for_srgan(4)
+                train_inputs, train_targets = get_next_batch_for_srgan(2)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
@@ -566,7 +566,7 @@ def train():
                 # 如何平均差太高，单独学习降低平均差
                 if errM > 0.1:   
                     for i in range(16):
-                        train_inputs, train_targets = get_next_batch_for_srgan(4)
+                        train_inputs, train_targets = get_next_batch_for_srgan(2)
                         feed = {inputs: train_inputs, targets: train_targets}
                         # train G
                         start = time.time() 
