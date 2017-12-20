@@ -595,7 +595,7 @@ def train():
                             return 
 
                 # 如果图片相差不远，训练RES
-                if errM < 0.5:
+                if errM < 0.2:
                     # train res
                     for i in range(16):
                         train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)
