@@ -522,7 +522,7 @@ def train():
 
                 start_steps = steps     
                 if errM > 0.1:   
-                    for i in range(10):
+                    for i in range(100):
                         train_inputs, train_targets = get_next_batch_for_srgan(1)
                         feed = {inputs: train_inputs, targets: train_targets}
 
