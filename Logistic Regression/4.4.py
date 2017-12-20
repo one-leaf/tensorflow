@@ -30,7 +30,7 @@ def INCEPTIONV2(inputs):
     layer2 = slim.conv2d(inputs, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer3 = slim.avg_pool2d(inputs, [3,3], stride=2, padding="SAME")
+    layer3 = slim.avg_pool2d(inputs, [3,3], stride=1, padding="SAME")
     layer3 = slim.conv2d(layer3, 32, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = tf.concat([layer0, layer1, layer2, layer3], 3)   
     # mixed_3c => 320
