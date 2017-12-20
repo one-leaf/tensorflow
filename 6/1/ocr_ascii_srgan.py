@@ -512,6 +512,16 @@ def train():
                 train_inputs, train_targets = get_next_batch_for_srgan(1)
                 feed = {inputs: train_inputs, targets: train_targets}
 
+                # train GAN (SRGAN)
+                start = time.time()                
+                ## update D
+                errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
+                print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                if np.isnan(errD) or np.isinf(errD):
+                    print("Error: cost is nan or inf")
+                    return 
+                start_steps = steps     
+
                 ## update G
                 start = time.time()                                
                 errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
@@ -520,12 +530,11 @@ def train():
                     print("Error: cost is nan or inf")
                     return 
 
-                start_steps = steps     
+                # 如何平均差太高，单独学习降低平均差
                 if errM > 0.1:   
-                    for i in range(100):
+                    for i in range(64):
                         train_inputs, train_targets = get_next_batch_for_srgan(1)
                         feed = {inputs: train_inputs, targets: train_targets}
-
                         # train G
                         start = time.time() 
                         errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
@@ -534,8 +543,9 @@ def train():
                             print("Error: cost is nan or inf")
                             return
 
-                if errA > 0 and errM < 0.1:
-                   for i in range(10):
+                # 如果D网络的差异太大，需要多学习下G网络
+                if errD > 10:
+                   for i in range(64):
                         train_inputs, train_targets = get_next_batch_for_srgan(1)
                         feed = {inputs: train_inputs, targets: train_targets}
 
@@ -547,21 +557,7 @@ def train():
                             print("Error: cost is nan or inf")
                             return 
 
-                # train_inputs, train_targets = get_next_batch_for_srgan(4)
-                # feed = {inputs: train_inputs, targets: train_targets}
-
-                # # 如果 G 网络没有训练出来，暂时不训练 D 网络
-                # if errA < 1:
-                # train GAN (SRGAN)
-                start = time.time()                
-                ## update D
-                errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
-                print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
-                if np.isnan(errD) or np.isinf(errD):
-                    print("Error: cost is nan or inf")
-                    return 
-
-                # 如果图片相差太远，不要训练RES
+                # 如果图片相差不远，训练RES
                 if errM < 0.1:
                     # train res
                     for i in range(10):
