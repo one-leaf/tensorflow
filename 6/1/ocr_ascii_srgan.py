@@ -520,16 +520,17 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
+                    if errM > 0.1:
+                        # train G
+                        start = time.time() 
+                        errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                        print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                        if np.isnan(errM) or np.isinf(errM) :
+                            print("Error: cost is nan or inf")
+                            return  
+                        
                 # train_inputs, train_targets = get_next_batch_for_srgan(4)
                 # feed = {inputs: train_inputs, targets: train_targets}
-
-                # train G
-                start = time.time() 
-                errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
-                print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                if np.isnan(errM) or np.isinf(errM) :
-                    print("Error: cost is nan or inf")
-                    return    
 
                 # 如果 G 网络没有训练出来，暂时不训练 D 网络
                 if  errA < 1:
