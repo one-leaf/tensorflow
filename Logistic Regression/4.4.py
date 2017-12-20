@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     step = 0
     while mnist.train.epochs_completed < 8:
-        batch_x, batch_y= getBatch(8)
+        batch_x, batch_y= getBatch(32)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, drop_prob: 0.25})
         if step % 10 == 0 :
             acc = 0
