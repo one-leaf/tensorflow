@@ -162,27 +162,132 @@ def addResLayer(inputs):
     outputs = inputs + layer
     return outputs  
 
-# 参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py
+def INCEPTIONV2(inputs):
+    # mixed_3b => 256
+    layer0 = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(inputs, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(inputs, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(inputs, [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 32, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)
+    # mixed_3c => 320
+    layer0 = slim.conv2d(layer, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer, 64,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)        
+    # mixed_4a => 576
+    layer0 = slim.conv2d(layer, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer0 = slim.conv2d(layer0, 160, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 64,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer = tf.concat([layer0, layer1, layer2], 3)   
+    # mixed_4b => 576
+    layer0 = slim.conv2d(layer, 224, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer, 96,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)  
+    # mixed_4c => 576
+    layer0 = slim.conv2d(layer, 192, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 96, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer, 96,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)  
+    # mixed_4d => 576
+    layer0 = slim.conv2d(layer, 160, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 160, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer, 128,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 160, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 160, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 96, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)  
+    # mixed_4e => 576
+    layer0 = slim.conv2d(layer, 96, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 192, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer, 160,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 192, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 192, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 96, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)
+    # mixed_5a => 1024
+    layer0 = slim.conv2d(layer, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer0 = slim.conv2d(layer0, 192, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 192,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer = tf.concat([layer0, layer1, layer2], 3)  
+    # mixed_5b => 1024
+    layer0 = slim.conv2d(layer, 352, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 192, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 320, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer, 160,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 224, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 224, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)
+    # mixed_5c => 1024
+    layer0 = slim.conv2d(layer, 352, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer, 192, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, 320, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer, 192,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 224, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer2 = slim.conv2d(layer2, 224, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer3 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
+    layer3 = slim.conv2d(layer3, 128, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)
+    return layer
+
+def old_SRGAN_g(inputs):
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    temp = layer
+    # B residual blocks
+    for i in range(16):
+        layer = addResLayer(layer)
+    layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = None)
+    layer = layer + temp        
+    # B residual blacks end
+    layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+    return layer
+
+# 原参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py 失败，后期和D对抗时无法提升，后改为 inception_v2
+# 参考 https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/slim/python/slim/nets/inception_v2.py
 def SRGAN_g(inputs, reuse=False):    
-    with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:
-        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        temp = layer
-        # B residual blocks
-        for i in range(16):
-            layer = addResLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = None)
-        layer = layer + temp        
-        # B residual blacks end
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+    with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
+        layer = INCEPTIONV2(inputs)
+        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=None, activation_fn=None)
         return layer
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer, _ = RESNET50(inputs)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
+        # layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        # layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.fully_connected(layer, 1024, activation_fn=tf.nn.relu)
         logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
         return logits
@@ -190,7 +295,7 @@ def SRGAN_d(inputs, reuse=False):
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
         layer, conv = RESNET50(inputs)
-        layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, CLASSES_NUMBER, [1,1], normalizer_fn=None, activation_fn=None)
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
