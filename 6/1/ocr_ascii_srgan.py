@@ -537,7 +537,7 @@ def train():
                     return    
 
                 # 如果 G 网络没有训练出来，暂时不训练 D 网络
-                if  errA < 0:
+                if  errA < 1:
                     # train GAN (SRGAN)
                     start = time.time()                
                     ## update D
