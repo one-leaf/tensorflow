@@ -329,7 +329,8 @@ def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer, _ = RESNET50(inputs)        
         layer = slim.fully_connected(layer, 1024, activation_fn=tf.nn.relu)
-        logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
+        # logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
+        logits = slim.fully_connected(layer, 1)
         return logits
 
 def RES(inputs, reuse = False):
