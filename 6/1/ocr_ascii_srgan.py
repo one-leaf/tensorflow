@@ -322,7 +322,7 @@ def SRGAN_g(inputs, reuse=False):
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
         # layer, _ = RESNET50(inputs, True)
         layer = INCEPTIONV3(inputs)
-        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=None, activation_fn=None)
+        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
 def SRGAN_d(inputs, reuse=False):
