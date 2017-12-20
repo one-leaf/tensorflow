@@ -514,12 +514,13 @@ def train():
 
                 ## update G
                 start = time.time()                                
-                errG, errM, errV, errA, _, start_steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
                 print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
                     print("Error: cost is nan or inf")
                     return 
 
+                start_steps = steps     
                 if errM > 0.1:   
                     for i in range(10):
                         train_inputs, train_targets = get_next_batch_for_srgan(1)
