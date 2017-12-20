@@ -544,7 +544,7 @@ def train():
                             return
 
                 # 如果D网络的差异太大，需要多学习下G网络
-                if errD > 10:
+                if errD < -10:
                    for i in range(64):
                         train_inputs, train_targets = get_next_batch_for_srgan(1)
                         feed = {inputs: train_inputs, targets: train_targets}
