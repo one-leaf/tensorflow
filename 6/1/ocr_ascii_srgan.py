@@ -515,7 +515,7 @@ def train():
                 #     if errM > 15 :  print(train_info)
 
                 for i in range(10):
-                    train_inputs, train_targets = get_next_batch_for_srgan(4)
+                    train_inputs, train_targets = get_next_batch_for_srgan(1)
                     feed = {inputs: train_inputs, targets: train_targets}
                     start = time.time()                                
                     ## update G
