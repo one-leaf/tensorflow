@@ -564,7 +564,7 @@ def train():
                     return 
 
                 # 如果平均差太高，单独学习降低平均差
-                if errM > 0.5:   
+                if (errM > 0.5 and errD > 10) or errM > 10:   
                     for i in range(16):
                         train_inputs, train_targets = get_next_batch_for_srgan(1)
                         feed = {inputs: train_inputs, targets: train_targets}
