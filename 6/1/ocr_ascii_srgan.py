@@ -380,7 +380,7 @@ def neural_networks():
 
     g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
     g_mse_loss = tf.losses.mean_squared_error(net_g, layer_targets)
-    g_res_loss = 2e-6 * tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
+    g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_res_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
@@ -542,7 +542,7 @@ def train():
  
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_targets = get_next_batch_for_srgan(1)
+                train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
@@ -566,7 +566,7 @@ def train():
                 # 如何平均差太高，单独学习降低平均差
                 if errM > 0.1:   
                     for i in range(64):
-                        train_inputs, train_targets = get_next_batch_for_srgan(1)
+                        train_inputs, train_targets = get_next_batch_for_srgan(4)
                         feed = {inputs: train_inputs, targets: train_targets}
                         # train G
                         start = time.time() 
@@ -579,7 +579,7 @@ def train():
                 # 如果D网络的差异太大，需要多学习下G网络
                 if errD < -10:
                    for i in range(64):
-                        train_inputs, train_targets = get_next_batch_for_srgan(1)
+                        train_inputs, train_targets = get_next_batch_for_srgan(4)
                         feed = {inputs: train_inputs, targets: train_targets}
 
                         ## update G
