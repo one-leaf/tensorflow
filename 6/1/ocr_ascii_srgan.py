@@ -320,7 +320,8 @@ def old_SRGAN_g(inputs):
 # 原参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py 失败，后期和D对抗时无法提升，后改为 resnet50
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
-        layer, _ = RESNET50(inputs, True)
+        # layer, _ = RESNET50(inputs, True)
+        layer = INCEPTIONV3(inputs)
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=None, activation_fn=None)
         return layer
 
