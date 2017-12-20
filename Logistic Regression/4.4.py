@@ -155,13 +155,13 @@ if __name__ == '__main__':
 
     step = 0
     while mnist.train.epochs_completed < 8:
-        batch_x, batch_y= getBatch(32)
+        batch_x, batch_y= getBatch(64)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, drop_prob: 0.25})
         if step % 10 == 0 :
             acc = 0
-            for i in range(500):
-                acc += sess.run(accuracy, feed_dict={x: valid_x[i*10:i*10+10], y: valid_y[i*10:i*10+10], drop_prob: 0})
-            acc = acc / 500.
+            for i in range(100):
+                acc += sess.run(accuracy, feed_dict={x: valid_x[i*10:i*50+50], y: valid_y[i*10:i*50+50], drop_prob: 0})
+            acc = acc / 100.
             print(step, loss, acc)
             plt.clf()
             plt_n.append(step)
@@ -175,8 +175,8 @@ if __name__ == '__main__':
         step += 1
 
     acc = 0
-    for i in range(1000):
-        acc += sess.run(accuracy, feed_dict={x: test_x[i*10:i*10+10], y: test_y[i*10:i*10+10], drop_prob: 0})
-    acc = acc / 1000.
+    for i in range(200):
+        acc += sess.run(accuracy, feed_dict={x: test_x[i*50:i*50+50], y: test_y[i*50:i*50+50], drop_prob: 0})
+    acc = acc / 200.
     print("Last accuracy:",acc)
     # Last accuracy: 
