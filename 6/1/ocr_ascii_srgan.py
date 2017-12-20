@@ -294,9 +294,7 @@ def SRGAN_g(inputs, reuse=False):
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        layer, _ = RESNET50(inputs)
-        # layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        # layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
+        layer, _ = RESNET50(inputs)        
         layer = slim.fully_connected(layer, 1024, activation_fn=tf.nn.relu)
         logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
         return logits
