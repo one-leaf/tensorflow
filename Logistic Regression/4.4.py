@@ -160,7 +160,7 @@ if __name__ == '__main__':
         if step % 10 == 0 :
             acc = 0
             for i in range(500):
-                acc += sess.run(accuracy, feed_dict={x: valid_x[i:i+10], y: valid_y[i:i+10], drop_prob: 0})
+                acc += sess.run(accuracy, feed_dict={x: valid_x[i*10:i*10+10], y: valid_y[i*10:i*10+10], drop_prob: 0})
             acc = acc / 500.
             print(step, loss, acc)
             plt.clf()
@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
     acc = 0
     for i in range(1000):
-        acc += sess.run(accuracy, feed_dict={x: test_x[i:i+10], y: test_y[i:i+10], drop_prob: 0})
+        acc += sess.run(accuracy, feed_dict={x: test_x[i*10:i*10+10], y: test_y[i*10:i*10+10], drop_prob: 0})
     acc = acc / 1000.
     print("Last accuracy:",acc)
     # Last accuracy: 
