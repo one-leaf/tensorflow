@@ -564,7 +564,7 @@ def train():
                     return 
 
                 # 如何平均差太高，单独学习降低平均差
-                if errM > 0.1:   
+                if errM > 1:   
                     for i in range(16):
                         train_inputs, train_targets = get_next_batch_for_srgan(1)
                         feed = {inputs: train_inputs, targets: train_targets}
@@ -591,7 +591,7 @@ def train():
                             return 
 
                 # 如果图片相差不远，训练RES
-                if errM < 0.1:
+                if errM < 0.5:
                     # train res
                     for i in range(16):
                         train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)
