@@ -509,18 +509,6 @@ def train():
  
         while True:
             for batch in range(BATCHES):
-                # train res
-                for i in range(10):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
-                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
-                    start = time.time() 
-                    errM, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                    print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errM, acc))
-                    if np.isnan(errM) or np.isinf(errM) :
-                        print("Error: cost is nan or inf")
-                        return                       
-                    if errM > 15 and acc > 0.8: print(train_info)
-
                 for i in range(10):
                     train_inputs, train_targets = get_next_batch_for_srgan(1)
                     feed = {inputs: train_inputs, targets: train_targets}
@@ -554,7 +542,21 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
 
-                if steps > 0 and steps % REPORT_STEPS < 11:
+                # 如果图片相差太远，不要训练RES
+                if errM < 0.1:
+                    # train res
+                    for i in range(10):
+                        train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
+                        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
+                        start = time.time() 
+                        errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                        print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
+                        if np.isnan(errR) or np.isinf(errR) :
+                            print("Error: cost is nan or inf")
+                            return                       
+                        if errR > 15 and acc > 0.8: print(train_info)
+
+                if steps > 0 and steps % REPORT_STEPS < 20:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
                     feed = {inputs: train_inputs, seq_len: train_seq_len}
