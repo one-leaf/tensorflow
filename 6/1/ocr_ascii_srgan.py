@@ -46,7 +46,7 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 
 # 模型来源，有改动 http://ethereon.github.io/netscope/#/gist/db945b393d40bfa26006
 # 取消了pool1,增加了3次pool，删除了最后的avg和fc层
-def RESNET50(inputs):
+def RESNET50(inputs, isKeepSize=False):
     # 1
     layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     # 2a
@@ -69,7 +69,10 @@ def RESNET50(inputs):
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.relu(templayer+layer)
     # 3a
-    layer = slim.max_pool2d(layer,[2,2])
+    if isKeepSize:
+        layer = slim.max_pool2d(layer,[2,2], stride=1, padding="SAME")
+    else:    
+        layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
     layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 128, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -95,7 +98,10 @@ def RESNET50(inputs):
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.relu(templayer+layer)
     # 4a
-    layer = slim.max_pool2d(layer,[2,2])
+    if isKeepSize:
+        layer = slim.max_pool2d(layer,[2,2], stride=1, padding="SAME")
+    else:    
+        layer = slim.max_pool2d(layer,[2,2])
     templayer = layer
     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -133,7 +139,10 @@ def RESNET50(inputs):
     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.relu(templayer+layer) 
     # 5a        
-    layer = slim.max_pool2d(layer,[2,2])
+    if isKeepSize:
+        layer = slim.max_pool2d(layer,[2,2], stride=1, padding="SAME")
+    else:    
+        layer = slim.max_pool2d(layer,[2,2])
     conv = layer
     templayer = layer
     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -279,7 +288,7 @@ def old_SRGAN_g(inputs):
 # 参考 https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/slim/python/slim/nets/inception_v2.py
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
-        layer = INCEPTIONV2(inputs)
+        layer = RESNET50(inputs, True)
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=None, activation_fn=None)
         return layer
 
@@ -503,16 +512,16 @@ def train():
         while True:
             for batch in range(BATCHES):
                 # train res
-                for i in range(10):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
-                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
-                    start = time.time() 
-                    errM, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                    print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errM, acc))
-                    if np.isnan(errM) or np.isinf(errM) :
-                        print("Error: cost is nan or inf")
-                        return                       
-                    if errM > 15 :  print(train_info)
+                # for i in range(10):
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
+                #     feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
+                #     start = time.time() 
+                #     errM, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                #     print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errM, acc))
+                #     if np.isnan(errM) or np.isinf(errM) :
+                #         print("Error: cost is nan or inf")
+                #         return                       
+                #     if errM > 15 :  print(train_info)
 
                 for i in range(10):
                     train_inputs, train_targets = get_next_batch_for_srgan(2)
