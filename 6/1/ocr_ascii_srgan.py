@@ -353,12 +353,12 @@ def neural_networks():
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
 
-    g_optim_init = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_mse_loss, global_step=global_step, var_list=g_vars)
+    g_optim_mse = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_mse_loss, global_step=global_step, var_list=g_vars)
 
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
-    return inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
+    return inputs, targets, labels, global_step, g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
             g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, res_loss, res_optim, seq_len, res_acc, res_decoded
 
 
@@ -472,7 +472,7 @@ def get_next_batch_for_srgan(batch_size=128):
     return inputs, targets
 
 def train():
-    inputs, targets, labels, global_step, g_optim_init, d_loss, d_loss1, d_loss2, d_optim, \
+    inputs, targets, labels, global_step, g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
         g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, \
         res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
 
@@ -526,7 +526,7 @@ def train():
                 start = time.time()                                
                 errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
                 print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
-                if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                if np.isnan(errG) or np.isinf(errG) or np.isnan(errM) or np.isinf(errM) or np.isnan(errA) or np.isinf(errA):
                     print("Error: cost is nan or inf")
                     return 
 
@@ -537,7 +537,7 @@ def train():
                         feed = {inputs: train_inputs, targets: train_targets}
                         # train G
                         start = time.time() 
-                        errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
+                        errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
                         print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
                         if np.isnan(errM) or np.isinf(errM) :
                             print("Error: cost is nan or inf")
