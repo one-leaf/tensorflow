@@ -288,7 +288,7 @@ def old_SRGAN_g(inputs):
 # 参考 https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/slim/python/slim/nets/inception_v2.py
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
-        layer = RESNET50(inputs, True)
+        layer, _ = RESNET50(inputs, True)
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=None, activation_fn=None)
         return layer
 
