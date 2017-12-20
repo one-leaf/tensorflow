@@ -605,7 +605,7 @@ def train():
                         if errR > 15 and acc > 0.8: print(train_info)
 
                 if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2)   
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
                     feed = {inputs: train_inputs, seq_len: train_seq_len}
                     b_predictions, decoded_list = session.run([net_g, res_decoded[0]], feed) 
