@@ -30,9 +30,9 @@ def INCEPTIONV2(inputs):
     layer2 = slim.conv2d(inputs, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer2 = slim.conv2d(layer2, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer3 = slim.avg_pool2d(inputs, [3,3])
+    layer3 = slim.avg_pool2d(inputs, [3,3], stride=2, padding="SAME")
     layer3 = slim.conv2d(layer3, 32, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer = tf.concat([layer0, layer1, layer2, layer3], 3)
+    layer = tf.concat([layer0, layer1, layer2, layer3], 3)   
     # mixed_3c => 320
     layer0 = slim.conv2d(layer, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(layer, 64, [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -49,7 +49,7 @@ def INCEPTIONV2(inputs):
     layer1 = slim.conv2d(layer, 64,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(layer1, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(layer1, 96, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer2 = slim.avg_pool2d(layer,  [3,3])
+    layer2 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
     layer = tf.concat([layer0, layer1, layer2], 3)   
     # mixed_4b => 576
     layer0 = slim.conv2d(layer, 224, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -97,7 +97,7 @@ def INCEPTIONV2(inputs):
     layer1 = slim.conv2d(layer, 192,  [1,1], weights_initializer=slim.init_ops.truncated_normal_initializer(0.0, 0.09),  normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(layer1, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(layer1, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer2 = slim.avg_pool2d(layer)
+    layer2 = slim.avg_pool2d(layer,  [3,3], stride=1, padding="SAME")
     layer = tf.concat([layer0, layer1, layer2], 3)  
     # mixed_5b => 1024
     layer0 = slim.conv2d(layer, 352, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     step = 0
     while mnist.train.epochs_completed < 8:
-        batch_x, batch_y= getBatch(8)
+        batch_x, batch_y= getBatch(1)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, drop_prob: 0.25})
         if step % 10 == 0 :
             acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, drop_prob: 0})
@@ -171,6 +171,6 @@ if __name__ == '__main__':
             plt.pause(0.1)
         step += 1
 
-    acc = sess.run(accuracy, feed_dict={x: test_x[:8], y: test_y[:8], drop_prob: 0})
+    acc = sess.run(accuracy, feed_dict={x: test_x[:1], y: test_y[:1], drop_prob: 0})
     print("Last accuracy:",acc)
     # Last accuracy: 
