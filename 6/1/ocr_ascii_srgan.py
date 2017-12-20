@@ -565,7 +565,7 @@ def train():
 
                 # 如何平均差太高，单独学习降低平均差
                 if errM > 0.1:   
-                    for i in range(64):
+                    for i in range(16):
                         train_inputs, train_targets = get_next_batch_for_srgan(4)
                         feed = {inputs: train_inputs, targets: train_targets}
                         # train G
@@ -578,7 +578,7 @@ def train():
 
                 # 如果D网络的差异太大，需要多学习下G网络
                 if errD < -10:
-                   for i in range(64):
+                   for i in range(16):
                         train_inputs, train_targets = get_next_batch_for_srgan(4)
                         feed = {inputs: train_inputs, targets: train_targets}
 
@@ -593,7 +593,7 @@ def train():
                 # 如果图片相差不远，训练RES
                 if errM < 0.1:
                     # train res
-                    for i in range(10):
+                    for i in range(16):
                         train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
                         feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
                         start = time.time() 
