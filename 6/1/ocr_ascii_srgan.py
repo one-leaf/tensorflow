@@ -509,31 +509,48 @@ def train():
  
         while True:
             for batch in range(BATCHES):
-                for i in range(10):
-                    train_inputs, train_targets = get_next_batch_for_srgan(1)
-                    feed = {inputs: train_inputs, targets: train_targets}
-                    start = time.time()                                
-                    ## update G
-                    errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
-                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
-                    if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
-                        print("Error: cost is nan or inf")
-                        return 
+                train_inputs, train_targets = get_next_batch_for_srgan(1)
+                feed = {inputs: train_inputs, targets: train_targets}
 
-                    if errM > 0.1:
+                ## update G
+                start = time.time()                                
+                errG, errM, errV, errA, _, start_steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                    print("Error: cost is nan or inf")
+                    return 
+
+                if errM > 0.1:   
+                    for i in range(10):
+                        train_inputs, train_targets = get_next_batch_for_srgan(1)
+                        feed = {inputs: train_inputs, targets: train_targets}
+
                         # train G
                         start = time.time() 
                         errM, _ , steps= session.run([g_mse_loss, g_optim_init, global_step], feed)
                         print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
                         if np.isnan(errM) or np.isinf(errM) :
                             print("Error: cost is nan or inf")
-                            return  
-                        
+                            return
+
+                if errA > 0 and errM < 0.1:
+                   for i in range(10):
+                        train_inputs, train_targets = get_next_batch_for_srgan(1)
+                        feed = {inputs: train_inputs, targets: train_targets}
+
+                        ## update G
+                        start = time.time()                                
+                        errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                        print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                        if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                            print("Error: cost is nan or inf")
+                            return 
+
                 # train_inputs, train_targets = get_next_batch_for_srgan(4)
                 # feed = {inputs: train_inputs, targets: train_targets}
 
                 # 如果 G 网络没有训练出来，暂时不训练 D 网络
-                if  errA < 1:
+                if errA < 1:
                     # train GAN (SRGAN)
                     start = time.time()                
                     ## update D
@@ -557,7 +574,7 @@ def train():
                             return                       
                         if errR > 15 and acc > 0.8: print(train_info)
 
-                if steps > 0 and steps % REPORT_STEPS < 20:
+                if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
                     feed = {inputs: train_inputs, seq_len: train_seq_len}
