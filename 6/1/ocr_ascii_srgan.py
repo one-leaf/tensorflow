@@ -594,7 +594,7 @@ def train():
                 if errM < 0.1:
                     # train res
                     for i in range(16):
-                        train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
+                        train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)
                         feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
                         start = time.time() 
                         errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
@@ -605,11 +605,11 @@ def train():
                         if errR > 15 and acc > 0.8: print(train_info)
 
                 if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2)   
                     print(train_info)          
                     feed = {inputs: train_inputs, seq_len: train_seq_len}
                     b_predictions, decoded_list = session.run([net_g, res_decoded[0]], feed) 
-                    for i in range(4):                    
+                    for i in range(2):                    
                         _predictions = np.reshape(b_predictions[i],train_inputs[i].shape)   
                         _pred = np.transpose(_predictions)   
                         _img = np.vstack((np.transpose(train_inputs[i]), _pred)) 
