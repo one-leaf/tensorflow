@@ -503,16 +503,16 @@ def train():
         while True:
             for batch in range(BATCHES):
                 # train res
-                # for i in range(10):
-                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
-                #     feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
-                #     start = time.time() 
-                #     errM, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                #     print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errM, acc))
-                #     if np.isnan(errM) or np.isinf(errM) :
-                #         print("Error: cost is nan or inf")
-                #         return                       
-                #     if errM > 15 :  print(train_info)
+                for i in range(10):
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
+                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
+                    start = time.time() 
+                    errM, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                    print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errM, acc))
+                    if np.isnan(errM) or np.isinf(errM) :
+                        print("Error: cost is nan or inf")
+                        return                       
+                    if errM > 15 :  print(train_info)
 
                 for i in range(10):
                     train_inputs, train_targets = get_next_batch_for_srgan(2)
