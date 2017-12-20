@@ -129,7 +129,8 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer = INCEPTIONV2(x_image)
-
+    
+    layer = tf.contrib.layers.flatten(layer)
     prediction = tf.layers.dense(layer, 10)
 
     cost = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=prediction)
