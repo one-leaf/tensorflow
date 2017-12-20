@@ -129,7 +129,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer = INCEPTIONV2(x_image)
-    
+
     layer = tf.contrib.layers.flatten(layer)
     prediction = tf.layers.dense(layer, 10)
 
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     step = 0
     while mnist.train.epochs_completed < 8:
-        batch_x, batch_y= getBatch(100)
+        batch_x, batch_y= getBatch(32)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, drop_prob: 0.25})
         if step % 10 == 0 :
             acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y, drop_prob: 0})
