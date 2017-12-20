@@ -160,7 +160,9 @@ if __name__ == '__main__':
         if step % 10 == 0 :
             acc = 0
             for i in range(100):
-                acc += sess.run(accuracy, feed_dict={x: valid_x[i*10:i*50+50], y: valid_y[i*10:i*50+50], drop_prob: 0})
+                _x = valid_x[i*50:i*50+50]
+                _y = valid_y[i*50:i*50+50]
+                acc += sess.run(accuracy, feed_dict={x: _x , y: _y , drop_prob: 0})
             acc = acc / 100.
             print(step, loss, acc)
             plt.clf()
