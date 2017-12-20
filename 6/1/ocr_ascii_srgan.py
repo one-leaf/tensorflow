@@ -603,7 +603,7 @@ def train():
                         if np.isnan(errR) or np.isinf(errR) :
                             print("Error: cost is nan or inf")
                             return                       
-                        if errR > 15 and acc > 0.8: print(train_info)
+                        # if errR > 15 and acc > 0.8: print(train_info)
 
                 if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
