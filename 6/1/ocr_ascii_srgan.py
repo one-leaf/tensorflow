@@ -437,7 +437,10 @@ def get_next_batch_for_res(batch_size=128):
         image = utils_pil.convert_to_gray(image)                   
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
-        image = (255. - image) / 255.
+        if random.random()>0.5:
+            image = image / 255.
+        else:
+            image = (255. - image) / 255.
         images.append(image)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
