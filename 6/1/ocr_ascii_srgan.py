@@ -630,7 +630,7 @@ def train():
  
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_clears, train_targets = get_next_batch_for_srgan(1)
+                train_inputs, train_clears, train_targets = get_next_batch_for_srgan(16)
                 feed = {inputs: train_inputs, clears: train_clears, targets: train_targets}
 
                 # train DnCNN
@@ -641,7 +641,10 @@ def train():
                 if np.isnan(errDnCNN) or np.isinf(errDnCNN):
                     print("Error: cost is nan or inf")
                     return 
-                start_steps = steps                  
+                start_steps = steps  
+
+                train_inputs, train_clears, train_targets = get_next_batch_for_srgan(1)
+                feed = {inputs: train_inputs, clears: train_clears, targets: train_targets}
 
                 # train GAN (SRGAN)
                 start = time.time()                
