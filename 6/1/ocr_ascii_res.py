@@ -609,10 +609,10 @@ def train():
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model R...")
             r_saver.restore(session, ckpt.model_checkpoint_path)   
-        ckpt = tf.train.get_checkpoint_state(model_D_dir)
-        if ckpt and ckpt.model_checkpoint_path:
-            print("Restore Model D...")
-            d_saver.restore(session, ckpt.model_checkpoint_path)    
+        # ckpt = tf.train.get_checkpoint_state(model_D_dir)
+        # if ckpt and ckpt.model_checkpoint_path:
+        #     print("Restore Model D...")
+        #     d_saver.restore(session, ckpt.model_checkpoint_path)    
  
         while True:
             for batch in range(BATCHES):
@@ -741,10 +741,10 @@ def train():
             if ckpt and ckpt.model_checkpoint_path:           
                 print("Restore Model G...")
                 g_saver.restore(session, ckpt.model_checkpoint_path)   
-            ckpt = tf.train.get_checkpoint_state(model_D_dir)
-            if ckpt and ckpt.model_checkpoint_path:
-                print("Restore Model D...")
-                d_saver.restore(session, ckpt.model_checkpoint_path)  
+            # ckpt = tf.train.get_checkpoint_state(model_D_dir)
+            # if ckpt and ckpt.model_checkpoint_path:
+            #     print("Restore Model D...")
+            #     d_saver.restore(session, ckpt.model_checkpoint_path)  
 
 if __name__ == '__main__':
     train()
