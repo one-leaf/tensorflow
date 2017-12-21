@@ -377,7 +377,7 @@ def neural_networks():
 
     d_loss1 = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
     # d_loss2 = -1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
-    d_loss2 = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
+    d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = d_loss1 + d_loss2
 
     g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
