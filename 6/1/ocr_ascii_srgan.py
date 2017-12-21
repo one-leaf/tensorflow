@@ -307,23 +307,16 @@ def INCEPTIONV3(inputs):
 def addResLayer(inputs):
     layer = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer,  64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer = slim.conv2d(layer,  64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    outputs = inputs + layer
+    layer = slim.conv2d(layer,  256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+    outputs = tf.nn.relu(inputs + layer)
     return outputs   
 
 # 降噪网络
 def DnCNN(inputs):
     with tf.variable_scope("DnCNN") as vs:  
         layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
-        temp = layer
-        # B residual blocks
         for i in range(16):
             layer = addResLayer(layer)
-        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = None)
-        layer = layer + temp        
-        # B residual blacks end
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
