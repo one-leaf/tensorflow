@@ -340,7 +340,7 @@ def SRGAN_d(inputs, reuse=False):
         layer = slim.fully_connected(layer, 1024, activation_fn=tf.nn.relu)
         # logits = slim.fully_connected(layer, 1, activation_fn=tf.identity)
         logits = slim.fully_connected(layer, 1)
-        logits = tf.nn.sigmoid(logits)
+        # logits = tf.nn.sigmoid(logits)
         return logits
 
 def RES(inputs, reuse = False):
