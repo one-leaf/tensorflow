@@ -303,6 +303,13 @@ def INCEPTIONV3(inputs):
         net    = tf.concat([layer0, layer1, layer2, layer3], 3)
     return net
 
+# 增加残差网络
+def addResLayer(inputs):
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    outputs = inputs + layer
+    return outputs   
+
 # 降噪网络
 def DnCNN(inputs):
     with tf.variable_scope("DnCNN") as vs:  
