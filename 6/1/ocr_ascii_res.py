@@ -678,7 +678,7 @@ def train():
 
                 # 训练RES
                 for i in range(16):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(4)
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(16)
                     feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
                     start = time.time() 
                     errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
