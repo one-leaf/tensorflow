@@ -676,57 +676,57 @@ def train():
                             print("Error: cost is nan or inf")
                             return 
 
-                # 训练RES
-                for i in range(16):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(4)
-                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
-                    start = time.time() 
-                    errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                    print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
-                    if np.isnan(errR) or np.isinf(errR) :
-                        print("Error: cost is nan or inf")
-                        return                       
+                # # 训练RES
+                # for i in range(16):
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(4)
+                #     feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
+                #     start = time.time() 
+                #     errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                #     print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
+                #     if np.isnan(errR) or np.isinf(errR) :
+                #         print("Error: cost is nan or inf")
+                #         return                       
 
                 # 报告
-                if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
-                    print(train_info)          
-                    p_dcCnn = session.run(dncnn, {inputs: train_inputs})
-                    p_net_g = session.run(net_g, {clears: p_dcCnn}) 
-                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
+                # if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
+                #     print(train_info)          
+                #     p_dcCnn = session.run(dncnn, {inputs: train_inputs})
+                #     p_net_g = session.run(net_g, {clears: p_dcCnn}) 
+                #     decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
-                    for i in range(4): 
-                        _p_dcCnn = np.transpose(p_dcCnn)                    
-                        _p_net_g = np.transpose(p_net_g)   
-                        _img = np.vstack((np.transpose(train_inputs[i]), _p_dcCnn, _p_net_g)) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
+                #     for i in range(4): 
+                #         _p_dcCnn = np.transpose(p_dcCnn)                    
+                #         _p_net_g = np.transpose(p_net_g)   
+                #         _img = np.vstack((np.transpose(train_inputs[i]), _p_dcCnn, _p_net_g)) 
+                #         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
-                    original_list = utils.decode_sparse_tensor(train_labels)
-                    detected_list = utils.decode_sparse_tensor(decoded_list)
-                    if len(original_list) != len(detected_list):
-                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-                            " test and detect length desn't match")
-                    print("T/F: original(length) <-------> detectcted(length)")
-                    acc = 0.
-                    for idx in range(min(len(original_list),len(detected_list))):
-                        number = original_list[idx]
-                        detect_number = detected_list[idx]  
-                        hit = (number == detect_number)          
-                        print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
-                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
-                        # 计算莱文斯坦比
-                        import Levenshtein
-                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-                    print("Test Accuracy:", acc / len(original_list))
+                #     original_list = utils.decode_sparse_tensor(train_labels)
+                #     detected_list = utils.decode_sparse_tensor(decoded_list)
+                #     if len(original_list) != len(detected_list):
+                #         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+                #             " test and detect length desn't match")
+                #     print("T/F: original(length) <-------> detectcted(length)")
+                #     acc = 0.
+                #     for idx in range(min(len(original_list),len(detected_list))):
+                #         number = original_list[idx]
+                #         detect_number = detected_list[idx]  
+                #         hit = (number == detect_number)          
+                #         print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
+                #         print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+                #         # 计算莱文斯坦比
+                #         import Levenshtein
+                #         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                #     print("Test Accuracy:", acc / len(original_list))
 
             print("Save Model C ...")
             r_saver.save(session, os.path.join(model_C_dir, "C.ckpt"), global_step=steps)
-            print("Save Model R ...")
-            r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
-            # ckpt = tf.train.get_checkpoint_state(model_R_dir)
-            # if ckpt and ckpt.model_checkpoint_path:
-            #     print("Restore Model R...")
-            #     r_saver.restore(session, ckpt.model_checkpoint_path)
+            # print("Save Model R ...")
+            # r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
+            ckpt = tf.train.get_checkpoint_state(model_R_dir)
+            if ckpt and ckpt.model_checkpoint_path:
+                print("Restore Model R...")
+                r_saver.restore(session, ckpt.model_checkpoint_path)
             print("Save Model D ...")
             d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
             print("Save Model G ...")
