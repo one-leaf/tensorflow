@@ -481,6 +481,7 @@ def get_next_batch_for_srgan(batch_size=128):
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)        
         image = np.asarray(image)
         image = utils.resize(image, height=image_height)
+        image = image * random.random()
         if random.random()>0.5:
             image = image / 255.
         else:
