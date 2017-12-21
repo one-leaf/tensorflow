@@ -503,7 +503,7 @@ def get_next_batch_for_res_train(batch_size=128):
         image = utils_pil.resize_by_height(image, image_height)
         image = utils_pil.convert_to_gray(image)                   
         image = np.asarray(image)     
-        image = utils.resize(image, height=image_height)
+        # image = utils.resize(image, height=image_height)
         image = utils.img2bwinv(image)
         images.append(image / 255.)
         if image.shape[1] > max_width_image: 
