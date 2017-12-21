@@ -558,7 +558,7 @@ def get_next_batch_for_srgan(batch_size=128):
         inputs_images.append(image)
 
         targets_image = np.asarray(targets_image)   
-        targets_image = utils.resize(targets_image, height=image_height)
+        # targets_image = utils.resize(targets_image, height=image_height)
         targets_image = utils.img2bwinv(targets_image)
         targets_images.append(targets_image / 255.)
 
