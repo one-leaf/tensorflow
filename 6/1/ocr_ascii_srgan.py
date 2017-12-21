@@ -589,7 +589,7 @@ def train():
                 for i in range(16):
                     train_inputs, train_targets = get_next_batch_for_srgan(1)
                     feed = {inputs: train_inputs, targets: train_targets}
-                    if errD < errA:
+                    if errD1 < errA:
                         ## update G
                         start = time.time()                                
                         errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
