@@ -570,7 +570,7 @@ def get_next_batch_for_srgan(batch_size=128):
 
 def train():
     inputs, clears, targets, labels, global_step, \
-        dncnn, dncnn_loss, dncnn_optim, \ 
+        dncnn, dncnn_loss, dncnn_optim, \
         g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
         g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, \
         res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
