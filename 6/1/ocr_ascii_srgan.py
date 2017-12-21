@@ -692,8 +692,8 @@ def train():
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
                     p_dcCnn = session.run(dncnn, {inputs: train_inputs})
-                    p_net_g = session.run(net_g, {clear: p_dcCnn}) 
-                    decoded_list = session.run(res_decoded[0], {targets: p_net_g, seq_len: train_seq_len}) 
+                    p_net_g = session.run(net_g, {clears: p_dcCnn}) 
+                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
                     for i in range(4): 
                         _p_dcCnn = np.transpose(p_dcCnn)                    
