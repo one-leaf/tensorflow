@@ -611,35 +611,34 @@ def train():
                         return                       
                         # if errR > 15 and acc > 0.8: print(train_info)
 
-                # if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
-                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
-                #     print(train_info)          
-                #     feed = {inputs: train_inputs, seq_len: train_seq_len}
-                #     b_predictions, decoded_list = session.run([net_g, res_decoded[0]], feed) 
-                #     for i in range(4):                    
-                #         _predictions = np.reshape(b_predictions[i],train_inputs[i].shape)   
-                #         _pred = np.transpose(_predictions)   
-                #         _img = np.vstack((np.transpose(train_inputs[i]), _pred)) 
-                #         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
+                if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
+                    print(train_info)          
+                    feed = {inputs: train_inputs, seq_len: train_seq_len}
+                    b_predictions, decoded_list = session.run([net_g, res_decoded[0]], feed) 
+                    for i in range(4):                    
+                        _predictions = np.reshape(b_predictions[i],train_inputs[i].shape)   
+                        _pred = np.transpose(_predictions)   
+                        _img = np.vstack((np.transpose(train_inputs[i]), _pred)) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
         
-                #     original_list = utils.decode_sparse_tensor(train_labels)
-                #     detected_list = utils.decode_sparse_tensor(decoded_list)
-                #     if len(original_list) != len(detected_list):
-                #         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-                #             " test and detect length desn't match")
-                #     print("T/F: original(length) <-------> detectcted(length)")
-                #     acc = 0.
-                #     for idx in range(min(len(original_list),len(detected_list))):
-                #         number = original_list[idx]
-                #         detect_number = detected_list[idx]  
-                #         hit = (number == detect_number)          
-                #         print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
-                #         print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
-                #         # 计算莱文斯坦比
-                #         import Levenshtein
-                #         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-                #     print("Test Accuracy:", acc / len(original_list))
-
+                    original_list = utils.decode_sparse_tensor(train_labels)
+                    detected_list = utils.decode_sparse_tensor(decoded_list)
+                    if len(original_list) != len(detected_list):
+                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+                            " test and detect length desn't match")
+                    print("T/F: original(length) <-------> detectcted(length)")
+                    acc = 0.
+                    for idx in range(min(len(original_list),len(detected_list))):
+                        number = original_list[idx]
+                        detect_number = detected_list[idx]  
+                        hit = (number == detect_number)          
+                        print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
+                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+                        # 计算莱文斯坦比
+                        import Levenshtein
+                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                    print("Test Accuracy:", acc / len(original_list))
 
             print("Save Model R ...")
             r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
