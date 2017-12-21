@@ -611,7 +611,7 @@ def train():
                         return                       
                         # if errR > 15 and acc > 0.8: print(train_info)
 
-                if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
+                if steps > 0 and steps % REPORT_STEPS < 16:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
                     feed = {inputs: train_inputs, seq_len: train_seq_len}
