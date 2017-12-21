@@ -598,18 +598,18 @@ def train():
                             return 
 
                 # 如果图片相差不远，训练RES
-                if errM < 0.1:
-                    # train res
-                    for i in range(16):
-                        train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)
-                        feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
-                        start = time.time() 
-                        errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                        print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
-                        if np.isnan(errR) or np.isinf(errR) :
-                            print("Error: cost is nan or inf")
-                            return                       
-                        # if errR > 15 and acc > 0.8: print(train_info)
+                # if errM < 0.1:
+                #     # train res
+                #     for i in range(16):
+                #         train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)
+                #         feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
+                #         start = time.time() 
+                #         errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                #         print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
+                #         if np.isnan(errR) or np.isinf(errR) :
+                #             print("Error: cost is nan or inf")
+                #             return                       
+                #         # if errR > 15 and acc > 0.8: print(train_info)
 
                 if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
@@ -641,8 +641,12 @@ def train():
                     print("Test Accuracy:", acc / len(original_list))
 
 
-            print("Save Model R ...")
-            r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
+            # print("Save Model R ...")
+            # r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
+            ckpt = tf.train.get_checkpoint_state(model_R_dir)
+            if ckpt and ckpt.model_checkpoint_path:
+                print("Restore Model R...")
+                r_saver.restore(session, ckpt.model_checkpoint_path)
             print("Save Model D ...")
             d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
             print("Save Model G ...")
