@@ -305,7 +305,7 @@ def INCEPTIONV3(inputs):
 
 # 降噪网络 https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/model.py
 def DnCNN(inputs):
-    with tf.variable_scope("DnCNN", reuse=reuse) as vs:  
+    with tf.variable_scope("DnCNN") as vs:  
         layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=None, activation_fn=tf.nn.relu)
         for i in range(16):
             layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = tf.nn.relu)
