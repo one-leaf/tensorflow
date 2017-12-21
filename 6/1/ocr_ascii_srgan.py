@@ -398,7 +398,7 @@ def neural_networks():
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
     return  inputs, clears, targets, labels, global_step, \
-            dncnn, dncnn_loss, dncnn_optim, \ 
+            dncnn, dncnn_loss, dncnn_optim, \
             g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
             g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, \
             res_loss, res_optim, seq_len, res_acc, res_decoded
