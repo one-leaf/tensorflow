@@ -386,7 +386,7 @@ def neural_networks():
 
     # OCR RESNET 识别 网络
     # net_res, _ = RES(layer_targets, reuse = True)
-    net_res, _ = RES(layer_targets, reuse = True)
+    net_res, _ = RES(layer, reuse = True)
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
