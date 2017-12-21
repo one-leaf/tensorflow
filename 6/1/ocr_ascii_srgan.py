@@ -387,7 +387,7 @@ def neural_networks():
     # OCR RESNET 识别 网络
     # net_res, _ = RES(layer_targets, reuse = True)
     net_res, _ = RES(layer_targets, reuse = True)
-    seq_len = tf.placeholder(tf.int32, [None])
+    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
     net_res = tf.transpose(net_res, (1, 0, 2))
@@ -581,18 +581,26 @@ def train():
     model_R_dir = os.path.join(model_dir, "R")
     model_D_dir = os.path.join(model_dir, "D")
     model_G_dir = os.path.join(model_dir, "G")
+    model_C_dir = os.path.join(model_dir, "C")
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_D_dir): os.mkdir(model_D_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
+    if not os.path.exists(model_C_dir): os.mkdir(model_C_dir)  
  
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
-        
+
+        c_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='DnCNN'), max_to_keep=5)
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), max_to_keep=5)
         d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'), max_to_keep=5)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), max_to_keep=5)
 
+        ckpt = tf.train.get_checkpoint_state(model_C_dir)
+        if ckpt and ckpt.model_checkpoint_path:           
+            print("Restore Model C...")
+            c_saver.restore(session, ckpt.model_checkpoint_path)   
+        ckpt = tf.train.get_checkpoint_state(model_R_dir)
         ckpt = tf.train.get_checkpoint_state(model_G_dir)
         if ckpt and ckpt.model_checkpoint_path:           
             print("Restore Model G...")
@@ -671,7 +679,7 @@ def train():
                 # 训练RES
                 for i in range(16):
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(4)
-                    feed = {inputs: [], targets: train_inputs, labels: train_labels, seq_len: train_seq_len}
+                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
                     start = time.time() 
                     errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                     print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
@@ -711,6 +719,8 @@ def train():
                         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
                     print("Test Accuracy:", acc / len(original_list))
 
+            print("Save Model C ...")
+            r_saver.save(session, os.path.join(model_C_dir, "C.ckpt"), global_step=steps)
             print("Save Model R ...")
             r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
             # ckpt = tf.train.get_checkpoint_state(model_R_dir)
