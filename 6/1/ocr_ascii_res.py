@@ -305,8 +305,9 @@ def INCEPTIONV3(inputs):
 
 # 增加残差网络
 def addResLayer(inputs):
-    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(layer,  64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(layer,  64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     outputs = inputs + layer
     return outputs   
 
