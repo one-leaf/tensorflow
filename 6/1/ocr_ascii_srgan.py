@@ -572,23 +572,19 @@ def train():
                     print("Error: cost is nan or inf")
                     return 
 
-                # 如果平均差太高，单独学习降低平均差
-                if (errM > 0.1 and errD/errD1 > 0.1) or errM > 1:   
-                    for i in range(16):
-                        train_inputs, train_targets = get_next_batch_for_srgan(1)
-                        feed = {inputs: train_inputs, targets: train_targets}
-                        # train G
-                        start = time.time() 
-                        errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
-                        print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                        if np.isnan(errM) or np.isinf(errM) :
-                            print("Error: cost is nan or inf")
-                            return
-
                 # 如果D网络的差异太大，需要多学习下G网络
                 for i in range(16):
                     train_inputs, train_targets = get_next_batch_for_srgan(1)
                     feed = {inputs: train_inputs, targets: train_targets}
+
+                    # train G
+                    start = time.time() 
+                    errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
+                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                    if np.isnan(errM) or np.isinf(errM) :
+                        print("Error: cost is nan or inf")
+                        return
+
                     if errD1 < errA:
                         ## update G
                         start = time.time()                                
