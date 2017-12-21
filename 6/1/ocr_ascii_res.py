@@ -359,8 +359,8 @@ def neural_networks():
     logits_real = SRGAN_d(layer_targets, reuse = False)
     logits_fake = SRGAN_d(net_g, reuse = True)
 
-    net_res, _ = RES(layer_targets, reuse = False)
-    # net_res, _ = RES(net_g, reuse = False)
+    # net_res, _ = RES(layer_targets, reuse = False)
+    net_res, _ = RES(net_g, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None])
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
     # 需要变换到 time_major == True [max_time x batch_size x num_classes]
@@ -531,13 +531,13 @@ def train():
         session.run(init)
         
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), max_to_keep=5)
-        d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'), max_to_keep=5)
+        # d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'), max_to_keep=5)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), max_to_keep=5)
 
-        # ckpt = tf.train.get_checkpoint_state(model_G_dir)
-        # if ckpt and ckpt.model_checkpoint_path:           
-        #     print("Restore Model G...")
-        #     g_saver.restore(session, ckpt.model_checkpoint_path)   
+        ckpt = tf.train.get_checkpoint_state(model_G_dir)
+        if ckpt and ckpt.model_checkpoint_path:           
+            print("Restore Model G...")
+            g_saver.restore(session, ckpt.model_checkpoint_path)   
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model R...")
@@ -647,6 +647,10 @@ def train():
             # d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
             # print("Save Model G ...")
             # g_saver.save(session, os.path.join(model_G_dir, "G.ckpt"), global_step=steps)
-                
+            ckpt = tf.train.get_checkpoint_state(model_G_dir)
+            if ckpt and ckpt.model_checkpoint_path:           
+                print("Restore Model G...")
+                g_saver.restore(session, ckpt.model_checkpoint_path) 
+
 if __name__ == '__main__':
     train()
