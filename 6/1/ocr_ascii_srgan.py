@@ -635,7 +635,7 @@ def train():
  
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_clears, train_targets = get_next_batch_for_srgan(16)
+                train_inputs, train_clears, train_targets = get_next_batch_for_srgan(8)
                 feed = {inputs: train_inputs, clears: train_clears, targets: train_targets}
 
                 # train DnCNN
