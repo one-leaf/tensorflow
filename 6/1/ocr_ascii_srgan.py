@@ -438,7 +438,10 @@ def get_next_batch_for_res(batch_size=128):
         image = utils_pil.convert_to_gray(image)                   
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
-        image = (255. - image) / 255.
+        if random.random()>0.5:
+            image = (255. - image) / 255.
+        else:
+            image = image / 255.
         images.append(image)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
@@ -471,6 +474,7 @@ def get_next_batch_for_srgan(batch_size=128):
         image = utils_pil.resize_by_height(image, image_height)
         to_image = image.copy()
 
+        need_inv_color = random.random()>0.5
         _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
         image = utils_font.add_noise(image)   
         image = utils_pil.convert_to_gray(image)            
@@ -479,13 +483,19 @@ def get_next_batch_for_srgan(batch_size=128):
         image = np.asarray(image)
         image = utils.resize(image, height=image_height)
         image = image * random.uniform(0.3, 1)
-        image = (255. - image) / 255.
+        if need_inv_color:
+            image = (255. - image) / 255.
+        else:
+            image = image / 255.
         images.append(image)
 
         to_image = utils_pil.convert_to_gray(to_image)
         to_image = np.asarray(to_image)   
         to_image = utils.resize(to_image, height=image_height)
-        to_image = utils.img2bwinv(to_image)
+        if need_inv_color:
+            to_image = utils.img2bwinv(to_image)
+        else:
+            to_image = utils.img2bw(to_image)
         to_image = to_image / 255.        
         to_images.append(to_image)
 

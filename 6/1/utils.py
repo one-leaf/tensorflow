@@ -173,6 +173,10 @@ def img2bwinv(img_gray):
     # show(img_bw)
     return img_bw
 
+def img2bw(img_gray):
+    thresh, img_bw = cv2.threshold(img_gray, 190, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return img_bw
+
 # 图片转为向量, img 参数是 np.array 类型
 def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     h=img.shape[0]
