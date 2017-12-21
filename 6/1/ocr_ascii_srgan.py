@@ -360,11 +360,24 @@ def neural_networks():
     dncnn_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='DnCNN')    
     dncnn_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(dncnn_loss, global_step=global_step, var_list=dncnn_vars)
 
+    # OCR RESNET 识别 网络
+    # net_res, _ = RES(layer_targets, reuse = True)
+    net_res, _ = RES(layer, reuse = False)
+    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
+    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
+    # 需要变换到 time_major == True [max_time x batch_size x num_classes]
+    net_res = tf.transpose(net_res, (1, 0, 2))
+    res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
+    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
+    res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
+    res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
+
     # 对抗网络
     net_g = SRGAN_g(layer_clears, reuse = False)
     logits_real = SRGAN_d(layer_targets, reuse = False)
     logits_fake = SRGAN_d(net_g, reuse = True)
-    _, res_target_emb   = RES(layer_targets, reuse = False)
+    _, res_target_emb   = RES(layer_targets, reuse = True)
     _, res_predict_emb  = RES(net_g, reuse = True)
 
     d_loss1 = 1e-6 * tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
@@ -383,19 +396,6 @@ def neural_networks():
     g_optim_mse = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_mse_loss, global_step=global_step, var_list=g_vars)
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
-
-    # OCR RESNET 识别 网络
-    # net_res, _ = RES(layer_targets, reuse = True)
-    net_res, _ = RES(layer, reuse = True)
-    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
-    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
-    # 需要变换到 time_major == True [max_time x batch_size x num_classes]
-    net_res = tf.transpose(net_res, (1, 0, 2))
-    res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
-    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
-    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
-    res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
-    res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
     return  inputs, clears, targets, labels, global_step, \
             dncnn, dncnn_loss, dncnn_optim, \
