@@ -669,7 +669,7 @@ def train():
                     return 
 
                 # 如果D网络的差异太大，需要多学习下G网络
-                for i in range(8):
+                for i in range(4):
                     train_inputs, train_clears, train_targets = get_next_batch_for_srgan(1)
                     feed = {inputs: train_inputs, clears: train_clears, targets: train_targets}
 
