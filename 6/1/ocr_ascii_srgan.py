@@ -696,8 +696,8 @@ def train():
                 #     decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
                 #     for i in range(4): 
-                #         _p_dcCnn = np.transpose(p_dcCnn)                    
-                #         _p_net_g = np.transpose(p_net_g)   
+                #         _p_dcCnn = np.transpose(p_dcCnn[i])                    
+                #         _p_net_g = np.transpose(p_net_g[i])     
                 #         _img = np.vstack((np.transpose(train_inputs[i]), _p_dcCnn, _p_net_g)) 
                 #         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
