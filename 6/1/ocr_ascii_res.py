@@ -437,7 +437,7 @@ def get_next_batch_for_res(batch_size=128):
         image = utils_pil.convert_to_gray(image)                   
         image = np.asarray(image)     
         image = utils.resize(image, height=image_height)
-        image = image * random.random()
+        image = image * random.uniform(0.3, 1)
         if random.random()>0.5:
             image = image / 255.
         else:
