@@ -303,13 +303,20 @@ def INCEPTIONV3(inputs):
         net    = tf.concat([layer0, layer1, layer2, layer3], 3)
     return net
 
-# 降噪网络 https://github.com/crisb-DUT/DnCNN-tensorflow/blob/master/model.py
+# 降噪网络
 def DnCNN(inputs):
     with tf.variable_scope("DnCNN") as vs:  
-        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=None, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(inputs, 64, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+        temp = layer
+        # B residual blocks
         for i in range(16):
-            layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = tf.nn.relu)
-        layer = slim.conv2d(layer, 1, [3,3], normalizer_fn=None, activation_fn=None)
+            layer = addResLayer(layer)
+        layer = slim.conv2d(layer, 64, [3,3], normalizer_fn = slim.batch_norm, activation_fn = None)
+        layer = layer + temp        
+        # B residual blacks end
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 256, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
 # 原参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py 失败，后期和D对抗时无法提升，后改为 resnet50
