@@ -365,7 +365,7 @@ def neural_networks():
 
     # 降噪网络
     dncnn = DnCNN(layer)
-    dncnn_loss  = tf.losses.mean_squared_error(dncnn, layer_clears)
+    dncnn_loss  = tf.losses.mean_squared_error(layer_clears, dncnn)
     dncnn_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='DnCNN')    
     dncnn_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(dncnn_loss, global_step=global_step, var_list=dncnn_vars)
 
@@ -399,7 +399,7 @@ def neural_networks():
     g_gan_loss = 1e-3 * tf.losses.log_loss(logits_fake, tf.ones_like(logits_real))
 
     # g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
-    g_mse_loss = tf.losses.mean_squared_error(net_g, layer_targets)
+    g_mse_loss = tf.losses.mean_squared_error(layer_targets, net_g)
     g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_res_loss
     
