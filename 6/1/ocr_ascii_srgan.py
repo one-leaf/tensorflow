@@ -358,7 +358,7 @@ def neural_networks():
     dncnn = DnCNN(layer)
     dncnn_loss  = tf.losses.mean_squared_error(dncnn, layer_clears)
     dncnn_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='DnCNN')    
-    dncnn_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=dncnn_vars)
+    dncnn_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(dncnn_loss, global_step=global_step, var_list=dncnn_vars)
 
     # 对抗网络
     net_g = SRGAN_g(layer_clears, reuse = False)
