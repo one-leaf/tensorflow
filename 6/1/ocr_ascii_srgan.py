@@ -586,16 +586,23 @@ def train():
                             return
 
                 # 如果D网络的差异太大，需要多学习下G网络
-                if errD < -10:
-                   for i in range(16):
-                        train_inputs, train_targets = get_next_batch_for_srgan(1)
-                        feed = {inputs: train_inputs, targets: train_targets}
-
+                for i in range(16):
+                    train_inputs, train_targets = get_next_batch_for_srgan(1)
+                    feed = {inputs: train_inputs, targets: train_targets}
+                    if errD < errG:
                         ## update G
                         start = time.time()                                
                         errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
                         print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
                         if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                            print("Error: cost is nan or inf")
+                            return 
+                    else:
+                        ## update D
+                        start = time.time()                
+                        errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
+                        print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                        if np.isnan(errD) or np.isinf(errD):
                             print("Error: cost is nan or inf")
                             return 
 
