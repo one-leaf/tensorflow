@@ -540,7 +540,7 @@ def get_next_batch_for_srgan(batch_size=128):
         clears_image = image.copy()
         clears_image = np.asarray(clears_image)
         clears_image = utils.resize(clears_image, height=image_height)
-        clears_images.append(clears_image /255.)
+        clears_images.append((255. - clears_image) / 255.)
 
         image = utils_font.add_noise(image)   
         image = np.asarray(image)
