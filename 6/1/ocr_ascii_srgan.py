@@ -720,7 +720,7 @@ def train():
                 #     print("Test Accuracy:", acc / len(original_list))
 
             print("Save Model C ...")
-            r_saver.save(session, os.path.join(model_C_dir, "C.ckpt"), global_step=steps)
+            c_saver.save(session, os.path.join(model_C_dir, "C.ckpt"), global_step=steps)
             # print("Save Model R ...")
             # r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
             ckpt = tf.train.get_checkpoint_state(model_R_dir)
