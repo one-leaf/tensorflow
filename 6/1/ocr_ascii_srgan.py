@@ -296,7 +296,7 @@ def get_next_batch_for_srgan(batch_size=128):
         if targets_image.shape[1] > max_width_image: 
             max_width_image = targets_image.shape[1]      
 
-    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    # max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(batch_size):
         image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
