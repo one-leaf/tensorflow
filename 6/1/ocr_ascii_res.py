@@ -66,7 +66,7 @@ def SRGAN_d(inputs, reuse=False):
         layer = utils_nn.resNet34(layer, True)
         shape = tf.shape(layer)
         batch_size, nn_size = shape[0], shape[3]   
-        layer = tf.transpose(net_res, (0, 3, 1, 2))
+        layer = tf.transpose(layer, (0, 3, 1, 2))
         layer = tf.reshape(layer, [batch_size, nn_size, 1, -1])
         layer = slim.conv2d(inputs, 2048, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)
         layer = slim.flatten(layer)
