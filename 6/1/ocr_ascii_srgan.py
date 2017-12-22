@@ -66,7 +66,7 @@ def SRGAN_d(inputs, reuse=False):
         layer = utils_nn.resNet34(layer, True)
         shape = tf.shape(inputs)
         batch_size = shape[0]
-        layer = tf.reshape(layer, [batch_size, -1, 4*512])
+        layer = tf.reshape(layer, [batch_size, -1, 4 * 512])
         layer = slim.fully_connected(layer, 1000)
         return layer
 
