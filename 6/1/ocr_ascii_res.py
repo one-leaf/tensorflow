@@ -421,7 +421,7 @@ def train():
 
                 # 训练RES
                 for i in range(16):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(4)
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(8)
                     start = time.time() 
                     # p_dcCnn = session.run(dncnn, {inputs: train_inputs})
                     # p_dcCnn = np.squeeze(p_dcCnn)
