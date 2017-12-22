@@ -63,7 +63,7 @@ def SRGAN_g(inputs, reuse=False):
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer, _ = utils_nn.resNet34(layer, True)
+        layer = utils_nn.resNet34(layer, True)
         shape = tf.shape(layer)
         batch_size, image_width, image_height, cnn_size = shape[0], shape[1], shape[2]  
         layer = slim.avg_pool2d(layer, [image_width, image_height])
