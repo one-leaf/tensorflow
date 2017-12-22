@@ -97,7 +97,7 @@ def neural_networks():
 
     # 降噪网络
     dncnn = DnCNN(layer)
-    dncnn_loss  = tf.losses.mean_squared_error(dncnn, layer_clears)
+    dncnn_loss  = tf.losses.mean_squared_error(layer_clears, dncnn)
     dncnn_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='DnCNN')    
     dncnn_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(dncnn_loss, global_step=global_step, var_list=dncnn_vars)
 
@@ -106,7 +106,7 @@ def neural_networks():
     net_res, _ = RES(layer, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
-    # 需要变换到 time_major == True [max_time x batch_size x num_classes]
+    # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
@@ -121,13 +121,16 @@ def neural_networks():
     _, res_target_emb   = RES(layer_targets, reuse = True)
     _, res_predict_emb  = RES(net_g, reuse = True)
 
-    d_loss1 = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
-    # d_loss2 = -1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
-    d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
+    d_loss1 =  tf.losses.log_loss(tf.ones_like(logits_real), logits_real)
+    d_loss2 =  tf.losses.log_loss(tf.zeros_like(logits_real), logits_fake,)
+    # d_loss1 = tf.losses.sigmoid_cross_entropy(logits_real, tf.ones_like(logits_real))
+    # d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
+    # d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = d_loss1 + d_loss2
 
-    g_gan_loss = 1e-3 * tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
-    g_mse_loss = tf.losses.mean_squared_error(net_g, layer_targets)
+    g_gan_loss =  tf.losses.log_loss(tf.ones_like(logits_real), logits_fake)
+    # g_gan_loss = tf.losses.sigmoid_cross_entropy(logits_fake, tf.ones_like(logits_fake))
+    g_mse_loss = tf.losses.mean_squared_error(layer_targets, net_g)
     g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_res_loss
     
