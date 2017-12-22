@@ -65,10 +65,12 @@ def SRGAN_d(inputs, reuse=False):
         layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = utils_nn.resNet34(layer, True)
         shape = tf.shape(layer)
-        batch_size = shape[0]   
-        layer = tf.reshape(layer, [batch_size, 1, 1, -1])
-        layer = slim.conv2d(inputs, 1, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        batch_size, nn_size = shape[0], shape[3]   
+        layer = tf.transpose(net_res, (0, 3, 1, 2))
+        layer = tf.reshape(layer, [batch_size, nn_size, 1, -1])
+        layer = slim.conv2d(inputs, 2048, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)
         layer = slim.flatten(layer)
+        layer = slim.fully_connected(layer, 1000)
         return layer
 
 def RES(inputs, reuse = False):
@@ -76,8 +78,8 @@ def RES(inputs, reuse = False):
         layer, conv = utils_nn.resNet50(inputs)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
-        layer = slim.conv2d(layer, 1,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)               
-        layer = tf.reshape(layer, [batch_size, -1, 1])
+        layer = slim.conv2d(layer, 64,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)               
+        layer = tf.reshape(layer, [batch_size, -1, 64])
         return layer, conv
 
 def neural_networks():
