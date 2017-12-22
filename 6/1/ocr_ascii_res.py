@@ -71,7 +71,7 @@ def SRGAN_d(inputs, reuse=False):
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer, conv = utils_nn.resNet50(inputs)
+        layer, conv = utils_nn.resNet50(inputs, False)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
         layer = slim.conv2d(layer, CLASSES_NUMBER,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
