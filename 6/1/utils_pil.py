@@ -96,7 +96,7 @@ def convert_to_gray(img):
 
 # 灰度图片转黑白，这里都是干净图片，所以不能 cv2.THRESH_OTSU 动态转，需要是固定值转
 def convert_to_bw(img_gray_array):
-    thresh, img_bw = cv2.threshold(img, 50, 255, cv2.THRESH_BINARY)
+    thresh, img_bw = cv2.threshold(img_gray_array, 50, 255, cv2.THRESH_BINARY)
     return img_bw
 
 def main():
