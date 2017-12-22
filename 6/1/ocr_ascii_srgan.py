@@ -73,7 +73,7 @@ def SRGAN_d(inputs, reuse=False):
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer, conv = RESNET50(inputs)
+        layer, conv = utils_nn.resNet50(inputs)
         shape = tf.shape(inputs)
         batch_size, image_width = shape[0], shape[1]        
         layer = tf.reshape(layer, [batch_size, -1, 2048])
