@@ -88,7 +88,7 @@ def resNet50(layer, isPoolSize=True):
             layer = resNetBlockV2(layer, 128)
         layer = slim.avg_pool2d(layer, [3,3])
         half_layer = layer
-        
+
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
         for i in range(6):
             layer = resNetBlockV2(layer, 256)
@@ -99,7 +99,7 @@ def resNet50(layer, isPoolSize=True):
             layer = resNetBlockV2(layer, 512)
         return layer, half_layer    
 
- def resNet101(layer, isPoolSize=True):
+def resNet101(layer, isPoolSize=True):
     if isPoolSize:
         stride = 2
         padding = "VALID"
@@ -126,7 +126,7 @@ def resNet50(layer, isPoolSize=True):
             layer = resNetBlockV2(layer, 512)
         return layer   
 
- def resNet152(layer, isPoolSize=True):
+def resNet152(layer, isPoolSize=True):
     if isPoolSize:
         stride = 2
         padding = "VALID"
