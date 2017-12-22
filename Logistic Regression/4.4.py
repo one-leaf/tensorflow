@@ -102,7 +102,7 @@ def neural_networks():
     drop_prob = tf.placeholder(tf.float32) 
     x_image = tf.reshape(x, [-1,28,28,1])
 
-    layer, _ = resNet34(x_image)
+    layer = resNet34(x_image)
     layer = slim.avg_pool2d(layer, [3,3])
     layer = tf.contrib.layers.flatten(layer)
     # print(layer.shape)
