@@ -666,14 +666,15 @@ def train():
                 for i in range(4):
                     train_inputs, train_clears, train_targets = get_next_batch_for_srgan(1)
                     feed = {inputs: train_inputs, clears: train_clears, targets: train_targets}
-
+                    
+                    if errM > 0.1:
                     # train G
-                    start = time.time() 
-                    errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
-                    print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                    if np.isnan(errM) or np.isinf(errM) :
-                        print("Error: cost is nan or inf")
-                        return
+                        start = time.time() 
+                        errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
+                        print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                        if np.isnan(errM) or np.isinf(errM) :
+                            print("Error: cost is nan or inf")
+                            return
 
                     if errD1 < errA:
                         ## update G
