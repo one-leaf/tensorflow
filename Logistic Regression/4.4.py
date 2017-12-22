@@ -68,7 +68,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer, _ = resNet50V3(x_image)
-    layer = tf.layers.max_pooling2d(layer, pool_size=[3,3], strides=1)
+    layer = tf.layers.max_pooling2d(layer, pool_size=[3,3], strides=3)
     #layer = tf.contrib.layers.flatten(layer)
     prediction = tf.layers.dense(layer, 10)
 
