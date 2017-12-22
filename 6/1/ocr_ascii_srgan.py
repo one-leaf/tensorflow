@@ -231,7 +231,7 @@ def get_next_batch_for_res_train(batch_size=128):
         image = np.asarray(image)     
         # image = utils.resize(image, height=image_height)
         # image = utils.img2bwinv(image)
-        images = utils_pil.convert_to_bw(images)        
+        image = utils_pil.convert_to_bw(image)        
         images.append((255. - image) / 255.)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
