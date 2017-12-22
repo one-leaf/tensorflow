@@ -19,15 +19,14 @@ def resNetBlockV2(inputs, size=64):
 
 # 第三种残差模型
 def resNetBlockV3(inputs, size=64):
-    print("inputs:",inputs.shape)
     layer0 = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(layer1, size,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer2 = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer2 = slim.conv2d(layer2, size,   [5,5], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
     layer3 = slim.avg_pool2d(inputs, [3, 3], stride = 1, padding = "SAME")  
+    layer3 = slim.conv2d(layer3, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
     layer  = tf.concat([layer0, layer1, layer2, layer3], 3) 
-    print("layer:",layer.shape)   
     return tf.nn.relu(inputs + layer)
 
 def resNet18(layer, isPoolSize=True):
