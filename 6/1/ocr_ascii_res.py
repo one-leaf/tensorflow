@@ -62,7 +62,7 @@ def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer, _ = utils_nn.resNet50V3(inputs, True) 
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
-        layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)        
+        # layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)        
         # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         # layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
@@ -223,11 +223,12 @@ def get_next_batch_for_res_train(batch_size=128):
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
         image = utils_pil.resize_by_height(image, image_height)
-        image = utils_pil.convert_to_gray(image)                   
+        image = utils_pil.convert_to_gray(image)                           
         image = np.asarray(image)     
-        image = utils.resize(image, height=image_height)
-        image = utils.img2bwinv(image)
-        images.append(image / 255.)
+        # image = utils.resize(image, height=image_height)
+        # image = utils.img2bwinv(image)
+        images = utils_pil.convert_to_bw(images)        
+        images.append((255. - image) / 255.)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
         info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
@@ -239,7 +240,7 @@ def get_next_batch_for_res_train(batch_size=128):
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)   
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)                
     return inputs, sparse_labels, seq_len, info
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
@@ -266,12 +267,13 @@ def get_next_batch_for_srgan(batch_size=128):
 
         clears_image = image.copy()
         clears_image = np.asarray(clears_image)
-        clears_image = utils.resize(clears_image, height=image_height)
+        # clears_image = utils.resize(clears_image, height=image_height)
+        clears_image = utils_pil.convert_to_bw(clears_image)
         clears_images.append((255. - clears_image) / 255.)
 
         image = utils_font.add_noise(image)   
         image = np.asarray(image)
-        image = utils.resize(image, height=image_height)
+        # image = utils.resize(image, height=image_height)
         image = image * random.uniform(0.3, 1)
         if random.random()>0.5:
             image = (255. - image) / 255.
@@ -280,9 +282,10 @@ def get_next_batch_for_srgan(batch_size=128):
         inputs_images.append(image)
 
         targets_image = np.asarray(targets_image)   
-        targets_image = utils.resize(targets_image, height=image_height)
-        targets_image = utils.img2bwinv(targets_image)
-        targets_images.append(targets_image / 255.)
+        # targets_image = utils.resize(targets_image, height=image_height)
+        # targets_image = utils.img2bwinv(targets_image)
+        targets_image = utils_pil.convert_to_bw(targets_image)        
+        targets_images.append((255. - targets_image) / 255.)
 
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]

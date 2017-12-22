@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont, ImageChops, ImageEnhance 
 import random
 import matplotlib.pyplot as plt
+import cv2
 
 # 随机截图
 def random_crop(img, width, height):  
@@ -38,6 +39,8 @@ def random_color(img, lower = 0.6, upper = 1.5):
     img = ImageEnhance.Color(img)  
     img = img.enhance(factor)  
     return img  
+
+
 
 # 显示图片  
 def show(img, cmap='gray'):
@@ -90,6 +93,11 @@ def convert_to_rgb(img):
 # RGB to 灰度
 def convert_to_gray(img):
     return img.convert('L')
+
+# 灰度图片转黑白
+def convert_to_bw(img_gray_array):
+    thresh, img_bw = cv2.threshold(img_gray_array, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return img_bw
 
 def main():
     img = getImage("abced12323","Arial",16)

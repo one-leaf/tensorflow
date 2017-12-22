@@ -63,7 +63,7 @@ def SRGAN_d(inputs, reuse=False):
         # layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer, _ = utils_nn.resNet50V3(inputs, True) 
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
-        layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)
+        # layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)
         # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         # layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
@@ -227,10 +227,11 @@ def get_next_batch_for_res_train(batch_size=128):
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
         image = utils_pil.resize_by_height(image, image_height)
-        image = utils_pil.convert_to_gray(image)                   
+        image = utils_pil.convert_to_gray(image)                           
         image = np.asarray(image)     
         # image = utils.resize(image, height=image_height)
         # image = utils.img2bwinv(image)
+        images = utils_pil.convert_to_bw(images)        
         images.append((255. - image) / 255.)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
@@ -271,6 +272,7 @@ def get_next_batch_for_srgan(batch_size=128):
         clears_image = image.copy()
         clears_image = np.asarray(clears_image)
         # clears_image = utils.resize(clears_image, height=image_height)
+        clears_image = utils_pil.convert_to_bw(clears_image)
         clears_images.append((255. - clears_image) / 255.)
 
         image = utils_font.add_noise(image)   
@@ -286,6 +288,7 @@ def get_next_batch_for_srgan(batch_size=128):
         targets_image = np.asarray(targets_image)   
         # targets_image = utils.resize(targets_image, height=image_height)
         # targets_image = utils.img2bwinv(targets_image)
+        targets_image = utils_pil.convert_to_bw(targets_image)        
         targets_images.append((255. - targets_image) / 255.)
 
         if image.shape[1] > max_width_image: 
