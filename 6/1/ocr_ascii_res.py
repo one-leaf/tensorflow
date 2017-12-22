@@ -687,8 +687,12 @@ def train():
                 # 训练RES
                 for i in range(16):
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res_train(8)
-                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}
                     start = time.time() 
+                    p_dcCnn = session.run(dncnn, {inputs: train_inputs})
+                    p_dcCnn = np.squeeze(p_dcCnn)
+                    p_net_g = session.run(net_g, {inputs: train_inputs, clears: p_dcCnn}) 
+                    p_net_g = np.squeeze(p_net_g)
+                    feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len}                   
                     errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                     print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
                     if np.isnan(errR) or np.isinf(errR) :
