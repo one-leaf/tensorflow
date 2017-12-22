@@ -104,7 +104,9 @@ def neural_networks():
 
     layer = resNet34(x_image)
     layer = slim.avg_pool2d(layer, [3,3])
-    layer = tf.contrib.layers.flatten(layer)
+    layer =  tf.reshape(layer, [-1,512])
+
+    # layer = tf.contrib.layers.flatten(layer)
     # print(layer.shape)
     prediction = slim.fully_connected(layer,10)
 
