@@ -55,16 +55,15 @@ def DnCNN(inputs):
 # 原参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py 失败，后期和D对抗时无法提升，后改为 resnet34
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
-        layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = utils_nn.resNet34(layer, False)
         layer = slim.conv2d(layer, 1,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer = utils_nn.resNet34(layer) 
+        layer = utils_nn.resNet50V3(layer, True) 
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+        layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)        
         # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         # layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
