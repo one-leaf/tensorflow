@@ -61,6 +61,7 @@ def SRGAN_g(inputs, reuse=False):
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer = utils_nn.resNet50V3(inputs, True) 
+        print(layer.shape)
         layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)        
         # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
