@@ -64,11 +64,11 @@ def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
         layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = utils_nn.resNet34(layer, True)
-        shape = tf.shape(inputs)
-        batch_size = shape[0]
-        layer = tf.reshape(layer, [batch_size, -1, 4 * 512])
+        # shape = tf.shape(inputs)
+        # batch_size = shape[0]
+        # layer = tf.reshape(layer, [batch_size, -1, 4 * 512])
         # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=None)        
+        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         return layer
 
 def RES(inputs, reuse = False):
@@ -76,8 +76,7 @@ def RES(inputs, reuse = False):
         layer, conv = utils_nn.resNet50(inputs)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
-        # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, CLASSES_NUMBER,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
         return layer, conv
 
