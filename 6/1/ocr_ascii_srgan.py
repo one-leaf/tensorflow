@@ -44,7 +44,6 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
-
 # 降噪网络
 def DnCNN(inputs):
     with tf.variable_scope("DnCNN") as vs:  
@@ -66,9 +65,9 @@ def SRGAN_d(inputs, reuse=False):
         layer = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer, _ = utils_nn.resNet34(layer, True)
         shape = tf.shape(layer)
-        batch_size, image_width, image_height = shape[0], shape[1], shape[2]  
+        batch_size, image_width, image_height, cnn_size = shape[0], shape[1], shape[2]  
         layer = slim.avg_pool2d(layer, [image_width, image_height])
-        layer = tf.reshape(layer, (batch_size, 2048))
+        layer = tf.reshape(layer, (batch_size, cnn_size))
         layer = slim.fully_connected(layer, 1)
         return layer
 
