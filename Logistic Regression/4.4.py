@@ -103,12 +103,8 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer = resNet34(x_image)
-    layer = slim.avg_pool2d(layer, [3,3])
-    layer =  tf.reshape(layer, [-1,512])
-
-    # layer = tf.contrib.layers.flatten(layer)
-    # print(layer.shape)
-    prediction = slim.fully_connected(layer,10)
+    layer = tf.layers.conv2d(layer, 10, kernel_size=[3, 3], activation=None)
+    prediction = tf.contrib.layers.flatten(layer)
 
     cost = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=prediction)
     optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
