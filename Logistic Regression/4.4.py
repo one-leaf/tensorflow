@@ -102,7 +102,7 @@ if __name__ == '__main__':
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, drop_prob: 0.25})
         if step % 10 == 0 :
             acc = 0
-            key = random.sample(range(5000), 64)
+            key = random.sample(range(len(valid_x)), 64)
             _x =[]
             _y =[]
             for i in key:
@@ -122,14 +122,14 @@ if __name__ == '__main__':
             plt.pause(0.1)
         step += 1
 
-        key = random.sample(range(10000), 64)
-        _x =[]
-        _y =[]
-        for i in key:
-            _x.append(valid_x[i])
-            _y.append(valid_y[i])
-        acc = sess.run(accuracy, feed_dict={x: _x , y: _y , drop_prob: 0})
-        acc = acc / 64.
+    key = random.sample(range(len(test_x)), 64)
+    _x =[]
+    _y =[]
+    for i in key:
+        _x.append(test_x[i])
+        _y.append(test_x[i])
+    acc = sess.run(accuracy, feed_dict={x: _x , y: _y , drop_prob: 0})
+    acc = acc / 64.
 
     print("Last accuracy:",acc)
     # Last accuracy: 
