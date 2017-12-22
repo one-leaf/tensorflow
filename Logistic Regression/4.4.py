@@ -70,8 +70,8 @@ def neural_networks():
     layer, _ = resNet50V3(x_image)
     layer = slim.avg_pool2d(layer, [3,3])
     layer = tf.contrib.layers.flatten(layer)
-    print(layer.shape)
-    prediction = tf.layers.dense(layer, 10)
+    # print(layer.shape)
+    prediction = slim.fully_connected(layer,10)
 
     cost = tf.losses.softmax_cross_entropy(onehot_labels=y, logits=prediction)
     optimizer = tf.train.AdamOptimizer(0.0001).minimize(cost)
