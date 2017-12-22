@@ -36,15 +36,14 @@ def resNetBlockV2(inputs, size=64):
 
 # 第三种残差模型
 def resNetBlockV3(inputs, size=64):
-    layer0 = slim.conv2d(inputs, size//2,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer0 = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer1 = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer1 = slim.conv2d(layer1, size//2,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer1 = slim.conv2d(layer1, size,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer2 = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer2 = slim.conv2d(layer2, size//2,   [5,5], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    layer2 = slim.conv2d(layer2, size,   [5,5], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
     layer3 = slim.avg_pool2d(inputs, [3, 3], stride = 1, padding = "SAME")  
-    layer3 = slim.conv2d(layer3, size//2,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
-    layer  = tf.concat([layer0, layer1, layer2, layer3], 3) 
-    return tf.nn.relu(inputs + layer)
+    layer3 = slim.conv2d(layer3, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    return tf.nn.relu(inputs + layer0 + layer1 + layer2 + layer3)
 
 def resNet34(layer, isPoolSize=True):
     if isPoolSize:
@@ -83,24 +82,24 @@ def resNet50V3(layer, isPoolSize=True):
         stride = 1
         padding = "SAME"
     with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
-        layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         
         for i in range(3):
             layer = resNetBlockV3(layer, 64)
         layer = slim.avg_pool2d(layer, [2, 2])
 
-        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(4):
             layer = resNetBlockV3(layer, 128)
         layer = slim.avg_pool2d(layer, [2, 2])
         half_layer = layer
 
-        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
+        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
         for i in range(6):
             layer = resNetBlockV3(layer, 256)
         layer = slim.avg_pool2d(layer, [2, 2])
 
-        layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
             layer = resNetBlockV3(layer, 512)
         return layer, half_layer
