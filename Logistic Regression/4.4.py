@@ -127,7 +127,7 @@ if __name__ == '__main__':
     _y =[]
     for i in key:
         _x.append(test_x[i])
-        _y.append(test_x[i])
+        _y.append(test_y[i])
     acc = sess.run(accuracy, feed_dict={x: _x , y: _y , drop_prob: 0})
     acc = acc / 64.
 
