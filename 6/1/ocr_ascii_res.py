@@ -78,8 +78,8 @@ def RES(inputs, reuse = False):
         layer, conv = utils_nn.resNet50(inputs)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
-        layer = slim.conv2d(layer, 64,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)               
-        layer = tf.reshape(layer, [batch_size, -1, 64])
+        layer = slim.conv2d(layer,  CLASSES_NUMBER,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
         return layer, conv
 
 def neural_networks():
