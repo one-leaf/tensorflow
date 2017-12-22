@@ -65,11 +65,8 @@ def SRGAN_d(inputs, reuse=False):
         layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = utils_nn.resNet34(layer, True)
         shape = tf.shape(inputs)
-        batch_size = shape[0]
-        layer = tf.transpose(layer, (0, 3, 1, 2))
-        layer = tf.reshape(layer, [batch_size, 1, 512, -1])
-        layer = slim.conv2d(layer, 1, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)
-        layer = tf.reshape(layer, [batch_size, 512])
+        batch_size, image_width = shape[0], shape[1]
+        layer = tf.reshape(layer, [batch_size, image_width, -1])
         layer = slim.fully_connected(layer, 1000)
         return layer
 
