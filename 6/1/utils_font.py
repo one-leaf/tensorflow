@@ -4,6 +4,7 @@ import random
 import utils_pil
 from PIL import Image
 import json
+import numpy as np
 
 def http(url):
     r = urllib.request.urlopen(url, timeout=30)
@@ -132,4 +133,12 @@ if __name__ == '__main__':
         img = get_font_image_from_url("GHLlIiMmNnWwZzOoQqAaBbDd1234567890",font_name,36)
         print(font_name,img.size)
         img = utils_pil.resize_by_height(img,32)
+        img = utils_pil.convert_to_gray(img)
+        img = np.array(img)
+        # img = 255. - img
+        # idx = np.nonzero(img)
+        # img[idx] = 255 
+        img = utils_pil.convert_to_bw(img)
+        img = 255. - img
+        # print(img)
         utils_pil.show(img)
