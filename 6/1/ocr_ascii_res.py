@@ -241,7 +241,8 @@ def get_next_batch_for_res_train(batch_size=128):
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (max_width_image * image_height ) #// (POOL_SIZE * POOL_SIZE)                
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) #// (POOL_SIZE * POOL_SIZE)   
+    print("seq_len:", seq_len)             
     return inputs, sparse_labels, seq_len, info
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
