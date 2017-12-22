@@ -68,7 +68,7 @@ def neural_networks():
     x_image = tf.reshape(x, [-1,28,28,1])
 
     layer, _ = resNet50V3(x_image)
-
+    print(layer.shape)
     layer = tf.contrib.layers.flatten(layer)
     prediction = tf.layers.dense(layer, 10)
 
