@@ -22,12 +22,47 @@ def getValidationImages():
 def getTestImages():
     return mnist.test.images, mnist.test.labels
 
+def resNetBlockV1(inputs, size=64):
+    layer = slim.conv2d(inputs, size, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(layer,  size, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None)
+    return tf.nn.relu(inputs + layer) 
+
 # 第二种残差模型
 def resNetBlockV2(inputs, size=64):
     layer = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer,  size,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     layer = slim.conv2d(layer,  size*2, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     return tf.nn.relu(inputs + layer)
+
+
+def resNet34(layer, isPoolSize=True):
+    if isPoolSize:
+        stride = 2
+        padding = "VALID"
+    else:
+        stride = 1
+        padding = "SAME"
+    with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
+        layer = slim.conv2d(layer, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+
+        for i in range(3):
+            layer = resNetBlockV1(layer, 64)
+        layer = slim.avg_pool2d(layer, [3, 3])
+
+        layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        for i in range(4):
+            layer = resNetBlockV1(layer, 128)
+        layer = slim.avg_pool2d(layer, [3, 3])
+
+        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
+        for i in range(6):
+            layer = resNetBlockV1(layer, 256)
+        layer = slim.avg_pool2d(layer, [3, 3])
+
+        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        for i in range(3):
+            layer = resNetBlockV1(layer, 512)
+        return layer
 
 def resNet50V3(layer, isPoolSize=True):
     if isPoolSize:
@@ -67,7 +102,7 @@ def neural_networks():
     drop_prob = tf.placeholder(tf.float32) 
     x_image = tf.reshape(x, [-1,28,28,1])
 
-    layer, _ = resNet50V3(x_image)
+    layer, _ = resNet34(x_image)
     layer = slim.avg_pool2d(layer, [3,3])
     layer = tf.contrib.layers.flatten(layer)
     # print(layer.shape)
