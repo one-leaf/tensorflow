@@ -102,11 +102,14 @@ if __name__ == '__main__':
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y, drop_prob: 0.25})
         if step % 10 == 0 :
             acc = 0
-            for i in range(100):
-                _x = valid_x[i*50:i*50+50]
-                _y = valid_y[i*50:i*50+50]
-                acc += sess.run(accuracy, feed_dict={x: _x , y: _y , drop_prob: 0})
-            acc = acc / 100.
+            key = random.sample(range(5000), 64)
+            _x =[]
+            _y =[]
+            for i in key:
+                _x.append(valid_x[i])
+                _y.append(valid_y[i])
+            acc = sess.run(accuracy, feed_dict={x: _x , y: _y , drop_prob: 0})
+            acc = acc / 64.
             print(step, loss, acc)
             plt.clf()
             plt_n.append(step)
@@ -119,9 +122,14 @@ if __name__ == '__main__':
             plt.pause(0.1)
         step += 1
 
-    acc = 0
-    for i in range(200):
-        acc += sess.run(accuracy, feed_dict={x: test_x[i*50:i*50+50], y: test_y[i*50:i*50+50], drop_prob: 0})
-    acc = acc / 200.
+        key = random.sample(range(10000), 64)
+        _x =[]
+        _y =[]
+        for i in key:
+            _x.append(valid_x[i])
+            _y.append(valid_y[i])
+        acc = sess.run(accuracy, feed_dict={x: _x , y: _y , drop_prob: 0})
+        acc = acc / 64.
+
     print("Last accuracy:",acc)
     # Last accuracy: 
