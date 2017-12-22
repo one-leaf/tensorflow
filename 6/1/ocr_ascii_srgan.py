@@ -232,8 +232,8 @@ def get_next_batch_for_res_train(batch_size=128):
         image = utils_pil.convert_to_gray(image)                   
         image = np.asarray(image)     
         # image = utils.resize(image, height=image_height)
-        image = utils.img2bwinv(image)
-        images.append(image / 255.)
+        # image = utils.img2bwinv(image)
+        images.append((255. - image) / 255.)
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
         info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
