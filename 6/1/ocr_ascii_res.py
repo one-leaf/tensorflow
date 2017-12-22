@@ -41,7 +41,7 @@ BATCH_SIZE = 4
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
-POOL_SIZE  = round(math.pow(3,POOL_COUNT))
+POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
 # 降噪网络
@@ -71,7 +71,7 @@ def SRGAN_d(inputs, reuse=False):
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer, conv = utils_nn.resNet50V3(inputs, False)
+        layer, conv = utils_nn.resNet50V3(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
         layer = slim.conv2d(layer, CLASSES_NUMBER,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
@@ -196,7 +196,7 @@ def get_next_batch_for_res(batch_size=128):
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
         info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
-    # max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -204,7 +204,7 @@ def get_next_batch_for_res(batch_size=128):
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (max_width_image * image_height ) #// (POOL_SIZE * POOL_SIZE)                
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)                
     return inputs, sparse_labels, seq_len, info
      
 def get_next_batch_for_res_train(batch_size=128):
@@ -233,7 +233,7 @@ def get_next_batch_for_res_train(batch_size=128):
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
         info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
-    # max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
     for i in range(len(images)):
         image_vec = utils.img2vec(images[i], height=image_height, width=max_width_image, flatten=False)
@@ -241,7 +241,7 @@ def get_next_batch_for_res_train(batch_size=128):
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (max_width_image * image_height )#// (POOL_SIZE * POOL_SIZE)   
+    seq_len = np.ones(batch_size) * (max_width_image * image_height ) // (POOL_SIZE * POOL_SIZE)   
     return inputs, sparse_labels, seq_len, info
 
 # 生成一个训练batch ,每一个批次采用最大图片宽度
