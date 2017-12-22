@@ -47,31 +47,27 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 # 降噪网络
 def DnCNN(inputs):
     with tf.variable_scope("DnCNN") as vs:  
-        layer = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = utils_nn.resNet34(layer, False)
-        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+        layer = slim.conv2d(layer, 1,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
 # 原参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py 失败，后期和D对抗时无法提升，后改为 resnet34
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
-        layer = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = utils_nn.resNet34(layer, False)
-        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+        layer = slim.conv2d(layer, 1,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         return layer
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        layer = slim.conv2d(inputs, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = utils_nn.resNet34(layer, True)
-        # shape = tf.shape(layer)
-        # batch_size, image_width, image_height, cnn_size = shape[0], shape[1], shape[2], shape[3]   
-        # layer = tf.transpose(layer, (0, 3, 1，2))
-
-        # layer = slim.avg_pool2d(layer, [image_width, image_height])
-        # layer = tf.reshape(layer, (batch_size, cnn_size))
-        layer = slim.fully_connected(layer, 1)
-        print(layer.shape)
+        shape = tf.shape(layer)
+        batch_size = shape[0]   
+        layer = tf.reshape(layer, [batch_size, 1, 1, -1])
+        layer = slim.conv2d(inputs, 1, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None)
         return layer
 
 def RES(inputs, reuse = False):
