@@ -40,8 +40,6 @@ def random_color(img, lower = 0.6, upper = 1.5):
     img = img.enhance(factor)  
     return img  
 
-
-
 # 显示图片  
 def show(img, cmap='gray'):
     plt.imshow(img, cmap = cmap)
