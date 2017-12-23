@@ -310,7 +310,7 @@ def pix2pix_g(inputs):
             layer = tf.concat([layer, encoder_activations[-i-2]], 3)
         layer = slim.conv2d_transpose(layer, 64, normalizer_fn=None)
         layer = tf.concat([layer, encoder_activations[0]], 3)
-        layer = slim.conv2d(layer, 64, normalizer_fn=None, activation_fn=None)
+        layer = slim.conv2d(layer, 1, normalizer_fn=None, activation_fn=None)
         layer = tf.tanh(layer)
         return layer
 
