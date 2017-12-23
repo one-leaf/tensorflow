@@ -33,7 +33,7 @@ CLASSES_NUMBER = len(CHARS) + 1
 LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 50
+REPORT_STEPS = 20
 MOMENTUM = 0.9
 
 BATCHES = 10
@@ -301,7 +301,6 @@ def train():
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
                     train_inputs, train_targets = get_next_batch_for_srgan(4)   
-                    print(train_info)          
                     p_net_g = session.run(net_g, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g)
 
