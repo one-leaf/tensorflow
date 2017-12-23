@@ -291,7 +291,7 @@ def INCEPTIONV3(inputs):
     return net
 
 def pix2pix_g(inputs):
-    with slim.arg_scope([slim.conv2d],  kernel_size=[4, 4],  stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
+    with slim.arg_scope([slim.conv2d, slim.conv2d_transpose],  kernel_size=[4, 4],  stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
         layer = slim.conv2d(inputs, 64, normalizer_fn=None)
