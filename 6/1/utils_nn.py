@@ -321,5 +321,5 @@ def pix2pix_d(inputs):
             layer = slim.conv2d(layer, cnn)
         layer = slim.conv2d(layer, 256, stride=1)
         layer = slim.conv2d(layer, 1, stride=1, normalizer_fn=None, activation_fn=None)
-        layer = tf.sigmoid(layer)
+      #  layer = tf.sigmoid(layer)
         return layer
