@@ -64,7 +64,7 @@ def SRGAN_d(inputs, reuse=False):
         # layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
         layer = slim.avg_pool2d(layer, [1, 4])
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)        
+        layer = slim.fully_connected(layer, 1, activation_fn=None)        
         return layer
 
 def RES(inputs, reuse = False):
