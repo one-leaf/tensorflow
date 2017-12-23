@@ -33,7 +33,7 @@ CLASSES_NUMBER = len(CHARS) + 1
 LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
-REPORT_STEPS = 20
+REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 10
@@ -163,7 +163,7 @@ def get_next_batch_for_srgan(batch_size=128):
         targets_image = image.copy()
         targets_image = np.asarray(targets_image)
         # targets_image = utils.resize(targets_image, height=image_height)
-        targets_image = utils_pil.convert_to_bw(targets_image)
+        # targets_image = utils_pil.convert_to_bw(targets_image)
         targets_images.append((255. - targets_image) / 255.)
 
         image = utils_font.add_noise(image)   
