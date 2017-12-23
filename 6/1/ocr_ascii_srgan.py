@@ -124,9 +124,9 @@ def neural_networks():
 
     logits_real = tf.nn.sigmoid(logits_real)
     logits_fake = tf.nn.sigmoid(logits_fake)
-    d_loss1 = tf.log(logits_real)
-    d_loss2 = tf.log(1-logits_fake)
-    g_gan_loss = tf.log(logits_fake)
+    d_loss1 = -tf.reduce_mean(tf.log(logits_real))
+    d_loss2 = -tf.reduce_mean(tf.log(1-logits_fake))
+    g_gan_loss = -tf.reduce_mean(tf.log(logits_fake))
 
     # d_loss1 =  tf.losses.hinge_loss(tf.ones_like(logits_real), logits_real)
     # d_loss2 =  tf.losses.hinge_loss(tf.zeros_like(logits_real), logits_fake,)
