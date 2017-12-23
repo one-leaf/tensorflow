@@ -258,7 +258,7 @@ def INCEPTIONV3(inputs):
         layer1 = slim.conv2d(layer1,192, [1,7], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer1 = slim.conv2d(layer1,192, [7,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer1 = slim.conv2d(layer1,192, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer2 = slim.max_pool2d(net,  [3,3])
+            
         net    = tf.concat([layer0, layer1, layer2], 3)
         # mixed_7b => 2048
         layer0 = slim.conv2d(net,   320, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -317,8 +317,11 @@ def pix2pix_g(inputs):
 def pix2pix_d(inputs):
     with slim.arg_scope([slim.conv2d],  kernel_size=[4, 4],  stride=1, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         layer = slim.conv2d(inputs, 64, normalizer_fn=None)
-        for cnn in (64,64,64,128,128,128,128,256,256,256,256,256,256,512,512,512):
-            layer = slim.conv2d(layer, cnn)
+        for cnn in (64,64,64,0,128,128,128,128,0,256,256,256,256,256,256,0,512,512,512):
+            if cnn == 0:
+                layer = slim.max_pool2d(layer,  [2,2])
+            else:
+                layer = slim.conv2d(layer, cnn)
         layer = slim.conv2d(layer, 256, stride=1)
         layer = slim.conv2d(layer, 1, stride=1, normalizer_fn=None, activation_fn=None)
         # layer = tf.sigmoid(layer)
