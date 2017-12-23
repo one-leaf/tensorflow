@@ -291,7 +291,7 @@ def INCEPTIONV3(inputs):
     return net
 
 def pix2pix_g(inputs):
-    with slim.arg_scope([slim.conv2d],  kernel_size=[4, 4],  stride=2, activation_fn=tf.nn.leaky_relu， normalizer_fn=slim.batch_norm):
+    with slim.arg_scope([slim.conv2d],  kernel_size=[4, 4],  stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
         layer = slim.conv2d(inputs, 64, normalizer_fn=None)
@@ -299,27 +299,27 @@ def pix2pix_g(inputs):
         for cnn in (128,256,512,512,512):
             layer = slim.conv2d(layer, cnn)
             encoder_activations.append(layer)
-        layer = slim.conv2d(layer, 512, normalizer_fn=None， activation_fn=None,)
+        layer = slim.conv2d(layer, 512, normalizer_fn=None, activation_fn=None,)
         encoder_activations.append(layer)
         # Decoder 
         layer = tf.nn.relu(layer)
-        layer = slim.conv2d_transpose(layer, 512, normalizer_fn=None， activation_fn=None,)
+        layer = slim.conv2d_transpose(layer, 512, normalizer_fn=None, activation_fn=None,)
         layer = tf.concat([layer, encoder_activations[-1]], axis=3)
         for i, cnn in enumerate((512,512,512,256,128)):
             layer = slim.conv2d_transpose(layer, cnn)
             layer = tf.concat([layer, encoder_activations[-i-2]], axis=3)
         layer = slim.conv2d_transpose(layer, 64, normalizer_fn=None)
         layer = tf.concat([layer, encoder_activations[0], axis=3)
-        layer = layers.conv2d(layer, 64, [4, 4], normalizer_fn=None， activation_fn=None)
+        layer = layers.conv2d(layer, 64, [4, 4], normalizer_fn=None, activation_fn=None)
         layer = tf.tanh(layer)
         return layer
 
 def pix2pix_d(inputs):
-    with slim.arg_scope([slim.conv2d],  kernel_size=[4, 4],  stride=2, padding='VALID', activation_fn=tf.nn.leaky_relu， normalizer_fn=slim.batch_norm):
+    with slim.arg_scope([slim.conv2d],  kernel_size=[4, 4],  stride=2, padding='VALID', activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         layer = slim.conv2d(inputs, 64, normalizer_fn=None)
         for cnn in (64,64,64,128,128,128,128,256,256,256,256,256,256,512,512,512):
             layer = slim.conv2d(layer, cnn)
         layer = slim.conv2d(layer, 256, stride=1)
-        layer = slim.conv2d(layer, 1, stride=1, normalizer_fn=None， activation_fn=None)
+        layer = slim.conv2d(layer, 1, stride=1, normalizer_fn=None, activation_fn=None)
         layer = tf.sigmoid(layer)
         return layer
