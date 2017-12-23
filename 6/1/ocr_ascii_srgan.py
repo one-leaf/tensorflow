@@ -60,12 +60,11 @@ def SRGAN_g(inputs, reuse=False):
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        # layer = slim.conv2d(inputs, 64, [1, 1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer, _ = utils_nn.resNet50(inputs, True) 
-        layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
-        # layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)
-        # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        # layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+        # layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+        layer = slim.avg_pool2d(layer, [1, 4])
+        layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.fully_connected(layer, 1, activation_fn=None)  
         return layer
 
 def RES(inputs, reuse = False):
@@ -73,9 +72,9 @@ def RES(inputs, reuse = False):
         layer, conv = utils_nn.resNet50(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
-        layer = slim.conv2d(layer, CLASSES_NUMBER,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
-        # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        # layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)  
+        # layer = slim.conv2d(layer, CLASSES_NUMBER,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+        layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=None, activation_fn=None)  
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
         return layer, conv
 
@@ -122,14 +121,17 @@ def neural_networks():
     _, res_target_emb   = RES(layer_targets, reuse = True)
     _, res_predict_emb  = RES(net_g, reuse = True)
 
-    # d_loss1 =  tf.losses.log_loss(tf.ones_like(logits_real), logits_real)
-    # d_loss2 =  tf.losses.log_loss(tf.zeros_like(logits_real), logits_fake,)
+
+    # logits_real = tf.nn.sigmoid(logits_real)
+    # logits_fake = tf.nn.sigmoid(logits_fake)
+    # d_loss1 = -tf.reduce_mean(tf.log(logits_real))
+    # d_loss2 = -tf.reduce_mean(tf.log(1-logits_fake))
+    # g_gan_loss = -tf.reduce_mean(tf.log(logits_fake))
+
+
     d_loss1 = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
     d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
-    # d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = d_loss1 + d_loss2
-
-    # g_gan_loss =  tf.losses.log_loss(tf.ones_like(logits_real), logits_fake)
     g_gan_loss = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_fake), logits_fake)
     g_mse_loss = tf.losses.mean_squared_error(layer_targets, net_g)
     g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
