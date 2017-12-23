@@ -121,15 +121,17 @@ def neural_networks():
     _, res_target_emb   = RES(layer_targets, reuse = True)
     _, res_predict_emb  = RES(net_g, reuse = True)
 
+    d_loss1 = tf.reduce_mean(-tf.log(logits_real))
+    d_loss2 = tf.reduce_mean(-tf.log(1-logits_fake)) 
     # d_loss1 =  tf.losses.hinge_loss(tf.ones_like(logits_real), logits_real)
     # d_loss2 =  tf.losses.hinge_loss(tf.zeros_like(logits_real), logits_fake,)
-    d_loss1 = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
-    d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
+    #d_loss1 = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
+    #d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
     # d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
     d_loss  = d_loss1 + d_loss2
-
+    g_gan_loss = tf.reduce_mean(-tf.log(logits_fake))
     # g_gan_loss =  tf.losses.hinge_loss(tf.ones_like(logits_real), logits_fake)
-    g_gan_loss = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_fake), logits_fake)
+    #g_gan_loss = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_fake), logits_fake)
     g_mse_loss = tf.losses.mean_squared_error(layer_targets, net_g)
     g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_res_loss
