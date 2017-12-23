@@ -304,12 +304,12 @@ def pix2pix_g(inputs):
         # Decoder 
         layer = tf.nn.relu(layer)
         layer = slim.conv2d_transpose(layer, 512, normalizer_fn=None, activation_fn=None,)
-        layer = tf.concat([layer, encoder_activations[-1]], axis=3)
+        layer = tf.concat([layer, encoder_activations[-1]], 3)
         for i, cnn in enumerate((512,512,512,256,128)):
             layer = slim.conv2d_transpose(layer, cnn)
-            layer = tf.concat([layer, encoder_activations[-i-2]], axis=3)
+            layer = tf.concat([layer, encoder_activations[-i-2]], 3)
         layer = slim.conv2d_transpose(layer, 64, normalizer_fn=None)
-        layer = tf.concat([layer, encoder_activations[0], axis=3)
+        layer = tf.concat([layer, encoder_activations[0], 3)
         layer = layers.conv2d(layer, 64, [4, 4], normalizer_fn=None, activation_fn=None)
         layer = tf.tanh(layer)
         return layer
