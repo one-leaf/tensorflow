@@ -155,12 +155,12 @@ def get_next_batch_for_srgan(batch_size=128):
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
         image = utils_pil.resize_by_height(image, image_height)
         image = utils_pil.convert_to_gray(image)
+        targets_image = image.copy()
 
         _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
         image = utils_pil.resize_by_height(image, _h)        
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
 
-        targets_image = image.copy()
         targets_image = np.asarray(targets_image)
         # targets_image = utils.resize(targets_image, height=image_height)
         # targets_image = utils_pil.convert_to_bw(targets_image)
