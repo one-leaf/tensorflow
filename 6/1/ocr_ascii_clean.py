@@ -108,8 +108,8 @@ def neural_networks():
     # g_gan_loss =  tf.losses.log_loss(tf.ones_like(logits_real), logits_fake)
     g_gan_loss = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_fake), logits_fake)
     g_mse_loss = tf.losses.mean_squared_error(layer_targets, net_g)
-    g_res_loss = 1e-3*tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
-    g_loss     = g_gan_loss + g_mse_loss + g_res_loss
+    # g_res_loss = 1e-3*tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
+    # g_loss     = g_gan_loss + g_mse_loss + g_res_loss
     g_loss     = g_gan_loss + g_mse_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
@@ -252,10 +252,12 @@ def train():
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
 
-                ## update G
+                # update G
                 start = time.time()                                
-                errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
-                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                # errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                # print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
+                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
                 if np.isnan(errG) or np.isinf(errG) or np.isnan(errM) or np.isinf(errM) or np.isnan(errA) or np.isinf(errA):
                     print("Error: cost is nan or inf")
                     return 
@@ -277,8 +279,10 @@ def train():
                     if errD1 < errA:
                         ## update G
                         start = time.time()                                
-                        errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
-                        print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                        # errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                        # print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                        errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
+                        print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
                         if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
                             print("Error: cost is nan or inf")
                             return 
