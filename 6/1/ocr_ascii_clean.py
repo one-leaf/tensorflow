@@ -108,8 +108,9 @@ def neural_networks():
     # g_gan_loss =  tf.losses.log_loss(tf.ones_like(logits_real), logits_fake)
     g_gan_loss = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_fake), logits_fake)
     g_mse_loss = tf.losses.mean_squared_error(layer_targets, net_g)
-    g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
+    g_res_loss = 1e-3*tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_res_loss
+    g_loss     = g_gan_loss + g_mse_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
