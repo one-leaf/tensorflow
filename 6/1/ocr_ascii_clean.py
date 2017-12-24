@@ -331,10 +331,13 @@ def train():
 
             # print("Save Model R ...")
             # r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
-            ckpt = tf.train.get_checkpoint_state(model_R_dir)
-            if ckpt and ckpt.model_checkpoint_path:
-                print("Restore Model R...")
-                r_saver.restore(session, ckpt.model_checkpoint_path)
+            try:
+                ckpt = tf.train.get_checkpoint_state(model_R_dir)
+                if ckpt and ckpt.model_checkpoint_path:
+                    print("Restore Model R...")
+                    r_saver.restore(session, ckpt.model_checkpoint_path)
+            except:
+                pass
             print("Save Model D ...")
             d_saver.save(session, os.path.join(model_D_dir, "D.ckpt"), global_step=steps)
             print("Save Model G ...")
