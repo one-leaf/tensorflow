@@ -235,7 +235,7 @@ def train():
  
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_targets = get_next_batch_for_srgan(2)
+                train_inputs, train_targets = get_next_batch_for_srgan(8)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
@@ -249,6 +249,9 @@ def train():
 
                 start_steps = steps  
 
+                train_inputs, train_targets = get_next_batch_for_srgan(1)
+                feed = {inputs: train_inputs, targets: train_targets}
+
                 ## update G
                 start = time.time()                                
                 errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
@@ -259,7 +262,7 @@ def train():
 
                 # 如果D网络的差异太大，需要多学习下G网络
                 for i in range(8):
-                    train_inputs, train_targets = get_next_batch_for_srgan(2)
+                    train_inputs, train_targets = get_next_batch_for_srgan(1)
                     feed = {inputs: train_inputs, targets: train_targets}
 
                     if errM > 1:
