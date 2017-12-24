@@ -64,6 +64,7 @@ namespace RenderFontHttpServer
             SizeF stringSize = graphics.MeasureString(text, font);
             bmp = new Bitmap(bmp, (int)stringSize.Width, (int)stringSize.Height);
             graphics = Graphics.FromImage(bmp);
+            graphics.Clear(Color.White);
             graphics.CompositingQuality = CompositingQuality.HighQuality;
             graphics.InterpolationMode = InterpolationMode.HighQualityBilinear;
             graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
