@@ -265,7 +265,7 @@ def train():
                     train_inputs, train_targets = get_next_batch_for_srgan(4)
                     feed = {inputs: train_inputs, targets: train_targets}
 
-                    if errM > 0.2:
+                    if errM > 0.05:
                     # train G
                         start = time.time() 
                         errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
