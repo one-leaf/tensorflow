@@ -44,27 +44,14 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
-# 降噪网络
-def DnCNN(inputs):
-    with tf.variable_scope("DnCNN") as vs:  
-        layer = utils_nn.resNet34(inputs, False)
-        layer = slim.conv2d(layer, 1,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
-        return layer
-
-# 原参考 https://github.com/zsdonghao/SRGAN/blob/master/model.py 失败，后期和D对抗时无法提升，后改为 resnet34
 def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
-        layer = utils_nn.resNet34(inputs, False)
-        layer = slim.conv2d(layer, 1,   [1, 1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
+        layer = utils_nn.pix2pix_g(inputs)
         return layer
 
 def SRGAN_d(inputs, reuse=False):
     with tf.variable_scope("SRGAN_d", reuse=reuse):
-        layer, _ = utils_nn.resNet50(inputs, True) 
-        # layer = slim.conv2d(layer, 1,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.tanh)
-        layer = slim.avg_pool2d(layer, [1, 4])
-        layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, 1, activation_fn=tf.identity)        
+        layer = utils_nn.pix2pix_d(inputs)
         return layer
 
 def RES(inputs, reuse = False):
@@ -81,8 +68,6 @@ def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, None, image_height], name="inputs")
     # 干净的图片
-    clears = tf.placeholder(tf.float32, [None, None, image_height], name="clears")
-    # 放大后的图片
     targets = tf.placeholder(tf.float32, [None, None, image_height], name="targets")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     global_step = tf.Variable(0, trainable=False)
@@ -91,14 +76,7 @@ def neural_networks():
     batch_size, image_width = shape[0], shape[1]
 
     layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
-    layer_clears = tf.reshape(clears, (batch_size, image_width, image_height, 1))
     layer_targets = tf.reshape(targets, (batch_size, image_width, image_height, 1))
-
-    # 降噪网络
-    dncnn = DnCNN(layer)
-    dncnn_loss  = tf.losses.mean_squared_error(layer_clears, dncnn)
-    dncnn_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='DnCNN')    
-    dncnn_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(dncnn_loss, global_step=global_step, var_list=dncnn_vars)
 
     # OCR RESNET 识别 网络
     # net_res, _ = RES(layer_targets, reuse = True)
@@ -114,24 +92,25 @@ def neural_networks():
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
     # 对抗网络
-    net_g = SRGAN_g(layer_clears, reuse = False)
+    net_g = SRGAN_g(layer, reuse = False)
     logits_real = SRGAN_d(layer_targets, reuse = False)
     logits_fake = SRGAN_d(net_g, reuse = True)
     _, res_target_emb   = RES(layer_targets, reuse = True)
     _, res_predict_emb  = RES(net_g, reuse = True)
 
-    # d_loss1 =  tf.losses.hinge_loss(tf.ones_like(logits_real), logits_real)
-    # d_loss2 =  tf.losses.hinge_loss(tf.zeros_like(logits_real), logits_fake,)
+    # d_loss1 =  tf.losses.log_loss(tf.ones_like(logits_real), logits_real)
+    # d_loss2 =  tf.losses.log_loss(tf.zeros_like(logits_real), logits_fake,)
     d_loss1 = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
     d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
-    # d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
+    # d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = d_loss1 + d_loss2
 
-    # g_gan_loss =  tf.losses.hinge_loss(tf.ones_like(logits_real), logits_fake)
+    # g_gan_loss =  tf.losses.log_loss(tf.ones_like(logits_real), logits_fake)
     g_gan_loss = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_fake), logits_fake)
     g_mse_loss = tf.losses.mean_squared_error(layer_targets, net_g)
-    g_res_loss = tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
+    g_res_loss = 1e-3*tf.losses.mean_squared_error(res_target_emb, res_predict_emb)
     g_loss     = g_gan_loss + g_mse_loss + g_res_loss
+    g_loss     = g_gan_loss + g_mse_loss
     
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     d_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d')
@@ -140,8 +119,7 @@ def neural_networks():
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
-    return  inputs, clears, targets, labels, global_step, \
-            dncnn, dncnn_loss, dncnn_optim, \
+    return  inputs, targets, labels, global_step, \
             g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
             g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, \
             res_loss, res_optim, seq_len, res_acc, res_decoded
@@ -177,17 +155,15 @@ def get_next_batch_for_res(batch_size=128):
             font_size = random.randint(8, 15) 
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,3,4,5])     #删除了2
-        text = random.sample(CHARS, 12)
-        text = text+text+[" "," "]
-        random.shuffle(text)
-        text = "".join(text).strip()
+        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
         codes.append([CHARS.index(char) for char in text])          
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
         image = utils_font.add_noise(image)   
         image = utils_pil.convert_to_gray(image)                   
         image = np.asarray(image)     
-        image = utils.resize(image, height=image_height)
+        # image = utils.resize(image, height=image_height)
+        image = image * random.uniform(0.3, 1)        
         if random.random()>0.5:
             image = (255. - image) / 255.
         else:
@@ -248,7 +224,6 @@ def get_next_batch_for_res_train(batch_size=128):
 # 生成一个训练batch ,每一个批次采用最大图片宽度
 def get_next_batch_for_srgan(batch_size=128):
     inputs_images  = []
-    clears_images  = []   
     targets_images = []
     max_width_image = 0
     for i in range(batch_size):
@@ -267,11 +242,10 @@ def get_next_batch_for_srgan(batch_size=128):
         image = utils_pil.resize_by_height(image, _h)        
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
 
-        clears_image = image.copy()
-        clears_image = np.asarray(clears_image)
-        # clears_image = utils.resize(clears_image, height=image_height)
-        clears_image = utils_pil.convert_to_bw(clears_image)
-        clears_images.append((255. - clears_image) / 255.)
+        targets_image = np.asarray(targets_image)
+        # targets_image = utils.resize(targets_image, height=image_height)
+        # targets_image = utils_pil.convert_to_bw(targets_image)
+        targets_images.append((255. - targets_image) / 255.)
 
         image = utils_font.add_noise(image)   
         image = np.asarray(image)
@@ -281,20 +255,25 @@ def get_next_batch_for_srgan(batch_size=128):
             image = (255. - image) / 255.
         else:
             image = image / 255.
-        inputs_images.append(image)
-
-        targets_image = np.asarray(targets_image)   
-        # targets_image = utils.resize(targets_image, height=image_height)
-        # targets_image = utils.img2bwinv(targets_image)
-        targets_image = utils_pil.convert_to_bw(targets_image)        
-        targets_images.append((255. - targets_image) / 255.)
+        inputs_images.append(image)        
 
         if image.shape[1] > max_width_image: 
             max_width_image = image.shape[1]
-        if clears_image.shape[1] > max_width_image: 
-            max_width_image = clears_image.shape[1] 
         if targets_image.shape[1] > max_width_image: 
             max_width_image = targets_image.shape[1]      
+
+    # max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    inputs = np.zeros([batch_size, max_width_image, image_height])
+    for i in range(batch_size):
+        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        inputs[i,:] = np.transpose(image_vec)
+
+    targets = np.zeros([batch_size, max_width_image, image_height])
+    for i in range(batch_size):
+        image_vec = utils.img2vec(targets_images[i], height=image_height, width=max_width_image, flatten=False)
+        targets[i,:] = np.transpose(image_vec)
+
+    return inputs, targets 
 
     # max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
     inputs = np.zeros([batch_size, max_width_image, image_height])
@@ -315,8 +294,7 @@ def get_next_batch_for_srgan(batch_size=128):
     return inputs, clears, targets
 
 def train():
-    inputs, clears, targets, labels, global_step, \
-        dncnn, dncnn_loss, dncnn_optim, \
+    inputs, targets, labels, global_step, \
         g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
         g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, net_g, \
         res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
@@ -325,27 +303,20 @@ def train():
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_R_dir = os.path.join(model_dir, "R")
-    model_D_dir = os.path.join(model_dir, "D")
-    model_G_dir = os.path.join(model_dir, "G")
-    model_C_dir = os.path.join(model_dir, "C")
+    model_D_dir = os.path.join(model_dir, "ND")
+    model_G_dir = os.path.join(model_dir, "NG")
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_D_dir): os.mkdir(model_D_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
-    if not os.path.exists(model_C_dir): os.mkdir(model_C_dir)  
  
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
 
-        c_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='DnCNN'), max_to_keep=5)
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), max_to_keep=5)
         d_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_d'), max_to_keep=5)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), max_to_keep=5)
-
-        ckpt = tf.train.get_checkpoint_state(model_C_dir)
-        if ckpt and ckpt.model_checkpoint_path:           
-            print("Restore Model C...")
-            c_saver.restore(session, ckpt.model_checkpoint_path)   
+  
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         ckpt = tf.train.get_checkpoint_state(model_G_dir)
         if ckpt and ckpt.model_checkpoint_path:           
@@ -442,16 +413,13 @@ def train():
                 if steps > 0 and steps % REPORT_STEPS < 16:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
-                    p_dcCnn = session.run(dncnn, {inputs: train_inputs})
-                    p_dcCnn = np.squeeze(p_dcCnn)
-                    p_net_g = session.run(net_g, {inputs: train_inputs, clears: p_dcCnn}) 
+                    p_net_g = session.run(net_g, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g)
                     decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
                     for i in range(4): 
-                        _p_dcCnn = np.transpose(p_dcCnn[i])                    
                         _p_net_g = np.transpose(p_net_g[i])   
-                        _img = np.vstack((np.transpose(train_inputs[i]), _p_dcCnn, _p_net_g)) 
+                        _img = np.vstack((np.transpose(train_inputs[i]), _p_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
                     original_list = utils.decode_sparse_tensor(train_labels)
@@ -485,11 +453,6 @@ def train():
             # print("Save Model G ...")
             # g_saver.save(session, os.path.join(model_G_dir, "G.ckpt"), global_step=steps)
 
-            ckpt = tf.train.get_checkpoint_state(model_C_dir)
-            if ckpt and ckpt.model_checkpoint_path:           
-                print("Restore Model C...")
-                c_saver.restore(session, ckpt.model_checkpoint_path)   
-            ckpt = tf.train.get_checkpoint_state(model_R_dir)
             ckpt = tf.train.get_checkpoint_state(model_G_dir)
             if ckpt and ckpt.model_checkpoint_path:           
                 print("Restore Model G...")
