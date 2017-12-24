@@ -276,24 +276,15 @@ def train():
                             print("Error: cost is nan or inf")
                             return
 
-                    if errD1 < errA:
-                        ## update G
-                        start = time.time()                                
-                        # errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
-                        # print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
-                        errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
-                        print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
-                        if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
-                            print("Error: cost is nan or inf")
-                            return 
-                    else:
-                        ## update D
-                        start = time.time()                
-                        errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
-                        print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
-                        if np.isnan(errD) or np.isinf(errD):
-                            print("Error: cost is nan or inf")
-                            return 
+                    ## update G
+                    start = time.time()                                
+                    # errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                    # print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                    errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
+                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
+                    if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                        print("Error: cost is nan or inf")
+                        return 
 
                 # # 训练RES
                 # for i in range(16):
