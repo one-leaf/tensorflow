@@ -30,7 +30,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-3
+LEARNING_RATE_INITIAL = 1e-4
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -100,8 +100,8 @@ def neural_networks():
 
     # d_loss1 =  tf.losses.log_loss(tf.ones_like(logits_real), logits_real)
     # d_loss2 =  tf.losses.log_loss(tf.zeros_like(logits_real), logits_fake,)
-    d_loss1 = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
-    d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
+    d_loss1 = 1e3 * tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
+    d_loss2 = 1e3 * tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
     # d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = d_loss1 + d_loss2
 
