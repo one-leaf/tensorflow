@@ -148,7 +148,7 @@ def get_next_batch_for_srgan(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_length = random.randint(25, 30)
+        font_length = random.randint(4, 5)
         font_size = 36 #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,3,4,5])     #删除了2
@@ -249,7 +249,7 @@ def train():
 
                 start_steps = steps  
 
-                train_inputs, train_targets = get_next_batch_for_srgan(1)
+                train_inputs, train_targets = get_next_batch_for_srgan(2)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 ## update G
@@ -262,7 +262,7 @@ def train():
 
                 # 如果D网络的差异太大，需要多学习下G网络
                 for i in range(8):
-                    train_inputs, train_targets = get_next_batch_for_srgan(1)
+                    train_inputs, train_targets = get_next_batch_for_srgan(2)
                     feed = {inputs: train_inputs, targets: train_targets}
 
                     if errM > 1:
