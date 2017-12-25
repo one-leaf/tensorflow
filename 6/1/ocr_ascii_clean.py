@@ -250,7 +250,6 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
                 else:
-                    start_steps = steps  
                     # update G
                     start = time.time()                                
                     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
