@@ -30,7 +30,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-4
+LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -117,7 +117,7 @@ def neural_networks():
 
     g_optim_mse = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_mse_loss, global_step=global_step, var_list=g_vars)
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
-    d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
+    d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL*0.1).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
     return  inputs, targets, labels, global_step, \
             g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
