@@ -30,13 +30,13 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-3
+LEARNING_RATE_INITIAL = 1e-4
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
 MOMENTUM = 0.9
 
-BATCHES = 5
+BATCHES = 64
 BATCH_SIZE = 4
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
@@ -100,8 +100,8 @@ def neural_networks():
 
     # d_loss1 =  tf.losses.log_loss(tf.ones_like(logits_real), logits_real)
     # d_loss2 =  tf.losses.log_loss(tf.zeros_like(logits_real), logits_fake,)
-    d_loss1 = 1e6 * tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
-    d_loss2 = 1e6 * tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
+    d_loss1 = tf.losses.sigmoid_cross_entropy(tf.ones_like(logits_real), logits_real)
+    d_loss2 = tf.losses.sigmoid_cross_entropy(tf.zeros_like(logits_fake), logits_fake)
     # d_loss2 = tf.losses.sigmoid_cross_entropy(logits_fake, tf.zeros_like(logits_fake))
     d_loss  = d_loss1 + d_loss2
 
@@ -232,59 +232,55 @@ def train():
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model D...")
             d_saver.restore(session, ckpt.model_checkpoint_path)    
- 
+
+        errD2 = errA = 0
         while True:
             for batch in range(BATCHES):
-                train_inputs, train_targets = get_next_batch_for_srgan(8)
-                feed = {inputs: train_inputs, targets: train_targets}
-
-                # train GAN (SRGAN)
-                start = time.time()                
-                ## update D
-                errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
-                print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
-                if np.isnan(errD) or np.isinf(errD):
-                    print("Error: cost is nan or inf")
-                    return 
-
-                start_steps = steps  
-
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
 
-                # update G
-                start = time.time()                                
-                # errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
-                # print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
-                errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
-                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
-                if np.isnan(errG) or np.isinf(errG) or np.isnan(errM) or np.isinf(errM) or np.isnan(errA) or np.isinf(errA):
-                    print("Error: cost is nan or inf")
-                    return 
-
-                # 如果D网络的差异太大，需要多学习下G网络
-                for i in range(64):
-                    train_inputs, train_targets = get_next_batch_for_srgan(4)
-                    feed = {inputs: train_inputs, targets: train_targets}
-
-                    if errM > 0.5:
-                    # train G
-                        start = time.time() 
-                        errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
-                        print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                        if np.isnan(errM) or np.isinf(errM) :
-                            print("Error: cost is nan or inf")
-                            return
-
-                    ## update G
-                    start = time.time()                                
-                    # errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
-                    # print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
-                    errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
-                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
-                    if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                if errD2 >= errA:
+                    # train GAN (SRGAN)
+                    start = time.time()                
+                    ## update D
+                    errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
+                    print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                    if np.isnan(errD) or np.isinf(errD):
                         print("Error: cost is nan or inf")
                         return 
+                else:
+                    start_steps = steps  
+                    # update G
+                    start = time.time()                                
+                    errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
+                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
+                    if np.isnan(errG) or np.isinf(errG) or np.isnan(errM) or np.isinf(errM) or np.isnan(errA) or np.isinf(errA):
+                        print("Error: cost is nan or inf")
+                        return 
+
+                # # 如果D网络的差异太大，需要多学习下G网络
+                # for i in range(64):
+                #     train_inputs, train_targets = get_next_batch_for_srgan(4)
+                #     feed = {inputs: train_inputs, targets: train_targets}
+
+                #     # if errM > 0.5:
+                #     # # train G
+                #     #     start = time.time() 
+                #     #     errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
+                #     #     print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                #     #     if np.isnan(errM) or np.isinf(errM) :
+                #     #         print("Error: cost is nan or inf")
+                #     #         return
+
+                #     ## update G
+                #     start = time.time()                                
+                #     # errG, errM, errV, errA, _, steps = session.run([g_loss, g_mse_loss, g_res_loss, g_gan_loss, g_optim, global_step], feed)
+                #     # print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f res: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errV, errA))
+                #     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
+                #     print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
+                #     if np.isnan(errG) or np.isinf(errG) or np.isnan(errA) or np.isinf(errA):
+                #         print("Error: cost is nan or inf")
+                #         return 
 
                 # # 训练RES
                 # for i in range(16):
