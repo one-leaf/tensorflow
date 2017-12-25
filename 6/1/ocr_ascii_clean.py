@@ -233,15 +233,15 @@ def train():
             print("Restore Model D...")
             d_saver.restore(session, ckpt.model_checkpoint_path)    
 
+        errA = errD2 = 1
         while True:
-            errA = errD2 = 1
             for batch in range(BATCHES):
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
                 # print("errA:", errA, errA > 0.65)
-                if errA > 0.65 or errA > errD2:
+                if errA >= 0.6 or errA >= errD2:
                     # update G
                     start = time.time()                                
                     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
@@ -249,11 +249,9 @@ def train():
                     if np.isnan(errG) or np.isinf(errG) or np.isnan(errM) or np.isinf(errM) or np.isnan(errA) or np.isinf(errA):
                         print("Error: cost is nan or inf")
                         return 
-                else:
-                    errD2 = 1
 
                 # print("errD2:", errD2, errD2 > 0.65)
-                if errD2 > 0.65 or errD2 > errA:
+                if errA < 0.5 or errD2>=0.6:
                     start = time.time()                
                     ## update D
                     errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
@@ -261,8 +259,8 @@ def train():
                     if np.isnan(errD) or np.isinf(errD):
                         print("Error: cost is nan or inf")
                         return
-                else:
-                    errA = 1 
+
+                if errD2 < 0.6: errA = 1 
 
                 # # 如果D网络的差异太大，需要多学习下G网络
                 # for i in range(64):
