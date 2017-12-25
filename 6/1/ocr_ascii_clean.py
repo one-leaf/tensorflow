@@ -233,7 +233,8 @@ def train():
             print("Restore Model D...")
             d_saver.restore(session, ckpt.model_checkpoint_path)    
 
-        errD2 = errA = 0
+        errD2 = 0
+        errA  = 1
         while True:
             for batch in range(BATCHES):
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
