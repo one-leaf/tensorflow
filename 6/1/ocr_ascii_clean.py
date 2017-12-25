@@ -294,7 +294,7 @@ def train():
                 #         return                       
 
                 # 报告
-                if steps > 0 and steps % REPORT_STEPS < (steps-start_steps):
+                if steps > 0 and steps % REPORT_STEPS < 2:
                     train_inputs, train_targets = get_next_batch_for_srgan(4)   
                     p_net_g = session.run(net_g, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g)
