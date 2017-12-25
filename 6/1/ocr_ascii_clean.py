@@ -233,15 +233,15 @@ def train():
             print("Restore Model D...")
             d_saver.restore(session, ckpt.model_checkpoint_path)    
 
+        errA = errD2 = 1
         while True:
-            errA = errD2 = 1
             for batch in range(BATCHES):
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
-                print("errA:", errA, errA > 0.65)
-                if errA > 0.65:
+                # print("errA:", errA, errA > 0.65)
+                if errA > 0.65 or errA > errD2:
                     # update G
                     start = time.time()                                
                     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
@@ -252,8 +252,8 @@ def train():
                 else:
                     errD2 = 1
 
-                print("errD2:", errD2, errD2 > 0.65)
-                if errD2 > 0.65:
+                # print("errD2:", errD2, errD2 > 0.65)
+                if errD2 > 0.65 or errD2 > errA:
                     start = time.time()                
                     ## update D
                     errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
