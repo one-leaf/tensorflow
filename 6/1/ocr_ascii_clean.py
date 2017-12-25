@@ -253,7 +253,7 @@ def train():
                     # update G
                     start = time.time()                                
                     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
-                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errA))
+                    print("%d time: %4.4fs, d_loss2: %.f8f, g_loss: %.8f (mse: %.6f adv: %.6f)" % (steps, time.time() - start, errD2, errG, errM, errA))
                     if np.isnan(errG) or np.isinf(errG) or np.isnan(errM) or np.isinf(errM) or np.isnan(errA) or np.isinf(errA):
                         print("Error: cost is nan or inf")
                         return 
