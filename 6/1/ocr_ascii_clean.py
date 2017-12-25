@@ -240,8 +240,8 @@ def train():
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
-                # print("errA:", errA, "errD2:", errD2)
-                if float(errA) > 0.65:
+                print("errA:", errA > 0.65, "errD2:", errD2 > 0.65)
+                if errA > 0.65:
                     # update G
                     start = time.time()                                
                     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
@@ -252,7 +252,7 @@ def train():
                 else:
                     errD2 = 1
 
-                if float(errD2) > 0.65:
+                if errD2 > 0.65:
                     start = time.time()                
                     ## update D
                     errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
