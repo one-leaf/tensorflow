@@ -240,21 +240,21 @@ def train():
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
 
-                if errD2 >= errA:
-                    # train GAN (SRGAN)
-                    start = time.time()                
-                    ## update D
-                    errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
-                    print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
-                    if np.isnan(errD) or np.isinf(errD):
-                        print("Error: cost is nan or inf")
-                        return 
-                else:
+                # train GAN (SRGAN)
+                if errA > errD2 or (errD2 < 0.5 and errA > 0.5):
                     # update G
                     start = time.time()                                
                     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
                     print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f adv: %.6f), d_loss2: %.6f" % (steps, time.time() - start, errG, errM, errA, errD2))
                     if np.isnan(errG) or np.isinf(errG) or np.isnan(errM) or np.isinf(errM) or np.isnan(errA) or np.isinf(errA):
+                        print("Error: cost is nan or inf")
+                        return 
+                else:
+                    start = time.time()                
+                    ## update D
+                    errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
+                    print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                    if np.isnan(errD) or np.isinf(errD):
                         print("Error: cost is nan or inf")
                         return 
 
