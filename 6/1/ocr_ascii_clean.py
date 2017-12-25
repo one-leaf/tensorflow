@@ -36,7 +36,7 @@ LEARNING_RATE_INITIAL = 1e-4
 REPORT_STEPS = 500
 MOMENTUM = 0.9
 
-BATCHES = 64
+BATCHES = 128
 BATCH_SIZE = 4
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
@@ -233,9 +233,8 @@ def train():
             print("Restore Model D...")
             d_saver.restore(session, ckpt.model_checkpoint_path)    
 
-        errD2 = 1
-        errA  = 1
         while True:
+            errA = errD2 = 1
             for batch in range(BATCHES):
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
