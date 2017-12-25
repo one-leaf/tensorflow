@@ -251,7 +251,7 @@ def train():
                         return 
 
                 # print("errD2:", errD2, errD2 > 0.65)
-                if errA < 0.6 or errD2>=0.6:
+                if errA < 0.6 or errD2 >= 0.6:
                     start = time.time()                
                     ## update D
                     errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
