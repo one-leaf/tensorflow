@@ -241,7 +241,7 @@ def train():
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
-                if errA > errD2 or (errD2 < 0.5 and errA > 0.5):
+                if errA > 0.6:
                     # update G
                     start = time.time()                                
                     errG, errM, errA, _, steps = session.run([g_loss, g_mse_loss, g_gan_loss, g_optim, global_step], feed)
@@ -250,13 +250,18 @@ def train():
                         print("Error: cost is nan or inf")
                         return 
                 else:
+                    errD2 = 1
+
+                if errD2 > 0.6:
                     start = time.time()                
                     ## update D
                     errD, errD1, errD2, _, steps = session.run([d_loss, d_loss1, d_loss2, d_optim, global_step], feed)
                     print("%d time: %4.4fs, d_loss: %.8f (d_loss1: %.6f  d_loss2: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
                     if np.isnan(errD) or np.isinf(errD):
                         print("Error: cost is nan or inf")
-                        return 
+                        return
+                else:
+                    errA = 1 
 
                 # # 如果D网络的差异太大，需要多学习下G网络
                 # for i in range(64):
