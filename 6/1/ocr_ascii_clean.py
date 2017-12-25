@@ -240,7 +240,7 @@ def train():
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # train GAN (SRGAN)
-                print("errA:", errA, "errD2:", errD2)
+                # print("errA:", errA, "errD2:", errD2)
                 if float(errA) > 0.65:
                     # update G
                     start = time.time()                                
