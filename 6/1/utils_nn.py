@@ -335,6 +335,7 @@ def pix2pix_g2(layer, dropout=False):
         for cnn in (64,128,256,512,512,512,512,512):
             layer = slim.conv2d(layer, cnn)
             encoder_activations.append(layer)
+            print(layer.shape)
 
         layer = slim.conv2d(layer, 1024)
         half_layer = layer
