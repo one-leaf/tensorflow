@@ -82,7 +82,7 @@ def neural_networks():
     net_g = SRGAN_g(layer, reuse = False)
     logits_real = SRGAN_d(layer_targets, reuse = False)
     logits_fake = SRGAN_d(net_g, reuse = True)
-    _, res_target_emb   = RES(layer_targets, reuse = True)
+    _, res_target_emb   = RES(layer_targets, reuse = False)
     _, res_predict_emb  = RES(net_g, reuse = True)
 
     # d_loss1 =  tf.losses.log_loss(tf.ones_like(logits_real), logits_real)
@@ -108,7 +108,7 @@ def neural_networks():
 
     # OCR RESNET 识别 网络
     # net_res, _ = RES(layer_targets, reuse = True)
-    net_res, _ = RES(net_g, reuse = False)
+    net_res, _ = RES(net_g, reuse = True)
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
