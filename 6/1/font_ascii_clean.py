@@ -199,7 +199,7 @@ def train():
         while True:
             errA = errD2 = 1
             for batch in range(BATCHES):
-                train_inputs, train_targets = get_next_batch_for_srgan(4)
+                train_inputs, train_targets = get_next_batch_for_srgan(16)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # start = time.time() 
@@ -222,7 +222,7 @@ def train():
                 start = time.time()                
                 ## update D
                 errD, errD1, errD2, _, steps = session.run([d_loss, d_loss_real, d_loss_fake, d_optim, global_step], feed)
-                print("%d time: %4.4fs, d_loss: %.8f (d_loss_fake: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                print("%d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
 
                 # if errD2 < 0.5: errA = 1 
 
