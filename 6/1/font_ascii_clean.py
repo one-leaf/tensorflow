@@ -152,7 +152,7 @@ def get_next_batch_for_srgan(batch_size=128):
         else:
             image = image / 255.
         width = np.size(image)
-        print(image.shape)
+        print(image.shape,width)
         image = np.pad(image,(0,512*512-width),'constant', constant_values=(0,))
         print(image.shape)
         image = np.reshape(image, [512,512])            
