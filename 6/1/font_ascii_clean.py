@@ -270,7 +270,7 @@ def train():
                     for i in range(4): 
                         _p_net_g = p_net_g[i]   
                         _train_targets = train_targets[i] 
-                        _img = np.vstack((np.reshape(train_inputs[i],(32,-1)), np.reshape(_p_net_g,(32,-1)), np.reshape(_train_targets,(32,-1)))) 
+                        _img = np.vstack((train_inputs[i], _p_net_g, _train_targets)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
 
                 #     original_list = utils.decode_sparse_tensor(train_labels)
