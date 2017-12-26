@@ -122,7 +122,7 @@ def get_next_batch_for_srgan(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_length = random.randint(15, 20)
+        font_length = random.randint(30, 40)
         font_size = 36 #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
@@ -199,7 +199,7 @@ def train():
         while True:
             errA = errD2 = 1
             for batch in range(BATCHES):
-                train_inputs, train_targets = get_next_batch_for_srgan(4)
+                train_inputs, train_targets = get_next_batch_for_srgan(16)
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # start = time.time() 
