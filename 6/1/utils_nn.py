@@ -357,7 +357,7 @@ def pix2pix_g2(layer, dropout=False):
 
 def pix2pix_d2(layer):
     with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
-        for cnn in (64,128,256,512,512,512,512,512,1024):
+        for cnn in (64,128,256,512,512,512,512,512):
             layer = slim.conv2d(layer, cnn)
         layer = slim.flatten(layer)
         layer = slim.fully_connected(layer, 1000)
