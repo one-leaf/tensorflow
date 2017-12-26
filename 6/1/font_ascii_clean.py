@@ -63,8 +63,8 @@ def neural_networks():
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     global_step = tf.Variable(0, trainable=False)
 
-    real_A = tf.reshape(inputs, (batch_size, 320, 320, 1))
-    real_B = tf.reshape(targets, (batch_size, 320, 320, 1))
+    real_A = tf.reshape(inputs, (-1, 320, 320, 1))
+    real_B = tf.reshape(targets, (-1, 320, 320, 1))
 
     # 对抗网络
     fake_B, half_real_A = SRGAN_g(real_A, reuse = False)
