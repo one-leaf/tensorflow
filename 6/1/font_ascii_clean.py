@@ -139,9 +139,8 @@ def get_next_batch_for_srgan(batch_size=128):
         targets_image = (255. - targets_image) / 255. 
         targets_image = np.reshape(targets_image,[-1])
         width = np.size(targets_image)
-        max_width_image = width + (512 - width % 512)
-        targets_image = np.pad(targets_image,(0,max_width_image-width),'constant', constant_values=(0,))
-        targets_image = np.reshape(targets_image, [512,-1])
+        targets_image = np.pad(targets_image,(0,512*512-width),'constant', constant_values=(0,))
+        targets_image = np.reshape(targets_image, [512,512])
         targets_images.append(targets_image)
 
         image = utils_font.add_noise(image)   
@@ -153,20 +152,17 @@ def get_next_batch_for_srgan(batch_size=128):
         else:
             image = image / 255.
         width = np.size(image)
-        max_width_image = width + (512 - width % 512)
-        image = np.pad(image,(0,max_width_image-width),'constant', constant_values=(0,))
-        image = np.reshape(image, [512,-1])            
+        image = np.pad(image,(0,512*512-width),'constant', constant_values=(0,))
+        image = np.reshape(image, [512,512])            
         inputs_images.append(image)   
 
     inputs = np.zeros([batch_size, 512, 512])
     for i in range(batch_size):
-        image_vec = utils.img2vec(inputs_images[i], height=512, width=512, flatten=False)
-        inputs[i,:] = np.transpose(image_vec)
+        inputs[i,:] = inputs_images[i]
 
     targets = np.zeros([batch_size, 512, 512])
     for i in range(batch_size):
-        image_vec = utils.img2vec(targets_images[i], height=512, width=512, flatten=False)
-        targets[i,:] = np.transpose(image_vec)
+        targets[i,:] = targets_images[i]
 
     return inputs, targets
 
