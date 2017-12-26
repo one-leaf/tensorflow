@@ -78,11 +78,24 @@ def neural_networks():
     layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
     layer_targets = tf.reshape(targets, (batch_size, image_width, image_height, 1))
 
+    # OCR RESNET 识别 网络
+    # net_res, _ = RES(layer_targets, reuse = True)
+    net_res, _ = RES(layer, reuse = False)
+    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
+    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
+    # 需要变换到 time_major == True [max_time x batch_size x 2048]
+    net_res = tf.transpose(net_res, (1, 0, 2))
+    res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
+    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
+    res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
+    res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
+
     # 对抗网络
     net_g = SRGAN_g(layer, reuse = False)
     logits_real = SRGAN_d(layer_targets, reuse = False)
     logits_fake = SRGAN_d(net_g, reuse = True)
-    _, res_target_emb   = RES(layer_targets, reuse = False)
+    _, res_target_emb   = RES(layer_targets, reuse = True)
     _, res_predict_emb  = RES(net_g, reuse = True)
 
     # d_loss1 =  tf.losses.log_loss(tf.ones_like(logits_real), logits_real)
@@ -105,19 +118,6 @@ def neural_networks():
     g_optim_mse = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_mse_loss, global_step=global_step, var_list=g_vars)
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
-
-    # OCR RESNET 识别 网络
-    # net_res, _ = RES(layer_targets, reuse = True)
-    net_res, _ = RES(net_g, reuse = True)
-    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
-    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
-    # 需要变换到 time_major == True [max_time x batch_size x 2048]
-    net_res = tf.transpose(net_res, (1, 0, 2))
-    res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
-    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
-    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
-    res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
-    res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
     return  inputs, targets, labels, global_step, \
             g_optim_mse, d_loss, d_loss1, d_loss2, d_optim, \
@@ -400,9 +400,9 @@ def train():
                     start = time.time() 
                     # p_dcCnn = session.run(dncnn, {inputs: train_inputs})
                     # p_dcCnn = np.squeeze(p_dcCnn)
-                    # p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                    # p_net_g = np.squeeze(p_net_g)
-                    feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}  
+                    p_net_g = session.run(net_g, {inputs: train_inputs}) 
+                    p_net_g = np.squeeze(p_net_g)
+                    feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len}  
                     # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len}                 
                     errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                     print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
@@ -414,9 +414,9 @@ def train():
                 if steps > 0 and steps % REPORT_STEPS < 16:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
-                    # p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                    decoded_list,p_net_g = session.run([res_decoded[0],net_g], {inputs: p_net_g, seq_len: train_seq_len}) 
+                    p_net_g = session.run(net_g, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g)
+                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
                     for i in range(4): 
                         _p_net_g = np.transpose(p_net_g[i])   
