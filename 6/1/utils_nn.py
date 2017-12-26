@@ -328,7 +328,7 @@ def pix2pix_d(inputs):
         return layer
 
 # inputs 320 * 320
-def pix2pix_g2(inputs, dropout=True): 
+def pix2pix_g2(inputs, dropout=False): 
     with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
