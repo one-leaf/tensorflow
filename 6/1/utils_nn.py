@@ -327,15 +327,15 @@ def pix2pix_d(inputs):
         # layer = tf.sigmoid(layer)
         return layer
 
-# inputs 320 * 320
+# inputs 512 * 512
 def pix2pix_g2(layer, dropout=False): 
     with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
-        for cnn in (64,128,256,512,512,512,512,512):
+        for cnn in (256,128,64,128,256,512,512,512):
             layer = slim.conv2d(layer, cnn)
             encoder_activations.append(layer)
-            print(layer.shape)
+            # print(layer.shape)
 
         layer = slim.conv2d(layer, 1024)
         half_layer = layer
@@ -346,11 +346,11 @@ def pix2pix_g2(layer, dropout=False):
         # layer = tf.concat([layer, embeddings], 3)
 
         # Decoder 
-        for i, cnn in enumerate((512,512,512,512,512,256,128,64)):
+        for i, cnn in enumerate((512,512,512,256,128,64,128,256)):
             layer = slim.conv2d_transpose(layer, cnn)
             if dropout and i in [0,1,2]:
                 layer = tf.nn.dropout(layer, 0.5)
-            print(layer.shape)               
+            # print(layer.shape)               
             layer = tf.concat([layer, encoder_activations[-i-1]], 3)
 
         layer = slim.conv2d(layer, 1, normalizer_fn=None, activation_fn=None)
@@ -359,11 +359,8 @@ def pix2pix_g2(layer, dropout=False):
 
 def pix2pix_d2(layer):
     with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
-        for cnn in (64,64,64,64,0,128,128,128,128,0,256,256,256,256,256,256,0,512,512,512):
-            if cnn == 0:
-                layer = slim.max_pool2d(layer,  [2,2])
-            else:
-                layer = slim.conv2d(layer, cnn)
+        for cnn in (64,128,256,512,512,512,512,512,1024):
+            layer = slim.conv2d(layer, cnn)
         layer = slim.flatten(layer)
         layer = slim.fully_connected(layer, 1000)
         layer = slim.fully_connected(layer, 1)
