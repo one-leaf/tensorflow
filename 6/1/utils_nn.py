@@ -326,3 +326,44 @@ def pix2pix_d(inputs):
         layer = slim.conv2d(layer, 1, stride=1, normalizer_fn=None, activation_fn=None)
         # layer = tf.sigmoid(layer)
         return layer
+
+# inputs 320 * 320
+def pix2pix_g2(inputs, dropout=False): 
+    with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
+        # Encoder 
+        encoder_activations=[]
+        layer = slim.conv2d(inputs, 64, normalizer_fn=None)
+        encoder_activations.append(layer)
+        for cnn in (128,256,512,512,512,512,512):
+            layer = slim.conv2d(layer, cnn)
+            encoder_activations.append(layer)
+
+        # 加了随机噪声也许会更好一些？
+        batch_size = tf.shape(inputs)[0]
+        embeddings = tf.get_variable("E", [batch_size, 1, 1, 512], tf.float32, tf.random_normal_initializer())
+        layer = tf.concat([layer, embeddings], 3)
+
+        # Decoder 
+        for i, cnn in enumerate((512,512,512,512,512,256,128,64)):
+            layer = slim.conv2d_transpose(layer, cnn)
+            if dropout and i in [0,1,2]:
+                layer = tf.nn.dropout(layer, 0.5)
+            layer = tf.concat([layer, encoder_activations[-i-1]], 3)
+
+        layer = slim.conv2d(layer, 1, normalizer_fn=None, activation_fn=None)
+        layer = tf.tanh(layer)
+        return layer
+
+def pix2pix_d2(inputs):
+    with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
+        layer = slim.conv2d(inputs, 64, normalizer_fn=None)
+        for cnn in (64,64,64,0,128,128,128,128,0,256,256,256,256,256,256,0,512,512,512):
+            if cnn == 0:
+                layer = slim.max_pool2d(layer,  [2,2])
+            else:
+                layer = slim.conv2d(layer, cnn)
+        layer = slim.flatten(layer)
+        layer = slim.fully_connected(layer, 1000)
+        layer = slim.fully_connected(layer, 1)
+        layer = tf.sigmoid(layer)
+        return layer
