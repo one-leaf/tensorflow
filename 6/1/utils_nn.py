@@ -335,7 +335,7 @@ def pix2pix_g2(layer, dropout=False):
         for cnn in (64,128,256,512,512,512,512,512):
             layer = slim.conv2d(layer, cnn)
             encoder_activations.append(layer)
-            # print(layer.shape)
+            print(layer.shape)
 
         layer = slim.conv2d(layer, 1024)
         half_layer = layer
@@ -350,7 +350,7 @@ def pix2pix_g2(layer, dropout=False):
             layer = slim.conv2d_transpose(layer, cnn)
             if dropout and i in [0,1,2]:
                 layer = tf.nn.dropout(layer, 0.5)
-            # print(layer.shape)               
+            print(layer.shape)               
             layer = tf.concat([layer, encoder_activations[-i-1]], 3)
         print(layer.shape)
         layer = slim.conv2d(layer, 1, normalizer_fn=None, activation_fn=None)
