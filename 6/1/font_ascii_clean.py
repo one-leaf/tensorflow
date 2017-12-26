@@ -77,11 +77,11 @@ def neural_networks():
     _, half_real_B = SRGAN_g(fake_B, reuse = True)
     g_half_loss = tf.losses.mean_squared_error(half_real_A, half_real_B)   
 
-    d_loss_real = tf.losses.sigmoid_cross_entropy(labels=tf.ones_like(real_D), logits=real_D)
-    d_loss_fake = tf.losses.sigmoid_cross_entropy(labels=tf.zeros_like(fake_D), logits=fake_D)
+    d_loss_real = tf.losses.sigmoid_cross_entropy(tf.ones_like(real_D), real_D)
+    d_loss_fake = tf.losses.sigmoid_cross_entropy(tf.zeros_like(fake_D), fake_D)
     d_loss  = d_loss_real + d_loss_fake
 
-    g_loss_fake = tf.losses.sigmoid_cross_entropy(labels=tf.ones_like(fake_D), logits=fake_D)
+    g_loss_fake = tf.losses.sigmoid_cross_entropy(tf.ones_like(fake_D), fake_D)
     g_mse_loss = tf.losses.mean_squared_error(real_B, fake_B)
 
     g_loss     = g_loss_fake + g_mse_loss + g_half_loss
