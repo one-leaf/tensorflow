@@ -337,7 +337,6 @@ def pix2pix_g2(layer, dropout=False):
             encoder_activations.append(layer)
             # print(layer.shape)
 
-        layer = slim.conv2d(layer, 1024)
         half_layer = layer
         # print(half_layer.shape)
         # # 加了随机噪声也许会更好一些？
@@ -346,12 +345,12 @@ def pix2pix_g2(layer, dropout=False):
         # layer = tf.concat([layer, embeddings], 3)
 
         # Decoder 
-        for i, cnn in enumerate((512,512,512,512,512,256,128,64)):
+        for i, cnn in enumerate((512,512,512,512,256,128,64)):
             layer = slim.conv2d_transpose(layer, cnn)
             if dropout and i in [0,1,2]:
                 layer = tf.nn.dropout(layer, 0.5)
             # print(layer.shape)               
-            layer = tf.concat([layer, encoder_activations[-i-1]], 3)
+            layer = tf.concat([layer, encoder_activations[-i-2]], 3)
         layer = slim.conv2d_transpose(layer, 1, normalizer_fn=None, activation_fn=None)
         layer = tf.tanh(layer)
         return layer, half_layer
