@@ -268,9 +268,9 @@ def train():
                     p_net_g = np.squeeze(p_net_g)
 
                     for i in range(4): 
-                        _p_net_g = np.transpose(p_net_g[i])   
-                        _train_targets = np.transpose(train_targets[i]) 
-                        _img = np.vstack((np.transpose(train_inputs[i]), _p_net_g, _train_targets)) 
+                        _p_net_g = p_net_g[i]   
+                        _train_targets = train_targets[i] 
+                        _img = np.vstack((train_inputs[i], _p_net_g, _train_targets)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
 
                 #     original_list = utils.decode_sparse_tensor(train_labels)
