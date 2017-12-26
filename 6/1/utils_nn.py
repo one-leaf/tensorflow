@@ -336,7 +336,7 @@ def pix2pix_g2(layer, dropout=False):
             layer = slim.conv2d(layer, cnn)
             encoder_activations.append(layer)
 
-        layer = slim.conv2d(layer, cnn)
+        layer = slim.conv2d(layer, 1024)
         half_layer = layer
         print(half_layer.shape)
         # # 加了随机噪声也许会更好一些？
