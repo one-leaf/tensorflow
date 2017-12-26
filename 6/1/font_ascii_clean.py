@@ -138,16 +138,11 @@ def get_next_batch_for_srgan(batch_size=128):
         targets_image = np.asarray(targets_image)
         targets_image = (255. - targets_image) / 255. 
         targets_image = np.reshape(targets_image,[-1])
-        print(targets_image.shape)
         width = np.size(targets_image)
-        print(width)
         max_width_image = width + (512 - width % 512)
-        print(max_width_image)
         targets_image = np.pad(targets_image,(0,max_width_image-width),'constant', constant_values=(0,))
-        print(targets_image.shape)
         targets_image = np.reshape(targets_image, [512,-1])
-        print(targets_image.shape)
-        targets_images.append()
+        targets_images.append(targets_image)
 
         image = utils_font.add_noise(image)   
         image = np.asarray(image)
