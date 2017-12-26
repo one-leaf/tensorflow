@@ -180,7 +180,6 @@ def img2img(srcimg,dstimg):
     for w in range(s_w):
         for h in range(s_h):
             l = w//d_w
-            print(l,l*s_h+h,w%s_w)
             dstimg[l*s_h+h][w%d_w] = srcimg[h][w]             
 
 # 图片转为向量, img 参数是 np.array 类型
