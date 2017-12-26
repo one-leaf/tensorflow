@@ -328,7 +328,7 @@ def pix2pix_d(inputs):
         return layer
 
 # inputs 320 * 320
-def pix2pix_g2(inputs, dropout=False): 
+def pix2pix_g2(layer, dropout=False): 
     with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
@@ -354,10 +354,9 @@ def pix2pix_g2(inputs, dropout=False):
         layer = tf.tanh(layer)
         return layer, half_layer
 
-def pix2pix_d2(inputs):
+def pix2pix_d2(layer):
     with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
-        layer = slim.conv2d(inputs, 64, normalizer_fn=None)
-        for cnn in (64,64,64,0,128,128,128,128,0,256,256,256,256,256,256,0,512,512,512):
+        for cnn in (64,64,64,64,0,128,128,128,128,0,256,256,256,256,256,256,0,512,512,512):
             if cnn == 0:
                 layer = slim.max_pool2d(layer,  [2,2])
             else:
