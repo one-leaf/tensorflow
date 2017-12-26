@@ -57,14 +57,14 @@ def SRGAN_d(inputs, reuse=False):
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, 320, 320], name="inputs")
+    inputs = tf.placeholder(tf.float32, [None, 512, 512], name="inputs")
     # 干净的图片
-    targets = tf.placeholder(tf.float32, [None, 320, 320], name="targets")
+    targets = tf.placeholder(tf.float32, [None, 512, 512], name="targets")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     global_step = tf.Variable(0, trainable=False)
 
-    real_A = tf.reshape(inputs, (-1, 320, 320, 1))
-    real_B = tf.reshape(targets, (-1, 320, 320, 1))
+    real_A = tf.reshape(inputs, (-1, 512, 512, 1))
+    real_B = tf.reshape(targets, (-1, 512, 512, 1))
 
     # 对抗网络
     fake_B, half_real_A = SRGAN_g(real_A, reuse = False)
@@ -137,7 +137,7 @@ def get_next_batch_for_srgan(batch_size=128):
 
         targets_image = np.asarray(targets_image)
         targets_image = (255. - targets_image) / 255. 
-        targets_image = np.reshape(targets_image, [320,-1])
+        targets_image = np.reshape(targets_image, [512,-1])
         targets_images.append()
 
         image = utils_font.add_noise(image)   
@@ -148,17 +148,17 @@ def get_next_batch_for_srgan(batch_size=128):
             image = (255. - image) / 255.
         else:
             image = image / 255.
-        image =  np.reshpe(image,[320,-1])
+        image =  np.reshpe(image,[512,-1])
         inputs_images.append(image)   
 
-    inputs = np.zeros([batch_size, 320, 320])
+    inputs = np.zeros([batch_size, 512, 512])
     for i in range(batch_size):
-        image_vec = utils.img2vec(inputs_images[i], height=320, width=320, flatten=False)
+        image_vec = utils.img2vec(inputs_images[i], height=512, width=512, flatten=False)
         inputs[i,:] = np.transpose(image_vec)
 
-    targets = np.zeros([batch_size, 320, 320])
+    targets = np.zeros([batch_size, 512, 512])
     for i in range(batch_size):
-        image_vec = utils.img2vec(targets_images[i], height=320, width=320, flatten=False)
+        image_vec = utils.img2vec(targets_images[i], height=512, width=512, flatten=False)
         targets[i,:] = np.transpose(image_vec)
 
     return inputs, targets
