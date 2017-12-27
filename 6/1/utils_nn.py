@@ -369,6 +369,7 @@ def pix2pix_d2(layer):
                 layer = slim.conv2d(layer, cnn, stride=1) 
             else:
                 layer = slim.conv2d(layer, cnn)
+    print(layer.shape)
     layer = slim.flatten(layer)
     layer = slim.fully_connected(layer, 1)
     layer = tf.nn.sigmoid(layer)
