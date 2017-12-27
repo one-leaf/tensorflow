@@ -270,7 +270,7 @@ def train():
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS < 2:
                     train_inputs, train_targets = get_next_batch_for_srgan(4)   
-                    train_embedding = np.random.normal(0, 0.01, (batch_size,1,1,512))
+                    train_embedding = np.random.normal(0, 0.01, (4,1,1,512))
                     p_net_g = session.run(fake_B, {inputs: train_inputs, embedding:train_embedding}) 
                     p_net_g = np.squeeze(p_net_g)
 
