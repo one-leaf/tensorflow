@@ -323,7 +323,7 @@ def pix2pix_d(inputs):
             else:
                 layer = slim.conv2d(layer, cnn)
         shape = tf.shape(layer)
-        layer = tf.reshape(layer,(shape[0],shape[1],-1))
+        layer = tf.reshape(layer,(shape[0],shape[1],512*4))
         # layer = slim.flatten(layer)
         # print(layer.shape)
         layer = slim.fully_connected(layer, 1000)
