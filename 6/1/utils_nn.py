@@ -328,7 +328,7 @@ def pix2pix_d(inputs):
         return layer
 
 # inputs 512 * 512
-def pix2pix_g2(layer, dropout=False): 
+def pix2pix_g2(layer, embeddings, dropout=False): 
     with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
@@ -339,8 +339,8 @@ def pix2pix_g2(layer, dropout=False):
         half_layer = layer
 
         # # 加了随机噪声也许会更好一些？
-        batch_size = tf.shape(layer)[0]
-        embeddings = tf.get_variable("E", [batch_size, 1, 1, 512], tf.float32, tf.random_normal_initializer())
+        # batch_size = tf.shape(layer)[0]
+        # embeddings = tf.get_variable("E", [batch_size, 1, 1, 512], tf.float32, tf.random_normal_initializer())
         layer = tf.concat([layer, embeddings], 3)
 
         # Decoder 
