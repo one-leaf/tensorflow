@@ -333,7 +333,8 @@ def pix2pix_d(inputs):
         # layer = tf.sigmoid(layer)
         return layer
 
-# inputs 512 * 512
+# inputs 256 * 256
+# G网络第后一层的不能normalizer
 def pix2pix_g2(layer, dropout=False): 
     with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
@@ -359,9 +360,11 @@ def pix2pix_g2(layer, dropout=False):
         layer = tf.tanh(layer)
         return layer, half_layer
 
+# D网络第一层的不能normalizer
 def pix2pix_d2(layer):
     with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
-        for i, cnn in enumerate((64,64,64,128,128,128,128,256,256,256,256,256,256,512,512,512)):
+        layer = slim.conv2d(layer, 64, normalizer_fn=None, activation_fn=None)
+        for i, cnn in enumerate((64,64,128,128,128,128,256,256,256,256,256,256,512,512,512)):
             if i % 2 ==0:
                 layer = slim.conv2d(layer, cnn, stride=1) 
             else:
