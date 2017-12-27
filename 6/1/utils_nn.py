@@ -358,16 +358,11 @@ def pix2pix_d2(layer):
     with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         for i, cnn in enumerate((64,64,64,128,128,128,128,256,256,256,256,256,256,512,512,512)):
             if i % 2 ==0:
-                layer = slim.conv2d(layer, cnn, kernel_size=[1, 1], stride=1) 
+                layer = slim.conv2d(layer, cnn, kernel_size=[3, 3], stride=1) 
             else:
                 layer = slim.conv2d(layer, cnn)
-            print(layer.shape)
-    # layer = slim.conv2d(layer, 1000, kernel_size=[1, 1], stride=1, normalizer_fn=None, activation_fn=None)
-    print(layer.shape)
     layer = slim.flatten(layer)
-    print(layer.shape)
     layer = slim.fully_connected(layer, 1000)
     layer = slim.fully_connected(layer, 1)
-    print(layer.shape)
-   # layer = tf.sigmoid(layer)
+    layer = tf.sigmoid(layer)
     return layer
