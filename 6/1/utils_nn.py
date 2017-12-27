@@ -339,9 +339,9 @@ def pix2pix_g2(layer, dropout=False):
         half_layer = layer
 
         # # 加了随机噪声也许会更好一些？
-        # batch_size = tf.shape(inputs)[0]
-        # embeddings = tf.get_variable("E", [batch_size, 1, 1, 512], tf.float32, tf.random_normal_initializer())
-        # layer = tf.concat([layer, embeddings], 3)
+        batch_size = tf.shape(inputs)[0]
+        embeddings = tf.get_variable("E", [batch_size, 1, 1, 512], tf.float32, tf.random_normal_initializer())
+        layer = tf.concat([layer, embeddings], 3)
 
         # Decoder 
         for i, cnn in enumerate((512,512,512,512,256,128,64)):
