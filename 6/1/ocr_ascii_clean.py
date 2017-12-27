@@ -239,12 +239,12 @@ def train():
                 train_inputs, train_targets = get_next_batch_for_srgan(4)
                 feed = {inputs: train_inputs, targets: train_targets}
 
-                start = time.time() 
-                errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
-                print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
-                if np.isnan(errM) or np.isinf(errM) :
-                    print("Error: cost is nan or inf")
-                    return    
+                # start = time.time() 
+                # errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
+                # print("%d time: %4.4fs, g_mse_loss: %.8f " % (steps, time.time() - start, errM))
+                # if np.isnan(errM) or np.isinf(errM) :
+                #     print("Error: cost is nan or inf")
+                #     return    
 
                 # train GAN (SRGAN)
                 # print("errA:", errA, errA > 0.65)
