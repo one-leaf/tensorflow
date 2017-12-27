@@ -69,8 +69,10 @@ def neural_networks():
 
     # 对抗网络
     fake_B, half_real_A = SRGAN_g(real_A, reuse = False)
-    real_AB = tf.concat([real_A, real_B], 3)
-    fake_AB = tf.concat([real_A, fake_B], 3)
+    # real_AB = tf.concat([real_A, real_B], 3)
+    # fake_AB = tf.concat([real_A, fake_B], 3)
+    real_AB = real_B
+    fake_AB = fake_B
     real_D  = SRGAN_d(real_AB, reuse = False)
     fake_D  = SRGAN_d(fake_AB, reuse = True)
 
