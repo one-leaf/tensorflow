@@ -62,14 +62,15 @@ def neural_networks():
     # 干净的图片
     targets = tf.placeholder(tf.float32, [None, image_size, image_size], name="targets")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
-    embedding = tf.placeholder(tf.float32, [None, 1, 1, 512], name="embedding")
+    # embedding = tf.placeholder(tf.float32, [None, 1, 1, 512], name="embedding")
 
     global_step = tf.Variable(0, trainable=False)
     real_A = tf.reshape(inputs, (-1, image_size, image_size, 1))
     real_B = tf.reshape(targets, (-1, image_size, image_size, 1))
 
     # 对抗网络
-    fake_B, half_real_A = SRGAN_g(real_A, embedding, reuse = False)
+    # fake_B, half_real_A = SRGAN_g(real_A, embedding, reuse = False)
+    fake_B, half_real_A = SRGAN_g(real_A, reuse = False)
     real_AB = tf.concat([real_A, real_B], 3)
     fake_AB = tf.concat([real_A, fake_B], 3)
     # real_AB = real_B
@@ -78,7 +79,8 @@ def neural_networks():
     fake_D  = SRGAN_d(fake_AB, reuse = True)
 
     # 假设预计输出和真实输出应该在一半网络也应该是相同的
-    _, half_real_B = SRGAN_g(fake_B, embedding, reuse = True)
+    # _, half_real_B = SRGAN_g(fake_B, embedding, reuse = True)
+    half_real_B = SRGAN_g(fake_B, reuse = True)
     g_half_loss = tf.losses.mean_squared_error(half_real_A, half_real_B)   
 
     d_loss_real = tf.losses.sigmoid_cross_entropy(tf.ones_like(real_D), real_D)
@@ -204,8 +206,9 @@ def train():
             for batch in range(BATCHES):
                 batch_size = 16
                 train_inputs, train_targets = get_next_batch_for_srgan(batch_size)
-                train_embedding = np.random.normal(0, 0.01, (batch_size,1,1,512))
-                feed = {inputs: train_inputs, targets: train_targets, embedding: train_embedding}
+                # train_embedding = np.random.normal(0, 0.01, (batch_size,1,1,512))
+                # feed = {inputs: train_inputs, targets: train_targets, embedding: train_embedding}
+                feed = {inputs: train_inputs, targets: train_targets}
 
                 # start = time.time() 
                 # errM, _ , steps= session.run([g_mse_loss, g_optim_mse, global_step], feed)
