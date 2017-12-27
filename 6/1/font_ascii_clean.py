@@ -46,9 +46,9 @@ POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
 # 参考 https://github.com/kaonashi-tyc/zi2zi/blob/master/model/unet.py
-def SRGAN_g(inputs, embedding=None, reuse=False):    
+def SRGAN_g(inputs, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
-        layer, half_layer = utils_nn.pix2pix_g2(inputs, embedding)
+        layer, half_layer = utils_nn.pix2pix_g2(inputs)
         return layer, half_layer
 
 def SRGAN_d(inputs, reuse=False):
@@ -62,14 +62,12 @@ def neural_networks():
     # 干净的图片
     targets = tf.placeholder(tf.float32, [None, image_size, image_size], name="targets")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
-    # embedding = tf.placeholder(tf.float32, [None, 1, 1, 512], name="embedding")
 
     global_step = tf.Variable(0, trainable=False)
     real_A = tf.reshape(inputs, (-1, image_size, image_size, 1))
     real_B = tf.reshape(targets, (-1, image_size, image_size, 1))
 
     # 对抗网络
-    # fake_B, half_real_A = SRGAN_g(real_A, embedding, reuse = False)
     fake_B, half_real_A = SRGAN_g(real_A, reuse = False)
     real_AB = tf.concat([real_A, real_B], 3)
     fake_AB = tf.concat([real_A, fake_B], 3)
@@ -79,7 +77,6 @@ def neural_networks():
     fake_D  = SRGAN_d(fake_AB, reuse = True)
 
     # 假设预计输出和真实输出应该在一半网络也应该是相同的
-    # _, half_real_B = SRGAN_g(fake_B, embedding, reuse = True)
     half_real_B = SRGAN_g(fake_B, reuse = True)
     g_half_loss = tf.losses.mean_squared_error(half_real_A, half_real_B)   
 
@@ -206,8 +203,6 @@ def train():
             for batch in range(BATCHES):
                 batch_size = 16
                 train_inputs, train_targets = get_next_batch_for_srgan(batch_size)
-                # train_embedding = np.random.normal(0, 0.01, (batch_size,1,1,512))
-                # feed = {inputs: train_inputs, targets: train_targets, embedding: train_embedding}
                 feed = {inputs: train_inputs, targets: train_targets}
 
                 # start = time.time() 
