@@ -332,7 +332,7 @@ def pix2pix_g2(layer, dropout=False):
     with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
-        for cnn in (64,128,256,512,512,512,512,512,1024):
+        for cnn in (64,128,256,512,512,512,512,512):
             layer = slim.conv2d(layer, cnn)
             encoder_activations.append(layer)
             # print(layer.shape)
@@ -345,7 +345,7 @@ def pix2pix_g2(layer, dropout=False):
         # layer = tf.concat([layer, embeddings], 3)
 
         # Decoder 
-        for i, cnn in enumerate((512,512,512,512,512,256,128,64)):
+        for i, cnn in enumerate((512,512,512,512,256,128,64)):
             layer = slim.conv2d_transpose(layer, cnn)
             if dropout and i in [0,1,2]:
                 layer = tf.nn.dropout(layer, 0.5)
