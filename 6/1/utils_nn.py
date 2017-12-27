@@ -322,9 +322,10 @@ def pix2pix_d(inputs):
                 layer = slim.max_pool2d(layer,  [2,2])
             else:
                 layer = slim.conv2d(layer, cnn)
-        print(layer.shape)
-        layer = slim.flatten(layer)
-        print(layer.shape)
+        batchsize, width, _, _ = layer.shape
+        layer = tf.reshape(layer,(batchsize,width,-1))
+        # layer = slim.flatten(layer)
+        # print(layer.shape)
         layer = slim.fully_connected(layer, 1000)
         layer = slim.fully_connected(layer, 1)
         # layer = slim.conv2d(layer, 256, stride=1)
