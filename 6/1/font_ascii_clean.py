@@ -46,7 +46,7 @@ POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
 # 参考 https://github.com/kaonashi-tyc/zi2zi/blob/master/model/unet.py
-def SRGAN_g(inputs, embedding, reuse=False):    
+def SRGAN_g(inputs, embedding=None, reuse=False):    
     with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
         layer, half_layer = utils_nn.pix2pix_g2(inputs, embedding)
         return layer, half_layer
