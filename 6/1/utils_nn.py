@@ -362,7 +362,7 @@ def pix2pix_d2(layer):
     #         else:
     #             layer = slim.conv2d(layer, cnn)
     # layer = slim.conv2d(layer, 1000, kernel_size=[1, 1], stride=1, normalizer_fn=None, activation_fn=None)
-    layer,_ = resNet34(layer)
+    layer = resNet34(layer)
     layer = slim.flatten(layer)
     layer = slim.fully_connected(layer, 1)
     layer = tf.sigmoid(layer)
