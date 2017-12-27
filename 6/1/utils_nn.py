@@ -355,6 +355,7 @@ def pix2pix_g2(layer, dropout=False):
         return layer, half_layer
 
 def pix2pix_d2(layer):
+    print(layer.shape)
     with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=[2,2], activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         for i, cnn in enumerate((64,64,64,128,128,128,128,256,256,256,256,256,256,512,512,512)):
             if i % 4 ==0:
