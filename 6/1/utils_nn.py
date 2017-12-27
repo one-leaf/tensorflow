@@ -75,9 +75,9 @@ def resNet34(layer, isPoolSize=True):
             layer = resNetBlockV1(layer, 512)
         return layer
 
-def resNet50(layer, isPoolSize=True):
+def resNet50(layer, isPoolSize=True, stride=2):
     if isPoolSize:
-        stride = 2
+        stride = stride
         padding = "VALID"
     else:
         stride = 1
@@ -359,7 +359,7 @@ def pix2pix_d2(layer):
     #with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
         # for cnn in (64,128,256,512,512,512,1024,1024,1024):
         #     layer = slim.conv2d(layer, cnn)
-    layer, _ = resNet50(layer, True)
+    layer, _ = resNet50(layer, True, stride=3)
     layer = slim.flatten(layer)
     layer = slim.fully_connected(layer, 1000)
     layer = slim.fully_connected(layer, 1)
