@@ -373,7 +373,9 @@ def pix2pix_d2(layer):
                 layer = slim.max_pool2d(layer,  [2,2])
             else:
                 layer = slim.conv2d(layer, cnn)
-        layer = slim.conv2d(layer, 256, stride=1)
-        layer = slim.conv2d(layer, 1, stride=1, normalizer_fn=None, activation_fn=None)
-        # layer = tf.sigmoid(layer)
+        layer = slim.conv2d(layer, 512, stride=1, normalizer_fn=None, activation_fn=None)
+        # layer = slim.conv2d(layer, 1, stride=1, )
+        layer = slim.flatten(layer)
+        layer = slim.fully_connected(layer, 1)
+    #         # layer = tf.sigmoid(layer)
         return layer
