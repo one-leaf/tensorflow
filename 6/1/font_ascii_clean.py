@@ -47,12 +47,14 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 
 # 参考 https://github.com/kaonashi-tyc/zi2zi/blob/master/model/unet.py
 def SRGAN_g(inputs, reuse=False):    
-    with tf.variable_scope("SRGAN_g", reuse=reuse) as vs:      
+    with tf.variable_scope("SRGAN_g"):      
+        if reuse: tf.get_variable_scope().reuse_variables()
         layer, half_layer = utils_nn.pix2pix_g2(inputs)
         return layer, half_layer
 
 def SRGAN_d(inputs, reuse=False):
-    with tf.variable_scope("SRGAN_d", reuse=reuse):
+    with tf.variable_scope("SRGAN_d") :
+        if reuse: tf.get_variable_scope().reuse_variables()
         layer = utils_nn.pix2pix_d2(inputs)
         return layer
 
