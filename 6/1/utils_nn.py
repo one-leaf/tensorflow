@@ -368,5 +368,6 @@ def pix2pix_d2(layer):
     print(layer.shape)
     layer = slim.fully_connected(layer, 1000)
     layer = slim.fully_connected(layer, 1)
-    # layer = tf.sigmoid(layer)
+    print(layer.shape)
+   # layer = tf.sigmoid(layer)
     return layer
