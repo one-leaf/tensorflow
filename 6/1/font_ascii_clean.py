@@ -16,7 +16,7 @@ import utils_pil, utils_font, utils_nn
 curr_dir = os.path.dirname(__file__)
 
 image_height = 32
-image_size = 256
+image_size = 512
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
