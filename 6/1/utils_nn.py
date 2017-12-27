@@ -367,7 +367,7 @@ def pix2pix_d2(layer):
     # # layer = tf.sigmoid(layer)
     # return layer
     with slim.arg_scope([slim.conv2d],  kernel_size=[4, 4],  stride=1, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
-        layer = slim.conv2d(inputs, 64, normalizer_fn=None)
+        layer = slim.conv2d(layer, 64, normalizer_fn=None)
         for cnn in (64,64,64,0,128,128,128,128,0,256,256,256,256,256,256,0,512,512,512):
             if cnn == 0:
                 layer = slim.max_pool2d(layer,  [2,2])
