@@ -336,7 +336,7 @@ def pix2pix_d(inputs):
 # inputs 256 * 256
 # G网络第后一层的不能normalizer
 def pix2pix_g2(layer, dropout=False): 
-    with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
+    with slim.arg_scope([slim.conv2d, slim.conv2d_transpose], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.relu, normalizer_fn=slim.batch_norm):
         # Encoder 
         encoder_activations=[]
         for cnn in (64,128,256,512,512,512,512,512):
@@ -371,4 +371,5 @@ def pix2pix_d2(layer):
                 layer = slim.conv2d(layer, cnn)
     layer = slim.flatten(layer)
     layer = slim.fully_connected(layer, 1)
+    layer = tf.nn.sigmoid(layer)
     return layer
