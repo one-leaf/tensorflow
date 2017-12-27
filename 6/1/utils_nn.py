@@ -335,10 +335,9 @@ def pix2pix_g2(layer, dropout=False):
         for cnn in (64,128,256,512,512,512,512,512):
             layer = slim.conv2d(layer, cnn)
             encoder_activations.append(layer)
-            # print(layer.shape)
 
         half_layer = layer
-        # print(half_layer.shape)
+
         # # 加了随机噪声也许会更好一些？
         # batch_size = tf.shape(inputs)[0]
         # embeddings = tf.get_variable("E", [batch_size, 1, 1, 512], tf.float32, tf.random_normal_initializer())
@@ -356,10 +355,13 @@ def pix2pix_g2(layer, dropout=False):
         return layer, half_layer
 
 def pix2pix_d2(layer):
-    #with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
-        # for cnn in (64,128,256,512,512,512,1024,1024,1024):
-        #     layer = slim.conv2d(layer, cnn)
-    layer, _ = resNet50(layer, True, stride=3)
+    with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
+        for i, cnn in in enumerate((64,64,64,128,128,128,128,256,256,256,256,256,256,512,512,512)):
+            if i % 2 ==0:
+                layer = slim.conv2d(layer, cnn, kernel_size=[3, 3], stride=1) 
+            else:
+                layer = slim.conv2d(layer, cnn)
+    print(layer.shape)
     layer = slim.flatten(layer)
     layer = slim.fully_connected(layer, 1000)
     layer = slim.fully_connected(layer, 1)
