@@ -213,20 +213,20 @@ def train():
 
                 # train GAN (SRGAN)
                 # print("errA:", errA, errA > 0.65)
-                if errA >= 0.5 or errA >= errD2 or errD1 == errD2:
+                # if errA >= 0.5 or errA >= errD2 or errD1 == errD2:
                     # update G
-                    start = time.time()                                
-                    errG, errM, errA, errH, _, steps = session.run([g_loss, g_mse_loss, g_loss_fake, g_half_loss, g_optim, global_step], feed)
-                    print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
+                start = time.time()                                
+                errG, errM, errA, errH, _, steps = session.run([g_loss, g_mse_loss, g_loss_fake, g_half_loss, g_optim, global_step], feed)
+                print("%d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
                 # print("errD2:", errD2, errD2 > 0.65)
-                if errA < 0.5 or errD2 >= 0.5:
-                    start = time.time()                
-                    ## update D
-                    errD, errD1, errD2, _, steps = session.run([d_loss, d_loss_real, d_loss_fake, d_optim, global_step], feed)
-                    print("%d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                # if errA < 0.5 or errD2 >= 0.5:
+                start = time.time()                
+                ## update D
+                errD, errD1, errD2, _, steps = session.run([d_loss, d_loss_real, d_loss_fake, d_optim, global_step], feed)
+                print("%d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
 
-                if errD2 < 0.5: errA = 1 
+                # if errD2 < 0.5: errA = 1 
 
                 # # 如果D网络的差异太大，需要多学习下G网络
                 # for i in range(64):
