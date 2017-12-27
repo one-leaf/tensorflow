@@ -97,7 +97,7 @@ def neural_networks():
     g_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(g_loss, global_step=global_step, var_list=g_vars)
     d_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(d_loss, global_step=global_step, var_list=d_vars)
 
-    return  inputs, targets, embedding, mglobal_step, \
+    return  inputs, targets, embedding, global_step, \
             g_optim_mse, d_loss, d_loss_real, d_loss_fake, d_optim, \
             g_loss, g_mse_loss, g_half_loss, g_loss_fake, g_optim, fake_B
 
