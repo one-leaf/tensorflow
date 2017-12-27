@@ -322,7 +322,7 @@ def pix2pix_d(inputs):
                 layer = slim.max_pool2d(layer,  [2,2])
             else:
                 layer = slim.conv2d(layer, cnn)
-        batchsize, width, _, _ = layer.shape
+        batchsize, width, _, _ = tf.shape(layer)
         layer = tf.reshape(layer,(batchsize,width,-1))
         # layer = slim.flatten(layer)
         # print(layer.shape)
