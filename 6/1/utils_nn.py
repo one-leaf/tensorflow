@@ -370,7 +370,7 @@ def pix2pix_d2(layer):
             else:
                 layer = slim.conv2d(layer, cnn)
 
-    layer = slim.conv2d(layer, [1,1], stride=1, normalizer_fn=None, activation_fn=None)
+    layer = slim.conv2d(layer, kernel_size=[1,1], stride=1, normalizer_fn=None, activation_fn=None)
     layer = slim.flatten(layer)
     print(layer)
     # layer = slim.fully_connected(layer, 1)
