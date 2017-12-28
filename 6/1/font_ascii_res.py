@@ -139,7 +139,7 @@ def get_next_batch_for_res(batch_size=128):
         info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
 
     inputs = np.zeros([batch_size, image_size, image_size])
-    for i in range(len(images)):
+    for i in range(batch_size):
         inputs[i,:] = utils.img2img(inputs_images[i],np.zeros([image_size, image_size]))
 
     labels = [np.asarray(i) for i in codes]
