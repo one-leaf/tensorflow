@@ -8,6 +8,8 @@ import os
 
 curr_dir = os.path.dirname(__file__)
 mnist = input_data.read_data_sets(os.path.join(curr_dir,"data"), one_hot=True)
+log_dir = os.path.join(curr_dir,"logs")
+if not os.path.exists(log_dir): os.makedirs(log_dir)
 
 # 55000 组图片和标签, 用于训练
 def getBatch(batchSize):
@@ -33,24 +35,32 @@ def neural_networks():
                 weights_initializer = layers.xavier_initializer(uniform=True),  
                 weights_regularizer = layers.l2_regularizer(scale=1e-4),  
                 activation_fn = tf.nn.tanh)
+    tf.summary.histogram("layer1",layer)            
     layer = layers.fully_connected(layer,   
                 num_outputs=200,  
                 weights_initializer = layers.xavier_initializer(uniform=True),  
                 weights_regularizer = layers.l2_regularizer(scale=1e-4),
                 activation_fn = tf.nn.tanh)  
+    tf.summary.histogram("layer2",layer)            
     prediction = layers.fully_connected(layer,   
                 num_outputs=10, 
                 weights_initializer = layers.xavier_initializer(uniform=True),  
                 weights_regularizer = layers.l2_regularizer(scale=1e-4),  
                 activation_fn = None)  
+    tf.summary.histogram("prediction",layer)            
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y, logits=prediction))  
-    reg_ws = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
-    cost = cross_entropy + tf.reduce_sum(reg_ws)
+    tf.summary.scalar("cross_entropy",cross_entropy)
+    reg_ws = tf.reduce_sum(tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES))
+    tf.summary.scalar("reg_ws",reg_ws)
+    cost = cross_entropy + reg_ws
+    tf.summary.scalar("cost",cost)
     optimizer = tf.train.AdamOptimizer(1e-4).minimize(cost)  
 
     correct_prediction = tf.equal(tf.argmax(y,1), tf.argmax(prediction,1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    tf.summary.scalar("accuracy",accuracy)
+
     return x, y, prediction, optimizer, cost, accuracy
 
 if __name__ == '__main__':
@@ -58,6 +68,10 @@ if __name__ == '__main__':
     sess = tf.Session()
     init = tf.global_variables_initializer()
     sess.run(init)
+
+    merged = tf.summary.merge_all()
+    writer = tf.summary.FileWriter(log_dir, sess.graph)
+
     valid_x, valid_y = getValidationImages()
     test_x, test_y = getTestImages()
 
@@ -72,7 +86,8 @@ if __name__ == '__main__':
         batch_x, batch_y= getBatch(100)
         _, loss, pred = sess.run([optimizer, cost, prediction], feed_dict={x: batch_x, y: batch_y})
         if step % 10 == 0 :
-            acc = sess.run(accuracy, feed_dict={x: valid_x, y: valid_y})
+            acc,rs = sess.run([accuracy,merged], feed_dict={x: valid_x, y: valid_y})
+            writer.add_summary(rs, step)
             print(step, loss, acc)
             plt.clf()
             plt_n.append(step)
