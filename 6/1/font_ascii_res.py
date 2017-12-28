@@ -56,6 +56,7 @@ def RES(inputs, reuse = False):
         layer, conv = utils_nn.resNet50(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
+        # layer = slim.flatten(layer) 不合并的效果貌似更好一点
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=None, activation_fn=None)  
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
