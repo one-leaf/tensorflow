@@ -67,7 +67,8 @@ def neural_networks():
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     global_step = tf.Variable(0, trainable=False)
 
-    layer = tf.reshape(inputs, (batch_size, image_width, image_height, 1))
+    layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
+
     net_res = RES(layer, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
