@@ -80,7 +80,7 @@ def neural_networks():
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
-    net_g = SRGAN_g(layer, reuse = False)
+    net_g, _ = SRGAN_g(layer, reuse = False)
     g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     
     return  inputs, labels, global_step, \
