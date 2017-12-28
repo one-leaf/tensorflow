@@ -183,24 +183,20 @@ def train():
             errA = errD1 = errD2 = 1
             for batch in range(BATCHES):
                 batch_size = 16
-                train_inputs, train_targets = get_next_batch_for_res(batch_size)
-                feed = {inputs: train_inputs, targets: train_targets}
-                
-                # 训练RES
-                for i in range(16):
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(8)
-                    start = time.time() 
-                    p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                    p_net_g = np.squeeze(p_net_g)
-                    feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len}  
-                    errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                    print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
-                    if np.isnan(errR) or np.isinf(errR) :
-                        print("Error: cost is nan or inf")
-                        return                      
+                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
+
+                start = time.time() 
+                p_net_g = session.run(net_g, {inputs: train_inputs}) 
+                p_net_g = np.squeeze(p_net_g)
+                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len}  
+                errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
+                if np.isnan(errR) or np.isinf(errR) :
+                    print("Error: cost is nan or inf")
+                    return                      
 
                 # 报告
-                if steps > 0 and steps % REPORT_STEPS < 2:
+                if steps > 0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
                     print(train_info)          
                     p_net_g = session.run(net_g, {inputs: train_inputs}) 
