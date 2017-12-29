@@ -104,7 +104,7 @@ eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8"
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
 
-def get_next_batch_for_res(batch_size=128):
+def get_next_batch_for_res(batch_size=128, add_noise=True):
     inputs_images = []   
     codes = []
     max_width_image = 0
@@ -131,15 +131,19 @@ def get_next_batch_for_res(batch_size=128):
             w, h = image.size
             if w * h < image_size * image_size: break
 
-        image = utils_font.add_noise(image)   
-        image = utils_pil.convert_to_gray(image)                   
+        image = utils_pil.convert_to_gray(image) 
+        if add_noise:                  
+            image = utils_font.add_noise(image)   
         image = np.asarray(image)     
         # image = utils.resize(image, height=image_height)
-        image = image * random.uniform(0.3, 1)        
-        if random.random()>0.5:
-            image = (255. - image) / 255.
-        else:
+        if add_noise:
+            image = image * random.uniform(0.3, 1)        
+
+        if add_noise and random.random()>0.5:
             image = image / 255.
+        else:
+            image = (255. - image) / 255.
+
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
@@ -189,12 +193,13 @@ def train():
         while True:
             errA = errD1 = errD2 = 1
             for batch in range(BATCHES):
-                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)
+                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(16, False)
 
                 start = time.time() 
-                p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                p_net_g = np.squeeze(p_net_g)
-                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len}  
+                # p_net_g = session.run(net_g, {inputs: train_inputs}) 
+                # p_net_g = np.squeeze(p_net_g)
+                # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
+                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
                 if np.isnan(errR) or np.isinf(errR) :
