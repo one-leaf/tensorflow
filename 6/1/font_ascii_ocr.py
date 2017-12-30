@@ -195,7 +195,7 @@ def train():
         while True:
             errA = errD1 = errD2 = 1
             for batch in range(BATCHES):
-                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4, False)
+                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False)
 
                 start = time.time() 
                 # p_net_g = session.run(net_g, {inputs: train_inputs}) 
@@ -210,13 +210,13 @@ def train():
 
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS == 0:
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2)   
                     print(train_info)          
                     p_net_g = session.run(net_g, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g)
                     decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
-                    for i in range(4): 
+                    for i in range(2): 
                         _img = np.vstack((train_inputs[i], p_net_g[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
