@@ -126,7 +126,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
 
             #text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-            if add_noise:                  
+            if add_noise:
                 image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
             else:
                 image = utils_pil.resize_by_height(image, image_height)
