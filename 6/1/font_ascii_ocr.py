@@ -53,7 +53,7 @@ def SRGAN_g(inputs, reuse=False):
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer, conv = utils_nn.resNet152(inputs, True)
+        layer = utils_nn.resNet152(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
