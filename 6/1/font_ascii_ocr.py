@@ -130,6 +130,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
                 image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
             else:
                 image = utils_pil.resize_by_height(image, image_height)
+                
             w, h = image.size
             if w * h < image_size * image_size: break
 
