@@ -53,10 +53,9 @@ def SRGAN_g(inputs, reuse=False):
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer, conv = utils_nn.resNet50(inputs, True)
+        layer, conv = utils_nn.resNet152(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
-        # layer = slim.flatten(layer) 不合并的效果貌似更好一点
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=None, activation_fn=None)  
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
@@ -130,7 +129,8 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
             if add_noise:                  
                 image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
             else:
-                image = utils_pil.resize_by_height(image, image_height)            w, h = image.size
+                image = utils_pil.resize_by_height(image, image_height)
+            w, h = image.size
             if w * h < image_size * image_size: break
 
         image = utils_pil.convert_to_gray(image) 
@@ -170,7 +170,7 @@ def train():
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_G_dir = os.path.join(model_dir, "FG")
-    model_R_dir = os.path.join(model_dir, "FR")
+    model_R_dir = os.path.join(model_dir, "BR")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
