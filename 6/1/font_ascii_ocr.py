@@ -228,7 +228,11 @@ def train():
                     return
 
                 for info in train_info:
-                    AllLosts[",".join(info)]=errR
+                    key = ",".join(info)
+                    if key in AllLosts:
+                        AllLosts[key]=AllLosts[key]*0.9+errR*0.1.
+                    else:
+                        AllLosts[key]=errR
 
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS == 0:
@@ -259,7 +263,7 @@ def train():
                         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
                     print("Test Accuracy:", acc / len(original_list))
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
-                    for f in sorted_fonts:
+                    for f in sorted_fonts[:20]:
                         print(f)
             print("Save Model R ...")
             r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
