@@ -13,6 +13,7 @@ import math
 import urllib,json,io
 import utils_pil, utils_font, utils_nn
 import font_ascii_clean
+import operator
 
 curr_dir = os.path.dirname(__file__)
 
@@ -103,19 +104,23 @@ eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8"
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
 
-def get_next_batch_for_res(batch_size=128, add_noise=True):
+def get_next_batch_for_res(batch_size=128, add_noise=True, font_name=None, font_size=None, font_mode=None, font_hint=None):
     inputs_images = []   
     codes = []
     max_width_image = 0
-    info = ""
+    info = []
     for i in range(batch_size):
-        font_name = random.choice(AllFontNames)
-        if random.random()>0.5:
-            font_size = random.randint(8, 49)    
-        else:
-            font_size = random.randint(8, 15) 
-        font_mode = random.choice([0,1,2,4]) 
-        font_hint = random.choice([0,1,2,3,4,5])     #删除了2
+        if font_name==None:
+            font_name = random.choice(AllFontNames)
+        if font_size==None:
+            if random.random()>0.5:
+                font_size = random.randint(8, 49)    
+            else:
+                font_size = random.randint(8, 15) 
+        if font_mode==None:
+            font_mode = random.choice([0,1,2,4]) 
+        if font_hint==None:
+            font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
             font_length = random.randint(5, 40)
 
@@ -149,7 +154,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
-        info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
+        info = info.append([font_name, font_size, font_mode, font_hint])
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
@@ -159,7 +164,6 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
     sparse_labels = utils.sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)                
     return inputs, sparse_labels, seq_len, info
-
 
 def train():
     inputs, labels, global_step, \
@@ -192,10 +196,17 @@ def train():
             print("Restore Model R...")
             r_saver.restore(session, ckpt.model_checkpoint_path)    
 
+        AllLosts={}
         while True:
             errA = errD1 = errD2 = 1
             for batch in range(BATCHES):
-                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False)
+                if len(AllLosts)>10 and random.random()>0.5:
+                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                    font_info = sorted_font[random.randint(0,5)].split(",")
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False, \
+                        font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
+                else:
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False)
 
                 start = time.time() 
                 # p_net_g = session.run(net_g, {inputs: train_inputs}) 
@@ -206,12 +217,14 @@ def train():
                 print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
                 if np.isnan(errR) or np.isinf(errR) :
                     print("Error: cost is nan or inf")
-                    return                      
+                    return
+
+                for info in train_info:
+                    AllLosts[",".join(info)]=errR
 
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2)   
-                    print(train_info)          
                     p_net_g = session.run(net_g, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g)
                     decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
