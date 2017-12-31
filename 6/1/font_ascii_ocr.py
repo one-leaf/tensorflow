@@ -258,7 +258,9 @@ def train():
                         import Levenshtein
                         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
                     print("Test Accuracy:", acc / len(original_list))
-
+                    sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                    for f in sorted_fonts:
+                        print(f)
             print("Save Model R ...")
             r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
             try:
