@@ -203,7 +203,6 @@ def train():
                 if len(AllLosts)>10 and random.random()>0.5:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     font_info = sorted_font[random.randint(0,5)]
-                    print(font_info)
                     font_info = font_info[0].split(",")
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False, \
                         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
@@ -216,7 +215,7 @@ def train():
                 # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
+                print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f, info: %s " % (steps, time.time() - start, errR, acc, train_info))
                 if np.isnan(errR) or np.isinf(errR) :
                     print("Error: cost is nan or inf")
                     return
