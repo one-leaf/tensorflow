@@ -111,16 +111,16 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, font_name=None, font_
     info = []
     for i in range(batch_size):
         if font_name==None:
-            font_name = random.choice(AllFontNames)
+            _font_name = random.choice(AllFontNames)
         if font_size==None:
             if random.random()>0.5:
-                font_size = random.randint(8, 49)    
+                _font_size = random.randint(8, 49)    
             else:
-                font_size = random.randint(8, 15) 
+                _font_size = random.randint(8, 15) 
         if font_mode==None:
-            font_mode = random.choice([0,1,2,4]) 
+            _font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
-            font_hint = random.choice([0,1,2,3,4,5])     #删除了2
+            _font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
             font_length = random.randint(5, 40)
 
@@ -130,7 +130,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, font_name=None, font_
             text = "".join(text).strip()
 
             #text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
+            image = utils_font.get_font_image_from_url(text, _font_name, _font_size, _font_mode, _font_hint )
             if add_noise:
                 image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
             else:
@@ -215,7 +215,6 @@ def train():
                 # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                print(train_info)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
                 print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f, info: %s " % (steps, time.time() - start, errR, acc, font_info))
                 if np.isnan(errR) or np.isinf(errR) :
