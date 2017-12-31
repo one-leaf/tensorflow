@@ -104,23 +104,23 @@ eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8"
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
 
-def get_next_batch_for_res(batch_size=128, add_noise=True, font_name=None, font_size=None, font_mode=None, font_hint=None):
+def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
     inputs_images = []   
     codes = []
     max_width_image = 0
     info = []
     for i in range(batch_size):
-        if font_name==None:
-            _font_name = random.choice(AllFontNames)
-        if font_size==None:
+        if _font_name==None:
+            font_name = random.choice(AllFontNames)
+        if _font_size==None:
             if random.random()>0.5:
-                _font_size = random.randint(8, 49)    
+                font_size = random.randint(8, 49)    
             else:
-                _font_size = random.randint(8, 15) 
-        if font_mode==None:
-            _font_mode = random.choice([0,1,2,4]) 
-        if font_hint==None:
-            _font_hint = random.choice([0,1,2,3,4,5])     #删除了2
+                font_size = random.randint(8, 15) 
+        if _font_mode==None:
+            font_mode = random.choice([0,1,2,4]) 
+        if _font_hint==None:
+            font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
             font_length = random.randint(5, 40)
 
@@ -130,7 +130,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, font_name=None, font_
             text = "".join(text).strip()
 
             #text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-            image = utils_font.get_font_image_from_url(text, _font_name, _font_size, _font_mode, _font_hint )
+            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
             if add_noise:
                 image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
             else:
@@ -154,7 +154,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, font_name=None, font_
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
-        info.append([font_name, str(_font_size), str(_font_mode), str(_font_hint)])
+        info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
