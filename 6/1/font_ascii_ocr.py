@@ -154,7 +154,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, font_name=None, font_
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
-        info.append([font_name, font_size, font_mode, font_hint])
+        info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
