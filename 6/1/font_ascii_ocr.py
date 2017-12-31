@@ -220,7 +220,7 @@ def train():
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
-                print("%d time: %4.4fs, res_loss: %.6f, res_acc: %.2f, info: %s " % (steps, time.time() - start, errR, acc, font_info))
+                print("%d time: %4.4fs, res_loss: %.4f, res_acc: %.4f, info: %s " % (steps, time.time() - start, errR, acc, font_info))
                 if np.isnan(errR) or np.isinf(errR) :
                     print("Error: cost is nan or inf")
                     return
