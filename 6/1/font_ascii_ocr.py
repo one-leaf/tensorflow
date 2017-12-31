@@ -206,7 +206,7 @@ def train():
             errA = errD1 = errD2 = 1
             batch_size = 4
             for batch in range(BATCHES):
-                if len(AllLosts)>10 and random.random()>0.5:
+                if len(AllLosts)>10 and random.random()>0.7:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     font_info = sorted_font[random.randint(0,10)]
                     font_info = font_info[0].split(",")
