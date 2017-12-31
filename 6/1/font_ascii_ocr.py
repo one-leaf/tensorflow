@@ -54,7 +54,8 @@ def SRGAN_g(inputs, reuse=False):
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer = utils_nn.resNet152(inputs, True)
+        # layer = utils_nn.resNet152(inputs, True)
+        layer = utils_nn.resNet50(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -178,7 +179,7 @@ def train():
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_G_dir = os.path.join(model_dir, "FG")
-    model_R_dir = os.path.join(model_dir, "BR")
+    model_R_dir = os.path.join(model_dir, "FR")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
@@ -203,15 +204,16 @@ def train():
         AllLosts={}
         while True:
             errA = errD1 = errD2 = 1
+            batch_size = 4
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.5:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
-                    font_info = sorted_font[random.randint(0,5)]
+                    font_info = sorted_font[random.randint(0,10)]
                     font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False, \
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, \
                         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
                 else:
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False)
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False)
 
                 start = time.time() 
                 # p_net_g = session.run(net_g, {inputs: train_inputs}) 
@@ -230,7 +232,7 @@ def train():
 
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS == 0:
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2)   
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
                     p_net_g = session.run(net_g, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g)
                     decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
