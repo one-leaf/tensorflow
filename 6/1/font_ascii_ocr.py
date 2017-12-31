@@ -230,7 +230,7 @@ def train():
                 for info in train_info:
                     key = ",".join(info)
                     if key in AllLosts:
-                        AllLosts[key]=AllLosts[key]*0.9+errR*0.1.
+                        AllLosts[key]=AllLosts[key]*0.95+errR*0.05
                     else:
                         AllLosts[key]=errR
 
