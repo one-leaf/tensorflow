@@ -202,9 +202,9 @@ def train():
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.5:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
-                    font_info = sorted_font[random.randint(0,5)][0]
+                    font_info = sorted_font[random.randint(0,5)]
                     print(font_info)
-                    font_info = font_info.split(",")
+                    font_info = font_info[0].split(",")
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(2, False, \
                         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
                 else:
