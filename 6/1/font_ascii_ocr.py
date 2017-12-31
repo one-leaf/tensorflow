@@ -110,16 +110,20 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
     max_width_image = 0
     info = []
     for i in range(batch_size):
-        if _font_name==None:
+        font_name = _font_name
+        font_size = _font_size
+        font_mode = _font_mode
+        font_hint = _font_hint
+        if font_name==None:
             font_name = random.choice(AllFontNames)
-        if _font_size==None:
+        if font_size==None:
             if random.random()>0.5:
                 font_size = random.randint(8, 49)    
             else:
                 font_size = random.randint(8, 15) 
-        if _font_mode==None:
+        if font_mode==None:
             font_mode = random.choice([0,1,2,4]) 
-        if _font_hint==None:
+        if font_hint==None:
             font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
             font_length = random.randint(5, 40)
