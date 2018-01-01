@@ -206,20 +206,22 @@ def train():
             errA = errD1 = errD2 = 1
             batch_size = 4
             for batch in range(BATCHES):
-                if len(AllLosts)>10 and random.random()>0.7:
-                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
-                    font_info = sorted_font[random.randint(0,10)]
-                    font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, \
-                        font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
-                else:
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
-
+                # if len(AllLosts)>10 and random.random()>0.7:
+                #     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                #     font_info = sorted_font[random.randint(0,10)]
+                #     font_info = font_info[0].split(",")
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, \
+                #         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
+                # else:
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
+                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 start = time.time() 
-                # p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                # p_net_g = np.squeeze(p_net_g)
-                # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
-                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
+
+                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, True)
+                p_net_g = session.run(net_g, {inputs: train_inputs}) 
+                p_net_g = np.squeeze(p_net_g)
+                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
+
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
                 print("%d time: %4.4fs, res_acc: %.4f, res_loss: %.4f, info: %s " % (steps, time.time() - start, acc, errR, font_info))
