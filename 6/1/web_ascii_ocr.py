@@ -94,7 +94,7 @@ def index():
         <body>
             <form action="/ocr" method="post" enctype="multipart/form-data">
                 选择一个文件上传来 OCR （支持全部Windows字体和各种字号）: <br/>
-                1. 只能是 白底 黑字<br/>
+                1. 只能是英文数字，不能跨表格线<br/>
                 <br/>
                 <br/>
                 <input type="file" name="file" id="file"> <br/><br/>
