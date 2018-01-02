@@ -48,9 +48,9 @@ def init():
         print("Restore Model R...")
         r_saver.restore(session, ckpt.model_checkpoint_path)    
 
-    return session, inputs, seq_len, res_decoded
+    return session, inputs, seq_len, res_decoded, net_g
 
-session, inputs, seq_len, res_decoded = init()
+session, inputs, seq_len, res_decoded, net_g = init()
 
 def scan(file):
     img = Image.open(file.stream)
