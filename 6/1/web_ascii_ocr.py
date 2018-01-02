@@ -75,7 +75,7 @@ def scan(file):
 
         start = time.time()
         p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
-        p_net_g = np.squeeze(p_net_g)
+        p_net_g = np.squeeze(p_net_g, axis=2)
         decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))
