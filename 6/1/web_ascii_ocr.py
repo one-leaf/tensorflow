@@ -79,7 +79,7 @@ def scan(file):
         decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))
-        detected_list = ocr.decode_sparse_tensor(decoded_list)            
+        detected_list = utils.decode_sparse_tensor(decoded_list)            
         for detect_number in detected_list:
             ocr_texts.append(ocr.list_to_chars(detect_number))
 
