@@ -6,10 +6,11 @@ import cv2
 # 随机缩小和位置
 def random_space(img):
     bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
-    img = resize(img, random.uniform(0.3, 1))
+    img = resize(img, random.uniform(0.5, 1))
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
-    return bg.paste(img, (random.randint(0,w),random.randint(0,h)))
+    bg.paste(img, (random.randint(0,w),random.randint(0,h)))
+    return bg
 
 # 随机截图
 def random_crop(img, width, height):  
