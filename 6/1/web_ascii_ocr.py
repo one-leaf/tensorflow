@@ -74,9 +74,9 @@ def scan(file):
         ocr_seq_len = np.ones(1) * (ocr.image_size * ocr.image_size ) // (ocr.POOL_SIZE * ocr.POOL_SIZE)
 
         start = time.time()
-        p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
+        p_net_g = sess.run(net_g, {inputs: ocr_inputs}) 
         p_net_g = np.squeeze(p_net_g)
-        decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
+        decoded_list = sess.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))
         detected_list = ocr.decode_sparse_tensor(decoded_list)            
