@@ -27,8 +27,8 @@ def init():
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
             net_g = ocr.neural_networks()
 
-    sess = tf.Session()
-    sess.run(tf.global_variables_initializer())
+    session = tf.Session()
+    session.run(tf.global_variables_initializer())
 
     model_dir = os.path.join(curr_dir, "model_ascii_srgan")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
@@ -48,9 +48,9 @@ def init():
         print("Restore Model R...")
         r_saver.restore(session, ckpt.model_checkpoint_path)    
 
-    return sess, inputs, seq_len, res_decoded
+    return session, inputs, seq_len, res_decoded
 
-sess, inputs, seq_len, res_decoded = init()
+session, inputs, seq_len, res_decoded = init()
 
 def scan(file):
     img = Image.open(file.stream)
@@ -74,9 +74,9 @@ def scan(file):
         ocr_seq_len = np.ones(1) * (ocr.image_size * ocr.image_size ) // (ocr.POOL_SIZE * ocr.POOL_SIZE)
 
         start = time.time()
-        p_net_g = sess.run(net_g, {inputs: ocr_inputs}) 
+        p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
         p_net_g = np.squeeze(p_net_g)
-        decoded_list = sess.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
+        decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))
         detected_list = ocr.decode_sparse_tensor(decoded_list)            
