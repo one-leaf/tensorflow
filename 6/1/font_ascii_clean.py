@@ -137,6 +137,8 @@ def get_next_batch_for_srgan(batch_size=128):
         _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
         image = utils_pil.resize_by_height(image, _h)        
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
+        
+        image = utils_pil.random_space(image)
 
         targets_image = np.asarray(targets_image)
         targets_image = (255. - targets_image) / 255. 
@@ -176,8 +178,8 @@ def train():
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_D_dir = os.path.join(model_dir, "FD")
-    model_G_dir = os.path.join(model_dir, "FG")
+    model_D_dir = os.path.join(model_dir, "FD2")
+    model_G_dir = os.path.join(model_dir, "FG2")
     if not os.path.exists(model_D_dir): os.mkdir(model_D_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
  
