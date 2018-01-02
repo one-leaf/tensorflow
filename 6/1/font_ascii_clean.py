@@ -133,19 +133,18 @@ def get_next_batch_for_srgan(batch_size=128):
         image = utils_pil.resize_by_height(image, image_height)
         image = utils_pil.convert_to_gray(image)
         targets_image = image.copy()
-
-        _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
-        image = utils_pil.resize_by_height(image, _h)        
-        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
-        
-        image = utils_pil.random_space(image)
-
         targets_image = np.asarray(targets_image)
         targets_image = (255. - targets_image) / 255. 
         # targets_image = np.reshape(targets_image,[-1])
         # targets_image = np.pad(targets_image,(0, image_size*image_size-np.size(targets_image)),"constant")
         # targets_image = np.reshape(targets_image, [image_size,image_size])  
         targets_images.append(targets_image)
+
+        _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
+        image = utils_pil.resize_by_height(image, _h)        
+        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
+        
+        image = utils_pil.random_space(image)
 
         image = utils_font.add_noise(image)   
         image = np.asarray(image)
