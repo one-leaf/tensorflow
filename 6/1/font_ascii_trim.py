@@ -17,7 +17,6 @@ import font_ascii_clean
 curr_dir = os.path.dirname(__file__)
 
 image_height = 32
-image_size = 256
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -46,11 +45,6 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
-def SRGAN_g(inputs, reuse=False):    
-    with tf.variable_scope("SRGAN_g", reuse=reuse):      
-        layer, half_layer = utils_nn.pix2pix_g2(inputs)
-        return layer, half_layer
-
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
         layer, conv = utils_nn.resNet50(inputs, True)
@@ -58,23 +52,19 @@ def RES(inputs, reuse = False):
         batch_size = shape[0] 
         # layer = slim.flatten(layer) 不合并的效果貌似更好一点
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=None, activation_fn=None)  
-        layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
+        layer = slim.fully_connected(layer, 8, normalizer_fn=None, activation_fn=None)  
         return layer
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, image_size, image_size], name="inputs")
-    labels = tf.sparse_placeholder(tf.int32, name="labels")
+    inputs = tf.placeholder(tf.float32, [None, image_height, None], name="inputs")
+    labels = tf.placeholder(tf.int32, [None, 8], name="labels")
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
     net_res = RES(layer, reuse = False)
-    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
-    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
-    # 需要变换到 time_major == True [max_time x batch_size x 2048]
-    net_res = tf.transpose(net_res, (1, 0, 2))
+
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
