@@ -344,10 +344,6 @@ def pix2pix_g2(layer, dropout=False):
 
         half_layer = layer
 
-        # # 加了随机噪声也许会更好一些？没有鸟用
-        # if embeddings != None:
-        #     layer = tf.concat([layer, embeddings], 3)
-
         # Decoder 
         for i, cnn in enumerate((512,512,512,512,256,128,64)):
             layer = slim.conv2d_transpose(layer, cnn)

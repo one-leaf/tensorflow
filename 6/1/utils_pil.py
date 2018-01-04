@@ -12,7 +12,10 @@ def random_space(img):
     x = random.randint(0,w)
     y = random.randint(0,h)
     bg.paste(img, (x,y))
-    return bg, x, y, img.size[0], img.size[1]
+    new_bg = Image.new('L', bg.size, 0)
+    new_img = Image.new('L', img.size, 255)
+    new_bg.paste(new_img,(x,y))
+    return bg, new_bg
 
 # 随机截图
 def random_crop(img, width, height):  
