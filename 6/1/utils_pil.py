@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import cv2
 
 # 随机缩小和位置
-def random_space(img):
+def random_space(img, minrate=0.5):
     bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
-    img = resize(img, random.uniform(0.5, 1))
+    img = resize(img, random.uniform(minrate, 1))
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
     x = random.randint(0,w)

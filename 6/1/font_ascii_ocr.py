@@ -119,9 +119,9 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
             font_name = random.choice(AllFontNames)
         if font_size==None:
             if random.random()>0.5:
-                font_size = random.randint(8, 49)    
+                font_size = random.randint(9, 49)    
             else:
-                font_size = random.randint(8, 15) 
+                font_size = random.randint(9, 15) 
         if font_mode==None:
             font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
