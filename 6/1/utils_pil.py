@@ -9,8 +9,10 @@ def random_space(img):
     img = resize(img, random.uniform(0.5, 1))
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
-    bg.paste(img, (random.randint(0,w),random.randint(0,h)))
-    return bg
+    x = random.randint(0,w)
+    y = random.randint(0,h)
+    bg.paste(img, (x,y))
+    return bg, x, y, img.size[0], img.size[1]
 
 # 随机截图
 def random_crop(img, width, height):  

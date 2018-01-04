@@ -17,6 +17,7 @@ import font_ascii_clean
 curr_dir = os.path.dirname(__file__)
 
 image_height = 32
+image_size = 256
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -48,53 +49,28 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
         layer, conv = utils_nn.resNet50(inputs, True)
-        shape = tf.shape(inputs)
-        batch_size = shape[0] 
-        # layer = slim.flatten(layer) 不合并的效果貌似更好一点
+        # shape = tf.shape(inputs)
+        # batch_size = shape[0] 
+        layer = slim.flatten(layer) 
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, 64, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, 4, normalizer_fn=None, activation_fn=None)  
         return layer
 
 def neural_networks():
-    # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, image_height, None], name="inputs")
+    # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,256,256]
+    inputs = tf.placeholder(tf.float32, [None, image_size, image_size], name="inputs")
     labels = tf.placeholder(tf.int32, [None, 4], name="labels")
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
-    # shape (batch_size, 32, -1, 64)
     net_res = RES(layer, reuse = False)
 
-    layer = tf.reshape(net_res,[batch_size, -1, 64])  #[batch_size, -1, 64]
-
-    num_hidden = 128
-    with tf.variable_scope('RNN1'):
-        cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
-        cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
-        cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-        outputs = tf.concat(outputs, axis=2) #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, num_hidden]
-        layer = tf.reshape(outputs, [-1, num_hidden])    
-    
-    layer = tf.layers.dense(layer, num_hidden)
-    layer = tf.reshape(layer, [batch_size, -1, num_hidden])    
-
-
-
-    res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
+    res_loss = tf.reduce_sum(tf.square(labels - net_res))
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
-    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
-    res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
-    res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
-
-    net_g, _ = SRGAN_g(layer, reuse = False)
-    g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     
     return  inputs, labels, global_step, \
-            res_loss, res_optim, seq_len, res_acc, res_decoded, \
-            net_g
+            net_res, res_loss, res_optim
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
@@ -116,7 +92,6 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
     inputs_images = []   
     codes = []
     max_width_image = 0
-    info = ""
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         if random.random()>0.5:
@@ -143,6 +118,9 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
             if w * h < image_size * image_size: break
 
         image = utils_pil.convert_to_gray(image) 
+
+        image,x,y,w,h = utils_pil.random_space(image)
+
         if add_noise:                  
             image = utils_font.add_noise(image)   
         image = np.asarray(image)     
@@ -156,30 +134,24 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
             image = (255. - image) / 255.
 
         inputs_images.append(image)
-        codes.append([CHARS.index(char) for char in text])                  
-
-        info = info+"%s\n\r" % utils_font.get_font_url(text, font_name, font_size, font_mode, font_hint)
+        codes.append([x,y,w,h])                  
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
         inputs[i,:] = utils.img2img(inputs_images[i],np.zeros([image_size, image_size]))
 
     labels = [np.asarray(i) for i in codes]
-    sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)                
-    return inputs, sparse_labels, seq_len, info
+    return inputs, labels
 
 
 def train():
     inputs, labels, global_step, \
-        res_loss, res_optim, seq_len, res_acc, res_decoded, \
-        net_g = neural_networks()
+        net_res, res_loss, res_optim = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_G_dir = os.path.join(model_dir, "FG")
-    model_R_dir = os.path.join(model_dir, "FR")
+    model_R_dir = os.path.join(model_dir, "T")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
@@ -189,12 +161,6 @@ def train():
         session.run(init)
 
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
-        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), sharded=True)
-
-        ckpt = tf.train.get_checkpoint_state(model_G_dir)
-        if ckpt and ckpt.model_checkpoint_path:           
-            print("Restore Model G...")
-            g_saver.restore(session, ckpt.model_checkpoint_path)   
 
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         if ckpt and ckpt.model_checkpoint_path:
@@ -204,58 +170,36 @@ def train():
         while True:
             errA = errD1 = errD2 = 1
             for batch in range(BATCHES):
-                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4, False)
+                train_inputs, train_labels = get_next_batch_for_res(4, False)
 
                 start = time.time() 
-                # p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                # p_net_g = np.squeeze(p_net_g)
-                # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
-                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
-                errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                print("%d time: %4.4fs, res_loss: %.8f, res_acc: %.8f " % (steps, time.time() - start, errR, acc))
+
+                feed = {inputs: train_inputs, labels: train_labels} 
+                errR, _ , steps= session.run([res_loss, res_optim, global_step], feed)
+                print("%d time: %4.4fs, res_loss: %.8f" % (steps, time.time() - start, errR))
                 if np.isnan(errR) or np.isinf(errR) :
                     print("Error: cost is nan or inf")
                     return                      
 
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS == 0:
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(4)   
-                    print(train_info)          
-                    p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                    p_net_g = np.squeeze(p_net_g)
-                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
+                    train_inputs, train_labels = get_next_batch_for_res(4)   
+                    decoded_list = session.run(net_res, {inputs: train_inputs}) 
 
                     for i in range(4): 
-                        _img = np.vstack((train_inputs[i], p_net_g[i])) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
 
-                    original_list = utils.decode_sparse_tensor(train_labels)
-                    detected_list = utils.decode_sparse_tensor(decoded_list)
-                    if len(original_list) != len(detected_list):
-                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-                            " test and detect length desn't match")
-                    print("T/F: original(length) <-------> detectcted(length)")
-                    acc = 0.
-                    for idx in range(min(len(original_list),len(detected_list))):
-                        number = original_list[idx]
-                        detect_number = detected_list[idx]  
+                    for idx in range(min(len(train_labels),len(decoded_list))):
+                        number = train_labels[idx]
+                        detect_number = decoded_list[idx]  
                         hit = (number == detect_number)          
-                        print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
-                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
-                        # 计算莱文斯坦比
-                        import Levenshtein
-                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-                    print("Test Accuracy:", acc / len(original_list))
+                        print("%6s" % hit, number))
+                        print("%6s" % "",  detect_number)
+
 
             print("Save Model R ...")
-            r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
-            try:
-                ckpt = tf.train.get_checkpoint_state(model_G_dir)
-                if ckpt and ckpt.model_checkpoint_path:           
-                    print("Restore Model G...")
-                    g_saver.restore(session, ckpt.model_checkpoint_path)   
-            except:
-                pass
+            r_saver.save(session, os.path.join(model_R_dir, "T.ckpt"), global_step=steps)
+
 
 if __name__ == '__main__':
     train()

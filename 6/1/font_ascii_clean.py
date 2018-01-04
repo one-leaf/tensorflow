@@ -144,7 +144,7 @@ def get_next_batch_for_srgan(batch_size=128):
         image = utils_pil.resize_by_height(image, _h)        
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
         
-        image = utils_pil.random_space(image)
+        image,_,_,_,_ = utils_pil.random_space(image)
 
         image = utils_font.add_noise(image)   
         image = np.asarray(image)
