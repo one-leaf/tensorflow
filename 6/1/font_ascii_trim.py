@@ -65,10 +65,11 @@ def neural_networks():
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
     net_res = RES(layer, reuse = False)
+    r_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
 
     # res_loss = tf.reduce_sum(tf.square(labels - net_res))
     res_loss = tf.losses.mean_squared_error(labels, net_res)
-    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step)
+    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=r_vars)
     
     return  inputs, labels, global_step, net_res, res_loss, res_optim
 
