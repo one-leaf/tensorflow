@@ -193,7 +193,7 @@ def train():
                         number = train_labels[idx]
                         detect_number = decoded_list[idx]  
                         hit = (number == detect_number)          
-                        print("%6s" % hit, number))
+                        print("%6s" % hit, number)
                         print("%6s" % "",  detect_number)
 
 
