@@ -29,17 +29,17 @@ def resNet18(layer, isPoolSize=True):
         
         for i in range(2):
             layer = resNetBlockV1(layer, 64)
-        layer = slim.max_pool2d(layer, [2, 2])
+        layer = slim.max_pool2d(layer, [3, 3])
 
         layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(2):
             layer = resNetBlockV1(layer, 128)
-        layer = slim.max_pool2d(layer, [2, 2])
+        layer = slim.max_pool2d(layer, [3, 3])
 
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
         for i in range(2):
             layer = resNetBlockV1(layer, 256)
-        layer = slim.max_pool2d(layer, [2, 2])
+        layer = slim.max_pool2d(layer, [3, 3])
 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(2):

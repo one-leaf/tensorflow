@@ -49,7 +49,7 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
         layer = utils_nn.resNet18(inputs, True)
-        layer = slim.avg_pool2d(layer,[32,32])
+        layer = slim.avg_pool2d(layer,[31,31])
         layer = slim.flatten(layer) 
         # layer = slim.fully_connected(layer, 512, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, 4, normalizer_fn=None, activation_fn=None)  
