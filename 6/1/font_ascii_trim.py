@@ -52,9 +52,8 @@ def RES(inputs, reuse = False):
         # shape = tf.shape(inputs)
         # batch_size = shape[0] 
         layer = slim.flatten(layer) 
-        layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        # layer = slim.fully_connected(layer, 512, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, 4, normalizer_fn=None, activation_fn=None)  
-        print(layer.shape)
         return layer
 
 def neural_networks():
