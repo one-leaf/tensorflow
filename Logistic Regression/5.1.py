@@ -41,6 +41,7 @@ def neural_networks():
     num_units = 64
     cell = tf.contrib.rnn.BasicLSTMCell(num_units, state_is_tuple=True)
     logits, _ = tf.nn.dynamic_rnn(cell, x_image, dtype=tf.float32, time_major=False)
+    print(logits.shape)
     logits = tf.transpose(logits, (0, 2, 1))
     logits = tf.reshape(logits,[-1, 28 * num_units])
     prediction = tf.layers.dense(logits, 10)              

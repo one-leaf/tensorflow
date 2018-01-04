@@ -52,18 +52,36 @@ def RES(inputs, reuse = False):
         batch_size = shape[0] 
         # layer = slim.flatten(layer) 不合并的效果貌似更好一点
         layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, 8, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, 64, normalizer_fn=None, activation_fn=None)  
         return layer
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, image_height, None], name="inputs")
-    labels = tf.placeholder(tf.int32, [None, 8], name="labels")
+    labels = tf.placeholder(tf.int32, [None, 4], name="labels")
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
+    # shape (batch_size, 32, -1, 64)
     net_res = RES(layer, reuse = False)
+
+    layer = tf.reshape(net_res,[batch_size, -1, 64])  #[batch_size, -1, 64]
+
+    num_hidden = 128
+    with tf.variable_scope('RNN1'):
+        cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
+        cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+        cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
+        cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
+        outputs = tf.concat(outputs, axis=2) #[batch_size, image_width*image_height//POOL_SIZE//POOL_SIZE, num_hidden]
+        layer = tf.reshape(outputs, [-1, num_hidden])    
+    
+    layer = tf.layers.dense(layer, num_hidden)
+    layer = tf.reshape(layer, [batch_size, -1, num_hidden])    
+
+
 
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
