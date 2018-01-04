@@ -69,8 +69,7 @@ def neural_networks():
     res_loss = tf.reduce_sum(tf.square(labels - net_res))
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
     
-    return  inputs, labels, global_step, \
-            net_res, res_loss, res_optim
+    return  inputs, labels, global_step, net_res, res_loss, res_optim
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
@@ -145,8 +144,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True):
 
 
 def train():
-    inputs, labels, global_step, \
-        net_res, res_loss, res_optim = neural_networks()
+    inputs, labels, global_step, net_res, res_loss, res_optim = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
