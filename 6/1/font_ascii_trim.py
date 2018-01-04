@@ -168,7 +168,7 @@ def train():
         while True:
             errA = errD1 = errD2 = 1
             for batch in range(BATCHES):
-                train_inputs, train_labels = get_next_batch_for_res(8, True)
+                train_inputs, train_labels = get_next_batch_for_res(16, True)
 
                 start = time.time() 
 
