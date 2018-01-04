@@ -152,7 +152,6 @@ def train():
     model_R_dir = os.path.join(model_dir, "T")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
-    if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
  
     init = tf.global_variables_initializer()
     with tf.Session() as session:
