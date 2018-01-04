@@ -66,7 +66,8 @@ def neural_networks():
 
     net_res = RES(layer, reuse = False)
 
-    res_loss = tf.reduce_sum(tf.square(labels - net_res))
+    # res_loss = tf.reduce_sum(tf.square(labels - net_res))
+    res_loss = tf.losses.mean_squared_error(labels, net_res)
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step)
     
     return  inputs, labels, global_step, net_res, res_loss, res_optim
