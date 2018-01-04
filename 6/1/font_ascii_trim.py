@@ -48,7 +48,7 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 
 def RES(inputs, reuse = False):
     with tf.variable_scope("RES", reuse=reuse):
-        layer, conv = utils_nn.resNet50(inputs, True)
+        layer = utils_nn.resNet50(inputs, True)
         # shape = tf.shape(inputs)
         # batch_size = shape[0] 
         layer = slim.flatten(layer) 
