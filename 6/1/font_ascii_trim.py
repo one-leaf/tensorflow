@@ -59,7 +59,7 @@ def RES(inputs, reuse = False):
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,256,256]
     inputs = tf.placeholder(tf.float32, [None, image_size, image_size], name="inputs")
-    labels = tf.placeholder(tf.int32, [None, 4], name="labels")
+    labels = tf.placeholder(tf.float32, [None, 4], name="labels")
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
