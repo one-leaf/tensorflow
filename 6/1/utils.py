@@ -217,8 +217,10 @@ def dropZeroEdgesGray(img_gray):
 # 清除边缘 输入为反色图片
 def dropZeroEdges(img_inv):
     w_sums = np.sum(img_inv, axis=1)
+    print(w_sums)
     avg = np.average(w_sums)
     for i in [0,-1]:
+        print(w_sums[i], avg, w_sums[i]/avg)
         if w_sums[i]/avg < 0.2:
             img_inv[i] = 0
 
