@@ -279,10 +279,10 @@ def train():
                         _p_net_g = p_net_g[i]   
                         _train_targets = train_targets[i] 
                         dstimg = utils.img2mask(train_inputs[i], _p_net_g, image_height, 0.5) * 255
-                        dstimg = utils.dropZeroEdges(dstimg) 
+                        #dstimg = utils.dropZeroEdges(dstimg) 
                         dstimg = utils.resize(dstimg, image_height)
                         dstimg = utils.img2img(dstimg, np.zeros((image_size, image_size)))
-                        _img = np.vstack((train_inputs[i], dstimg)) 
+                        _img = np.vstack((train_inputs[i]*255, dstimg)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
                 #     original_list = utils.decode_sparse_tensor(train_labels)
                 #     detected_list = utils.decode_sparse_tensor(decoded_list)
