@@ -173,7 +173,8 @@ def img2bwinv(img_gray):
     # show(img_bw)
     return img_bw
 
-def img2img(srcimg,dstimg):
+# 将原图平铺到目标图
+def img2img(srcimg, dstimg):
     s_h,s_w=srcimg.shape
     d_h,d_w=dstimg.shape
     for w in range(s_w):
@@ -181,6 +182,18 @@ def img2img(srcimg,dstimg):
             l = w//d_w
             dstimg[l*s_h+h][w%d_w] = srcimg[h][w]  
     return dstimg           
+
+# 安装遮罩图，将原图中的数据取出来并拼接为完整的
+def img2mask(srcimg, maskimg, height, min_value=0.5):
+    s_h,s_w=maskimg.shape
+    d_w = s_w * (s_h//height)
+    dstimg = np.zeros((height,d_w))
+    for w in range(d_w):
+        for h in range(height):
+            l = w//s_w
+            if maskimg[l*height+h][w%s_w]>min_value:
+                dstimg[h][w]=srcimg[l*height+h][w%s_w]
+    return dstimg
 
 # 图片转为向量, img 参数是 np.array 类型
 def img2vec(img, height=-1, width=-1, value=0, flatten=True):
