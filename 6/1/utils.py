@@ -191,7 +191,7 @@ def img2mask(srcimg, maskimg, height, min_value=0.5):
     for w in range(d_w):
         for h in range(height):
             l = w//s_w
-            if maskimg[l*height+h][w%s_w]>min_value:
+            if maskimg[l*height+h][w%s_w]>min_value :
                 dstimg[h][w]=srcimg[l*height+h][w%s_w]
     return dstimg
 
