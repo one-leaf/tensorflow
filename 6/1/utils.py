@@ -212,11 +212,7 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
 # 清除边缘 输入为灰度图片
 def dropZeroEdgesGray(img_gray):
     img=img2bwinv(img_gray)
-    true_points = np.argwhere(img)
-    top_left = true_points.min(axis=0)
-    bottom_right = true_points.max(axis=0)
-    if top_left[0] == bottom_right[0] and top_left[1] == bottom_right[1] : return img
-    return img_gray[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
+    return dropZeroEdges(img)
 
 # 清除边缘 输入为反色图片
 def dropZeroEdges(img_inv):
