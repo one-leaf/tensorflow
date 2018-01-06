@@ -313,6 +313,7 @@ def train():
                 print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
                 train_clean_inputs = np.zeros([batch_size, image_size, image_size])
+                has_err = False
                 for i in range(batch_size):
                     _t_net_g = np.squeeze(t_net_g[i], axis=2)
                     dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.3) 
@@ -324,7 +325,13 @@ def train():
                         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_2.png"%(steps,i)), _t_net_g * 255) 
                         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_3.png"%(steps,i)), dstimg * 255)                            
                     dstimg = utils.resize(dstimg, image_height)
+                    w,h = dstimg.shape
+                    if w * h > image_size * image_size :
+                        print("trim src image failed, break")
+                        has_err = True
+                        break
                     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
+                if has_err: continue
 
                 feed = {c_inputs: train_clean_inputs, c_targets: train_clears}
 
