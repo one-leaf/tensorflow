@@ -15,7 +15,7 @@ import utils_pil, utils_font, utils_nn
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 32
+image_height = 16
 image_size = 256
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
@@ -318,9 +318,6 @@ def train():
                     dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.5) 
                     dstimg = utils.dropZeroEdges(dstimg) 
                     dstimg = utils.resize(dstimg, image_height)
-                    w,h = dstimg.shape
-                    if w*h>image_size*image_size:
-                        print(dstimg.shape)
                     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
 
                 feed = {c_inputs: train_clean_inputs, c_targets: train_clears}
