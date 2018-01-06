@@ -17,6 +17,17 @@ def random_space(img, minrate=0.5):
     new_bg.paste(new_img,(x,y))
     return bg, new_bg
 
+# 随机缩小和位置
+def random_space2(img, minrate=0.5):
+    bg = Image.new(img.mode, img.size, 255)
+    img = resize(img, random.uniform(minrate, 1))
+    w = bg.size[0]-img.size[0]
+    h = bg.size[1]-img.size[1]
+    x = random.randint(0,w)
+    y = random.randint(0,h)
+    bg.paste(img, (x,y))
+    return bg, img
+
 # 随机截图
 def random_crop(img, width, height):  
     width1 = randint(0, img.size[0] - width )  

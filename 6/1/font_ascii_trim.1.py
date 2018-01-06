@@ -203,7 +203,7 @@ def get_next_batch_for_gan(batch_size=128):
         half_clear_images.append(half_clear_image) 
 
         # 随机移动位置并缩小 trims_image 为字体实际位置标识
-        image, trims_image = utils_pil.random_space2(image)
+        image, trims_image = utils_pil.random_space(image)
         trims_image = np.asarray(trims_image)
         trims_image = trims_image / 255.         
         trim_images.append(trims_image)
@@ -328,26 +328,26 @@ def train():
                 errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
                 print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
-                # train_clean_inputs = np.zeros([batch_size, image_size, image_size])
-                # has_err = False
-                # for i in range(batch_size):
-                #     _t_net_g = np.squeeze(t_net_g[i], axis=2)
-                #     dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.3) 
-                #     try:
-                #         dstimg = utils.dropZeroEdges(dstimg) 
-                #     except:
-                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_0.png"%(steps,i)), train_inputs[i] * 255) 
-                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_1.png"%(steps,i)), train_trims[i]) 
-                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_2.png"%(steps,i)), _t_net_g * 255) 
-                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_3.png"%(steps,i)), dstimg * 255)                            
-                #     dstimg = utils.resize(dstimg, image_height)
-                #     w,h = dstimg.shape
-                #     if w * h > image_size * image_size :
-                #         print("trim src image failed, break")
-                #         has_err = True
-                #         break
-                #     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
-                # if has_err: continue
+                train_clean_inputs = np.zeros([batch_size, image_size, image_size])
+                has_err = False
+                for i in range(batch_size):
+                    _t_net_g = np.squeeze(t_net_g[i], axis=2)
+                    dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.3) 
+                    try:
+                        dstimg = utils.dropZeroEdges(dstimg) 
+                    except:
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_0.png"%(steps,i)), train_inputs[i] * 255) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_1.png"%(steps,i)), train_trims[i]) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_2.png"%(steps,i)), _t_net_g * 255) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_3.png"%(steps,i)), dstimg * 255)                            
+                    dstimg = utils.resize(dstimg, image_height)
+                    w,h = dstimg.shape
+                    if w * h > image_size * image_size :
+                        print("trim src image failed, break")
+                        has_err = True
+                        break
+                    train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
+                if has_err: continue
 
                 feed = {c_inputs: train_half_clears, c_targets: train_clears}
 
@@ -362,12 +362,9 @@ def train():
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS < 4:
                     for i in range(batch_size): 
-                        _t_net_g = np.squeeze(t_net_g[i], axis=2)
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
-                        _img = np.vstack((train_inputs[i], _t_net_g, train_trims[i])) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
-                        _img = np.vstack((train_half_clears[i], train_clears[i],  _c_net_g)) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
+                        _img = np.vstack((train_inputs[i], train_clean_inputs[i], train_half_clears[i], train_clears[i],  _c_net_g)) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
             save(session, t_d_saver, t_global_step)
             save(session, t_g_saver, t_global_step)
             save(session, c_d_saver, c_global_step)
