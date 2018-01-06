@@ -262,16 +262,16 @@ def restore(session, saver=None):
             c_d_saver.restore(session, ckpt.model_checkpoint_path) 
 
 def save(session, saver, steps):
-    if saver == None or saver == t_g_saver： 
+    if saver == None or saver == t_g_saver:
         print("Save Model TRIM G...")
         t_g_saver.save(session, os.path.join(t_model_G_dir, "TG.ckpt"), global_step=steps)
-    if saver == None or saver == t_d_saver 
+    if saver == None or saver == t_d_saver: 
         print("Save Model TRIM D...")
         t_d_saver.save(session, os.path.join(t_model_D_dir, "TD.ckpt"), global_step=steps)
-    if saver == None or saver == c_g_saver 
+    if saver == None or saver == c_g_saver: 
         print("Save Model CLEAN G...")
         c_g_saver.save(session, os.path.join(c_model_G_dir, "CG.ckpt"), global_step=steps)
-    if saver == None or saver == c_d_saver 
+    if saver == None or saver == c_d_saver: 
         print("Save Model CLEAN D...")
         c_d_saver.save(session, os.path.join(c_model_D_dir, "CD.ckpt"), global_step=steps)
   
