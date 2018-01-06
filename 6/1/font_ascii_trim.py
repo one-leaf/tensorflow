@@ -220,6 +220,7 @@ t_d_saver, t_g_saver, c_d_saver, c_g_saver = [None, None, None, None]
 t_model_D_dir, t_model_G_dir, c_model_D_dir, c_model_G_dir = [None, None, None, None]
 
 def init_saver():
+    global t_d_saver, t_g_saver, c_d_saver, c_g_saver, t_model_D_dir, t_model_G_dir, c_model_D_dir, c_model_G_dir  
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
