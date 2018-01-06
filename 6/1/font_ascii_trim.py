@@ -316,7 +316,10 @@ def train():
                 for i in range(batch_size):
                     _t_net_g = np.squeeze(t_net_g[i], axis=2)
                     dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.5) 
-                    dstimg = utils.dropZeroEdges(dstimg) 
+                    try:
+                        dstimg = utils.dropZeroEdges(dstimg) 
+                    except:
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s.png"%(steps,i)), dstimg * 255) 
                     dstimg = utils.resize(dstimg, image_height)
                     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
 
