@@ -311,7 +311,7 @@ def train():
 
                 train_clean_inputs = np.zeros([batch_size, image_size, image_size])
                 for i in range(batch_size):
-                    _t_net_g = np.squeeze(t_net_g[i], axis=3)
+                    _t_net_g = np.squeeze(t_net_g[i], axis=2)
                     _train_targets = train_targets[i]
                     dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.5) 
                     dstimg = utils.dropZeroEdges(dstimg) 
@@ -331,7 +331,7 @@ def train():
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS < 4:
                     for i in range(BATCHES): 
-                        _c_net_g = np.squeeze(c_net_g[i], axis=3)
+                        _c_net_g = np.squeeze(c_net_g[i], axis=2)
                         _img = np.vstack((train_inputs[i], train_clean_inputs[i], _c_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
             save(session, t_d_saver, t_global_step)
