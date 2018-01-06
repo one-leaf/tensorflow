@@ -174,13 +174,14 @@ def img2bwinv(img_gray):
     return img_bw
 
 # 将原图平铺到目标图
-def img2img(srcimg, dstimg):
+def img2img(srcimg, dstimg, height=None):
     s_h,s_w=srcimg.shape
+    if height == None: height = s_h
     d_h,d_w=dstimg.shape
     for w in range(s_w):
         for h in range(s_h):
             l = w//d_w
-            dstimg[l*s_h+h][w%d_w] = srcimg[h][w]  
+            dstimg[l*height+h][w%d_w] = srcimg[h][w]  
     return dstimg           
 
 # 安装遮罩图，将原图中的数据取出来并拼接为完整的
