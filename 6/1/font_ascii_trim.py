@@ -326,6 +326,7 @@ def train():
                 start = time.time()                                
                 errG, errM, errA, errH, _, steps, c_net_g = session.run([c_g_loss, c_g_mse_loss, c_g_loss_fake, c_g_half_loss, c_g_optim, c_global_step, c_fake_B], feed)
                 print("C %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
+                print(c_net_g.shape)
 
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS < 4:
