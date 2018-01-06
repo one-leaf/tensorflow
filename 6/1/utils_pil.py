@@ -5,7 +5,7 @@ import cv2
 
 # 随机缩小和位置
 def random_space(img, minrate=0.5):
-    bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
+    bg = Image.new(img.mode, img.size, (255,255))
     img = resize(img, random.uniform(minrate, 1))
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
@@ -34,14 +34,14 @@ def random_flip_left_right(img):
     return img  
 
 # 随机对比度变换 
-def random_contrast(img, lower = 0.2, upper = 1.8):  
+def random_contrast(img, lower = 0.6, upper = 1.5):  
     factor = random.uniform(lower, upper)  
     img = ImageEnhance.Sharpness(img)  
     img = img.enhance(factor)  
     return img  
 
 # 随机亮度  
-def random_brightness(img, lower = 0.6, upper = 1.4):  
+def random_brightness(img, lower = 0.6, upper = 1.5):  
     factor = random.uniform(lower, upper)  
     img = ImageEnhance.Brightness(img)  
     img = img.enhance(factor)  
