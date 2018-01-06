@@ -219,15 +219,15 @@ def get_next_batch_for_gan(batch_size=128):
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        inputs[i,:] = utils.img2img(input_images[i],np.zeros([image_size, image_size]), image_height)
+        inputs[i,:] = utils.img2img(input_images[i], np.zeros([image_size, image_size]), image_height)
 
     trims = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        trims[i,:] = utils.img2img(trim_images[i],np.zeros([image_size, image_size]), image_height)
+        trims[i,:] = utils.img2img(trim_images[i], np.zeros([image_size, image_size]), image_height)
 
     clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        clears[i,:] = utils.img2img(clear_images[i],np.zeros([image_size, image_size]), image_height)
+        clears[i,:] = utils.img2img(clear_images[i], np.zeros([image_size, image_size]), image_height)
 
     half_clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
