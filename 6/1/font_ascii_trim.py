@@ -319,7 +319,9 @@ def train():
                     try:
                         dstimg = utils.dropZeroEdges(dstimg) 
                     except:
-                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s.png"%(steps,i)), dstimg * 255) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_1.png"%(steps,i)), _t_net_g * 255) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_2.png"%(steps,i)), dstimg * 255)                            
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_3.png"%(steps,i)), train_inputs[i] * 255) 
                     dstimg = utils.resize(dstimg, image_height)
                     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
 
