@@ -366,7 +366,7 @@ def train():
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
                         _img = np.vstack((train_inputs[i], _t_net_g, train_trims[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
-                        _img = np.vstack((train_half_clears[i], train_clears[i],  _c_net_g)) 
+                        _img = np.vstack((train_half_clears[i], _c_net_g, train_clears[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
             save(session, t_d_saver, t_global_step)
             save(session, t_g_saver, t_global_step)
