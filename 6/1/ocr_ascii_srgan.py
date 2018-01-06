@@ -258,7 +258,7 @@ def get_next_batch_for_srgan(batch_size=128):
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
         font_length = random.randint(25, 30)
-        font_size = 36 #random.randint(image_height, 64)    
+        font_size = image_height #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
@@ -267,7 +267,7 @@ def get_next_batch_for_srgan(batch_size=128):
         image = utils_pil.convert_to_gray(image)
         targets_image = image.copy()
 
-        _h =  random.randint(9, image_height // random.choice([1,1.5,2,2.5]))
+        _h =  random.randint(9, image_height)
         image = utils_pil.resize_by_height(image, _h)        
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
 
