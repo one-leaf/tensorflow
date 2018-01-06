@@ -237,7 +237,7 @@ def init_saver():
     c_g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='CLEAN_G'), sharded=True)
 
 def restore(session, saver=None):
-    if saver == None or saver == t_g_saver： 
+    if saver == None or saver == t_g_saver: 
         ckpt = tf.train.get_checkpoint_state(t_model_G_dir)
         if ckpt and ckpt.model_checkpoint_path:           
             print("Restore Model TRIM G...")
@@ -333,6 +333,10 @@ def train():
                         _c_net_g = np.squeeze(c_net_g[i], axis=3)
                         _img = np.vstack((train_inputs[i], train_clean_inputs[i], _c_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
-
+            save(session, t_d_saver, t_global_step)
+            save(session, t_g_saver, t_global_step)
+            save(session, c_d_saver, c_global_step)
+            save(session, c_g_saver, c_global_step)
+            
 if __name__ == '__main__':
     train()
