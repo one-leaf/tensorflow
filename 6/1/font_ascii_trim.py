@@ -243,19 +243,19 @@ def restore(session, saver=None):
             print("Restore Model TRIM G...")
             t_g_saver.restore(session, ckpt.model_checkpoint_path)   
 
-    if saver == None or saver == t_d_saver 
+    if saver == None or saver == t_d_saver: 
         ckpt = tf.train.get_checkpoint_state(t_model_D_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model TRIM D...")
             t_d_saver.restore(session, ckpt.model_checkpoint_path)    
 
-    if saver == None or saver == c_g_saver 
+    if saver == None or saver == c_g_saver: 
         ckpt = tf.train.get_checkpoint_state(c_model_G_dir)
         if ckpt and ckpt.model_checkpoint_path:           
             print("Restore Model CLEAN G...")
             c_g_saver.restore(session, ckpt.model_checkpoint_path)   
 
-    if saver == None or saver == c_d_saver 
+    if saver == None or saver == c_d_saver: 
         ckpt = tf.train.get_checkpoint_state(c_model_D_dir)
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model CLEAN D...")
