@@ -117,14 +117,14 @@ def neural_networks_clean():
     real_B = tf.reshape(targets, (-1, image_size, image_size, 1))
 
     # 对抗网络
-    fake_B, half_real_A = SRGAN_g(real_A, reuse = False)
+    fake_B, half_real_A = CLEAN_G(real_A, reuse = False)
     real_AB = tf.concat([real_A, real_B], 3)
     fake_AB = tf.concat([real_A, fake_B], 3)
-    real_D  = SRGAN_d(real_AB, reuse = False)
-    fake_D  = SRGAN_d(fake_AB, reuse = True)
+    real_D  = CLEAN_D(real_AB, reuse = False)
+    fake_D  = CLEAN_D(fake_AB, reuse = True)
 
     # 假设预计输出和真实输出应该在一半网络也应该是相同的
-    _, half_real_B = SRGAN_g(fake_B, reuse = True)
+    _, half_real_B = CLEAN_G(fake_B, reuse = True)
     g_half_loss = tf.losses.mean_squared_error(half_real_A, half_real_B)   
 
     d_loss_real = tf.losses.sigmoid_cross_entropy(tf.ones_like(real_D), real_D)
