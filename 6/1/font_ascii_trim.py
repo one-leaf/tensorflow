@@ -168,13 +168,16 @@ def get_next_batch_for_gan(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_length = random.randint(3, 70)
         font_size = 36 #random.randint(image_height, 64)    
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
-        text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-        image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
-        image = utils_pil.resize_by_height(image, image_height)
+        while True:
+            font_length = random.randint(3, 70)
+            text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
+            image = utils_pil.resize_by_height(image, image_height)
+            w, h = image.size
+            if w * h <= image_size * image_size: break
         image = utils_pil.convert_to_gray(image)
 
         # 干净的图片，给降噪网络用
