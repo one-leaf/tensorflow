@@ -318,6 +318,7 @@ def train():
                     dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.5) 
                     dstimg = utils.dropZeroEdges(dstimg) 
                     dstimg = utils.resize(dstimg, image_height)
+                    print(dstimg.shape)
                     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
 
                 feed = {c_inputs: train_clean_inputs, c_targets: train_clears}
