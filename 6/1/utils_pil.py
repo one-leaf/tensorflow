@@ -5,7 +5,7 @@ import cv2
 
 # 随机缩小和位置
 def random_space(img, minrate=0.5):
-    bg = Image.new(img.mode, img.size, (255,255))
+    bg = Image.new(img.mode, img.size, 255)
     img = resize(img, random.uniform(minrate, 1))
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
