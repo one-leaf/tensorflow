@@ -363,7 +363,7 @@ def train():
                 if steps > 0 and steps % REPORT_STEPS < 4:
                     for i in range(batch_size): 
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
-                        _img = np.vstack((train_inputs[i], train_clean_inputs[i], _c_net_g, train_half_clears[i], train_clears[i])) 
+                        _img = np.vstack((train_inputs[i], train_clean_inputs[i], train_half_clears[i], train_clears[i],  _c_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
             save(session, t_d_saver, t_global_step)
             save(session, t_g_saver, t_global_step)
