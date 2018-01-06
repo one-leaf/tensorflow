@@ -34,21 +34,21 @@ def random_flip_left_right(img):
     return img  
 
 # 随机对比度变换 
-def random_contrast(img, lower = 0.6, upper = 1.5):  
+def random_contrast(img, lower = 0.8, upper = 1.2):  
     factor = random.uniform(lower, upper)  
     img = ImageEnhance.Sharpness(img)  
     img = img.enhance(factor)  
     return img  
 
 # 随机亮度  
-def random_brightness(img, lower = 0.3, upper = 1.0):  
+def random_brightness(img, lower = 0.8, upper = 1.2):  
     factor = random.uniform(lower, upper)  
     img = ImageEnhance.Brightness(img)  
     img = img.enhance(factor)  
     return img  
   
 # 随机白平衡 
-def random_color(img, lower = 0.6, upper = 1.5):  
+def random_color(img, lower = 0.8, upper = 1.2):  
     factor = random.uniform(lower, upper)  
     img = ImageEnhance.Color(img)  
     img = img.enhance(factor)  
