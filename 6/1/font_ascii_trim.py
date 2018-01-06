@@ -299,7 +299,7 @@ def train():
             for batch in range(BATCHES):
                 batch_size = 16
                 train_inputs, train_trims, train_clears = get_next_batch_for_gan(batch_size)
-                feed = {inputs: train_inputs, targets: train_trims}
+                feed = {t_inputs: train_inputs, t_targets: train_trims}
 
                 start = time.time()                
                 errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
@@ -318,7 +318,7 @@ def train():
                     dstimg = utils.resize(dstimg, image_height)
                     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
 
-                feed = {inputs: train_clean_inputs, targets: train_clears}
+                feed = {c_inputs: train_clean_inputs, c_targets: train_clears}
 
                 start = time.time()                
                 errD, errD1, errD2, _, steps = session.run([c_d_loss, c_d_loss_real, c_d_loss_fake, c_d_optim, c_global_step], feed)
