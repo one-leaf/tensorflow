@@ -165,6 +165,7 @@ def get_next_batch_for_gan(batch_size=128):
     input_images  = []
     trim_images = []
     clear_images = []
+    half_clear_images = []
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
@@ -190,6 +191,17 @@ def get_next_batch_for_gan(batch_size=128):
         image = utils_pil.resize_by_height(image, _h)        
         image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
         
+        # 给早期降噪网络使用
+        half_clear_image = image.copy()
+        half_clear_image = utils_font.add_noise(half_clear_image) 
+        half_clear_image = np.asarray(half_clear_image)
+        half_clear_image = half_clear_image * random.uniform(0.3, 1)
+        if random.random()>0.5:
+            half_clear_image = (255. - half_clear_image) / 255.
+        else:
+            half_clear_image = half_clear_image / 255.           
+        half_clear_images.append(half_clear_image) 
+
         # 随机移动位置并缩小 trims_image 为字体实际位置标识
         image, trims_image = utils_pil.random_space(image)
         trims_image = np.asarray(trims_image)
@@ -217,7 +229,11 @@ def get_next_batch_for_gan(batch_size=128):
     for i in range(batch_size):
         clears[i,:] = utils.img2img(clear_images[i],np.zeros([image_size, image_size]))
 
-    return inputs, trims, clears
+    half_clears = np.zeros([batch_size, image_size, image_size])
+    for i in range(batch_size):
+        half_clears[i,:] = utils.img2img(half_clear_images[i],np.zeros([image_size, image_size]))
+
+    return inputs, trims, clears, half_clears
 
 t_d_saver, t_g_saver, c_d_saver, c_g_saver = [None, None, None, None]
 t_model_D_dir, t_model_G_dir, c_model_D_dir, c_model_G_dir = [None, None, None, None]
@@ -301,7 +317,7 @@ def train():
             errA = errD1 = errD2 = 1
             for batch in range(BATCHES):
                 batch_size = 16
-                train_inputs, train_trims, train_clears = get_next_batch_for_gan(batch_size)
+                train_inputs, train_trims, train_clears, train_half_clears = get_next_batch_for_gan(batch_size)
                 feed = {t_inputs: train_inputs, t_targets: train_trims}
 
                 start = time.time()                
@@ -333,7 +349,7 @@ def train():
                     train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
                 if has_err: continue
 
-                feed = {c_inputs: train_clean_inputs, c_targets: train_clears}
+                feed = {c_inputs: train_half_clears, c_targets: train_clears}
 
                 start = time.time()                
                 errD, errD1, errD2, _, steps = session.run([c_d_loss, c_d_loss_real, c_d_loss_fake, c_d_optim, c_global_step], feed)
@@ -347,7 +363,7 @@ def train():
                 if steps > 0 and steps % REPORT_STEPS < 4:
                     for i in range(batch_size): 
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
-                        _img = np.vstack((train_inputs[i], train_clean_inputs[i], _c_net_g)) 
+                        _img = np.vstack((train_inputs[i], train_clean_inputs[i], _c_net_g, train_half_clears[i], train_clears[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
             save(session, t_d_saver, t_global_step)
             save(session, t_g_saver, t_global_step)
