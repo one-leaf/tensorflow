@@ -172,7 +172,7 @@ def get_next_batch_for_gan(batch_size=128):
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
-            font_length = random.randint(3, 70)
+            font_length = random.randint(3, 200)
             text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
             image = utils_pil.resize_by_height(image, image_height)
