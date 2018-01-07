@@ -172,7 +172,7 @@ def train():
                 feed = {inputs: train_inputs, targets: train_trims}
                 print("training")
                 start = time.time()                
-                err, _, steps, net = session.run([loss, optim, t_global_step, logits], feed)
+                err, _, steps, net = session.run([loss, optim, global_step, logits], feed)
                 print("T %d time: %4.4fs, loss: %.8f" % (steps, time.time() - start, err))
 
                 # 报告
