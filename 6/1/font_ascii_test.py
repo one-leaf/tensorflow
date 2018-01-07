@@ -60,7 +60,7 @@ def neural_networks_trim():
     layer = slim.fully_connected(layer,512, activation_fn=None)
     layer = tf.reshape(layer, (-1, 1, 1, 512))   
     for cnn in (512,512,512,512,512,256,128,64,1):  
-        layer.slim.conv2d_transpose(layer, cnn, [3,3], stride=2)
+        layer = slim.conv2d_transpose(layer, cnn, [3,3], stride=2)
     print(layer.shape)
 
     logits = tf.reshape(layer, (-1, image_size, image_size))   
