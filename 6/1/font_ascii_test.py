@@ -158,7 +158,9 @@ def train():
     inputs, targets, global_step, logits, loss, optim = neural_networks_trim()
     init = tf.global_variables_initializer()
     with tf.Session() as session:
+        print("start init")
         session.run(init)
+        print("end init")
         while True:
             for batch in range(BATCHES):
                 print("geting")
