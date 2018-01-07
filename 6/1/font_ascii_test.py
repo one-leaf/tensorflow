@@ -62,7 +62,7 @@ def neural_networks_trim():
 
     logits = tf.reshape(layer, (-1, image_size, image_size))   
     loss = tf.losses.mean_squared_error(logits, targets)   
-    optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(loss, global_step=global_step, var_list=g_vars)
+    optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(loss, global_step=global_step)
     
     return  inputs, targets, global_step, logits, loss, optim
 
