@@ -161,7 +161,7 @@ def train():
         session.run(init)
         while True:
             for batch in range(BATCHES):
-                batch_size = 16
+                batch_size = 2
                 train_inputs, train_trims, train_clears, train_half_clears = get_next_batch_for_gan(batch_size)
                 feed = {inputs: train_inputs, targets: train_trims}
 
