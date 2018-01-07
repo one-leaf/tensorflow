@@ -54,13 +54,13 @@ def neural_networks_trim():
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
     for cnn in (64,128,256,512,512,1024,2048,4096):
-        layer = slim.conv2d(layer, cnn, [3,3], stride=2)        
+        layer = slim.conv2d(layer, cnn, [4,4], stride=2, normalizer_fn=slim.batch_norm)        
     layer = slim.flatten(layer)
     layer = slim.fully_connected(layer,4096, activation_fn=None)
     layer = tf.reshape(layer, (-1, 1, 1, 4096))   
-    for cnn in (2048,1024,512,512,256,128,64,1):  
-        layer = slim.conv2d_transpose(layer, cnn, [3,3], stride=2)
-
+    for cnn in (2048,1024,512,512,256,128,64):  
+        layer = slim.conv2d_transpose(layer, cnn, [4,4], stride=2, normalizer_fn=slim.batch_norm)
+    layer = slim.conv2d_transpose(layer, 1, [4,4], stride=2, normalizer_fn=None, activation_fn=None)
     logits = tf.reshape(layer, (-1, image_size, image_size))   
     loss = tf.losses.mean_squared_error(logits, targets)   
     optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(loss, global_step=global_step)
