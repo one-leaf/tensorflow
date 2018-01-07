@@ -53,14 +53,17 @@ def neural_networks_trim():
     global_step = tf.Variable(0, trainable=False)
 
     layer = slim.flatten(inputs)
+    print(layer.shape)
     layer = slim.fully_connected(layer, image_size * image_size)
+    print(layer.shape)
     # layer = slim.fully_connected(layer, image_size * image_size)
     # layer = slim.fully_connected(layer, image_size * image_size)
     # layer = slim.fully_connected(layer, image_size * image_size)
     # layer = slim.fully_connected(layer, image_size * image_size)
     layer = slim.fully_connected(layer, image_size * image_size, activation_fn= tf.nn.tanh)
-
+    print(layer.shape)
     logits = tf.reshape(layer, (-1, image_size, image_size))   
+    print(logits.shape)
     loss = tf.losses.mean_squared_error(logits, targets)   
     optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(loss, global_step=global_step)
     
