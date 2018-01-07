@@ -54,10 +54,10 @@ def neural_networks_trim():
 
     layer = slim.flatten(inputs)
     layer = slim.fully_connected(layer, image_size * image_size)
-    layer = slim.fully_connected(layer, image_size * image_size)
-    layer = slim.fully_connected(layer, image_size * image_size)
-    layer = slim.fully_connected(layer, image_size * image_size)
-    layer = slim.fully_connected(layer, image_size * image_size)
+    # layer = slim.fully_connected(layer, image_size * image_size)
+    # layer = slim.fully_connected(layer, image_size * image_size)
+    # layer = slim.fully_connected(layer, image_size * image_size)
+    # layer = slim.fully_connected(layer, image_size * image_size)
     layer = slim.fully_connected(layer, image_size * image_size, activation_fn= tf.nn.tanh)
 
     logits = tf.reshape(layer, (-1, image_size, image_size))   
