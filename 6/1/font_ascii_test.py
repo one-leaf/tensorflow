@@ -52,8 +52,7 @@ def neural_networks_trim():
 
     global_step = tf.Variable(0, trainable=False)
 
-    # layer = slim.flatten(inputs)
-    layer = tf.reshape(inputs, (-1, image_size, image_size, -1))
+    layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
     layer = slim.fully_connected(layer, 64)
     layer = slim.fully_connected(layer, 128)
     layer = slim.fully_connected(layer, 256)
