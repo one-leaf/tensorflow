@@ -170,7 +170,7 @@ def train():
                 print("T %d time: %4.4fs, loss: %.8f" % (steps, time.time() - start, err))
 
                 # 报告
-                if steps > 0 and steps % REPORT_STEPS < 4:
+                if steps > 0 and steps % REPORT_STEPS ==0:
                     for i in range(batch_size): 
                         _img = np.vstack((train_inputs[i], net[i], train_trims[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
