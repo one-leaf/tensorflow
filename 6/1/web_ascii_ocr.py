@@ -32,11 +32,11 @@ def init():
 
     model_dir = os.path.join(curr_dir, "model_ascii_srgan")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_G_dir = os.path.join(model_dir, "FG")
-    model_R_dir = os.path.join(model_dir, "FR")
+    model_G_dir = os.path.join(model_dir, "CG")
+    model_R_dir = os.path.join(model_dir, "R16")
 
     r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
-    g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), sharded=True)
+    g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='CLEAN_G'), sharded=True)
 
     ckpt = tf.train.get_checkpoint_state(model_G_dir)
     if ckpt and ckpt.model_checkpoint_path:           
@@ -56,7 +56,9 @@ def scan(file):
     img = Image.open(file.stream)
     image = np.array(img)
     image = utils.img2gray(image)
-    image = utils.clearImgGray(image)    
+    utils.save(image * 255, os.path.join(curr_dir,"test","p0.png"))
+   # image = utils.clearImgGray(image)    
+   # utils.save(image * 255, os.path.join(curr_dir,"test","p1.png"))
     split_images = utils.splitImg(image)
     
     ocr_texts = []
@@ -66,16 +68,19 @@ def scan(file):
         image = 255. - split_image
         # image = utils.dropZeroEdges(image)  
         image = utils.resize(image, ocr.image_height)
-        utils.save(image,os.path.join(curr_dir,"test","%s.png"%i))
         image = image / 255.
         ocr_inputs = np.zeros([1, ocr.image_size, ocr.image_size])
-        ocr_inputs[0,:] = utils.img2img(image,np.zeros([ocr.image_size, ocr.image_size]))
+        ocr_inputs[0,:] = utils.img2img(image, np.zeros([ocr.image_size, ocr.image_size]))
         
         ocr_seq_len = np.ones(1) * (ocr.image_size * ocr.image_size ) // (ocr.POOL_SIZE * ocr.POOL_SIZE)
 
         start = time.time()
         p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
         p_net_g = np.squeeze(p_net_g, axis=3)
+
+        _img = np.vstack((ocr_inputs[0], p_net_g[0])) 
+        utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
+
         decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))

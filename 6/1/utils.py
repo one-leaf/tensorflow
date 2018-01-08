@@ -86,8 +86,8 @@ def show(img):
     cv2.imshow('image', img)
     cv2.waitKey(0)
 
-def pltshow(img):
-    plt.imshow(img)
+def pltshow(img, cmap = 'gray'):
+    plt.imshow(img, cmap)
     plt.show()
 
 # 保存图片
@@ -163,7 +163,7 @@ def img2gray(img_color):
 # 为了方便计算，需要反色
 # 后面的方法更好一些，会保留一些轮廓信息
 def img2bwinv(img_gray):
-    thresh, img_bw = cv2.threshold(img_gray, 190, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+    thresh, img_bw = cv2.threshold(img_gray, 127, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # thresh, img_bw = cv2.threshold(img_gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
     # img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY_INV, 3, 2)
     # img_bw = cv2.adaptiveThreshold(img_gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY_INV, 11, 5)
@@ -213,10 +213,10 @@ def img2vec(img, height=-1, width=-1, value=0, flatten=True):
 # 清除边缘 输入为灰度图片
 def dropZeroEdgesGray(img_gray):
     img=img2bwinv(img_gray)
-    return dropZeroEdges(img)
+    return dropZeroEdges(img, img_gray)
 
 # 清除边缘 输入为反色图片
-def dropZeroEdges(img_inv):
+def dropZeroEdges(img_inv, img_gray=None):
     w_sums = np.sum(img_inv, axis=1)
     avg = np.average(np.trim_zeros(w_sums))
     for i in range(len(w_sums)):
@@ -227,27 +227,32 @@ def dropZeroEdges(img_inv):
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
     if top_left[0] == bottom_right[0] and top_left[1] == bottom_right[1] : return img_inv
-    return img_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
+    if img_gray == None:
+        return img_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
+    else:
+        return img_gray[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
 
 # 图片分割，按水平投影分割
 # img_gray 传入的灰度图像
 def splitImg(img_gray):
     # 将灰度图二值化，并反色
     adaptive_binary_inv=img2bwinv(img_gray)
+    pltshow(adaptive_binary_inv)
     # thresh, adaptive_binary_inv = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # 清除多余的线段
     clearImg(adaptive_binary_inv)
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
-    peek_ranges = extract_peek_ranges_from_array(h_sum,3,5)
+    peek_ranges = extract_peek_ranges_from_array(h_sum,0,5)
     images=[]
     for i, peek_range in enumerate(peek_ranges):
         x = 0
         y = peek_range[0]
         w = adaptive_binary_inv.shape[1]
-        h = peek_range[1] - y
+        h = peek_range[1] - y + 1
         # 删除前面和后面的空白区域
-        w_sum = np.sum(adaptive_binary_inv[y: y + h, x: x + w], axis=0)
+        pltshow(adaptive_binary_inv[y: y + h + 1, x: x + w + 1])
+        w_sum = np.sum(adaptive_binary_inv[y: y + h + 1, x: x + w + 1], axis=0)
         for s in w_sum:
             if s==0:
                 x += 1
@@ -259,28 +264,32 @@ def splitImg(img_gray):
                 w -= 1
             else:
                 break    
-        images.append(img_gray[y: y + h , x: x + w ])
+        images.append(img_gray[y: y + h + 1 , x: x + w + 1 ])
     return images
     
 # 从一个数组抓到分割点
 # minimun_val 最小分割的最小值
 # minimun_range 最小分割的长度
+# end_i包含最后一位
 def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
     start_i = None
     end_i = None
     peek_ranges = []
+    zero_count = 0
     for i, val in enumerate(array_vals):
         if val > minimun_val and start_i is None:
             start_i = i
         elif val > minimun_val and start_i is not None:
             end_i = i
-        elif val < minimun_val and start_i is not None:
-            end_i = i
-            if end_i - start_i >= minimun_range:
+        elif val <= minimun_val and start_i is not None:
+            if end_i - start_i >= minimun_range and zero_count > 2:
                 peek_ranges.append((start_i, end_i))
-            start_i = None
-            end_i = None
-        elif val < minimun_val and start_i is None:
+                start_i = None
+                end_i = None
+                zero_count = 0
+            else:
+                zero_count += 1
+        elif val <= minimun_val and start_i is None:
             pass
         else:
             raise ValueError("cannot parse this case...")
