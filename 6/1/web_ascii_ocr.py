@@ -32,11 +32,11 @@ def init():
 
     model_dir = os.path.join(curr_dir, "model_ascii_srgan")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_G_dir = os.path.join(model_dir, "FG")
-    model_R_dir = os.path.join(model_dir, "FR")
+    model_G_dir = os.path.join(model_dir, "CG")
+    model_R_dir = os.path.join(model_dir, "R16")
 
     r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
-    g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), sharded=True)
+    g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='CLEAN_G'), sharded=True)
 
     ckpt = tf.train.get_checkpoint_state(model_G_dir)
     if ckpt and ckpt.model_checkpoint_path:           
