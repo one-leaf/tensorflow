@@ -66,16 +66,19 @@ def scan(file):
         image = 255. - split_image
         # image = utils.dropZeroEdges(image)  
         image = utils.resize(image, ocr.image_height)
-        utils.save(image,os.path.join(curr_dir,"test","%s.png"%i))
         image = image / 255.
         ocr_inputs = np.zeros([1, ocr.image_size, ocr.image_size])
-        ocr_inputs[0,:] = utils.img2img(image,np.zeros([ocr.image_size, ocr.image_size]))
+        ocr_inputs[0,:] = utils.img2img(image, np.zeros([ocr.image_size, ocr.image_size]))
         
         ocr_seq_len = np.ones(1) * (ocr.image_size * ocr.image_size ) // (ocr.POOL_SIZE * ocr.POOL_SIZE)
 
         start = time.time()
         p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
         p_net_g = np.squeeze(p_net_g, axis=3)
+
+        _img = np.vstack((ocr_inputs[0], p_net_g[0])) 
+        utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
+
         decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))
