@@ -242,7 +242,7 @@ def splitImg(img_gray):
     clearImg(adaptive_binary_inv)
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
-    peek_ranges = extract_peek_ranges_from_array(h_sum,0,5)
+    peek_ranges = extract_peek_ranges_from_array(h_sum,1,5)
     images=[]
     for i, peek_range in enumerate(peek_ranges):
         x = 0
