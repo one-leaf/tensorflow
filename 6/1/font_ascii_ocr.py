@@ -17,7 +17,7 @@ import operator
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 32
+image_height = 16
 image_size = 256
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
@@ -47,8 +47,8 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
-def SRGAN_g(inputs, reuse=False):    
-    with tf.variable_scope("SRGAN_g", reuse=reuse):      
+def CLEAN_G(inputs, reuse=False):    
+    with tf.variable_scope("CLEAN_G", reuse=reuse):      
         layer, half_layer = utils_nn.pix2pix_g2(inputs)
         return layer, half_layer
 
@@ -58,7 +58,7 @@ def RES(inputs, reuse = False):
         layer = utils_nn.resNet50(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
-        # layer = slim.fully_connected(layer, 1000, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=None, activation_fn=None)  
         layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])
         return layer
@@ -83,7 +83,6 @@ def neural_networks():
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
     net_g, _ = SRGAN_g(layer, reuse = False)
-    g_vars     = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g')
     
     return  inputs, labels, global_step, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
@@ -125,16 +124,17 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
         if font_mode==None:
             font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
-            font_hint = random.choice([0,1,2,3,4,5])     #删除了2
+            font_hint = random.choice([0,1,2,3,4,5])    
+
         while True:
-            font_length = random.randint(5, 40)
+            font_length = random.randint(5, 400)
 
-            text = random.sample(CHARS, font_length)
-            text = text+text+[" "," "]
-            random.shuffle(text)
-            text = "".join(text).strip()
+            # text = random.sample(CHARS, font_length)
+            # text = text+text+[" "," "]
+            # random.shuffle(text)
+            # text = "".join(text).strip()
 
-            #text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+            text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
             if add_noise:
                 image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
@@ -178,8 +178,8 @@ def train():
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_G_dir = os.path.join(model_dir, "FG")
-    model_R_dir = os.path.join(model_dir, "FR")
+    model_G_dir = os.path.join(model_dir, "CG")
+    model_R_dir = os.path.join(model_dir, "R16")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
@@ -189,7 +189,7 @@ def train():
         session.run(init)
 
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
-        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='SRGAN_g'), sharded=True)
+        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='CLEAN_G'), sharded=False)
 
         ckpt = tf.train.get_checkpoint_state(model_G_dir)
         if ckpt and ckpt.model_checkpoint_path:           
