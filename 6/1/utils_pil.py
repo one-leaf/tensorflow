@@ -26,6 +26,9 @@ def random_space2(img, minrate=0.5):
     x = random.randint(0,w)
     y = random.randint(0,h)
     bg.paste(img, (x,y))
+    # new_bg = Image.new('L', bg.size, 255)
+    # new_bg.paste(img,(x,y))    
+    # return bg, new_bg 
     return bg, img
 
 # 随机截图
