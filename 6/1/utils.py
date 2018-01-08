@@ -237,13 +237,15 @@ def dropZeroEdges(img_inv, img_gray=None):
 def splitImg(img_gray):
     # 将灰度图二值化，并反色
     adaptive_binary_inv=img2bwinv(img_gray)
-    pltshow(adaptive_binary_inv)
+    # pltshow(adaptive_binary_inv)
     # thresh, adaptive_binary_inv = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # 清除多余的线段
     clearImg(adaptive_binary_inv)
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
     peek_ranges = extract_peek_ranges_from_array(h_sum,1,5)
+    print(h_sum)
+    print(peek_ranges)
     images=[]
     for i, peek_range in enumerate(peek_ranges):
         x = 0
