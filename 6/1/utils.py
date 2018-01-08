@@ -253,7 +253,7 @@ def splitImg(img_gray):
         w = adaptive_binary_inv.shape[1]
         h = peek_range[1] - y + 1
         # 删除前面和后面的空白区域
-        w_sum = np.sum(adaptive_binary_inv[y: y + h, x: x + w], axis=0)
+        w_sum = np.sum(adaptive_binary_inv[y: y + h + 1, x: x + w + 1], axis=0)
         for s in w_sum:
             if s==0:
                 x += 1
@@ -265,7 +265,7 @@ def splitImg(img_gray):
                 w -= 1
             else:
                 break    
-        images.append(img_gray[y: y + h , x: x + w ])
+        images.append(img_gray[y: y + h + 1 , x: x + w + 1 ])
     return images
     
 # 从一个数组抓到分割点
