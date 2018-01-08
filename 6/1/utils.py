@@ -244,8 +244,6 @@ def splitImg(img_gray):
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
     peek_ranges = extract_peek_ranges_from_array(h_sum,0,5)
-    print(h_sum)
-    print(peek_ranges)
     images=[]
     for i, peek_range in enumerate(peek_ranges):
         x = 0
@@ -253,6 +251,7 @@ def splitImg(img_gray):
         w = adaptive_binary_inv.shape[1]
         h = peek_range[1] - y + 1
         # 删除前面和后面的空白区域
+        pltshow(adaptive_binary_inv[y: y + h + 1, x: x + w + 1])
         w_sum = np.sum(adaptive_binary_inv[y: y + h + 1, x: x + w + 1], axis=0)
         for s in w_sum:
             if s==0:
@@ -271,6 +270,7 @@ def splitImg(img_gray):
 # 从一个数组抓到分割点
 # minimun_val 最小分割的最小值
 # minimun_range 最小分割的长度
+# end_i包含最后一位
 def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
     start_i = None
     end_i = None
