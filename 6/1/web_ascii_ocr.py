@@ -56,7 +56,9 @@ def scan(file):
     img = Image.open(file.stream)
     image = np.array(img)
     image = utils.img2gray(image)
+    utils.save(image * 255, os.path.join(curr_dir,"test","p0.png"))
     image = utils.clearImgGray(image)    
+    utils.save(image * 255, os.path.join(curr_dir,"test","p1.png"))
     split_images = utils.splitImg(image)
     
     ocr_texts = []
