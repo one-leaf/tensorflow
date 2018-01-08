@@ -243,7 +243,7 @@ def splitImg(img_gray):
     clearImg(adaptive_binary_inv)
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
-    peek_ranges = extract_peek_ranges_from_array(h_sum,1,5)
+    peek_ranges = extract_peek_ranges_from_array(h_sum,0,5)
     print(h_sum)
     print(peek_ranges)
     images=[]
@@ -275,18 +275,22 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
     start_i = None
     end_i = None
     peek_ranges = []
+    zero_count = 0
     for i, val in enumerate(array_vals):
         if val > minimun_val and start_i is None:
             start_i = i
         elif val > minimun_val and start_i is not None:
             end_i = i
-        elif val < minimun_val and start_i is not None:
+        elif val <= minimun_val and start_i is not None:
             end_i = i
-            if end_i - start_i >= minimun_range:
+            if end_i - start_i >= minimun_range and zerocount > 2:
                 peek_ranges.append((start_i, end_i))
-            start_i = None
-            end_i = None
-        elif val < minimun_val and start_i is None:
+                start_i = None
+                end_i = None
+                zero_count = 0
+            else:
+                zero_count += 1
+        elif val <= minimun_val and start_i is None:
             pass
         else:
             raise ValueError("cannot parse this case...")
