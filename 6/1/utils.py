@@ -282,7 +282,6 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
         elif val > minimun_val and start_i is not None:
             end_i = i
         elif val <= minimun_val and start_i is not None:
-            end_i = i
             if end_i - start_i >= minimun_range and zero_count > 2:
                 peek_ranges.append((start_i, end_i))
                 start_i = None
