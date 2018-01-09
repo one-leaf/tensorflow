@@ -85,6 +85,7 @@ def decode_a_seq(indexes, spars_tensor):
 def show(img):
     cv2.imshow('image', img)
     cv2.waitKey(0)
+    cv2.destroyAllWindows() 
 
 def pltshow(img, cmap = 'gray'):
     plt.imshow(img, cmap)
@@ -141,19 +142,20 @@ def clearImgGray(gray_image):
 # img 参数是 np.array 类型 输入是二值化并且反色的图片
 # 用于清除表格线
 def clearImg(adaptive_binary_inv):
+    result = np.copy(adaptive_binary_inv)
     # 清除竖线
     _sum=np.sum(adaptive_binary_inv,axis=0)
     _mean = 255 * adaptive_binary_inv.shape[0]
     for i,x in enumerate(_sum):
         if x>_mean*0.95:
-            adaptive_binary_inv[:,i]=0
+            result[:,i]=0
     # 清除横线
     _sum=np.sum(adaptive_binary_inv,axis=1)
     _mean = 255 * adaptive_binary_inv.shape[1]
     for i,x in enumerate(_sum):
         if x>_mean*0.8:
-            adaptive_binary_inv[i,:]=0
-    return dropZeroEdges(adaptive_binary_inv)
+            result[i,:]=0
+    return result
 
 # 图片转灰度, 参数是 np.array 类型
 def img2gray(img_color):
@@ -216,14 +218,37 @@ def dropZeroEdgesGray(img_gray):
     return dropZeroEdges(img, img_gray)
 
 # 清除边缘 输入为反色图片
-def dropZeroEdges(img_inv, img_gray=None):
-    w_sums = np.sum(img_inv, axis=1)
-    avg = np.average(np.trim_zeros(w_sums))
-    for i in range(len(w_sums)):
-        if w_sums[i]/avg < 0.1:
-            img_inv[i] = 0
+def dropZeroEdges(img_inv, img_gray=None, min_rate=0):
+    temp = np.copy(img_inv)
 
-    true_points = np.argwhere(img_inv)
+    if min_rate>0:
+        h_sums = np.sum(temp, axis=1)
+        avg = np.average(np.trim_zeros(h_sums))
+        for i in range(len(h_sums)):
+            if h_sums[i]/avg < min_rate:
+                temp[i] = 0
+            else:
+                break
+        for i in reversed(range(len(h_sums))):
+            if h_sums[i]/avg < min_rate:
+                temp[i] = 0
+            else:
+                break
+
+        w_sums = np.sum(temp, axis=0)
+        avg = np.average(np.trim_zeros(w_sums))
+        for i in range(len(h_sums)):
+            if h_sums[i]/avg < min_rate:
+                temp[:,i] = 0
+            else:
+                break
+        for i in reversed(range(len(w_sums))):
+            if h_sums[i]/avg < min_rate:
+                temp[:,i] = 0
+            else:
+                break
+
+    true_points = np.argwhere(temp)
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
     if top_left[0] == bottom_right[0] and top_left[1] == bottom_right[1] : return img_inv
@@ -237,10 +262,12 @@ def dropZeroEdges(img_inv, img_gray=None):
 def splitImg(img_gray):
     # 将灰度图二值化，并反色
     adaptive_binary_inv=img2bwinv(img_gray)
-    pltshow(adaptive_binary_inv)
+    # pltshow(adaptive_binary_inv)
     # thresh, adaptive_binary_inv = cv2.threshold(img_gray, 192, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
     # 清除多余的线段
-    clearImg(adaptive_binary_inv)
+    oldimg = adaptive_binary_inv
+    adaptive_binary_inv = clearImg(adaptive_binary_inv)
+    # pltshow(np.vstack([oldimg,adaptive_binary_inv]))
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
     peek_ranges = extract_peek_ranges_from_array(h_sum,0,5)
@@ -251,8 +278,8 @@ def splitImg(img_gray):
         w = adaptive_binary_inv.shape[1]
         h = peek_range[1] - y + 1
         # 删除前面和后面的空白区域
-        pltshow(adaptive_binary_inv[y: y + h + 1, x: x + w + 1])
-        w_sum = np.sum(adaptive_binary_inv[y: y + h + 1, x: x + w + 1], axis=0)
+       
+        w_sum = np.sum(adaptive_binary_inv[y - 1: y + h + 1, x: x + w + 1], axis=0)
         for s in w_sum:
             if s==0:
                 x += 1
@@ -264,7 +291,7 @@ def splitImg(img_gray):
                 w -= 1
             else:
                 break    
-        images.append(img_gray[y: y + h + 1 , x: x + w + 1 ])
+        images.append(img_gray[y: y + h , x: x + w + 1 ])
     return images
     
 # 从一个数组抓到分割点
@@ -282,7 +309,7 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
         elif val > minimun_val and start_i is not None:
             end_i = i
         elif val <= minimun_val and start_i is not None:
-            if end_i - start_i >= minimun_range and zero_count > 2:
+            if end_i - start_i >= minimun_range and zero_count >= 2:
                 peek_ranges.append((start_i, end_i))
                 start_i = None
                 end_i = None
@@ -455,34 +482,42 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
     img = resize(img, image_height)
     return text, img
 
-def main():
-    curr_dir = os.path.dirname(__file__)
-    FontDir = os.path.join(curr_dir,"fonts")
-    FontNames = []    
-    # fontName = os.path.join(curr_dir,"fonts","simsun.ttc")
-    for name in os.listdir(FontDir):
-        fontName = os.path.join(FontDir, name)
-        if fontName.lower().endswith('ttf') or \
-           fontName.lower().endswith('ttc') or \
-           fontName.lower().endswith('otf'):
-           FontNames.append(fontName)
+# def main():
+#     curr_dir = os.path.dirname(__file__)
+#     FontDir = os.path.join(curr_dir,"fonts")
+#     FontNames = []    
+#     # fontName = os.path.join(curr_dir,"fonts","simsun.ttc")
+#     for name in os.listdir(FontDir):
+#         fontName = os.path.join(FontDir, name)
+#         if fontName.lower().endswith('ttf') or \
+#            fontName.lower().endswith('ttc') or \
+#            fontName.lower().endswith('otf'):
+#            FontNames.append(fontName)
 
-    fontName = random.choice(FontNames)
-    eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
-    ASCII_CHARS = [chr(c) for c in range(32,126+1)]
-    lable,img = getImage(ASCII_CHARS,fontName,image_height=32, font_length=50, \
-            font_size=64,word_dict=eng_world_list,is_Debug=False)
-    print(lable)
-    #plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
+#     fontName = random.choice(FontNames)
+#     eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
+#     ASCII_CHARS = [chr(c) for c in range(32,126+1)]
+#     lable,img = getImage(ASCII_CHARS,fontName,image_height=32, font_length=50, \
+#             font_size=64,word_dict=eng_world_list,is_Debug=False)
+#     print(lable)
+#     #plt.imshow(img, cmap = 'gray', interpolation = 'bicubic')
 
-    plt.imshow(img, cmap = 'gray',)
-    plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
-    plt.show()
+#     plt.imshow(img, cmap = 'gray',)
+#     plt.xticks([]), plt.yticks([])  # to hide tick values on X and Y axis
+#     plt.show()
     
-    # cv2.imshow(lable,np.asarray(img))
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()    
+#     # cv2.imshow(lable,np.asarray(img))
+#     # cv2.waitKey(0)
+#     # cv2.destroyAllWindows()    
+
+def main():
+    img = Image.open("/Users/oneleaf/Desktop/test2.png")
+    img = np.array(img)
+    img = img2gray(img)
+    # show(img)
+    imgs = splitImg(img)
+    for img in imgs:
+        show(img)
 
 if __name__ == '__main__':
-    while True:
-        main()
+    main()
