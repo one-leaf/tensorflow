@@ -47,8 +47,8 @@ POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
 
-def CLEAN_G(inputs, reuse=False):    
-    with tf.variable_scope("CLEAN_G", reuse=reuse):      
+def TRIM_G(inputs, reuse=False):    
+    with tf.variable_scope("TRIM_G", reuse=reuse):      
         layer, half_layer = utils_nn.pix2pix_g2(inputs)
         return layer, half_layer
 
@@ -82,7 +82,7 @@ def neural_networks():
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
-    net_g, _ = CLEAN_G(layer, reuse = False)
+    net_g, _ = TRIM_G(layer, reuse = False)
     
     return  inputs, labels, global_step, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
@@ -143,9 +143,13 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
             w, h = image.size
             if w * h < image_size * image_size: break
 
+        image, trims_image = utils_pil.random_space2(image)
+
         image = utils_pil.convert_to_gray(image) 
+
         if add_noise:                  
             image = utils_font.add_noise(image)   
+    
         image = np.asarray(image)     
         # image = utils.resize(image, height=image_height)
         if add_noise:
@@ -178,7 +182,7 @@ def train():
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_G_dir = os.path.join(model_dir, "CG")
+    model_G_dir = os.path.join(model_dir, "TG")
     model_R_dir = os.path.join(model_dir, "R16")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
@@ -189,7 +193,7 @@ def train():
         session.run(init)
 
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
-        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='CLEAN_G'), sharded=False)
+        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TRIM_G'), sharded=False)
 
         ckpt = tf.train.get_checkpoint_state(model_G_dir)
         if ckpt and ckpt.model_checkpoint_path:           
