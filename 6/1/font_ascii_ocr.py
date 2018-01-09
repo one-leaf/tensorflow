@@ -163,7 +163,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        inputs[i,:] = utils.img2img(inputs_images[i],np.zeros([image_size, image_size]))
+        inputs[i,:] = utils.square_img(inputs_images[i],np.zeros([image_size, image_size]))
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)

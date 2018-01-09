@@ -161,11 +161,11 @@ def get_next_batch_for_srgan(batch_size=128):
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        inputs[i,:] = utils.img2img(inputs_images[i],np.zeros([image_size, image_size]))
+        inputs[i,:] = utils.square_img(inputs_images[i],np.zeros([image_size, image_size]))
 
     targets = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        targets[i,:] = utils.img2img(targets_images[i],np.zeros([image_size, image_size]))
+        targets[i,:] = utils.square_img(targets_images[i],np.zeros([image_size, image_size]))
 
     return inputs, targets
 

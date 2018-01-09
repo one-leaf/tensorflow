@@ -176,7 +176,11 @@ def img2bwinv(img_gray):
     return img_bw
 
 # 将原图平铺到目标图
-def img2img(srcimg, dstimg, height=None):
+# ###########  ==>  ######
+#                   ######
+#                   ###
+#
+def square_img(srcimg, dstimg, height=None):
     s_h,s_w=srcimg.shape
     if height == None: height = s_h
     d_h,d_w=dstimg.shape
@@ -186,16 +190,19 @@ def img2img(srcimg, dstimg, height=None):
             dstimg[l*height+h][w%d_w] = srcimg[h][w]  
     return dstimg           
 
-# 安装遮罩图，将原图中的数据取出来并拼接为完整的
-def img2mask(srcimg, maskimg, height, min_value=0.5):
-    s_h,s_w=maskimg.shape
+# 将原图中的数据取出来并拼接为完整的
+#  ######  ==>  ##############
+#  ######
+#  ###
+#
+def unsquare_img(srcimg, height):
+    s_h,s_w=srcimg.shape
     d_w = s_w * (s_h//height)
     dstimg = np.zeros((height,d_w))
     for w in range(d_w):
         for h in range(height):
             l = w//s_w
-            if maskimg[l*height+h][w%s_w]>min_value :
-                dstimg[h][w]=srcimg[l*height+h][w%s_w]
+            dstimg[h][w]=srcimg[l*height+h][w%s_w]
     return dstimg
 
 # 图片转为向量, img 参数是 np.array 类型

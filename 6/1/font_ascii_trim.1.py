@@ -219,19 +219,19 @@ def get_next_batch_for_gan(batch_size=128):
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        inputs[i,:] = utils.img2img(input_images[i],np.zeros([image_size, image_size]))
+        inputs[i,:] = utils.square_img(input_images[i],np.zeros([image_size, image_size]))
 
     trims = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        trims[i,:] = utils.img2img(trim_images[i],np.zeros([image_size, image_size]))
+        trims[i,:] = utils.square_img(trim_images[i],np.zeros([image_size, image_size]))
 
     clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        clears[i,:] = utils.img2img(clear_images[i],np.zeros([image_size, image_size]))
+        clears[i,:] = utils.square_img(clear_images[i],np.zeros([image_size, image_size]))
 
     half_clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        half_clears[i,:] = utils.img2img(half_clear_images[i],np.zeros([image_size, image_size]))
+        half_clears[i,:] = utils.square_img(half_clear_images[i],np.zeros([image_size, image_size]))
 
     return inputs, trims, clears, half_clears
 
@@ -346,7 +346,7 @@ def train():
                         print("trim src image failed, break")
                         has_err = True
                         break
-                    train_clean_inputs[i,:] = utils.img2img(dstimg,np.zeros([image_size, image_size]))
+                    train_clean_inputs[i,:] = utils.square_img(dstimg,np.zeros([image_size, image_size]))
                 if has_err: continue
 
                 feed = {c_inputs: train_half_clears, c_targets: train_clears}
