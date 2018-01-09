@@ -143,9 +143,10 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
             w, h = image.size
             if w * h < image_size * image_size: break
 
+        image = utils_pil.convert_to_gray(image) 
+
         image, trims_image = utils_pil.random_space2(image)
 
-        image = utils_pil.convert_to_gray(image) 
 
         if add_noise:                  
             image = utils_font.add_noise(image)   
