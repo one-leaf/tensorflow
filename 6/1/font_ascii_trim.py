@@ -365,7 +365,7 @@ def train():
                         _t_net_g = np.squeeze(t_net_g[i], axis=2)
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
                         _t_img = utils.unsquare_img(_t_net_g, image_height)
-                        _t_img = utils.dropZeroEdges(_t_img, min_rate=0.2)
+                        _t_img = utils.dropZeroEdges(_t_img, min_rate=0.1)
                         _t_img = utils.resize(_t_img, image_height)
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                             _t_net_g = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
