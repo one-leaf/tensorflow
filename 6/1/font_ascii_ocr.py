@@ -225,7 +225,7 @@ def train():
 
                 p_net_g = session.run(net_g, {inputs: train_inputs}) 
 
-                p_net_g = np.squeeze(p_net_g, axis=2)
+                p_net_g = np.squeeze(p_net_g, axis=3)
                 for i in range(batch_size):
                     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
                     _t_img_bin = np.copy(_t_img)    
@@ -255,8 +255,8 @@ def train():
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
                     p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                    p_net_g = np.squeeze(p_net_g, axis=2)
-                    
+                    p_net_g = np.squeeze(p_net_g, axis=3)
+
                     for i in range(batch_size):
                         _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
                         _t_img_bin = np.copy(_t_img)    
