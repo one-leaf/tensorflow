@@ -258,7 +258,8 @@ def dropZeroEdges(img_inv, img_gray=None, min_rate=0):
     true_points = np.argwhere(temp)
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
-    if top_left[0] == bottom_right[0] and top_left[1] == bottom_right[1] : return img_inv
+    if top_left[0] == bottom_right[0] or top_left[1] == bottom_right[1] : return img_inv
+    print(top_left[0], bottom_right[0], top_left[1], bottom_right[1])
     if img_gray == None:
         return img_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
     else:
