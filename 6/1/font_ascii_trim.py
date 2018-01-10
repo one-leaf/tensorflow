@@ -364,6 +364,10 @@ def train():
                     for i in range(batch_size): 
                         _t_net_g = np.squeeze(t_net_g[i], axis=2)
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
+                        _t_net_g = utils.unsquare_img(_t_net_g, image_height)
+                        _t_net_g = utils.dropZeroEdgesGray(_t_net_g)
+                        _t_net_g = utils.resize(_t_net_g, image_height)
+                        _t_net_g = utils.square_img(_t_net_g, np.zeros([image_size, image_size]), image_height)
                         _img = np.vstack((train_inputs[i], _t_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
                         _img = np.vstack((train_half_clears[i], _c_net_g)) 
