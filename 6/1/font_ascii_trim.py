@@ -370,7 +370,7 @@ def train():
                         _t_img_bin=np.where(_t_img>0.4, 1, 0)
 
                         _img = np.vstack((_t_img, _t_img_bin))                         
-                        cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _img * 255)
+                        # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _img * 255)
                         _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
                         _t_img = utils.resize(_t_img, image_height)
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
