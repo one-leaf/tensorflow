@@ -225,7 +225,7 @@ def dropZeroEdgesGray(img_gray):
     return dropZeroEdges(img, img_gray)
 
 # 清除边缘 输入为反色图片
-def dropZeroEdges(img_inv, img_gray=None, min_rate=0):
+def dropZeroEdges(img_inv, img_gray=[], min_rate=0):
     temp = np.copy(img_inv)
 
     if min_rate>0:
@@ -263,7 +263,7 @@ def dropZeroEdges(img_inv, img_gray=None, min_rate=0):
     if top_left[0] == bottom_right[0] or top_left[1] == bottom_right[1] : return img_inv
     # print(img_inv.shape)
     # print(top_left[0], bottom_right[0], top_left[1], bottom_right[1])
-    if img_gray :
+    if len(img_gray)>0 :
         return img_gray[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
     else:
         return img_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
