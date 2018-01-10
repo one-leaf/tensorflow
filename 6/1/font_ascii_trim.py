@@ -364,13 +364,13 @@ def train():
                     for i in range(batch_size): 
                         _t_net_g = np.squeeze(t_net_g[i], axis=2)
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
-                        
+
                         _t_img = utils.unsquare_img(_t_net_g, image_height)                        
                         _t_img_p = np.ravel(_t_img)
                         avg_vaue = np.average(np.trim_zeros(_t_img_p))
                         _t_img_bin = np.copy(_t_img)
-                        _t_img_bin[_t_img_bin>=avg_vaue*0.1] = 1
-                        _t_img_bin[_t_img_bin<avg_vaue*0.1] = 0
+                        _t_img_bin[_t_img_bin>=avg_vaue] = 1
+                        _t_img_bin[_t_img_bin<avg_vaue] = 0
                         _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
                         _t_img = utils.resize(_t_img, image_height)
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
