@@ -367,7 +367,7 @@ def train():
 
                         _t_img = utils.unsquare_img(_t_net_g, image_height)                        
 
-                        _t_img_bin=np.where(_t_img>0.4, 1, 0)
+                        _t_img_bin=np.where(_t_img>0.5, 1, 0)
 
                         _img = np.vstack((_t_img, _t_img_bin))                         
                         # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _img * 255)
