@@ -368,7 +368,7 @@ def train():
                         rate = 0.1
                         while True:
                             rate += 0.1
-                            _t_net_g = utils.dropZeroEdges(_t_net_g, min_rate=0.3)
+                            _t_net_g = utils.dropZeroEdges(_t_net_g, min_rate=rate)
                             _t_net_g = utils.resize(_t_net_g, image_height)
                             if _t_net_g.shape[0] * _t_net_g.shape[1] <= image_size * image_size:
                                 break
