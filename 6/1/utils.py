@@ -244,13 +244,13 @@ def dropZeroEdges(img_inv, img_gray=None, min_rate=0):
 
         w_sums = np.sum(temp, axis=0)
         avg = np.average(np.trim_zeros(w_sums))
-        for i in range(len(h_sums)):
-            if h_sums[i]/avg < min_rate:
+        for i in range(len(w_sums)):
+            if w_sums[i]/avg < min_rate:
                 temp[:,i] = 0
             else:
                 break
         for i in reversed(range(len(w_sums))):
-            if h_sums[i]/avg < min_rate:
+            if w_sums[i]/avg < min_rate:
                 temp[:,i] = 0
             else:
                 break
@@ -259,8 +259,8 @@ def dropZeroEdges(img_inv, img_gray=None, min_rate=0):
     top_left = true_points.min(axis=0)
     bottom_right = true_points.max(axis=0)
     if top_left[0] == bottom_right[0] or top_left[1] == bottom_right[1] : return img_inv
-    print(img_inv.shape)
-    print(top_left[0], bottom_right[0], top_left[1], bottom_right[1])
+    # print(img_inv.shape)
+    # print(top_left[0], bottom_right[0], top_left[1], bottom_right[1])
     if img_gray == None:
         return img_inv[top_left[0]:bottom_right[0]+1, top_left[1]:bottom_right[1]+1]
     else:
