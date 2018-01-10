@@ -365,8 +365,13 @@ def train():
                         _t_net_g = np.squeeze(t_net_g[i], axis=2)
                         _c_net_g = np.squeeze(c_net_g[i], axis=2)
                         _t_net_g = utils.unsquare_img(_t_net_g, image_height)
-                        _t_net_g = utils.dropZeroEdges(_t_net_g, min_rate=0.2)
-                        _t_net_g = utils.resize(_t_net_g, image_height)
+                        rate = 0.1
+                        while True:
+                            rate += 0.1
+                            _t_net_g = utils.dropZeroEdges(_t_net_g, min_rate=0.3)
+                            _t_net_g = utils.resize(_t_net_g, image_height)
+                            if _t_net_g.shape[0] * _t_net_g.shape[1] <= image_size * image_size:
+                                break
                         _t_net_g = utils.square_img(_t_net_g, np.zeros([image_size, image_size]), image_height)
                         _img = np.vstack((train_inputs[i], _t_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
