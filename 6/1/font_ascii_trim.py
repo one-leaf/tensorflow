@@ -169,7 +169,13 @@ def get_next_batch_for_gan(batch_size=128):
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_size = image_height #random.randint(image_height, 64)    
+        # font_size = image_height #random.randint(image_height, 64)    
+        # if font_size==None:
+        if random.random()>0.5:
+            font_size = random.randint(9, 49)    
+        else:
+            font_size = random.randint(9, 15) 
+
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
