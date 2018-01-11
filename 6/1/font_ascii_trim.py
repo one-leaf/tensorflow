@@ -214,9 +214,11 @@ def get_next_batch_for_gan(batch_size=128):
         trims_image = (255. - trims_image) / 255.         
         trim_images.append(trims_image)
 
-        image = utils_font.add_noise(image)   
+        if random.random()>0.1:
+            image = utils_font.add_noise(image)   
         image = np.asarray(image)
-        image = image * random.uniform(0.3, 1)
+        if random.random()>0.1:
+            image = image * random.uniform(0.3, 1)
         if random.random()>0.5:
             image = (255. - image) / 255.
         else:
