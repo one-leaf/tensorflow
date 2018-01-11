@@ -79,6 +79,7 @@ def scan(file):
         p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
         p_net_g = np.squeeze(p_net_g, axis=3)
 
+        debug_net_g = np.copy(p_net_g)
         for j in range(1):
             _t_img = utils.unsquare_img(p_net_g[j], ocr.image_height)                        
             _t_img_bin = np.copy(_t_img)    
@@ -88,7 +89,7 @@ def scan(file):
             if _t_img.shape[0] * _t_img.shape[1] <= ocr.image_size * ocr.image_size:
                 p_net_g[j] = utils.square_img(_t_img, np.zeros([ocr.image_size, ocr.image_size]), ocr.image_height)
 
-        _img = np.vstack((ocr_inputs[0], p_net_g[0])) 
+        _img = np.vstack((ocr_inputs[0], debug_net_g[0], p_net_g[0])) 
         utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
 
         decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
