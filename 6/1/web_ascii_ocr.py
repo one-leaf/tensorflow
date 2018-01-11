@@ -32,11 +32,11 @@ def init():
 
     model_dir = os.path.join(curr_dir, "model_ascii_srgan")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_G_dir = os.path.join(model_dir, "CG")
+    model_G_dir = os.path.join(model_dir, "TG")
     model_R_dir = os.path.join(model_dir, "R16")
 
     r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
-    g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='CLEAN_G'), sharded=True)
+    g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TRIM_G'), sharded=True)
 
     ckpt = tf.train.get_checkpoint_state(model_G_dir)
     if ckpt and ckpt.model_checkpoint_path:           
@@ -77,6 +77,15 @@ def scan(file):
         start = time.time()
         p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
         p_net_g = np.squeeze(p_net_g, axis=3)
+
+        for i in range(1):
+            _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
+            _t_img_bin = np.copy(_t_img)    
+            _t_img_bin[_t_img_bin<=0.3] = 0
+            _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
+            _t_img = utils.resize(_t_img, image_height)
+            if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
+                p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
         _img = np.vstack((ocr_inputs[0], p_net_g[0])) 
         utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
