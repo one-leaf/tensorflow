@@ -64,9 +64,10 @@ def scan(file):
     ocr_texts = []
 
     for i, split_image in enumerate(split_images):
-        # image = utils.img2bwinv(split_image)
+        inv_image = utils.img2bwinv(split_image)
+        inv_image = utils.clearImg(inv_image)
         image = 255. - split_image
-        # image = utils.dropZeroEdges(image)  
+        image = utils.dropZeroEdges(inv_image, image)  
         image = utils.resize(image, ocr.image_height)
         image = image / 255.
         ocr_inputs = np.zeros([1, ocr.image_size, ocr.image_size])
