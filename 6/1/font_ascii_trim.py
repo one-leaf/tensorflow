@@ -357,21 +357,21 @@ def train():
                 #     train_clean_inputs[i,:] = utils.square_img(dstimg,np.zeros([image_size, image_size]))
                 # if has_err: continue
 
-                feed = {c_inputs: train_half_clears, c_targets: train_clears}
+                # feed = {c_inputs: train_half_clears, c_targets: train_clears}
 
-                start = time.time()                
-                errD, errD1, errD2, _, steps = session.run([c_d_loss, c_d_loss_real, c_d_loss_fake, c_d_optim, c_global_step], feed)
-                print("C %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                # start = time.time()                
+                # errD, errD1, errD2, _, steps = session.run([c_d_loss, c_d_loss_real, c_d_loss_fake, c_d_optim, c_global_step], feed)
+                # print("C %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
 
-                start = time.time()                                
-                errG, errM, errA, errH, _, steps, c_net_g = session.run([c_g_loss, c_g_mse_loss, c_g_loss_fake, c_g_half_loss, c_g_optim, c_global_step, c_fake_B], feed)
-                print("C %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
+                # start = time.time()                                
+                # errG, errM, errA, errH, _, steps, c_net_g = session.run([c_g_loss, c_g_mse_loss, c_g_loss_fake, c_g_half_loss, c_g_optim, c_global_step, c_fake_B], feed)
+                # print("C %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS < 4:
                     for i in range(batch_size): 
                         _t_net_g = np.squeeze(t_net_g[i], axis=2)
-                        _c_net_g = np.squeeze(c_net_g[i], axis=2)
+                        # _c_net_g = np.squeeze(c_net_g[i], axis=2)
 
                         _t_img = utils.unsquare_img(_t_net_g, image_height)                        
                         # _t_img_bin=np.where(_t_img>0.5, 1, 0)
@@ -386,12 +386,12 @@ def train():
 
                         _img = np.vstack((train_inputs[i], _t_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
-                        _img = np.vstack((train_half_clears[i], _c_net_g)) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
+                        # _img = np.vstack((train_half_clears[i], _c_net_g)) 
+                        # cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
             save(session, t_d_saver, t_global_step)
             save(session, t_g_saver, t_global_step)
-            save(session, c_d_saver, c_global_step)
-            save(session, c_g_saver, c_global_step)
+            # save(session, c_d_saver, c_global_step)
+            # save(session, c_g_saver, c_global_step)
             
 if __name__ == '__main__':
     train()
