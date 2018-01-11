@@ -70,7 +70,7 @@ def scan(file):
         image = utils.resize(image, ocr.image_height)
         image = image / 255.
         ocr_inputs = np.zeros([1, ocr.image_size, ocr.image_size])
-        ocr_inputs[0,:] = utils.img2img(image, np.zeros([ocr.image_size, ocr.image_size]))
+        ocr_inputs[0,:] = utils.square_img(image, np.zeros([ocr.image_size, ocr.image_size]))
         
         ocr_seq_len = np.ones(1) * (ocr.image_size * ocr.image_size ) // (ocr.POOL_SIZE * ocr.POOL_SIZE)
 
