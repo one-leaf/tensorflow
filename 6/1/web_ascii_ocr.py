@@ -79,13 +79,13 @@ def scan(file):
         p_net_g = np.squeeze(p_net_g, axis=3)
 
         for i in range(1):
-            _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
+            _t_img = utils.unsquare_img(p_net_g[i], ocr.image_height)                        
             _t_img_bin = np.copy(_t_img)    
             _t_img_bin[_t_img_bin<=0.3] = 0
             _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-            _t_img = utils.resize(_t_img, image_height)
-            if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
-                p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
+            _t_img = utils.resize(_t_img, ocr.image_height)
+            if _t_img.shape[0] * _t_img.shape[1] <= ocr.image_size * ocr.image_size:
+                p_net_g[i] = utils.square_img(_t_img, np.zeros([ocr.image_size, ocr.image_size]), ocr.image_height)
 
         _img = np.vstack((ocr_inputs[0], p_net_g[0])) 
         utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
