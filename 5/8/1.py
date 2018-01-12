@@ -97,48 +97,17 @@ def resnet_cifar10(ipt, depth=32):
     res2 = layer_warp(basicblock, res1, 32, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
     pool = paddle.layer.img_pool(
-        input=res3, pool_size=8, stride=1, pool_type=paddle.pooling.Avg())
+        input=res3, pool_size=7, stride=1, pool_type=paddle.pooling.Avg())
     return pool
-
-
-def convolutional_neural_network(img):
-    # first conv layer
-    conv_pool_1 = paddle.networks.simple_img_conv_pool(
-        input=img,
-        filter_size=5,
-        num_filters=20,
-        num_channel=1,
-        pool_size=2,
-        pool_stride=2,
-        act=paddle.activation.Relu())
-    # second conv layer
-    conv_pool_2 = paddle.networks.simple_img_conv_pool(
-        input=conv_pool_1,
-        filter_size=5,
-        num_filters=50,
-        num_channel=20,
-        pool_size=2,
-        pool_stride=2,
-        act=paddle.activation.Relu())
-    # fully-connected layer
-    # predict = paddle.layer.fc(
-    #     input=conv_pool_2, size=10, act=paddle.activation.Softmax())
-    return conv_pool_2
-
 
 def network():
     # -1 ,2048
     x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector(2048))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = x
-    # layer = paddle.layer.embedding(input=layer, size=28*28)
-    layer = paddle.layer.fc(input=layer, size=28*28*1, act=paddle.activation.Relu())
-    layer = convolutional_neural_network(layer)
-    # layer = resnet_cifar10(layer)
+    layer = paddle.layer.fc(input=x, size=45*45*1, act=paddle.activation.Relu())
+    layer = resnet_cifar10(layer)
     
-    # layer = paddle.layer.embedding(input=layer, size=128)
-
     # fc1 = paddle.layer.fc(input=layer, size=128, act=paddle.activation.Linear())
     # lstm1 = paddle.layer.lstmemory(input=fc1, act=paddle.activation.Relu())
     # inputs = [fc1, lstm1]
@@ -151,7 +120,7 @@ def network():
     # lstm_last = paddle.layer.pooling(input=inputs[1], pooling_type=paddle.pooling.Max())
     # output = paddle.layer.fc(input=[fc_last, lstm_last], size=class_dim, act=paddle.activation.Softmax())
 
-    output = paddle.layer.fc(input=layer, size=class_dim, act=paddle.activation.Softmax())
+    # output = paddle.layer.fc(input=layer, size=class_dim, act=paddle.activation.Softmax())
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
