@@ -184,7 +184,6 @@ def get_next_batch_for_gan(batch_size=128):
             temp_image = utils_pil.resize_by_height(image, image_height)
             w, h = temp_image.size
             if w * h <= image_size * image_size: break
-        print("--------------")
         image = utils_pil.convert_to_gray(image)    #原始图片   
         w, h = image.size
         if h > image_height:

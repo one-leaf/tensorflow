@@ -24,8 +24,12 @@ def random_space2(img, height, minrate=0.5):
 
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
-    x = random.randint(0,w)
-    y = random.randint(0,h)
+    x = 0
+    y = 0
+    if w>0:
+        x = random.randint(0,w)
+    if h>0:
+        y = random.randint(0,h)
     bg.paste(img, (x,y))
     # new_bg = Image.new('L', bg.size, 255)
     # new_bg.paste(img,(x,y))    
