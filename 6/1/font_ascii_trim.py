@@ -175,30 +175,42 @@ def get_next_batch_for_gan(batch_size=128):
             font_size = random.randint(9, 49)    
         else:
             font_size = random.randint(9, 15) 
-
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
             font_length = random.randint(3, 400)
             text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
-            image = utils_pil.resize_by_height(image, image_height)
-            w, h = image.size
+            temp_image = utils_pil.resize_by_height(image, image_height)
+            w, h = temp_image.size
             if w * h <= image_size * image_size: break
-        image = utils_pil.convert_to_gray(image)
+        
+        image = utils_pil.convert_to_gray(image)    #原始图片   
+        w, h = image.size
+        if h > image_height:
+            image = utils_pil.resize_by_height(image, image_height)     
+        source_image = image.copy()
+
+        # 随机缩放下图片
+        if random.random()>0.5：
+            _h =  random.randint(9, image_height+1)
+            image = utils_pil.resize_by_height(image, _h)  
+        # image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
 
         # 干净的图片，给降噪网络用
-        clears_image = image.copy()
+        clears_image = source_image.copy()
+        w, h = clears_image.size
+        if h != image_height:
+            clears_image = utils_pil.resize_by_height(clears_image, image_height)
         clears_image = np.asarray(clears_image)
         clears_image = (255. - clears_image) / 255. 
         clear_images.append(clears_image)
-
-        _h =  random.randint(9, image_height+1)
-        image = utils_pil.resize_by_height(image, _h)        
-        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
-        
-        # 给早期降噪网络使用
+      
+        # 给clear降噪网络使用
         half_clear_image = image.copy()
+        w, h = half_clear_image.size
+        if h != image_height:
+            half_clear_image = utils_pil.resize_by_height(half_clear_image, image_height, random.random()>0.5)
         half_clear_image = utils_font.add_noise(half_clear_image) 
         half_clear_image = np.asarray(half_clear_image)
         half_clear_image = half_clear_image * random.uniform(0.3, 1)
@@ -208,8 +220,8 @@ def get_next_batch_for_gan(batch_size=128):
             half_clear_image = half_clear_image / 255.           
         half_clear_images.append(half_clear_image) 
 
-        # 随机移动位置并缩小 trims_image 为字体实际位置标识
-        image, trims_image = utils_pil.random_space2(image)
+        # 随机移动位置 trims_image 为字体实际位置标识
+        image = utils_pil.random_space2(image, image_height)
         trims_image = np.asarray(image)
         trims_image = (255. - trims_image) / 255.         
         trim_images.append(trims_image)
