@@ -19,17 +19,14 @@ def random_space(img, minrate=0.5):
 
 # 随机移动位置
 def random_space2(img, height, minrate=0.5):
-    _img = resize(img, height)
-    print("4",_img.size)
+    _img = resize_by_height(img, height)
     bg = Image.new(img.mode, _img.size, 255)
-    print("5",bg.size)
 
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
     x = random.randint(0,w)
     y = random.randint(0,h)
     bg.paste(img, (x,y))
-    print("6",bg.size)
     # new_bg = Image.new('L', bg.size, 255)
     # new_bg.paste(img,(x,y))    
     # return bg, new_bg 

@@ -190,14 +190,12 @@ def get_next_batch_for_gan(batch_size=128):
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)     
         source_image = image.copy()
-        print("0",image.size)
 
         # 随机缩放下图片
         if random.random()>0.5:
             _h =  random.randint(9, image_height+1)
             image = utils_pil.resize_by_height(image, _h)  
         # image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
-        print("1",image.size)
 
         # 干净的图片，给降噪网络用
         clears_image = source_image.copy()
@@ -223,9 +221,7 @@ def get_next_batch_for_gan(batch_size=128):
         half_clear_images.append(half_clear_image) 
 
         # 随机移动位置 trims_image 为字体实际位置标识
-        print("2",image.size)
         image = utils_pil.random_space2(image, image_height)
-        print("3",image.size)
         trims_image = np.asarray(image)
         trims_image = (255. - trims_image) / 255.         
         trim_images.append(trims_image)
