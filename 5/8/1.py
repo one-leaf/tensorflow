@@ -102,12 +102,18 @@ def resnet_cifar10(ipt, depth=32):
 
 def network():
     # -1 ,2048
-    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector(2048))
+    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector_sequence(2048))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = paddle.layer.fc(input=x, size=45*45*1, act=paddle.activation.Relu())
     layer = resnet_cifar10(layer)
     
+    src_forward = paddle.networks.simple_gru(
+        input=layer, size=512)
+    src_backward = paddle.networks.simple_gru(
+        input=layer, size=512, reverse=True)
+    layer = paddle.layer.concat(input=[src_forward, src_backward])
+
     # fc1 = paddle.layer.fc(input=layer, size=128, act=paddle.activation.Linear())
     # lstm1 = paddle.layer.lstmemory(input=fc1, act=paddle.activation.Relu())
     # inputs = [fc1, lstm1]
@@ -120,7 +126,7 @@ def network():
     # lstm_last = paddle.layer.pooling(input=inputs[1], pooling_type=paddle.pooling.Max())
     # output = paddle.layer.fc(input=[fc_last, lstm_last], size=class_dim, act=paddle.activation.Softmax())
 
-    # output = paddle.layer.fc(input=layer, size=class_dim, act=paddle.activation.Softmax())
+    output = paddle.layer.fc(input=layer, size=class_dim, act=paddle.activation.Softmax())
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
