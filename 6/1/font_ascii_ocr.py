@@ -136,17 +136,20 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
 
             text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-            if add_noise:
-                image = utils_pil.resize_by_height(image, image_height, random.random()>0.5)
-            else:
-                image = utils_pil.resize_by_height(image, image_height)
-            w, h = image.size
+            temp_image = utils_pil.resize_by_height(image, image_height)
+            w, h = temp_image.size            
             if w * h < image_size * image_size: break
 
         image = utils_pil.convert_to_gray(image) 
+        w, h = image.size
+        if h > image_height:
+            image = utils_pil.resize_by_height(image, image_height)  
 
-        image, trims_image = utils_pil.random_space2(image)
+        if add_noise and random.random()>0.5:
+            _h =  random.randint(9, image_height+1)
+            image = utils_pil.resize_by_height(image, _h)  
 
+        image = utils_pil.random_space2(image, image_height)
 
         if add_noise:                  
             image = utils_font.add_noise(image)   
