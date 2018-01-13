@@ -246,6 +246,7 @@ def dropZeroEdges(img_inv, img_gray=[], min_rate=0):
         w_sums = np.sum(temp, axis=0)
         avg = np.average(np.trim_zeros(w_sums))
         w_sums_avg = w_sums*1.0/avg
+        min_rate = min_rate * 2
         for i in range(len(w_sums)):
             if w_sums_avg[i] < min_rate or (w_sums_avg[i+1] < min_rate and w_sums_avg[i+2] < min_rate and w_sums_avg[i+3] < min_rate):
                 temp[:,i] = 0
