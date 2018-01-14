@@ -51,10 +51,10 @@ SEQ_LENGHT = (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
         layer, half_layer = utils_nn.pix2pix_g2(inputs)
-        print(half_layer.shape)
+        # print(half_layer.shape) ? 1,1, 512
         return layer, half_layer
 
-def RES(inputs, keep_prob, seq_len, reuse = False):
+def RES(inputs, half_input, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -62,9 +62,10 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         batch_size = tf.shape(inputs)[0]
         layer = tf.reshape(layer, [batch_size, -1, 1024])
 
-        lstm_layer = LSTM(inputs, keep_prob, seq_len)
-        layer = tf.concat([layer,lstm_layer], axis=2) 
-        # layer = LSTM(layer, keep_prob, seq_len)
+        lstm_layer = LSTM(half_input, keep_prob, seq_len)
+        lstm_layer = tf.reshape(lstm_layer, [batch_size, -1, 1024])
+        
+        layer = tf.concat([layer, lstm_layer], axis=2)
 
         layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
@@ -73,10 +74,10 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         layer = tf.reshape(layer, [batch_size, -1, 1024])       
         return layer
 
+# 输入 half_layer
 def LSTM(inputs, keep_prob, seq_len):
-    layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE * POOL_SIZE))
-    # layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    # layer = inputs
+    layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
+    layer = tf.reshape(inputs, (-1, SEQ_LENGHT, 1))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
@@ -98,7 +99,9 @@ def neural_networks():
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
-    net_res = RES(layer,keep_prob, seq_len, reuse = False)
+    net_g, half_net_g = TRIM_G(layer, reuse = False)
+
+    net_res = RES(layer, half_net_g, keep_prob, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
@@ -108,7 +111,6 @@ def neural_networks():
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
 
-    net_g, _ = TRIM_G(layer, reuse = False)
     
     return  inputs, labels, global_step, keep_prob, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
