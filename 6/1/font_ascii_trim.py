@@ -407,7 +407,7 @@ def train():
                         _b_t_img = _b_t_img.astype(np.uint8)
                         
                         kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
-                        _b_t_img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+                        _b_t_img = cv2.morphologyEx(_b_t_img, cv2.MORPH_CLOSE, kernel)
 
                         x,y,w,h = utils.getMaxContours(_b_t_img)
                         # print(x,y,w,h)
