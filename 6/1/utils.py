@@ -537,9 +537,12 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
 def main():
     img = Image.open("D://S4_0.png")
     img = np.array(img)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
     img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
-    show(img)
+    show(img)    
+    # img = cv2.dilate(img, None , iterations=10) 
+    # img = cv2.erode(img, None , iterations=10) 
+    # show(img)
 
 
 if __name__ == '__main__':

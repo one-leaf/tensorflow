@@ -405,18 +405,9 @@ def train():
                         _b_t_img[_b_t_img<=0.2] = 0
                         _b_t_img = _b_t_img * 255
                         _b_t_img = _b_t_img.astype(np.uint8)
-                        cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _b_t_img)
                         
-                        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 25))
-                        # closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-
-                        # _b_t_img = cv2.Canny(_b_t_img, 50, 255) 
-                        kernel=np.uint8(np.zeros((3,3)))   
-                        for j in range(10):
-                            _b_t_img = cv2.dilate(_b_t_img, kernel)  
-                            cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s_%s_0.png"%(steps,i,j)), _b_t_img)
-                            # _b_t_img = cv2.erode(_b_t_img, kernel); 
-                            # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s_%s_1.png"%(steps,i,j)), _b_t_img)
+                        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
+                        _b_t_img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
 
                         x,y,w,h = utils.getMaxContours(_b_t_img)
                         # print(x,y,w,h)
