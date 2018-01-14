@@ -45,67 +45,60 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-SEQ_LEN = (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)
-
 MODEL_SAVE_NAME = "model_ascii_srgan"
+SEQ_LENGHT = (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)
 
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
         layer, half_layer = utils_nn.pix2pix_g2(inputs)
         return layer, half_layer
 
-def OCR(inputs, keep_prob, seq_len, reuse = False):
+def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
-        shape = tf.shape(inputs)
-        batch_size = shape[0] 
-        layer = slim.flatten(layer)
-        print(layer.shape)
-        layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
 
-        layer = tf.reshape(layer, [batch_size, -1]) 
-        layer = tf.split(layer, SEQ_LEN, 0)
-   
-        num_hidden = 128
-        cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
-        cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
-        cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        outputs, _ = tf.nn.static_bidirectional_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-        outputs = tf.concat(outputs, axis=2) 
+        lstm_layer = LSTM(inputs, keep_prob, seq_len)
 
-        print(layer.shape)
-        layer = slim.flatten(layer)        
-        layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        # layer = tf.reshape(layer, [batch_size, -1, num_hidden])    
-        layer = tf.reshape(layer, [batch_size, -1])    
-        cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
-        cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
-        cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        outputs, _ = tf.nn.static_bidirectional_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-        outputs = tf.concat(outputs, axis=2) 
-
-        print(layer.shape)
-        layer = slim.flatten(layer)
-        layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=None, activation_fn=None)  
-
-        layer = tf.reshape(layer, [batch_size, SEQ_LEN, 1])
+        layer = tf.concat([layer,lstm_layer], axis=2) 
+        layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)  
+        # shape = tf.shape(inputs)
+        # batch_size = shape[0] 
+        # layer = tf.reshape(layer, [batch_size, -1, SEQ_LENGHT])
+        
         return layer
+
+def LSTM(inputs, keep_prob, seq_len):
+    layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE * POOL_SIZE))
+    num_hidden = 128
+    cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
+    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
+    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
+    outputs = tf.concat(outputs, axis=2) 
+    layer = slim.fully_connected(layer, num_hidden, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
+    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
+    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
+    outputs = tf.concat(outputs, axis=2)
+    layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    return layer
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, image_size, image_size], name="inputs")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
-    keep_prob = tf.placeholder(tf.float32, name="keep_prob")    
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
+    keep_prob = tf.placeholder(tf.float32, name="keep_prob")
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
-    net_ocr = OCR(layer, keep_prob, seq_len,  reuse = False)
-    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
+    net_res = RES(layer,keep_prob, seq_len, reuse = False)
+    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
@@ -116,7 +109,7 @@ def neural_networks():
 
     net_g, _ = TRIM_G(layer, reuse = False)
     
-    return  inputs, labels, global_step, keep_prob,  \
+    return  inputs, labels, global_step, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
             net_g
 
@@ -166,7 +159,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
             # random.shuffle(text)
             # text = "".join(text).strip()
 
-            text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
+            text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
             temp_image = utils_pil.resize_by_height(image, image_height)
             w, h = temp_image.size            
@@ -207,11 +200,11 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * SEQ_LEN                
+    seq_len = np.ones(batch_size) * (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)                
     return inputs, sparse_labels, seq_len, info
 
 def train():
-    inputs, labels, global_step, keep_prob,\
+    inputs, labels, global_step, \
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
         net_g = neural_networks()
 
@@ -219,7 +212,7 @@ def train():
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_G_dir = os.path.join(model_dir, "TG")
-    model_R_dir = os.path.join(model_dir, "OCR")
+    model_R_dir = os.path.join(model_dir, "R16")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
@@ -228,7 +221,7 @@ def train():
     with tf.Session() as session:
         session.run(init)
 
-        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True)
+        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TRIM_G'), sharded=False)
 
         ckpt = tf.train.get_checkpoint_state(model_G_dir)
@@ -269,7 +262,7 @@ def train():
                     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
+                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
@@ -300,7 +293,7 @@ def train():
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                             p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len, keep_prob:1.0}) 
+                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
                     for i in range(batch_size): 
                         _img = np.vstack((train_inputs[i], p_net_g[i])) 
@@ -327,7 +320,7 @@ def train():
                     for f in sorted_fonts[:20]:
                         print(f)
             print("Save Model R ...")
-            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)
+            r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
             try:
                 ckpt = tf.train.get_checkpoint_state(model_G_dir)
                 if ckpt and ckpt.model_checkpoint_path:           
