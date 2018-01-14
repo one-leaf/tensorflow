@@ -535,13 +535,12 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
 #     # cv2.destroyAllWindows()    
 
 def main():
-    img = Image.open("/Users/oneleaf/Desktop/test2.png")
+    img = Image.open("D://S4_0.png")
     img = np.array(img)
-    img = img2gray(img)
-    # show(img)
-    imgs = splitImg(img)
-    for img in imgs:
-        show(img)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, 1))
+    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+    show(img)
+
 
 if __name__ == '__main__':
     main()

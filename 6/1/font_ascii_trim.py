@@ -407,6 +407,9 @@ def train():
                         _b_t_img = _b_t_img.astype(np.uint8)
                         cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _b_t_img)
                         
+                        # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (25, 25))
+                        # closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+
                         # _b_t_img = cv2.Canny(_b_t_img, 50, 255) 
                         kernel=np.uint8(np.zeros((3,3)))   
                         for j in range(10):
