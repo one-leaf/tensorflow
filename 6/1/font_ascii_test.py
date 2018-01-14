@@ -62,6 +62,8 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 
         lstm_layer = LSTM(inputs, keep_prob, seq_len)
         layer = tf.concat([layer,lstm_layer], axis=2) 
+
+        layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
         layer = tf.reshape(layer, [batch_size, -1, 1024])       
@@ -192,7 +194,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)                
+    seq_len = np.ones(batch_size) * SEQ_LENGHT                
     return inputs, sparse_labels, seq_len, info
 
 def train():
