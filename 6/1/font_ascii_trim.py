@@ -387,7 +387,7 @@ def train():
                 # print("C %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
                 # 报告
-                if steps > 0 and steps % REPORT_STEPS < 4:
+                if steps > 0 and steps % REPORT_STEPS < 5:
                     for i in range(batch_size): 
                         _t_net_g = np.squeeze(t_net_g[i], axis=2)
                         # _c_net_g = np.squeeze(c_net_g[i], axis=2)
