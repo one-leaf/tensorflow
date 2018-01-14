@@ -14,6 +14,29 @@ def trim(img):
     if bbox:
         return img.crop(bbox)
 
+# 用cv的膨胀复试来提取图片 (输入 nparray 0~1)
+def cvTrimImage(img):
+    # 将图片放到一个大的图片里面
+    w,h = img.shape
+    b_t_img = np.zeros([w+200, h+10])
+    b_t_img[100:w+100,5:h+5]=img
+
+    # 清理下大图片并转为8bit位图
+    _b_t_img = np.copy(b_t_img)
+    _b_t_img[_b_t_img<=0.2] = 0
+    _b_t_img = _b_t_img * 255
+    _b_t_img = _b_t_img.astype(np.uint8)
+    
+    # 按照80的规格横向膨胀并腐蚀
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (80, 1))
+    _b_t_img = cv2.morphologyEx(_b_t_img, cv2.MORPH_CLOSE, kernel)
+
+    # 找到最大的矩形框
+    x,y,w,h = getMaxContours(_b_t_img)
+    if w==0 or h==0: return img
+    return b_t_img[y:y+h,x:x+w]
+
+
 # 按高度缩放图片,img_shape=(height,width)
 def resize(img,height=28):
     width = round(height*img.shape[1]/img.shape[0])

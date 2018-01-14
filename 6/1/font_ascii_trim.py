@@ -393,30 +393,8 @@ def train():
                         # _c_net_g = np.squeeze(c_net_g[i], axis=2)
 
                         _t_img = utils.unsquare_img(_t_net_g, image_height)   
-
-
-                        # _t_img_bin=np.where(_t_img>0.5, 1, 0)
-                        # _t_img_bin = np.copy(_t_img)    
-                        # _t_img_bin[_t_img_bin<=0.2] = 0
-                        # _img = np.vstack((_t_img, _t_img_bin))                         
-                        # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _img * 255)
-                        # _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-                        w,h = _t_img.shape
-                        b_t_img = np.zeros([w+100, h+10])
-                        b_t_img[50:w+50,5:h+5]=_t_img
-
-                        _b_t_img = np.copy(b_t_img)
-                        _b_t_img[_b_t_img<=0.2] = 0
-                        _b_t_img = _b_t_img * 255
-                        _b_t_img = _b_t_img.astype(np.uint8)
-                        
-                        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (32, 1))
-                        _b_t_img = cv2.morphologyEx(_b_t_img, cv2.MORPH_CLOSE, kernel)
-
-                        x,y,w,h = utils.getMaxContours(_b_t_img)
-                        # print(x,y,w,h)
-                        _t_img = b_t_img[y:y+h,x:x+w]
-
+                        _t_img = utils.cvTrimImage(_t_img)
+                        _t_img[_t_img<0] = 0
                         _t_img = utils.resize(_t_img, image_height)
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                             _t_net_g = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
