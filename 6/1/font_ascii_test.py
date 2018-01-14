@@ -91,7 +91,7 @@ def neural_networks():
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
     net_res = RES(layer,keep_prob, seq_len, reuse = False)
-    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES')
+    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
@@ -214,7 +214,7 @@ def train():
     with tf.Session() as session:
         session.run(init)
 
-        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
+        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TRIM_G'), sharded=False)
 
         ckpt = tf.train.get_checkpoint_state(model_G_dir)
@@ -224,7 +224,7 @@ def train():
 
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         if ckpt and ckpt.model_checkpoint_path:
-            print("Restore Model R...")
+            print("Restore Model OCR...")
             r_saver.restore(session, ckpt.model_checkpoint_path)    
 
         AllLosts={}
@@ -312,8 +312,8 @@ def train():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
                         print(f)
-            print("Save Model R ...")
-            r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
+            print("Save Model OCR ...")
+            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)
             try:
                 ckpt = tf.train.get_checkpoint_state(model_G_dir)
                 if ckpt and ckpt.model_checkpoint_path:           
