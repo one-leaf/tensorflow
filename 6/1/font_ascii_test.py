@@ -69,19 +69,19 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
         cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
+        outputs, _ = tf.nn.static_bidirectional_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
         outputs = tf.concat(outputs, axis=2) 
 
         print(layer.shape)
-        layer = slim.flatten(layer)
+        layer = slim.flatten(layer)        
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-
+        # layer = tf.reshape(layer, [batch_size, -1, num_hidden])    
         layer = tf.reshape(layer, [batch_size, -1, 1])    
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
         cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-        outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
+        outputs, _ = tf.nn.static_bidirectional_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
         outputs = tf.concat(outputs, axis=2) 
 
         print(layer.shape)
