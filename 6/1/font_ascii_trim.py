@@ -401,8 +401,9 @@ def train():
                         # _img = np.vstack((_t_img, _t_img_bin))                         
                         # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _img * 255)
                         # _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-                        b_t_img = np.zeros([_t_img.shape[0]*100, _t_img.shape[1]*10])
-                        b_t_img[50:,5:]=_t_img
+                        w,h = _t_img.shape
+                        b_t_img = np.zeros(w+100, h+10])
+                        b_t_img[50:w+50,5:h+5]=_t_img
 
                         _b_t_img = np.copy(b_t_img)
                         _b_t_img[_b_t_img<=0.2] = 0
