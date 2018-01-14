@@ -408,6 +408,11 @@ def train():
                         # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _b_t_img)
                         
                         # _b_t_img = cv2.Canny(_b_t_img, 50, 255)  
+                        for j in range(10):
+                            _b_t_img = cv2.dilate(_b_t_img)  
+                            _b_t_img = cv2.erode(_b_t_img); 
+                            cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s_%s.png"%(steps,i,j)), _b_t_img)
+
                         x,y,w,h = utils.getMaxContours(_b_t_img)
                         print(x,y,w,h)
                         _t_img = _t_img[y:y+h,x:x+w]
