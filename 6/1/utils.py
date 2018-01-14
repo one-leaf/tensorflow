@@ -367,6 +367,18 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
         images.append((img,(_x,_y,_w,_h)))
     return images
 
+def getMaxContours(img):
+    im2, contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    x,y,w,h =(0,0,0,0)
+    max_area = 0
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area > max_area:
+            max_area = area
+            x,y,w,h = cv2.boundingRect(cnt)
+    return img[y,y+h,x,x+w]
+
+
 def renderFontBypyGame(font_file, font_size, text):
     from pygame import freetype
     import pygame
