@@ -62,6 +62,7 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         layer = slim.flatten(layer)
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
 
+        layer = tf.reshape(layer, [batch_size, -1, 1])    
         num_hidden = 128
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
@@ -72,7 +73,8 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
 
         layer = slim.flatten(layer)
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-
+        
+        layer = tf.reshape(layer, [batch_size, -1, 1])    
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
         cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
@@ -86,9 +88,6 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
 
         layer = tf.reshape(layer, [batch_size, SEQ_LEN, 1])
         return layer
-
-
-
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
