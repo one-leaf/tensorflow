@@ -106,7 +106,7 @@ def neural_networks():
 
     net_g, _ = TRIM_G(layer, reuse = False)
     
-    return  inputs, labels, global_step, \
+    return  inputs, labels, global_step, keep_prob, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
             net_g
 
@@ -156,7 +156,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
             # random.shuffle(text)
             # text = "".join(text).strip()
 
-            text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+            text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
             temp_image = utils_pil.resize_by_height(image, image_height)
             w, h = temp_image.size            
@@ -201,7 +201,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
     return inputs, sparse_labels, seq_len, info
 
 def train():
-    inputs, labels, global_step, \
+    inputs, labels, global_step, keep_prob,\
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
         net_g = neural_networks()
 
