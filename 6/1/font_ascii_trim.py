@@ -401,15 +401,15 @@ def train():
                         # _img = np.vstack((_t_img, _t_img_bin))                         
                         # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _img * 255)
                         # _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-                        b_t_img = np.zeros(_t_img.shape*100)
-                        b_t_img[50:,50:]=_t_img
+                        b_t_img = np.zeros([_t_img.shape[0]*100, _t_img.shape[1]*10])
+                        b_t_img[50:,5:]=_t_img
 
                         _b_t_img = np.copy(b_t_img)
-                        # _b_t_img[_b_t_img<=0.2] = 0
+                        _b_t_img[_b_t_img<=0.2] = 0
                         _b_t_img = _b_t_img * 255
                         _b_t_img = _b_t_img.astype(np.uint8)
                         
-                        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (32, 32))
+                        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (32, 1))
                         _b_t_img = cv2.morphologyEx(_b_t_img, cv2.MORPH_CLOSE, kernel)
 
                         x,y,w,h = utils.getMaxContours(_b_t_img)
