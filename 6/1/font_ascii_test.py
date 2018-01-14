@@ -64,7 +64,7 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
 
         layer = tf.reshape(layer, [batch_size, -1]) 
-        layer = tf.split(layer, SEQ_LEN)
+        layer = tf.split(layer, SEQ_LEN, 0)
    
         num_hidden = 128
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
