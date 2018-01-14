@@ -60,6 +60,7 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         shape = tf.shape(inputs)
         batch_size = shape[0] 
         layer = slim.flatten(layer)
+        print(layer.shape)
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
 
         layer = tf.reshape(layer, [batch_size, -1, 1])    
@@ -71,9 +72,10 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
         outputs = tf.concat(outputs, axis=2) 
 
+        print(layer.shape)
         layer = slim.flatten(layer)
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        
+
         layer = tf.reshape(layer, [batch_size, -1, 1])    
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
@@ -82,6 +84,7 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
         outputs = tf.concat(outputs, axis=2) 
 
+        print(layer.shape)
         layer = slim.flatten(layer)
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=None, activation_fn=None)  
