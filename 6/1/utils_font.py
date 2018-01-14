@@ -64,6 +64,30 @@ def get_random_text(CHARS, word_dict, font_length):
     text = text.strip()
     return text
 
+def get_words_text(CHARS, word_dict, font_length):
+    text=''
+
+    while True:
+        word = random.choice(word_dict)
+        _word=""
+        for c in word:
+            if c in CHARS:
+                _word += c
+        if len(text)+len(_word)>font_length: break
+        text = text+_word.strip()+" "
+    
+    if font_length - len(text)>0:
+        n = random.random()
+        if n<0.3:
+            for i in range(font_length - len(text)):
+                text += random.choice("123456789012345678901234567890-./$,:()+-*=><")
+        else:
+            for i in range(font_length - len(text)):
+                text += random.choice(CHARS)
+       
+    text = text.strip()
+    return text
+
 def get_font_image_from_pygame(font_file, font_size, text):
     import pygame
     from pygame import freetype
