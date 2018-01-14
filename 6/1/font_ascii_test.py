@@ -54,7 +54,7 @@ def TRIM_G(inputs, reuse=False):
         layer, half_layer = utils_nn.pix2pix_g2(inputs)
         return layer, half_layer
 
-def OCR(inputs, keep_prob, reuse = False):
+def OCR(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
         shape = tf.shape(inputs)
@@ -95,12 +95,12 @@ def neural_networks():
     inputs = tf.placeholder(tf.float32, [None, image_size, image_size], name="inputs")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     keep_prob = tf.placeholder(tf.float32, name="keep_prob")    
+    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
-    net_ocr = OCR(layer, keep_prob,  reuse = False)
-    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
+    net_ocr = OCR(layer, keep_prob, seq_len,  reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
