@@ -368,7 +368,7 @@ def getGrids(img_gray,minArea=0,x=0,y=0,w=0,h=0):
     return images
 
 def getMaxContours(img):
-    im2, contours, hierarchy = cv2.findContours(img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    im2, contours, hierarchy = cv2.findContours(img, cv2.CV_RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     x,y,w,h =(0,0,0,0)
     max_area = 0
     for cnt in contours:
