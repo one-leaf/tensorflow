@@ -56,20 +56,19 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
-        layer = slim.fully_connected(layer, 512, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.dropout(layer, keep_prob)
         batch_size = tf.shape(inputs)[0]
-        layer = tf.reshape(layer, [batch_size, -1, 512])
+        layer = tf.reshape(layer, [batch_size, -1, 1024])
 
         lstm_layer = LSTM(inputs, keep_prob, seq_len)
         layer = tf.concat([layer,lstm_layer], axis=2) 
-        print(layer.shape)
 
-        layer = slim.fully_connected(layer, 512, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
-        layer = slim.fully_connected(layer, 512, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
-        layer = tf.reshape(layer, [batch_size, -1, 512])       
+        layer = tf.reshape(layer, [batch_size, -1, 1024])       
         return layer
 
 def LSTM(inputs, keep_prob, seq_len):
@@ -81,7 +80,7 @@ def LSTM(inputs, keep_prob, seq_len):
     cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
-    layer = slim.fully_connected(layer, 512, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
     layer = slim.dropout(layer, keep_prob)
     return layer
 
@@ -260,7 +259,7 @@ def train():
                     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
+                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
@@ -291,7 +290,7 @@ def train():
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                             p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
+                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len, keep_prob: 1}) 
 
                     for i in range(batch_size): 
                         _img = np.vstack((train_inputs[i], p_net_g[i])) 
