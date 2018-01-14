@@ -57,6 +57,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.dropout(layer, keep_prob)
         batch_size = tf.shape(inputs)[0]
         layer = tf.reshape(layer, [batch_size, -1, 1024])
 
@@ -64,6 +65,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         layer = tf.concat([layer,lstm_layer], axis=2) 
 
         layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
+        layer = slim.dropout(layer, keep_prob)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
         layer = tf.reshape(layer, [batch_size, -1, 1024])       
@@ -71,7 +73,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 
 def LSTM(inputs, keep_prob, seq_len):
     layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE * POOL_SIZE))
-    num_hidden = 128
+    num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
@@ -79,6 +81,7 @@ def LSTM(inputs, keep_prob, seq_len):
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
     layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    layer = slim.dropout(layer, keep_prob)
     return layer
 
 def neural_networks():
@@ -206,7 +209,7 @@ def train():
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_G_dir = os.path.join(model_dir, "TG")
-    model_R_dir = os.path.join(model_dir, "R16")
+    model_R_dir = os.path.join(model_dir, "OCR")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
@@ -231,7 +234,7 @@ def train():
         AllLosts={}
         while True:
             errA = errD1 = errD2 = 1
-            batch_size = 4
+            batch_size = 2
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
