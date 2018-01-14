@@ -57,15 +57,14 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
         layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        batch_size = tf.shape(inputs)[0]
+        layer = tf.reshape(layer, [batch_size, -1, SEQ_LENGHT])
 
         lstm_layer = LSTM(inputs, keep_prob, seq_len)
-
         layer = tf.concat([layer,lstm_layer], axis=2) 
         layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)  
-        # shape = tf.shape(inputs)
-        # batch_size = shape[0] 
-        # layer = tf.reshape(layer, [batch_size, -1, SEQ_LENGHT])
-        
+
+        layer = tf.reshape(layer, [batch_size, -1, SEQ_LENGHT])       
         return layer
 
 def LSTM(inputs, keep_prob, seq_len):
