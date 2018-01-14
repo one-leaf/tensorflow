@@ -403,7 +403,7 @@ def train():
                         # _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
                         _b_t_img = np.copy(_t_img)
                         _b_t_img = _b_t_img * 255
-                        _b_t_img = _t_img.astype(np.uint8)
+                        _b_t_img = _b_t_img.astype(np.uint8)
                         cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _b_t_img)
                         
                         #_b_t_img = cv2.Canny(_b_t_img, 0, 255)  
