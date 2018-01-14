@@ -112,7 +112,7 @@ def neural_networks():
 
     net_g, _ = TRIM_G(layer, reuse = False)
     
-    return  inputs, labels, global_step, \
+    return  inputs, labels, global_step, keep_prob,  \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
             net_g
 
@@ -207,7 +207,7 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
     return inputs, sparse_labels, seq_len, info
 
 def train():
-    inputs, labels, global_step, \
+    inputs, labels, global_step, keep_prob,\
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
         net_g = neural_networks()
 
