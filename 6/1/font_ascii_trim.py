@@ -408,7 +408,7 @@ def train():
                         cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _b_t_img)
                         
                         # _b_t_img = cv2.Canny(_b_t_img, 50, 255) 
-                        kernel=np.uint8(np.zeros((5,5)))   
+                        kernel=np.uint8(np.zeros((3,3)))   
                         for j in range(10):
                             _b_t_img = cv2.dilate(_b_t_img, kernel)  
                             _b_t_img = cv2.erode(_b_t_img, kernel); 
