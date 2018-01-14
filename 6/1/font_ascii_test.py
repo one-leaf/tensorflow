@@ -63,7 +63,7 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         print(layer.shape)
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
 
-        layer = tf.reshape(layer, [batch_size, -1, 1])    
+        layer = tf.reshape(layer, [batch_size, -1])    
         num_hidden = 128
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
@@ -76,7 +76,7 @@ def OCR(inputs, keep_prob, seq_len, reuse = False):
         layer = slim.flatten(layer)        
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         # layer = tf.reshape(layer, [batch_size, -1, num_hidden])    
-        layer = tf.reshape(layer, [batch_size, -1, 1])    
+        layer = tf.reshape(layer, [batch_size, -1])    
         cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
         cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
         cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
