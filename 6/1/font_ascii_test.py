@@ -56,15 +56,15 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
-        layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         batch_size = tf.shape(inputs)[0]
-        layer = tf.reshape(layer, [batch_size, -1, SEQ_LENGHT])
+        layer = tf.reshape(layer, [batch_size, -1, 1024])
 
         lstm_layer = LSTM(inputs, keep_prob, seq_len)
         layer = tf.concat([layer,lstm_layer], axis=2) 
-        layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
-        layer = tf.reshape(layer, [batch_size, -1, SEQ_LENGHT])       
+        layer = tf.reshape(layer, [batch_size, -1, 1024])       
         return layer
 
 def LSTM(inputs, keep_prob, seq_len):
@@ -76,7 +76,7 @@ def LSTM(inputs, keep_prob, seq_len):
     cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
-    layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
     return layer
 
 def neural_networks():
