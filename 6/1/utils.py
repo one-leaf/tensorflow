@@ -376,7 +376,7 @@ def getMaxContours(img):
         if area > max_area:
             max_area = area
             x,y,w,h = cv2.boundingRect(cnt)
-    return img[y,y+h,x,x+w]
+    return x,y,w,h
 
 
 def renderFontBypyGame(font_file, font_size, text):
