@@ -166,33 +166,51 @@ def get_next_batch_for_gan(batch_size=128):
     trim_images = []
     clear_images = []
     half_clear_images = []
+    codes = []
     max_width_image = 0
     for i in range(batch_size):
         font_name = random.choice(AllFontNames)
-        font_size = image_height #random.randint(image_height, 64)    
+        # font_size = image_height #random.randint(image_height, 64)    
+        # if font_size==None:
+        if random.random()>0.5:
+            font_size = random.randint(9, 49)    
+        else:
+            font_size = random.randint(9, 15) 
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
             font_length = random.randint(3, 400)
             text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
-            image = utils_pil.resize_by_height(image, image_height)
-            w, h = image.size
+            temp_image = utils_pil.resize_by_height(image, image_height)
+            w, h = temp_image.size
             if w * h <= image_size * image_size: break
-        image = utils_pil.convert_to_gray(image)
+        image = utils_pil.convert_to_gray(image)    #原始图片   
+        w, h = image.size
+        if h > image_height:
+            image = utils_pil.resize_by_height(image, image_height)     
+        source_image = image.copy()
+
+        # 随机缩放下图片
+        if random.random()>0.5:
+            _h =  random.randint(9, image_height+1)
+            image = utils_pil.resize_by_height(image, _h)  
+        # image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
 
         # 干净的图片，给降噪网络用
-        clears_image = image.copy()
+        clears_image = source_image.copy()
+        w, h = clears_image.size
+        if h != image_height:
+            clears_image = utils_pil.resize_by_height(clears_image, image_height)
         clears_image = np.asarray(clears_image)
         clears_image = (255. - clears_image) / 255. 
         clear_images.append(clears_image)
-
-        _h =  random.randint(9, image_height+1)
-        image = utils_pil.resize_by_height(image, _h)        
-        image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
-        
-        # 给早期降噪网络使用
+      
+        # 给clear降噪网络使用
         half_clear_image = image.copy()
+        w, h = half_clear_image.size
+        if h != image_height:
+            half_clear_image = utils_pil.resize_by_height(half_clear_image, image_height, random.random()>0.5)
         half_clear_image = utils_font.add_noise(half_clear_image) 
         half_clear_image = np.asarray(half_clear_image)
         half_clear_image = half_clear_image * random.uniform(0.3, 1)
@@ -202,15 +220,17 @@ def get_next_batch_for_gan(batch_size=128):
             half_clear_image = half_clear_image / 255.           
         half_clear_images.append(half_clear_image) 
 
-        # 随机移动位置并缩小 trims_image 为字体实际位置标识
-        image, trims_image = utils_pil.random_space(image)
-        trims_image = np.asarray(trims_image)
-        trims_image = trims_image / 255.         
+        # 随机移动位置 trims_image 为字体实际位置标识
+        image = utils_pil.random_space2(image, image_height)
+        trims_image = np.asarray(image)
+        trims_image = (255. - trims_image) / 255.         
         trim_images.append(trims_image)
 
-        image = utils_font.add_noise(image)   
+        if random.random()>0.1:
+            image = utils_font.add_noise(image)   
         image = np.asarray(image)
-        image = image * random.uniform(0.3, 1)
+        if random.random()>0.1:
+            image = image * random.uniform(0.3, 1)
         if random.random()>0.5:
             image = (255. - image) / 255.
         else:
@@ -219,19 +239,19 @@ def get_next_batch_for_gan(batch_size=128):
 
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        inputs[i,:] = utils.square_img(input_images[i],np.zeros([image_size, image_size]))
+        inputs[i,:] = utils.square_img(input_images[i], np.zeros([image_size, image_size]), image_height)
 
     trims = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        trims[i,:] = utils.square_img(trim_images[i],np.zeros([image_size, image_size]))
+        trims[i,:] = utils.square_img(trim_images[i], np.zeros([image_size, image_size]), image_height)
 
     clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        clears[i,:] = utils.square_img(clear_images[i],np.zeros([image_size, image_size]))
+        clears[i,:] = utils.square_img(clear_images[i], np.zeros([image_size, image_size]), image_height)
 
     half_clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
-        half_clears[i,:] = utils.square_img(half_clear_images[i],np.zeros([image_size, image_size]))
+        half_clears[i,:] = utils.square_img(half_clear_images[i], np.zeros([image_size, image_size]), image_height)
 
     return inputs, trims, clears, half_clears
 
@@ -323,52 +343,71 @@ def train():
                 start = time.time()                
                 errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
                 print("T %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                
+                start = time.time()                
+                errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
+                print("T %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                
+                start = time.time()                
+                errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
+                print("T %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
 
                 start = time.time()                                
                 errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
                 print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
-                train_clean_inputs = np.zeros([batch_size, image_size, image_size])
-                has_err = False
-                for i in range(batch_size):
-                    _t_net_g = np.squeeze(t_net_g[i], axis=2)
-                    dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.3) 
-                    try:
-                        dstimg = utils.dropZeroEdges(dstimg) 
-                    except:
-                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_0.png"%(steps,i)), train_inputs[i] * 255) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_1.png"%(steps,i)), train_trims[i]) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_2.png"%(steps,i)), _t_net_g * 255) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_3.png"%(steps,i)), dstimg * 255)                            
-                    dstimg = utils.resize(dstimg, image_height)
-                    w,h = dstimg.shape
-                    if w * h > image_size * image_size :
-                        print("trim src image failed, break")
-                        has_err = True
-                        break
-                    train_clean_inputs[i,:] = utils.square_img(dstimg,np.zeros([image_size, image_size]))
-                if has_err: continue
+                # train_clean_inputs = np.zeros([batch_size, image_size, image_size])
+                # has_err = False
+                # for i in range(batch_size):
+                #     _t_net_g = np.squeeze(t_net_g[i], axis=2)
+                #     dstimg = utils.img2mask(train_inputs[i], _t_net_g, image_height, 0.3) 
+                #     try:
+                #         dstimg = utils.dropZeroEdges(dstimg) 
+                #     except:
+                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_0.png"%(steps,i)), train_inputs[i] * 255) 
+                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_1.png"%(steps,i)), train_trims[i]) 
+                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_2.png"%(steps,i)), _t_net_g * 255) 
+                #         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_3.png"%(steps,i)), dstimg * 255)                            
+                #     dstimg = utils.resize(dstimg, image_height)
+                #     w,h = dstimg.shape
+                #     if w * h > image_size * image_size :
+                #         print("trim src image failed, break")
+                #         has_err = True
+                #         break
+                #     train_clean_inputs[i,:] = utils.square_img(dstimg,np.zeros([image_size, image_size]))
+                # if has_err: continue
 
-                feed = {c_inputs: train_half_clears, c_targets: train_clears}
+                # feed = {c_inputs: train_half_clears, c_targets: train_clears}
 
-                start = time.time()                
-                errD, errD1, errD2, _, steps = session.run([c_d_loss, c_d_loss_real, c_d_loss_fake, c_d_optim, c_global_step], feed)
-                print("C %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                # start = time.time()                
+                # errD, errD1, errD2, _, steps = session.run([c_d_loss, c_d_loss_real, c_d_loss_fake, c_d_optim, c_global_step], feed)
+                # print("C %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
 
-                start = time.time()                                
-                errG, errM, errA, errH, _, steps, c_net_g = session.run([c_g_loss, c_g_mse_loss, c_g_loss_fake, c_g_half_loss, c_g_optim, c_global_step, c_fake_B], feed)
-                print("C %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
+                # start = time.time()                                
+                # errG, errM, errA, errH, _, steps, c_net_g = session.run([c_g_loss, c_g_mse_loss, c_g_loss_fake, c_g_half_loss, c_g_optim, c_global_step, c_fake_B], feed)
+                # print("C %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
                 # 报告
-                if steps > 0 and steps % REPORT_STEPS < 4:
+                if steps > 0 and steps % REPORT_STEPS < 5:
                     for i in range(batch_size): 
-                        _c_net_g = np.squeeze(c_net_g[i], axis=2)
-                        _img = np.vstack((train_inputs[i], train_clean_inputs[i], train_half_clears[i], train_clears[i],  _c_net_g)) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","F%s_%s.png"%(steps,i)), _img * 255) 
+                        _t_net_g = np.squeeze(t_net_g[i], axis=2)
+                        # _c_net_g = np.squeeze(c_net_g[i], axis=2)
+
+                        _t_img = utils.unsquare_img(_t_net_g, image_height)   
+                        _t_img = utils.cvTrimImage(_t_img)
+                        _t_img[_t_img<0] = 0
+                        _t_img = utils.resize(_t_img, image_height)
+                        if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
+                            _t_net_g = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
+
+                        _img = np.vstack((train_inputs[i], _t_net_g)) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
+                        # _img = np.vstack((train_half_clears[i], _c_net_g)) 
+                        # cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
             save(session, t_d_saver, t_global_step)
             save(session, t_g_saver, t_global_step)
-            save(session, c_d_saver, c_global_step)
-            save(session, c_g_saver, c_global_step)
+            # save(session, c_d_saver, c_global_step)
+            # save(session, c_g_saver, c_global_step)
             
 if __name__ == '__main__':
     train()

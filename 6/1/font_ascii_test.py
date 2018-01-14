@@ -51,6 +51,7 @@ SEQ_LENGHT = (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
         layer, half_layer = utils_nn.pix2pix_g2(inputs)
+        print(half_layer.shape)
         return layer, half_layer
 
 def RES(inputs, keep_prob, seq_len, reuse = False):
