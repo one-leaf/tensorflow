@@ -61,8 +61,9 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         batch_size = tf.shape(inputs)[0]
         layer = tf.reshape(layer, [batch_size, -1, 1024])
 
-        lstm_layer = LSTM(inputs, keep_prob, seq_len)
-        layer = tf.concat([layer,lstm_layer], axis=2) 
+        # lstm_layer = LSTM(inputs, keep_prob, seq_len)
+        # layer = tf.concat([layer,lstm_layer], axis=2) 
+        layer = LSTM(layer, keep_prob, seq_len)
 
         layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
@@ -72,8 +73,8 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         return layer
 
 def LSTM(inputs, keep_prob, seq_len):
-    layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE * POOL_SIZE))
-    layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    # layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE * POOL_SIZE))
+    # layer = slim.fully_connected(layer, 1, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
