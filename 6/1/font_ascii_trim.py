@@ -401,7 +401,8 @@ def train():
                         # _img = np.vstack((_t_img, _t_img_bin))                         
                         # cv2.imwrite(os.path.join(curr_dir,"test","S%s_%s.png"%(steps,i)), _img * 255)
                         # _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-                        _t_img[_t_img<0] = 0
+                        _t_img = _t_img * 255
+                        _t_img = _t_img.astype(np.uint8)
                         _t_img = cv2.Canny(_t_img*255, 50, 150)  
                         _t_img = utils.getMaxContours(_t_img)
                         _t_img = utils.resize(_t_img, image_height)
