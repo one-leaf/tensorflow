@@ -56,6 +56,7 @@ def TRIM_G(inputs, reuse=False):
 
 def OCR(inputs, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
+        keep_prob = tf.placeholder(tf.float32, name="keep_prob")    
         layer = utils_nn.resNet50(inputs, True)
         shape = tf.shape(inputs)
         batch_size = shape[0] 
@@ -85,7 +86,7 @@ def OCR(inputs, reuse = False):
         layer = slim.fully_connected(layer, SEQ_LEN, normalizer_fn=None, activation_fn=None)  
 
         layer = tf.reshape(layer, [batch_size, SEQ_LEN, 1])
-        return layer
+        return layer, keep_prob
 
 
 
@@ -96,7 +97,7 @@ def neural_networks():
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     global_step = tf.Variable(0, trainable=False)
 
-    layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
+    layer, keep_prob = tf.reshape(inputs, (-1, image_size, image_size, 1))
 
     net_ocr = OCR(layer, reuse = False)
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
@@ -264,7 +265,7 @@ def train():
                     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
+                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
@@ -295,7 +296,7 @@ def train():
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                             p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
+                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len, keep_prob:1.0}) 
 
                     for i in range(batch_size): 
                         _img = np.vstack((train_inputs[i], p_net_g[i])) 
