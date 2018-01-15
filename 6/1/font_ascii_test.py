@@ -110,7 +110,7 @@ def neural_networks():
     
     return  inputs, labels, global_step, keep_prob, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
-            net_g
+            net_g, resize_layer
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
@@ -207,7 +207,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
 def train():
     inputs, labels, global_step, keep_prob,\
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
-        net_g = neural_networks()
+        net_g, resize_layer = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -283,8 +283,8 @@ def train():
                 # 报告
                 if steps >0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
-                    # p_net_g = session.run(resize_layer, {inputs: train_inputs}) 
-                    # p_net_g = np.squeeze(p_net_g, axis=3)
+                    p_net_g = session.run(resize_layer, {inputs: train_inputs}) 
+                    p_net_g = np.squeeze(p_net_g, axis=3)
 
                     # for i in range(batch_size):
                     #     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
@@ -300,7 +300,7 @@ def train():
                     for i in range(batch_size): 
                         # _img = np.vstack((train_inputs[i], p_net_g[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
-                        # cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), p_net_g[i] * 255) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), p_net_g[i] * 255) 
 
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
