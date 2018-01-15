@@ -57,27 +57,27 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
-        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.dropout(layer, keep_prob)
-        batch_size = tf.shape(inputs)[0]
-        layer = tf.reshape(layer, [batch_size, -1, 1024])
+        # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        # layer = slim.dropout(layer, keep_prob)
+        # batch_size = tf.shape(inputs)[0]
+        # layer = tf.reshape(layer, [batch_size, -1, 1024])
 
-        lstm_layer = LSTM(inputs, keep_prob, seq_len)
-        lstm_layer = tf.reshape(lstm_layer, [batch_size, -1, 1024])
+        layer = LSTM(layer, keep_prob, seq_len)
+        # layer = tf.reshape(lstm_layer, [batch_size, -1, 1024])
         # layer = lstm_layer
-        layer = tf.concat([layer, lstm_layer], axis=2)
+        # layer = tf.concat([layer, lstm_layer], axis=2)
 
         layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
-        layer = tf.reshape(layer, [batch_size, -1, 1024])       
+        # layer = tf.reshape(layer, [batch_size, -1, 1024])       
         return layer
 
 # 输入 half_layer
 def LSTM(inputs, keep_prob, seq_len):
     # layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
-    layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
+    # layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
@@ -85,8 +85,8 @@ def LSTM(inputs, keep_prob, seq_len):
     cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
-    layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
-    layer = slim.dropout(layer, keep_prob)
+    # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+    # layer = slim.dropout(layer, keep_prob)
     return layer
 
 def neural_networks():
@@ -132,7 +132,7 @@ eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8"
 def list_to_chars(list):
     return "".join([CHARS[v] for v in list])
 
-def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
+def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
     inputs_images = []   
     codes = []
     max_width_image = 0
@@ -173,21 +173,24 @@ def get_next_batch_for_res(batch_size=128, add_noise=True, _font_name=None, _fon
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)  
 
-        if add_noise and random.random()>0.5:
+        if if_to_G and random.random()>0.5:
             _h =  random.randint(9, image_height+1)
-            image = utils_pil.resize_by_height(image, _h)  
-
-        image = utils_pil.random_space2(image, image_height)
-
-        if add_noise:                  
+            image = utils_pil.resize_by_height(image, _h) 
+             
+        if if_to_G:
+            image = utils_pil.random_space2(image, image_height)
             image = utils_font.add_noise(image)   
     
-        image = np.asarray(image)     
-        # image = utils.resize(image, height=image_height)
-        if add_noise:
+        image = np.asarray(image) 
+
+        if not if_to_G:    
+            image = utils.resize(image, height=image_height)
+            image = utils.img2bw(image)
+
+        if if_to_G:
             image = image * random.uniform(0.3, 1)        
 
-        if add_noise and random.random()>0.5:
+        if if_to_G and random.random()>0.5:
             image = image / 255.
         else:
             image = (255. - image) / 255.
