@@ -206,7 +206,8 @@ def get_next_batch_for_gan(batch_size=128):
         if h != image_height:
             clears_image = utils_pil.resize_by_height(clears_image, image_height)
         clears_image = np.asarray(clears_image)
-        clears_image = (255. - clears_image) / 255. 
+        clears_image = (255. - clears_image) / 255.
+        clears_image[clears_image==0]=-1 
         clear_images.append(clears_image)
       
         # 给clear降噪网络使用
