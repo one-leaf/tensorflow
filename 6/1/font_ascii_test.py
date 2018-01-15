@@ -68,7 +68,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         # layer = lstm_layer
         # layer = tf.concat([layer, lstm_layer], axis=2)
 
-        layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
