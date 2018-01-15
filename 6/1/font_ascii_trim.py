@@ -262,7 +262,7 @@ def get_next_batch_for_gan(batch_size=128):
     for i in range(batch_size):
         trims[i,:] = utils.square_img(trim_images[i], np.zeros([image_size, image_size]), image_height)
         trims[trims==0] == -1
-        
+
     clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
         clears[i,:] = utils.square_img(clear_images[i], np.zeros([image_size, image_size]), image_height)
@@ -421,7 +421,7 @@ def train():
                         _tran_img = train_trims[i]
                         _tran_img[_tran_img<0] = 0
 
-                        _img = np.vstack((train_inputs[i], _t_net_g, _tran_img)) 
+                        _img = np.vstack((train_inputs[i], _tran_img, _t_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
                         # _img = np.vstack((train_half_clears[i], _c_net_g)) 
                         # cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
