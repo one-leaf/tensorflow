@@ -45,7 +45,7 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-MODEL_SAVE_NAME = "model_ascii_srgan"
+MODEL_SAVE_NAME = "model_ascii"
 SEQ_LENGHT = resize_image_size * resize_image_size // (POOL_SIZE * POOL_SIZE)
 
 def TRIM_G(inputs, reuse=False):    

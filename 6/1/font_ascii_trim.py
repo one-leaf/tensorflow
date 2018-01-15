@@ -43,7 +43,7 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-MODEL_SAVE_NAME = "model_ascii_srgan"
+MODEL_SAVE_NAME = "model_ascii"
 
 # 参考 https://github.com/kaonashi-tyc/zi2zi/blob/master/model/unet.py
 def TRIM_G(inputs, reuse=False):    
