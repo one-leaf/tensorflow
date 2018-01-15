@@ -246,6 +246,12 @@ def train():
                     print("Error: cost is nan or inf")
                     return
 
+                # 如果正确率低于90%，保存出来
+                if acc<0.9:
+                    for i in range(batch_size):
+                        _img = np.vstack((train_inputs[i], p_net_g[i])) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s.png"%(steps,i)), _img * 255) 
+
                 for info in train_info:
                     key = ",".join(info)
                     if key in AllLosts:
