@@ -313,11 +313,12 @@ def train():
                         detect_number = detected_list[idx]  
                         hit = (number == detect_number)          
                         print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
-                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+                        if len(detected_list)>0:
+                            print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
                         # 计算莱文斯坦比
-                        import Levenshtein
-                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-                    print("Test Accuracy:", acc / len(original_list))
+                            import Levenshtein
+                            acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                        print("Test Accuracy:", acc / len(original_list))
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
                         print(f)
