@@ -182,12 +182,12 @@ def get_next_batch_for_gan(batch_size=128):
             text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint, trim=False)
             if font_hint in (0,1,3,5):
-                clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0, trim=False)
+                clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0, trim=False)
             else:
-                clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4, trim=False)    
+                clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4, trim=False)    
             temp_image = utils_pil.resize_by_height(image, image_height)
-            if clear_image.size[0] != image.size[0] or  clear_image.size[1] != image.size[1]:
-                print("get size not same,",image.size,clear_image.size,font_name,font_size,font_mode,font_hint)
+            if clear_trim_image.size[0] != image.size[0] or  clear_trim_image.size[1] != image.size[1]:
+                print("get size not same,",image.size,clear_trim_image.size,font_name,font_size,font_mode,font_hint)
                 continue
             w, h = temp_image.size
             if w * h <= image_size * image_size: 
@@ -203,9 +203,9 @@ def get_next_batch_for_gan(batch_size=128):
         if random.random()>0.5:
             _h =  random.randint(9, image_height+1)
             image = utils_pil.resize_by_height(image, _h, random.random()>0.5)  
-            clear_image = utils_pil.resize_by_size(clear_image, image.size)  
-            if clear_image.size[0] != image.size[0] or  clear_image.size[1] != image.size[1]:
-                print("random resize get size not same,",image.size,clear_image.size,font_name,font_size,font_mode,font_hint)
+            clear_trim_image = utils_pil.resize_by_size(clear_trim_image, image.size)  
+            if clear_trim_image.size[0] != image.size[0] or  clear_trim_image.size[1] != image.size[1]:
+                print("random resize get size not same,",image.size,clear_trim_image.size,font_name,font_size,font_mode,font_hint)
         # image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
 
         # 干净的图片，给降噪网络用
@@ -233,12 +233,14 @@ def get_next_batch_for_gan(batch_size=128):
         half_clear_images.append(half_clear_image) 
 
         # 随机移动位置 trims_image 为字体实际位置标识
-        image, clear_image = utils_pil.random_space2(image, clear_image, image_height)
+        image, clear_trim_image = utils_pil.random_space2(image, clear_trim_image, image_height)
 
-        trims_image = np.asarray(clear_image)
+        if clear_trim_image.size[0] != image.size[0] or  clear_trim_image.size[1] != image.size[1]:
+            print("random move space get size not same,",image.size,clear_trim_image.size,font_name,font_size,font_mode,font_hint)
+
+        trims_image = np.asarray(clear_trim_image)
         # 转黑白二值化，降低维度
         trims_image = (255. - trims_image) / 255.  
-        trims_image[trim_images==0]=-1      
         trim_images.append(trims_image)
 
         if random.random()>0.5:
@@ -259,7 +261,8 @@ def get_next_batch_for_gan(batch_size=128):
     trims = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
         trims[i,:] = utils.square_img(trim_images[i], np.zeros([image_size, image_size]), image_height)
-
+        trims[trims==0] == -1
+        
     clears = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
         clears[i,:] = utils.square_img(clear_images[i], np.zeros([image_size, image_size]), image_height)
