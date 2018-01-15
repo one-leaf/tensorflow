@@ -99,9 +99,9 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
-    layer = tf.image.resize_images(inputs, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
+    resize_layer = tf.image.resize_images(inputs, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
 
-    net_g, half_net_g = TRIM_G(layer, reuse = False)
+    net_g, half_net_g = TRIM_G(resize_layer, reuse = False)
 
     net_res = RES(layer, keep_prob, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
@@ -116,7 +116,7 @@ def neural_networks():
     
     return  inputs, labels, global_step, keep_prob, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
-            net_g
+            net_g, resize_layer
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
@@ -214,7 +214,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
 def train():
     inputs, labels, global_step, keep_prob,\
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
-        net_g = neural_networks()
+        net_g, resize_layer = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -290,23 +290,23 @@ def train():
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
-                    # p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                    # p_net_g = np.squeeze(p_net_g, axis=3)
+                    p_net_g = session.run(resize_layer, {inputs: train_inputs}) 
+                    p_net_g = np.squeeze(p_net_g, axis=3)
 
-                    # for i in range(batch_size):
-                    #     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
-                    #     _t_img_bin = np.copy(_t_img)    
-                    #     _t_img_bin[_t_img_bin<=0.3] = 0
-                    #     _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-                    #     _t_img = utils.resize(_t_img, image_height)
-                    #     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
-                    #         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
+                    for i in range(batch_size):
+                        _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
+                        _t_img_bin = np.copy(_t_img)    
+                        _t_img_bin[_t_img_bin<=0.3] = 0
+                        _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
+                        _t_img = utils.resize(_t_img, image_height)
+                        if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
+                            p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
                     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len, keep_prob: 1}) 
 
                     for i in range(batch_size): 
-                        _img = np.vstack((train_inputs[i], p_net_g[i])) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
+                        # _img = np.vstack((train_inputs[i], p_net_g[i])) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), p_net_g[i] * 255) 
 
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
