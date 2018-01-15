@@ -288,7 +288,7 @@ def train():
                         AllLosts[key]=errR
 
                 # 报告
-                if steps > 0 and steps % REPORT_STEPS == 0:
+                if steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
                     p_net_g = session.run(resize_layer, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g, axis=3)
