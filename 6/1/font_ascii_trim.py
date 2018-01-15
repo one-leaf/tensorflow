@@ -265,8 +265,8 @@ def init_saver():
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    t_model_D_dir = os.path.join(model_dir, "D")
-    t_model_G_dir = os.path.join(model_dir, "G")
+    t_model_D_dir = os.path.join(model_dir, "TD32")
+    t_model_G_dir = os.path.join(model_dir, "TG32")
     c_model_D_dir = os.path.join(model_dir, "CD")
     c_model_G_dir = os.path.join(model_dir, "CG")
     if not os.path.exists(t_model_D_dir): os.mkdir(t_model_D_dir)
@@ -306,10 +306,10 @@ def restore(session, saver=None):
 def save(session, saver, steps):
     if saver == None or saver == t_g_saver:
         print("Save Model TRIM G...")
-        t_g_saver.save(session, os.path.join(t_model_G_dir, "G.ckpt"), global_step=steps)
+        t_g_saver.save(session, os.path.join(t_model_G_dir, "TG.ckpt"), global_step=steps)
     if saver == None or saver == t_d_saver: 
         print("Save Model TRIM D...")
-        t_d_saver.save(session, os.path.join(t_model_D_dir, "D.ckpt"), global_step=steps)
+        t_d_saver.save(session, os.path.join(t_model_D_dir, "TD.ckpt"), global_step=steps)
     if saver == None or saver == c_g_saver: 
         print("Save Model CLEAN G...")
         c_g_saver.save(session, os.path.join(c_model_G_dir, "CG.ckpt"), global_step=steps)
