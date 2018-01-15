@@ -185,6 +185,16 @@ def clearImg(adaptive_binary_inv):
 def img2gray(img_color):
     return cv2.cvtColor(img_color, cv2.COLOR_BGR2GRAY)
 
+def img2bw(img_gray):
+    if np.dtype == np.uint8:
+        _img = img_gray
+    else:
+        _img = np.copy(img_gray)
+        _img = _img * 255
+        _img = _img.astype(np.uint8)
+    thresh, img_bw = cv2.threshold(_img, 127, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    return img_bw
+
 # 将图片转为黑白2色，参数是 np.array 类型
 # 为了方便计算，需要反色
 # 后面的方法更好一些，会保留一些轮廓信息
