@@ -46,7 +46,7 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
-SEQ_LENGHT = (image_size//2 * image_size//2 ) // (POOL_SIZE * POOL_SIZE)
+SEQ_LENGHT = (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)
 
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
@@ -70,9 +70,9 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         # layer = slim.dropout(layer, keep_prob)
-        layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=None, activation_fn=None)  
 
-        layer = tf.reshape(layer, [batch_size, -1, 1024])       
+        layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])       
         return layer
 
 # 输入 half_layer
@@ -99,12 +99,12 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
-    resize_layer = tf.image.resize_images(layer, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
+    # resize_layer = tf.image.resize_images(layer, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
     # print(resize_layer.shape)
 
-    net_g, half_net_g = TRIM_G(resize_layer, reuse = False)
+    net_g, half_net_g = TRIM_G(layer, reuse = False)
 
-    net_res = RES(resize_layer, keep_prob, seq_len, reuse = False)
+    net_res = RES(layer, keep_prob, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
@@ -117,7 +117,7 @@ def neural_networks():
     
     return  inputs, labels, global_step, keep_prob, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
-            net_g, resize_layer
+            net_g
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
@@ -159,12 +159,6 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
 
         while True:
             font_length = random.randint(5, 400)
-
-            # text = random.sample(CHARS, font_length)
-            # text = text+text+[" "," "]
-            # random.shuffle(text)
-            # text = "".join(text).strip()
-
             text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
             temp_image = utils_pil.resize_by_height(image, image_height)
@@ -173,31 +167,32 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
 
         image = utils_pil.convert_to_gray(image) 
         w, h = image.size
-        if h > image_height:
-            image = utils_pil.resize_by_height(image, image_height)  
+        image = utils_pil.resize_by_height(image, image_height)  
 
-        if if_to_G and random.random()>0.5:
-            _h =  random.randint(9, image_height+1)
-            image = utils_pil.resize_by_height(image, _h) 
+        # if if_to_G and random.random()>0.5:
+        #     _h =  random.randint(9, image_height+1)
+        #     image = utils_pil.resize_by_height(image, _h) 
 
-        if if_to_G:
-            image = utils_pil.random_space2(image, image_height)
-            image = utils_font.add_noise(image)   
+        # if if_to_G:
+        #     image = utils_pil.random_space2(image, image_height)
+        #     image = utils_font.add_noise(image)   
     
-        image = np.asarray(image) 
+        # image = np.asarray(image) 
 
-        if not if_to_G:    
-            image = utils.resize(image, height=image_height)
-            image = utils.img2bw(image)
+        # if not if_to_G:    
+        #     image = utils.resize(image, height=image_height)
+        #     image = utils.img2bw(image)
 
-        if if_to_G:
-            image = image * random.uniform(0.3, 1)        
+        # if if_to_G:
+        #     image = image * random.uniform(0.3, 1)        
 
-        if if_to_G and random.random()>0.5:
-            image = image / 255.
-        else:
-            image = (255. - image) / 255.
+        # if if_to_G and random.random()>0.5:
+        #     image = image / 255.
+        # else:
+        #     image = (255. - image) / 255.
 
+        image = np.asarray(image)
+        image = (255. - image) / 255.
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
@@ -215,7 +210,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
 def train():
     inputs, labels, global_step, keep_prob,\
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
-        net_g, resize_layer = neural_networks()
+        net_g = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -246,7 +241,7 @@ def train():
         AllLosts={}
         while True:
             errA = errD1 = errD2 = 1
-            batch_size = 4
+            batch_size = 1
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
