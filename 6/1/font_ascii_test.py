@@ -72,7 +72,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         layer = slim.dropout(layer, keep_prob)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
-        # layer = tf.reshape(layer, [batch_size, -1, 1024])       
+        layer = tf.reshape(layer, [batch_size, -1, 1024])       
         return layer
 
 # 输入 half_layer
