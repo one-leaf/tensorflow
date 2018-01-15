@@ -202,7 +202,11 @@ def get_next_batch_for_gan(batch_size=128):
         # 随机缩放下图片
         if random.random()>0.5:
             _h =  random.randint(9, image_height+1)
-            image = utils_pil.resize_by_height(image, _h, random.random()>0.5)  
+            antialias = random.random()>0.5
+            image = utils_pil.resize_by_height(image, _h, antialias)  
+            clear_image = utils_pil.resize_by_height(clear_image, _h, True)  
+            if clear_image.size[0] != image.size[0] or  clear_image.size[1] != image.size[1]:
+                print("random resize get size not same,",image.size,clear_image.size,font_name,font_size,font_mode,font_hint)
         # image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
 
         # 干净的图片，给降噪网络用
@@ -230,7 +234,6 @@ def get_next_batch_for_gan(batch_size=128):
         half_clear_images.append(half_clear_image) 
 
         # 随机移动位置 trims_image 为字体实际位置标识
-        clear_image = utils_pil.resize_by_size(clear_image, image.size)
         image, clear_image = utils_pil.random_space2(image, clear_image, image_height)
 
         trims_image = np.asarray(clear_image)
