@@ -66,9 +66,9 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
-        layer = slim.fully_connected(layer, 128, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, 1, normalizer_fn=None, activation_fn=None)  
 
-        layer = tf.reshape(layer, [batch_size, -1, 128])       
+        layer = tf.reshape(layer, [batch_size, -1, 1])       
         return layer
 
 # 输入 half_layer
@@ -215,7 +215,7 @@ def train():
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_G_dir = os.path.join(model_dir, "TG")
-    model_R_dir = os.path.join(model_dir, "OCR")
+    model_R_dir = os.path.join(model_dir, "RL32")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
     if not os.path.exists(model_G_dir): os.mkdir(model_G_dir)  
