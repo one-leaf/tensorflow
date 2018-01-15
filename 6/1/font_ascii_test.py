@@ -69,7 +69,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         # layer = tf.concat([layer, lstm_layer], axis=2)
 
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
-        layer = slim.dropout(layer, keep_prob)
+        # layer = slim.dropout(layer, keep_prob)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
 
         layer = tf.reshape(layer, [batch_size, -1, 1024])       
@@ -307,6 +307,7 @@ def train():
 
                     for i in range(batch_size): 
                         # _img = np.vstack((train_inputs[i], p_net_g[i])) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s_s.png"%(steps,i)), train_inputs[i] * 255) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), p_net_g[i] * 255) 
 
                     original_list = utils.decode_sparse_tensor(train_labels)
