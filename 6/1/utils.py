@@ -192,7 +192,7 @@ def img2bw(img_gray):
         _img = np.copy(img_gray)
         _img = _img * 255
         _img = _img.astype(np.uint8)
-    img_bw = cv2.adaptiveThreshold(_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2)
+    img_bw = cv2.adaptiveThreshold(_img, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 3, 3)
     return img_bw
 
 # 将图片转为黑白2色，参数是 np.array 类型
