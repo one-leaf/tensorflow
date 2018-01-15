@@ -186,6 +186,9 @@ def get_next_batch_for_gan(batch_size=128):
             else:
                 clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4, trim=False)    
             temp_image = utils_pil.resize_by_height(image, image_height)
+            if clear_image.size[0] != image.size[0] or  clear_image.size[1] != image.size[1]:
+                print("get size not same,",image.size,clear_image.size,font_name,font_size,font_mode,font_hint)
+                continue
             w, h = temp_image.size
             if w * h <= image_size * image_size: 
                 break
