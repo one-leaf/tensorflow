@@ -77,7 +77,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 # 输入 half_layer
 def LSTM(inputs, keep_prob, seq_len):
     # layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
-    layer = tf.reshape(layer, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
+    layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
