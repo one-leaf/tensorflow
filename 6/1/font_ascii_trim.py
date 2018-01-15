@@ -229,7 +229,8 @@ def get_next_batch_for_gan(batch_size=128):
 
         trims_image = np.asarray(clear_image)
         # 转黑白二值化，降低维度
-        trims_image = (255. - trims_image) / 255.        
+        trims_image = (255. - trims_image) / 255.  
+        trims_image[trim_images==0]=-1      
         trim_images.append(trims_image)
 
         if random.random()>0.5:
