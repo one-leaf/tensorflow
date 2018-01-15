@@ -93,8 +93,8 @@ def trim(img):
         return img.crop(bbox)
 
 # 图片缩放
-def resize(img, width, height):
-    return img.resize((width, height),Image.ANTIALIAS) 
+def resize_by_size(img, size):
+    return img.resize(size,Image.ANTIALIAS) 
 
 # 图片缩放
 def resize(img, rate):

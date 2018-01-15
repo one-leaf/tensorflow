@@ -224,7 +224,7 @@ def get_next_batch_for_gan(batch_size=128):
         half_clear_images.append(half_clear_image) 
 
         # 随机移动位置 trims_image 为字体实际位置标识
-        clear_image = utils_pil.resize(clear_image, image.size[0], image.size[1])
+        clear_image = utils_pil.resize_by_size(clear_image, image.size)
         image, clear_image = utils_pil.random_space2(image, clear_image, image_height)
 
         trims_image = np.asarray(clear_image)
