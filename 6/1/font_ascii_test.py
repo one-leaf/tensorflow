@@ -57,8 +57,8 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = utils_nn.resNet50(inputs, True)
-        # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        # layer = slim.dropout(layer, keep_prob)
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.dropout(layer, keep_prob)
         # batch_size = tf.shape(inputs)[0]
         # layer = tf.reshape(layer, [batch_size, -1, 1024])
 
@@ -176,7 +176,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         if if_to_G and random.random()>0.5:
             _h =  random.randint(9, image_height+1)
             image = utils_pil.resize_by_height(image, _h) 
-             
+
         if if_to_G:
             image = utils_pil.random_space2(image, image_height)
             image = utils_font.add_noise(image)   
