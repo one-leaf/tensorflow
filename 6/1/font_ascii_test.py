@@ -17,8 +17,8 @@ import operator
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 16
-image_size = 256
+image_height = 32
+image_size = 512
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -230,10 +230,10 @@ def train():
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True)
         g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TRIM_G'), sharded=False)
 
-        ckpt = tf.train.get_checkpoint_state(model_G_dir)
-        if ckpt and ckpt.model_checkpoint_path:           
-            print("Restore Model G...")
-            g_saver.restore(session, ckpt.model_checkpoint_path)   
+        # ckpt = tf.train.get_checkpoint_state(model_G_dir)
+        # if ckpt and ckpt.model_checkpoint_path:           
+        #     print("Restore Model G...")
+        #     g_saver.restore(session, ckpt.model_checkpoint_path)   
 
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         if ckpt and ckpt.model_checkpoint_path:
@@ -270,7 +270,7 @@ def train():
 
                 # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
-                
+
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
                 print("%d time: %4.4fs, res_acc: %.4f, res_loss: %.4f, info: %s " % (steps, time.time() - start, acc, errR, font_info))
@@ -328,13 +328,13 @@ def train():
                         print(f)
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)
-            try:
-                ckpt = tf.train.get_checkpoint_state(model_G_dir)
-                if ckpt and ckpt.model_checkpoint_path:           
-                    print("Restore Model G...")
-                    g_saver.restore(session, ckpt.model_checkpoint_path)   
-            except:
-                pass
+            # try:
+            #     ckpt = tf.train.get_checkpoint_state(model_G_dir)
+            #     if ckpt and ckpt.model_checkpoint_path:           
+            #         print("Restore Model G...")
+            #         g_saver.restore(session, ckpt.model_checkpoint_path)   
+            # except:
+            #     pass
 
 if __name__ == '__main__':
     train()
