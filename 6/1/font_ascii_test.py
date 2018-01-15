@@ -57,7 +57,7 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
-        layer = utils_nn.resNet50(layer, True)
+        layer = utils_nn.resNet50(inputs, True)
         # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         # layer = slim.dropout(layer, keep_prob)
 
@@ -246,7 +246,7 @@ def train():
         AllLosts={}
         while True:
             errA = errD1 = errD2 = 1
-            batch_size = 1
+            batch_size = 4
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
