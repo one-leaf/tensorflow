@@ -22,11 +22,10 @@ def cvTrimImage(img):
     b_t_img[100:w+100,5:h+5]=img
 
     # 清理下大图片并转为8bit位图
-    # _b_t_img = np.copy(b_t_img)
-    # _b_t_img[_b_t_img<=0.2] = 0
-    # _b_t_img = _b_t_img * 255
-    # _b_t_img = _b_t_img.astype(np.uint8)
-    _b_t_img = img2bw(b_t_img)
+    _b_t_img = np.copy(b_t_img)
+    _b_t_img[_b_t_img<=0.2] = 0
+    _b_t_img = _b_t_img * 255
+    _b_t_img = _b_t_img.astype(np.uint8)
 
     # 按照80的规格横向膨胀并腐蚀
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (80, 1))
