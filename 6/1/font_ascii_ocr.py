@@ -17,8 +17,8 @@ import operator
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 16
-image_size = 256
+image_height = 32
+image_size = 512
 
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
@@ -197,12 +197,12 @@ def train():
         session.run(init)
 
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='RES'), sharded=True)
-        g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TRIM_G'), sharded=False)
+        # g_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='TRIM_G'), sharded=False)
 
-        ckpt = tf.train.get_checkpoint_state(model_G_dir)
-        if ckpt and ckpt.model_checkpoint_path:           
-            print("Restore Model G...")
-            g_saver.restore(session, ckpt.model_checkpoint_path)   
+        # ckpt = tf.train.get_checkpoint_state(model_G_dir)
+        # if ckpt and ckpt.model_checkpoint_path:           
+        #     print("Restore Model G...")
+        #     g_saver.restore(session, ckpt.model_checkpoint_path)   
 
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         if ckpt and ckpt.model_checkpoint_path:
@@ -302,13 +302,13 @@ def train():
                         print(f)
             print("Save Model R ...")
             r_saver.save(session, os.path.join(model_R_dir, "R.ckpt"), global_step=steps)
-            try:
-                ckpt = tf.train.get_checkpoint_state(model_G_dir)
-                if ckpt and ckpt.model_checkpoint_path:           
-                    print("Restore Model G...")
-                    g_saver.restore(session, ckpt.model_checkpoint_path)   
-            except:
-                pass
+            # try:
+            #     ckpt = tf.train.get_checkpoint_state(model_G_dir)
+            #     if ckpt and ckpt.model_checkpoint_path:           
+            #         print("Restore Model G...")
+            #         g_saver.restore(session, ckpt.model_checkpoint_path)   
+            # except:
+            #     pass
 
 if __name__ == '__main__':
     train()
