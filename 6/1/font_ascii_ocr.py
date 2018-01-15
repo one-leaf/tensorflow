@@ -249,7 +249,6 @@ def train():
                 # 如果正确率低于90%，保存出来
                 if acc<0.9:
                     for i in range(batch_size):
-
                         _img = np.vstack((train_inputs[i] * 255 , p_net_g[i] * 255, utils.img2bw(p_net_g[i]) )) 
                         cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s.png"%(steps,i)), _img) 
 
