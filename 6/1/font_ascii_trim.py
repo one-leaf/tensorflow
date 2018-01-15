@@ -202,9 +202,8 @@ def get_next_batch_for_gan(batch_size=128):
         # 随机缩放下图片
         if random.random()>0.5:
             _h =  random.randint(9, image_height+1)
-            antialias = random.random()>0.5
-            image = utils_pil.resize_by_height(image, _h, antialias)  
-            clear_image = utils_pil.resize_by_height(clear_image, _h, True)  
+            image = utils_pil.resize_by_height(image, _h, random.random()>0.5)  
+            clear_image = utils_pil.resize_by_size(clear_image, image.size)  
             if clear_image.size[0] != image.size[0] or  clear_image.size[1] != image.size[1]:
                 print("random resize get size not same,",image.size,clear_image.size,font_name,font_size,font_mode,font_hint)
         # image = utils_pil.resize_by_height(image, image_height, random.random()>0.5) 
