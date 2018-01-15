@@ -99,8 +99,8 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
-    resize_layer = tf.image.resize_images(inputs, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
-    print(resize_layer.shape)
+    resize_layer = tf.image.resize_images(layer, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
+    # print(resize_layer.shape)
 
     net_g, half_net_g = TRIM_G(resize_layer, reuse = False)
 
