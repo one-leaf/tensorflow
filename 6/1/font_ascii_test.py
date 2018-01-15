@@ -257,19 +257,20 @@ def train():
                 # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 start = time.time() 
 
-                p_net_g = session.run(net_g, {inputs: train_inputs}) 
+                # p_net_g = session.run(net_g, {inputs: train_inputs}) 
 
-                p_net_g = np.squeeze(p_net_g, axis=3)
-                for i in range(batch_size):
-                    _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
-                    _t_img = utils.cvTrimImage(_t_img)
-                    _t_img[_t_img<0] = 0
-                    _t_img = utils.resize(_t_img, image_height)
-                    if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
-                        p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
+                # p_net_g = np.squeeze(p_net_g, axis=3)
+                # for i in range(batch_size):
+                #     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
+                #     _t_img = utils.cvTrimImage(_t_img)
+                #     _t_img[_t_img<0] = 0
+                #     _t_img = utils.resize(_t_img, image_height)
+                #     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
+                #         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
-
+                # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
+                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
+                
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]+" "+train_info[1][0]+"/"+train_info[1][1]
                 print("%d time: %4.4fs, res_acc: %.4f, res_loss: %.4f, info: %s " % (steps, time.time() - start, acc, errR, font_info))
