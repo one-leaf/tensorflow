@@ -227,7 +227,7 @@ def get_next_batch_for_gan(batch_size=128):
         clear_image = utils_pil.resize(clear_image, image.size[0], image.size[1])
         image, clear_image = utils_pil.random_space2(image, clear_image, image_height)
 
-        trims_image = np.copy(np.asarray(clear_image))
+        trims_image = np.asarray(clear_image)
         # 转黑白二值化，降低维度
         trims_image = (255. - trims_image) / 255.        
         trim_images.append(trims_image)
