@@ -19,7 +19,7 @@ curr_dir = os.path.dirname(__file__)
 
 image_height = 32
 image_size = 512
-
+resize_image_size = 320
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
 # https://zh.wikipedia.org/wiki/ASCII
@@ -46,7 +46,7 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
-SEQ_LENGHT = (image_size//2 * image_size//2 ) // (POOL_SIZE * POOL_SIZE)
+SEQ_LENGHT = resize_image_size * resize_image_size // (POOL_SIZE * POOL_SIZE)
 
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
@@ -93,7 +93,7 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
-    resize_layer = tf.image.resize_images(layer, (320,320), method=tf.image.ResizeMethod.BILINEAR)
+    resize_layer = tf.image.resize_images(layer, (resize_image_size,resize_image_size), method=tf.image.ResizeMethod.BILINEAR)
     # print(resize_layer.shape)
 
     net_g, half_net_g = TRIM_G(layer, reuse = False)
