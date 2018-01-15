@@ -18,9 +18,12 @@ def random_space(img, minrate=0.5):
     return bg, new_bg
 
 # 随机移动位置
-def random_space2(img, height, minrate=0.5):
+def random_space2(img, clear_image, height, minrate=0.5):
     _img = resize_by_height(img, height)
+    w,h =_img.size
+
     bg = Image.new(img.mode, _img.size, 255)
+    clear_bg = Image.new(img.mode, _img.size, 255)
 
     w = bg.size[0]-img.size[0]
     h = bg.size[1]-img.size[1]
@@ -30,11 +33,13 @@ def random_space2(img, height, minrate=0.5):
         x = random.randint(0,w)
     if h>0:
         y = random.randint(0,h)
+
     bg.paste(img, (x,y))
+    clear_bg.paste(clear_image, (x,y))
     # new_bg = Image.new('L', bg.size, 255)
     # new_bg.paste(img,(x,y))    
     # return bg, new_bg 
-    return bg
+    return bg, clear_bg
 
 # 随机截图
 def random_crop(img, width, height):  

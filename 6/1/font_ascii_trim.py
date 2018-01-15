@@ -181,9 +181,13 @@ def get_next_batch_for_gan(batch_size=128):
             font_length = random.randint(3, 400)
             text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
+            clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0)
             temp_image = utils_pil.resize_by_height(image, image_height)
             w, h = temp_image.size
-            if w * h <= image_size * image_size: break
+            if w * h <= image_size * image_size: 
+                break
+
+
         image = utils_pil.convert_to_gray(image)    #原始图片   
         w, h = image.size
         if h > image_height:
@@ -220,12 +224,12 @@ def get_next_batch_for_gan(batch_size=128):
         half_clear_images.append(half_clear_image) 
 
         # 随机移动位置 trims_image 为字体实际位置标识
-        image = utils_pil.random_space2(image, image_height)
+        clear_image = utils_pil.resize(clear_image, image.size[0], image.size[1])
+        image, clear_image = utils_pil.random_space2(image, clear_image, image_height)
 
-        trims_image = np.copy(np.asarray(image))
+        trims_image = np.copy(np.asarray(clear_image))
         # 转黑白二值化，降低维度
         trims_image = (255. - trims_image) / 255.        
-        trims_image = utils.img2bw(trims_image)
         trim_images.append(trims_image)
 
         if random.random()>0.5:
