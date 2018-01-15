@@ -286,8 +286,8 @@ def train():
                 # 报告
                 if steps == 1 or steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
-                    p_net_g = session.run(resize_layer, {inputs: train_inputs}) 
-                    p_net_g = np.squeeze(p_net_g, axis=3)
+                    # p_net_g = session.run(resize_layer, {inputs: train_inputs}) 
+                    # p_net_g = np.squeeze(p_net_g, axis=3)
 
                     # for i in range(batch_size):
                     #     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
@@ -302,8 +302,8 @@ def train():
 
                     for i in range(batch_size): 
                         # _img = np.vstack((train_inputs[i], p_net_g[i])) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s_s.png"%(steps,i)), train_inputs[i] * 255) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), p_net_g[i] * 255) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
+                        # cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), p_net_g[i] * 255) 
 
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
