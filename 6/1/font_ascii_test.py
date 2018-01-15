@@ -58,21 +58,17 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
         layer = utils_nn.resNet50(inputs, True)
-        # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        # layer = slim.dropout(layer, keep_prob)
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        layer = slim.dropout(layer, keep_prob)
 
-        # layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 1024])
-        # layer = LSTM(layer, keep_prob, seq_len)
-        # layer = tf.reshape(lstm_layer, [batch_size, -1, 1024])
-
-        # layer = lstm_layer
-        # layer = tf.concat([layer, lstm_layer], axis=2)
+        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 1024])
+        layer = LSTM(layer, keep_prob, seq_len)
 
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
-        # layer = slim.dropout(layer, keep_prob)
-        layer = slim.fully_connected(layer, CLASSES_NUMBER, normalizer_fn=None, activation_fn=None)  
+        layer = slim.dropout(layer, keep_prob)
+        layer = slim.fully_connected(layer, 128, normalizer_fn=None, activation_fn=None)  
 
-        layer = tf.reshape(layer, [batch_size, -1, CLASSES_NUMBER])       
+        layer = tf.reshape(layer, [batch_size, -1, 128])       
         return layer
 
 # 输入 half_layer
