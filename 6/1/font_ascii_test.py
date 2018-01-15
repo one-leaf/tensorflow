@@ -59,7 +59,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         layer = tf.image.resize_images(inputs, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
         print(layer.shape)
         batch_size = tf.shape(inputs)[0]
-        layer = utils_nn.resNet50(inputs, True)
+        layer = utils_nn.resNet50(layer, True)
         # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         # layer = slim.dropout(layer, keep_prob)
 
