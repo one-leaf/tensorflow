@@ -103,7 +103,7 @@ def neural_networks():
 
     net_g, half_net_g = TRIM_G(resize_layer, reuse = False)
 
-    net_res = RES(layer, keep_prob, seq_len, reuse = False)
+    net_res = RES(resize_layer, keep_prob, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
