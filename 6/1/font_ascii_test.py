@@ -129,7 +129,10 @@ AllFontNames.remove("Gabriola")
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 
 def list_to_chars(list):
-    return "".join([CHARS[v] for v in list])
+    try:
+        return "".join([CHARS[v] for v in list])
+    except Exception as err:
+        return "Error: %s" % err        
 
 def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
     inputs_images = []   
@@ -313,11 +316,10 @@ def train():
                         detect_number = detected_list[idx]  
                         hit = (number == detect_number)          
                         print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
-                        if len(detected_list)>0:
-                            print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
-                        # 计算莱文斯坦比
-                            import Levenshtein
-                            acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+                    # 计算莱文斯坦比
+                        import Levenshtein
+                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
                         print("Test Accuracy:", acc / len(original_list))
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
