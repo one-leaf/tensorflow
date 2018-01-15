@@ -93,12 +93,12 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
-    # resize_layer = tf.image.resize_images(layer, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
+    resize_layer = tf.image.resize_images(layer, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
     # print(resize_layer.shape)
 
     net_g, half_net_g = TRIM_G(layer, reuse = False)
 
-    net_res = RES(layer, keep_prob, seq_len, reuse = False)
+    net_res = RES(resize_layer, keep_prob, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
@@ -151,7 +151,8 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         if font_mode==None:
             font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
-            font_hint = random.choice([0,1,2,3,4,5])    
+            # font_hint = random.choice([0,1,2,3,4,5])    
+            font_hint = 0
 
         while True:
             font_length = random.randint(5, 400)
