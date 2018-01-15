@@ -69,7 +69,7 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 
         single_font_pix = image_height*image_height//(POOL_SIZE*POOL_SIZE)
         layer = slim.fully_connected(layer, single_font_pix, normalizer_fn=None, activation_fn=None)  
-        layer = tf.reshape(layer, [batch_size, -1, single_font_pix)])       
+        layer = tf.reshape(layer, [batch_size, -1, single_font_pix])       
         return layer
 
 # 输入 half_layer
