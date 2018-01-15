@@ -48,7 +48,7 @@ MODEL_SAVE_NAME = "model_ascii_srgan"
 # 参考 https://github.com/kaonashi-tyc/zi2zi/blob/master/model/unet.py
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
-        layer, half_layer = utils_nn.pix2pix_g2(inputs)
+        layer, half_layer = utils_nn.pix2pix_g3(inputs)
         return layer, half_layer
 
 def TRIM_D(inputs, reuse=False):
