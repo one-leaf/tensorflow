@@ -250,7 +250,7 @@ def train():
                 if acc<0.9:
                     for i in range(batch_size):
                         _img = np.vstack((train_inputs[i] * 255 , p_net_g[i] * 255)) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_%s.png"%(steps,i,acc)), _img) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","E%s_%s_%s.png"%(acc,steps,i)), _img) 
 
                 for info in train_info:
                     key = ",".join(info)
