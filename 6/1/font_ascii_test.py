@@ -59,9 +59,9 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         layer = utils_nn.resNet50(inputs, True)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.dropout(layer, keep_prob)
-        
+
         batch_size = tf.shape(inputs)[0]
-        layer = tf.reshape(layer, [batch_size, -1, 1024])
+        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 1024])
         layer = LSTM(layer, keep_prob, seq_len)
         # layer = tf.reshape(lstm_layer, [batch_size, -1, 1024])
         # layer = lstm_layer
