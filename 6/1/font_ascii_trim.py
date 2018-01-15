@@ -194,9 +194,12 @@ def get_next_batch_for_gan(batch_size=128):
                 break
 
         image = utils_pil.convert_to_gray(image)    #原始图片   
+        clear_trim_image = utils_pil.convert_to_gray(clear_trim_image)
+
         w, h = image.size
         if h > image_height:
-            image = utils_pil.resize_by_height(image, image_height)     
+            image = utils_pil.resize_by_height(image, image_height)   
+            clear_trim_image = utils_pil.resize_by_size(clear_trim_image, image.size)  
         source_image = image.copy()
 
         # 随机缩放下图片
