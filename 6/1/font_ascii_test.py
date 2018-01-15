@@ -66,9 +66,9 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
-        layer = slim.fully_connected(layer, 1, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, image_height*image_height, normalizer_fn=None, activation_fn=None)  
 
-        layer = tf.reshape(layer, [batch_size, -1, 1])       
+        layer = tf.reshape(layer, [batch_size, -1, image_height*image_height])       
         return layer
 
 # 输入 half_layer
@@ -109,7 +109,6 @@ def neural_networks():
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
-
     
     return  inputs, labels, global_step, keep_prob, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
