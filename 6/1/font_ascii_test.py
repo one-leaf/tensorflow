@@ -56,6 +56,7 @@ def TRIM_G(inputs, reuse=False):
 
 def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
+        layer = tf.image.resize_images(inputs, (image_size//2,image_size//2), method=tf.image.ResizeMethod.BILINEAR)
         batch_size = tf.shape(inputs)[0]
         layer = utils_nn.resNet50(inputs, True)
         # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
