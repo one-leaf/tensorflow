@@ -36,11 +36,12 @@ def get_font_url(text,  font_name, font_size, fontmode=None, fonthint=None):
     return url
 
 # 从字体服务器上获取字体图片
-def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=None):
+def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=None, trim=True):
     r = http(get_font_url(text, font_name, font_size, fontmode, fonthint))
     img = Image.open(io.BytesIO(r))
     img = utils_pil.convert_to_rgb(img)
-    img = utils_pil.trim(img)
+    if trim:
+        img = utils_pil.trim(img)
     return img
 
 # 获得随机字符串
@@ -155,11 +156,12 @@ if __name__ == '__main__':
     a=c+e
     for font_name in a:
         images=[]
-        for i in range(6):
-            for j in range(5):
-                img = get_font_image_from_url("GHLlIiMmNnWwZzOoQqAaBbDd1234567890",font_name,36, fonthint=i, fontmode=j)
-                img = utils_pil.resize_by_size(img, (1500,50))
-                images.append(img)
+        j = random.randint(0,5)
+        for i in (0,1,3,5):
+            img = get_font_image_from_url("GHLlIiMmNnWwZzOoQqAaBbDd1234567890",font_name,36, fonthint=i, fontmode=j)
+                # img = utils_pil.resize_by_size(img, (1500,50))
+            print(img.size)
+            images.append(img)
         img = np.vstack(images)
         # print(font_name,img.size)
         # img = utils_pil.resize_by_height(img,32)

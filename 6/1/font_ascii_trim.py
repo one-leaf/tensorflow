@@ -180,11 +180,11 @@ def get_next_batch_for_gan(batch_size=128):
         while True:
             font_length = random.randint(3, 400)
             text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
-            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
+            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint, trim=False)
             if font_hint in (0,1,3,5):
-                clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0)
+                clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0, trim=False)
             else:
-                clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4)    
+                clear_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4, trim=False)    
             temp_image = utils_pil.resize_by_height(image, image_height)
             w, h = temp_image.size
             if w * h <= image_size * image_size: 
