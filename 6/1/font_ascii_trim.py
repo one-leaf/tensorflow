@@ -403,7 +403,10 @@ def train():
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                             _t_net_g = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                        _img = np.vstack((train_inputs[i], _t_net_g, train_trims[i])) 
+                        _tran_img = train_trims[i]
+                        _tran_img[_tran_img<0] = 0
+
+                        _img = np.vstack((train_inputs[i], _t_net_g, _tran_img)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
                         # _img = np.vstack((train_half_clears[i], _c_net_g)) 
                         # cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
