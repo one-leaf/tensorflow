@@ -154,15 +154,21 @@ if __name__ == '__main__':
     c,e =get_font_names_from_url()
     a=c+e
     for font_name in a:
-        img = get_font_image_from_url("GHLlIiMmNnWwZzOoQqAaBbDd1234567890",font_name,36)
-        print(font_name,img.size)
-        img = utils_pil.resize_by_height(img,32)
-        img = utils_pil.convert_to_gray(img)
-        img = np.array(img)
+        images=[]
+        for i in range(6):
+            for j in range(5):
+                img = get_font_image_from_url("GHLlIiMmNnWwZzOoQqAaBbDd1234567890",font_name,36, fonthint=i, fontmode=j)
+                img = utils_pil.resize_by_size(img, (1500,50))
+                images.append(img)
+        img = np.vstack(images)
+        # print(font_name,img.size)
+        # img = utils_pil.resize_by_height(img,32)
+        # img = utils_pil.convert_to_gray(img)
+        # img = np.array(img)
+        # # img = 255. - img
+        # # idx = np.nonzero(img)
+        # # img[idx] = 255 
+        # # img = utils_pil.convert_to_bw(img)
         # img = 255. - img
-        # idx = np.nonzero(img)
-        # img[idx] = 255 
-        img = utils_pil.convert_to_bw(img)
-        img = 255. - img
         # print(img)
         utils_pil.show(img)

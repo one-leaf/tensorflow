@@ -152,7 +152,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
             # font_hint = random.choice([0,1,2,3,4,5])    
-            font_hint = 0
+            font_hint = random.choice([0,4]) 
 
         while True:
             font_length = random.randint(5, 400)
