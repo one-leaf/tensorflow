@@ -290,19 +290,19 @@ def train():
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
-                    p_net_g = session.run(net_g, {inputs: train_inputs}) 
-                    p_net_g = np.squeeze(p_net_g, axis=3)
+                    # p_net_g = session.run(net_g, {inputs: train_inputs}) 
+                    # p_net_g = np.squeeze(p_net_g, axis=3)
 
-                    for i in range(batch_size):
-                        _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
-                        _t_img_bin = np.copy(_t_img)    
-                        _t_img_bin[_t_img_bin<=0.3] = 0
-                        _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-                        _t_img = utils.resize(_t_img, image_height)
-                        if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
-                            p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
+                    # for i in range(batch_size):
+                    #     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
+                    #     _t_img_bin = np.copy(_t_img)    
+                    #     _t_img_bin[_t_img_bin<=0.3] = 0
+                    #     _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
+                    #     _t_img = utils.resize(_t_img, image_height)
+                    #     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
+                    #         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len, keep_prob: 1}) 
+                    decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len, keep_prob: 1}) 
 
                     for i in range(batch_size): 
                         _img = np.vstack((train_inputs[i], p_net_g[i])) 
