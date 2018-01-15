@@ -63,11 +63,12 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 
         layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 1024])
         layer = LSTM(layer, keep_prob, seq_len)
-
+        print(layer.shape)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)        
         layer = slim.dropout(layer, keep_prob)
 
         single_font_pix = image_height*image_height//(POOL_SIZE*POOL_SIZE)
+        print(single_font_pix)
         layer = slim.fully_connected(layer, single_font_pix, normalizer_fn=None, activation_fn=None)  
         layer = tf.reshape(layer, [batch_size, -1, single_font_pix])       
         return layer
