@@ -46,7 +46,7 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_srgan"
-SEQ_LENGHT = (image_size * image_size ) // (POOL_SIZE * POOL_SIZE)
+SEQ_LENGHT = (image_size//2 * image_size//2 ) // (POOL_SIZE * POOL_SIZE)
 
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
