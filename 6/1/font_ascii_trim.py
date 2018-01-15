@@ -222,10 +222,12 @@ def get_next_batch_for_gan(batch_size=128):
         # 随机移动位置 trims_image 为字体实际位置标识
         image = utils_pil.random_space2(image, image_height)
 
-        trims_image = np.asarray(image)
+        trims_image = np.copy(image)
+        trims_image = np.asarray(trims_image)
         # 转黑白二值化，降低维度
-        trims_image = (255. - trims_image) / 255.         
+        trims_image = 255 - trims_image         
         trims_image = utils.img2bw(trims_image)
+        trims_image = trims_image / 255
         trims_image[trims_image==0]=-1
         trim_images.append(trims_image)
 
