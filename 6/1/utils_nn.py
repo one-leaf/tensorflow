@@ -394,3 +394,20 @@ def pix2pix_g3(layer, dropout=False):
         layer = slim.conv2d_transpose(layer, 1, normalizer_fn=None, activation_fn=None)
         layer = tf.tanh(layer)
         return layer, half_layer
+
+# D网络第一层的不能normalizer
+def pix2pix_d3(layer):
+    with slim.arg_scope([slim.conv2d], kernel_size=[4, 4], stride=2, activation_fn=tf.nn.leaky_relu, normalizer_fn=slim.batch_norm):
+        layer = slim.conv2d(layer, 64, normalizer_fn=None, activation_fn=None)
+        for i, cnn in enumerate((64,64,128,128,128,128,256,256,256,256,256,512,512,512,1024)):
+            if i % 2 ==0:
+                layer = slim.conv2d(layer, cnn, stride=1) 
+            else:
+                layer = slim.conv2d(layer, cnn)
+
+    layer = slim.conv2d(layer, 1, kernel_size=[1,1], stride=1, normalizer_fn=None, activation_fn=None)
+    layer = slim.flatten(layer)
+    # print(layer.shape)
+    # layer = slim.fully_connected(layer, 1)
+    layer = tf.nn.sigmoid(layer)
+    return layer
