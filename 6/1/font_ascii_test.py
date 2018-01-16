@@ -155,8 +155,13 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             font_hint = random.choice([0,4]) 
 
         while True:
-            font_length = random.randint(5, 400)
-            text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
+            font_length = random.randint(200, 400)
+            # text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
+            text = random.sample(CHARS, font_length//2)
+            text = text+text
+            random.shuffle(text)
+            text = "".join(text).strip()
+
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
             temp_image = utils_pil.resize_by_height(image, image_height)
             w, h = temp_image.size            
