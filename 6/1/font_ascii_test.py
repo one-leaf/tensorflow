@@ -157,8 +157,9 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         while True:
             # font_length = random.randint(5, 400)
             # text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-            # text = random.sample(CHARS, font_length)
-            text = CHARS + CHARS + random.sample(CHARS, random.randint(3,len(CHARS)))
+            text = random.sample(CHARS, random.randint(2,5))
+            for i in range(random.randint(3,80)):
+                text += text  #+ random.sample(CHARS, random.randint(3,len(CHARS)))
             random.shuffle(text)
             text = "".join(text).strip()
 
