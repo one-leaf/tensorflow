@@ -203,8 +203,9 @@ def get_next_batch_for_gan(batch_size=128):
         source_image = image.copy()
 
         # 随机缩放下图片
-        if random.random()>0.5:
-            _h =  random.randint(9, image_height+1)
+        w, h = image.size
+        if random.random()>0.5 and h<image_height:
+            _h =  random.randint(h+1, image_height+1)
             image = utils_pil.resize_by_height(image, _h, random.random()>0.5)  
             clear_trim_image = utils_pil.resize_by_size(clear_trim_image, image.size)  
             if clear_trim_image.size[0] != image.size[0] or  clear_trim_image.size[1] != image.size[1]:
