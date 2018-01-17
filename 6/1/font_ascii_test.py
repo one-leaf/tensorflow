@@ -57,11 +57,13 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, keep_prob, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
-        layer = utils_nn.resNet50(inputs, True)
+        layer = utils_nn.resNet50(inputs, True)    
 
-        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 2048])
-        layer = LSTM(layer, keep_prob, seq_len)
+        res_layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 2048]) # -1,1600,2048
+        lstm_layer = LSTM(inputs, keep_prob, seq_len)    # -1, 1600, 256
 
+        layer = tf.concat([res_layer,lstm_layer], axis=2)
+        layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, 128, normalizer_fn=None, activation_fn=None)  
         return layer
 
@@ -69,12 +71,17 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
 def LSTM(inputs, keep_prob, seq_len):
     # layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
     # layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
+    batch_size = tf.shape(inputs)[0]
+    layer = slim.conv2d(inputs, 256, [2,2], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 512, [2,2], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 1024, [2,2], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = tf.reshape(layer, (batch_size, SEQ_LENGHT, 1024))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
-    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
     # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
     # layer = slim.dropout(layer, keep_prob)
