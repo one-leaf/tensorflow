@@ -50,7 +50,7 @@ SEQ_LENGHT = resize_image_size * resize_image_size // (POOL_SIZE * POOL_SIZE)
 
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
-        layer, half_layer = utils_nn.pix2pix_g2(inputs)
+        layer, half_layer = utils_nn.pix2pix_g3(inputs)
         # print(half_layer.shape) ? 1,1, 512
         return layer, half_layer
 
@@ -216,7 +216,7 @@ def train():
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
-    model_G_dir = os.path.join(model_dir, "TG")
+    model_G_dir = os.path.join(model_dir, "TG32")
     model_R_dir = os.path.join(model_dir, "RL32")
 
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
@@ -256,19 +256,19 @@ def train():
                 # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 start = time.time() 
 
-                # p_net_g = session.run(net_g, {inputs: train_inputs}) 
+                p_net_g = session.run(net_g, {inputs: train_inputs}) 
 
-                # p_net_g = np.squeeze(p_net_g, axis=3)
-                # for i in range(batch_size):
-                #     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
-                #     _t_img = utils.cvTrimImage(_t_img)
-                #     _t_img[_t_img<0] = 0
-                #     _t_img = utils.resize(_t_img, image_height)
-                #     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
-                #         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
+                p_net_g = np.squeeze(p_net_g, axis=3)
+                for i in range(batch_size):
+                    _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
+                    _t_img[_t_img<0] = 0
+                    _t_img = utils.cvTrimImage(_t_img)
+                    _t_img = utils.resize(_t_img, image_height)
+                    if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
+                        p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                # feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
-                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
+                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
+                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]
