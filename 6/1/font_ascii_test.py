@@ -307,7 +307,6 @@ def train():
                     decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len, keep_prob: 1}) 
 
                     for i in range(batch_size): 
-                        
                         _img = np.vstack((utils.resize_image_size(train_inputs[i], p_net_g[i].size), p_net_g[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
