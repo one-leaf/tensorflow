@@ -19,7 +19,7 @@ curr_dir = os.path.dirname(__file__)
 
 image_height = 32
 image_size = 512
-resize_image_size = 320
+resize_image_size = 256
 # 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
 # https://zh.wikipedia.org/wiki/Unicode
 # https://zh.wikipedia.org/wiki/ASCII
@@ -72,9 +72,9 @@ def LSTM(inputs, keep_prob, seq_len):
     # layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
     # layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
     batch_size = tf.shape(inputs)[0]
-    layer = slim.conv2d(inputs, 64, [5,5], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.conv2d(layer, 128, [5,5], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.conv2d(layer, 256, [5,5], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(inputs, 64, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 128, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 256, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.reshape(layer, (batch_size, SEQ_LENGHT, 256))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
