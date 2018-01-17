@@ -174,16 +174,16 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             if w * h < image_size * image_size: break
 
         image = utils_pil.convert_to_gray(image) 
-        w, h = image.size
-        image = utils_pil.resize_by_height(image, image_height)  
+        # w, h = image.size
+        # image = utils_pil.resize_by_height(image, image_height)  
 
-        # if if_to_G and random.random()>0.5:
-        #     _h =  random.randint(9, image_height+1)
-        #     image = utils_pil.resize_by_height(image, _h) 
+        if if_to_G and random.random()>0.5:
+            _h =  random.randint(9, image_height+1)
+            image = utils_pil.resize_by_height(image, _h) 
 
-        # if if_to_G:
-        #     image = utils_pil.random_space2(image, image_height)
-        #     image = utils_font.add_noise(image)   
+        if if_to_G:
+            image = utils_pil.random_space2(image, image_height)
+            image = utils_font.add_noise(image)   
     
         # image = np.asarray(image) 
 
@@ -191,13 +191,13 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         #     image = utils.resize(image, height=image_height)
         #     image = utils.img2bw(image)
 
-        # if if_to_G:
-        #     image = image * random.uniform(0.3, 1)        
+        if if_to_G:
+            image = image * random.uniform(0.3, 1)        
 
-        # if if_to_G and random.random()>0.5:
-        #     image = image / 255.
-        # else:
-        #     image = (255. - image) / 255.
+        if if_to_G and random.random()>0.5:
+            image = image / 255.
+        else:
+            image = (255. - image) / 255.
 
         image = np.asarray(image)
         image = (255. - image) / 255.
@@ -255,11 +255,11 @@ def train():
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     font_info = sorted_font[random.randint(0,10)]
                     font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, \
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, if_to_G=True, \
                         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
                 else:
                     # train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, if_to_G=True)
                 # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 start = time.time() 
 
@@ -293,25 +293,22 @@ def train():
 
                 # 报告
                 if steps >0 and steps % REPORT_STEPS < 2:
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, if_to_G=True)   
                     p_net_g = session.run(resize_layer, {inputs: train_inputs}) 
                     p_net_g = np.squeeze(p_net_g, axis=3)
+                    for i in range(batch_size):
+                        _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
+                        _t_img[_t_img<0] = 0
+                        _t_img = utils.cvTrimImage(_t_img)
+                        _t_img = utils.resize(_t_img, image_height)
+                        if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
+                            p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                    # for i in range(batch_size):
-                    #     _t_img = utils.unsquare_img(p_net_g[i], image_height)                        
-                    #     _t_img_bin = np.copy(_t_img)    
-                    #     _t_img_bin[_t_img_bin<=0.3] = 0
-                    #     _t_img = utils.dropZeroEdges(_t_img_bin, _t_img, min_rate=0.1)
-                    #     _t_img = utils.resize(_t_img, image_height)
-                    #     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
-                    #         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
-
-                    decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len, keep_prob: 1}) 
+                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len, keep_prob: 1}) 
 
                     for i in range(batch_size): 
-                        # _img = np.vstack((train_inputs[i], p_net_g[i])) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), p_net_g[i] * 255) 
+                        _img = np.vstack((train_inputs[i], p_net_g[i])) 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
 
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
