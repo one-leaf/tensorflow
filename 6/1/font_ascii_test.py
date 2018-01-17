@@ -185,7 +185,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             image, _ = utils_pil.random_space2(image, image,  image_height)
             image = utils_font.add_noise(image)   
     
-        # image = np.asarray(image) 
+        image = np.asarray(image) 
 
         # if not if_to_G:    
         #     image = utils.resize(image, height=image_height)
@@ -199,8 +199,8 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         else:
             image = (255. - image) / 255.
 
-        image = np.asarray(image)
-        image = (255. - image) / 255.
+        # image = np.asarray(image)
+        # image = (255. - image) / 255.
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
