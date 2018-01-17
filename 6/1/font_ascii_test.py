@@ -72,9 +72,9 @@ def LSTM(inputs, keep_prob, seq_len):
     # layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
     # layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
     batch_size = tf.shape(inputs)[0]
-    layer = slim.conv2d(inputs, 64, [2,2], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.conv2d(layer, 128, [2,2], normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.conv2d(layer, 256, [2,2], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(inputs, 64, [3,3], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 128, [3,3], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = slim.conv2d(layer, 256, [3,3], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.reshape(layer, (batch_size, SEQ_LENGHT, 256))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
