@@ -255,7 +255,7 @@ def train():
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     font_info = sorted_font[random.randint(0,10)]
                     font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, if_to_G=True, \
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, True, \
                         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
                 else:
                     # train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
