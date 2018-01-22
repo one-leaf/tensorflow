@@ -15,45 +15,45 @@ data_path = os.path.join(curr_dir,"data")
 
 class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
 
-# def load_data():
-#     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
-#     training_data = []
-#     validation_data = []
-#     testing_data = []
-#     for data_id in data['database']:
-#         if data['database'][data_id]['subset'] == 'training':
-#             if os.path.exists(os.path.join(data_path,"training", "%s.pkl"%data_id)):
-#                 training_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
-#         elif data['database'][data_id]['subset'] == 'validation':
-#             if os.path.exists(os.path.join(data_path,"validation", "%s.pkl"%data_id)):
-#                 validation_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
-#         elif data['database'][data_id]['subset'] == 'testing':
-#             if os.path.exists(os.path.join(data_path,"testing", "%s.pkl"%data_id)):
-#                 testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
-#     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
-#     return training_data, validation_data, testing_data
-
 def load_data():
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
     training_data = []
     validation_data = []
     testing_data = []
-    _training_data = json.loads(open(os.path.join(data_path,"training","data.json")).read())
-    _validation_data = json.loads(open(os.path.join(data_path,"validation","data.json")).read())
-    _testing_data = json.loads(open(os.path.join(data_path,"testing","data.json")).read())
     for data_id in data['database']:
-        f = "%s.pkl"%data_id
         if data['database'][data_id]['subset'] == 'training':
-            if f in _training_data:
-                training_data.append({'id':data_id,'data':data['database'][data_id]['annotations'],"shape":_training_data[f]})
+            if os.path.exists(os.path.join(data_path,"training", "%s.pkl"%data_id)):
+                training_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
         elif data['database'][data_id]['subset'] == 'validation':
-            if f in _validation_data:
-                validation_data.append({'id':data_id,'data':data['database'][data_id]['annotations'],"shape":_validation_data[f]})
+            if os.path.exists(os.path.join(data_path,"validation", "%s.pkl"%data_id)):
+                validation_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
         elif data['database'][data_id]['subset'] == 'testing':
-            if f in _testing_data:
-                testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations'],"shape":_testing_data[f]})
+            if os.path.exists(os.path.join(data_path,"testing", "%s.pkl"%data_id)):
+                testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
+
+# def load_data():
+#     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
+#     training_data = []
+#     validation_data = []
+#     testing_data = []
+#     _training_data = json.loads(open(os.path.join(data_path,"training","data.json")).read())
+#     _validation_data = json.loads(open(os.path.join(data_path,"validation","data.json")).read())
+#     _testing_data = json.loads(open(os.path.join(data_path,"testing","data.json")).read())
+#     for data_id in data['database']:
+#         f = "%s.pkl"%data_id
+#         if data['database'][data_id]['subset'] == 'training':
+#             if f in _training_data:
+#                 training_data.append({'id':data_id,'data':data['database'][data_id]['annotations'],"shape":_training_data[f]})
+#         elif data['database'][data_id]['subset'] == 'validation':
+#             if f in _validation_data:
+#                 validation_data.append({'id':data_id,'data':data['database'][data_id]['annotations'],"shape":_validation_data[f]})
+#         elif data['database'][data_id]['subset'] == 'testing':
+#             if f in _testing_data:
+#                 testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations'],"shape":_testing_data[f]})
+#     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
+#     return training_data, validation_data, testing_data
 
 
 def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
@@ -93,39 +93,20 @@ def resnet_cifar10(ipt, depth=32):
     n = (depth - 2) / 6
     nStages = {16, 64, 128}
     conv1 = conv_bn_layer(ipt, ch_in=3, ch_out=16, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 16, n, 1)
+    res1 = layer_warp(basicblock, conv1, 16, n, 2)
     res2 = layer_warp(basicblock, res1, 32, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
-    pool = paddle.layer.img_pool(
-        input=res3, pool_size=7, stride=1, pool_type=paddle.pooling.Avg())
+    pool = paddle.layer.img_pool(input=res3, pool_size=9, stride=1, pool_type=paddle.pooling.Avg())
     return pool
 
 def network():
-    # -1 ,2048
-    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector_sequence(2048))
+    # -1 ,2048 
+    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector(2048*3))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = paddle.layer.fc(input=x, size=45*45*1, act=paddle.activation.Relu())
+    layer = paddle.layer.fc(input=x, size=72*72*3, act=paddle.activation.Relu())
     layer = resnet_cifar10(layer)
     
-    src_forward = paddle.networks.simple_gru(
-        input=layer, size=512)
-    src_backward = paddle.networks.simple_gru(
-        input=layer, size=512, reverse=True)
-    layer = paddle.layer.concat(input=[src_forward, src_backward])
-
-    # fc1 = paddle.layer.fc(input=layer, size=128, act=paddle.activation.Linear())
-    # lstm1 = paddle.layer.lstmemory(input=fc1, act=paddle.activation.Relu())
-    # inputs = [fc1, lstm1]
-    # for i in range(2, 4):
-    #     fc = paddle.layer.fc(input=inputs, size=128, act=paddle.activation.Linear())
-    #     lstm = paddle.layer.lstmemory(input=fc, reverse=(i % 2) == 0, act=paddle.activation.Relu())
-    #     inputs = [fc, lstm]
-
-    # fc_last = paddle.layer.pooling(input=inputs[0], pooling_type=paddle.pooling.Max())
-    # lstm_last = paddle.layer.pooling(input=inputs[1], pooling_type=paddle.pooling.Max())
-    # output = paddle.layer.fc(input=[fc_last, lstm_last], size=class_dim, act=paddle.activation.Softmax())
-
     output = paddle.layer.fc(input=layer, size=class_dim, act=paddle.activation.Softmax())
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
@@ -135,46 +116,54 @@ def network():
         model_average=paddle.optimizer.ModelAverage(average_window=0.5))
     return cost, parameters, adam_optimizer
 
-# training_data, validation_data, testing_data = load_data()  
-# def reader_get_image_and_label():
-#     def reader():
-#         while True:
-#             data = random.choice(training_data)
-#             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))
-#             w = v_data.shape[0]
-#             label = np.zeros([w])
-#             print(w)
-#             print(label)
-#             for annotations in data["data"]:
-#                 segment = annotations['segment']
-# #                 print(segment)
-#                 for i in range(int(segment[0]),int(segment[1]+1)):
-#                     label[i] += 1
-#             yield v_data, label
-#     return reader
-
 training_data, validation_data, testing_data = load_data()  
 def reader_get_image_and_label():
     def reader():
         for data in training_data:
-            print("reading:", data["id"], " shape:", data["shape"])
-            v_data = np.random.random(data["shape"])
+            # data = random.choice(training_data)
+            batch_data = np.zeros((2048,3))            
+            v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))
             w = v_data.shape[0]
             label = np.zeros([w], dtype=np.int)
+
             for annotations in data["data"]:
                 segment = annotations['segment']
                 for i in range(int(segment[0]),int(segment[1]+1)):
                     label[i] += 1
+
             for i in range(len(label)):
-                # print("data:", v_data[i], "label:" ,label[i])
-                yield v_data[i], label[i]
+                _data = np.reshape(v_data[i], (2048,1))
+                np.append(batch_data[:, 1:], _data, axis=1)
+                yield batch_data, label[i]
     return reader
+
+# training_data, validation_data, testing_data = load_data()  
+# def reader_get_image_and_label():
+#     def reader():
+#         for data in training_data:
+#             batch_data = np.zeros((2048,3))
+#             print("reading:", data["id"], " shape:", data["shape"])
+#             v_data = np.random.random(data["shape"])
+#             w = v_data.shape[0]
+#             label = np.zeros([w], dtype=np.int)
+#             for annotations in data["data"]:
+#                 segment = annotations['segment']
+#                 for i in range(int(segment[0]),int(segment[1]+1)):
+#                     label[i] += 1
+#             for i in range(len(label)):
+#                 _data = np.reshape(v_data[i], (2048,1))
+#                 np.append(batch_data[:, 1:], _data, axis=1)
+#                 yield batch_data, label[i]
+#     return reader
 
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id % 100 == 0:
             print("\nPass %d, Batch %d, Cost %f, %s" % (
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
+            with open('parameters.tar', 'w') as f:
+                print("saveing parameters ...")
+                trainer.save_parameter_to_tar(f)    
         else:
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -194,6 +183,9 @@ def train():
     paddle.init(use_gpu=False, trainer_count=1)  
     print("get network ...")
     cost, parameters, adam_optimizer = network()
+    if os.path.exists("parameters.tar"):
+        print("loading parameters ...")
+        parameters.from_tar(open("parameters.tar"))       
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=10)
     feeding={'x': 0, 'y': 1}
