@@ -183,7 +183,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             _h =  random.randint(9, image_height)
             image = utils_pil.resize_by_height(image, _h) 
 
-        if if_to_G:
+        if if_to_G and random.random()>0.5:
             image, _ = utils_pil.random_space2(image, image,  image_height)
             image = utils_font.add_noise(image)   
     
