@@ -31,7 +31,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 2e-4
+LEARNING_RATE_INITIAL = 1e-5
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -251,8 +251,10 @@ def get_next_batch_for_gan(batch_size=128):
         if random.random()>0.9:
             image = utils_font.add_noise(image)   
         image = np.asarray(image)
+
         if random.random()>0.9:
             image = image * random.uniform(0.3, 1)
+
         if random.random()>0.5:
             image = (255. - image) / 255.
         else:
