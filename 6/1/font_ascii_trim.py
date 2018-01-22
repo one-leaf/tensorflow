@@ -91,7 +91,7 @@ def neural_networks_trim():
     d_loss  = d_loss_real + d_loss_fake
 
     g_loss_fake = tf.losses.sigmoid_cross_entropy(tf.ones_like(fake_D), fake_D)
-    g_mse_loss = 1e6 * tf.losses.mean_squared_error(real_B, fake_B)
+    g_mse_loss = tf.losses.mean_squared_error(real_B, fake_B)
 
     g_loss     = g_loss_fake + g_mse_loss + g_half_loss
     
