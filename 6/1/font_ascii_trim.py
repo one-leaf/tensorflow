@@ -84,14 +84,14 @@ def neural_networks_trim():
 
     # 假设预计输出和真实输出应该在一半网络也应该是相同的
     _, half_real_B = TRIM_G(fake_B, reuse = True)
-    g_half_loss = tf.losses.mean_squared_error(half_real_A, half_real_B)   
+    g_half_loss = 1e6 * tf.losses.mean_squared_error(half_real_A, half_real_B)   
 
     d_loss_real = tf.losses.sigmoid_cross_entropy(tf.ones_like(real_D), real_D)
     d_loss_fake = tf.losses.sigmoid_cross_entropy(tf.zeros_like(fake_D), fake_D)
     d_loss  = d_loss_real + d_loss_fake
 
     g_loss_fake = tf.losses.sigmoid_cross_entropy(tf.ones_like(fake_D), fake_D)
-    g_mse_loss = tf.losses.mean_squared_error(real_B, fake_B)
+    g_mse_loss = 1e6 * tf.losses.mean_squared_error(real_B, fake_B)
 
     g_loss     = g_loss_fake + g_mse_loss + g_half_loss
     
