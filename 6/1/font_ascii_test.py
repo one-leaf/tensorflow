@@ -192,6 +192,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         # if not if_to_G:    
         #     image = utils.resize(image, height=image_height)
         #     image = utils.img2bw(image)
+        image = utils.resize(image, height=image_height)
 
         if if_to_G and random.random()>0.5:
             image = image * random.uniform(0.3, 1)        
@@ -201,6 +202,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         else:
             image = (255. - image) / 255.
 
+        
         # image = np.asarray(image)
         # image = (255. - image) / 255.
         inputs_images.append(image)
