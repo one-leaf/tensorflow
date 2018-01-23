@@ -101,15 +101,55 @@ def resnet_cifar10(ipt, depth=32):
     pool = paddle.layer.img_pool(input=res3, pool_size=7, stride=1, pool_type=paddle.pooling.Avg())
     return pool
 
+def simple_cnn(ipt):
+    layer = paddle.layer.img_conv(
+        input=ipt, filter_size=5, num_filters=16, num_channels=3, 
+        padding=2, stride=1, act=paddle.activation.Relu())
+    layer = paddle.layer.dropout(input=layer, dropout_rate=0.2)
+
+    layer = paddle.layer.img_conv(
+        input=layer, filter_size=5, num_filters=32, num_channels=16, 
+        padding=2, stride=1, act=paddle.activation.Relu())
+    layer = paddle.layer.dropout(input=layer, dropout_rate=0.2)
+
+    layer = paddle.layer.img_pool(input=layer, pool_size=2, stride=2, pool_type=paddle.pooling.Max())
+
+    layer = paddle.layer.img_conv(
+        input=layer, filter_size=3, num_filters=64, num_channels=32, 
+        padding=1, stride=1, act=paddle.activation.Relu())
+    layer = paddle.layer.dropout(input=layer, dropout_rate=0.2)
+    
+    layer = paddle.layer.img_pool(input=layer, pool_size=2, stride=2, pool_type=paddle.pooling.Max())
+
+    layer = paddle.layer.img_conv(
+        input=layer, filter_size=3, num_filters=64, num_channels=64, 
+        padding=1, stride=1, act=paddle.activation.Relu())
+    layer = paddle.layer.dropout(input=layer, dropout_rate=0.2)
+
+    layer = paddle.layer.img_pool(input=layer, pool_size=7, stride=7, pool_type=paddle.pooling.Avg())
+    return layer
+
 def network():
     # -1 ,2048 
     x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector(2048*5))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = paddle.layer.fc(input=x, size=28*28*3, act=paddle.activation.Relu())
-    layer = resnet_cifar10(layer)
-    
-    output = paddle.layer.fc(input=layer, size=class_dim, act=paddle.activation.Softmax())
+    #layer = resnet_cifar10(layer)   #1*1*64
+    layer = simple_cnn(layer)
+
+    sliced_feature = paddle.layer.block_expand(
+            input=layer,
+            num_channels=64,
+            stride_x=1,
+            stride_y=1,
+            block_x=1,
+            block_y=1)
+
+    gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu(), reverse=True)
+
+    output = paddle.layer.fc(input=[gru_forward,gru_backward], size=class_dim, act=paddle.activation.Softmax())
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
