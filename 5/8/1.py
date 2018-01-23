@@ -217,20 +217,21 @@ def event_handler(event):
 #         print "\nTest with Pass %d, %s" % (event.pass_id, result.metrics)
         
 print("paddle init ...")
-paddle.init(use_gpu=False, trainer_count=1)  
+paddle.init(use_gpu=False, trainer_count=2)  
 print("get network ...")
 cost, parameters, adam_optimizer = network()
 print('set reader ...')
-train_reader = paddle.batch(reader_get_image_and_label(), batch_size=10)
+train_reader = paddle.batch(reader_get_image_and_label(), batch_size=256)
 feeding={'x': 0, 'y': 1}
-trainer = paddle.trainer.SGD(cost=cost, parameters=parameters, update_equation=adam_optimizer)
 
-if not TEST and os.path.exists(param_file):
+if os.path.exists(param_file):
     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
     print("loading parameters ...")
-    parameters.from_tar(open(param_file,"rb"))
-
+    parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+    
+trainer = paddle.trainer.SGD(cost=cost, parameters=parameters, update_equation=adam_optimizer)
+    
 print("start train ...")
 trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
 
