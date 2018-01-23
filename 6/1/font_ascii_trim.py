@@ -31,7 +31,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 2e-4
+LEARNING_RATE_INITIAL = 1e-5
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -84,14 +84,14 @@ def neural_networks_trim():
 
     # 假设预计输出和真实输出应该在一半网络也应该是相同的
     _, half_real_B = TRIM_G(fake_B, reuse = True)
-    g_half_loss = 1e6 * tf.losses.mean_squared_error(half_real_A, half_real_B)   
+    g_half_loss = 1e3 * tf.losses.mean_squared_error(half_real_A, half_real_B)   
 
     d_loss_real = tf.losses.sigmoid_cross_entropy(tf.ones_like(real_D), real_D)
     d_loss_fake = tf.losses.sigmoid_cross_entropy(tf.zeros_like(fake_D), fake_D)
     d_loss  = d_loss_real + d_loss_fake
 
     g_loss_fake = tf.losses.sigmoid_cross_entropy(tf.ones_like(fake_D), fake_D)
-    g_mse_loss = 1e6 * tf.losses.mean_squared_error(real_B, fake_B)
+    g_mse_loss = tf.losses.mean_squared_error(real_B, fake_B)
 
     g_loss     = g_loss_fake + g_mse_loss + g_half_loss
     
@@ -178,8 +178,9 @@ def get_next_batch_for_gan(batch_size=128):
         font_mode = random.choice([0,1,2,4]) 
         font_hint = random.choice([0,1,2,3,4,5])     #删除了2
         while True:
-            font_length = random.randint(3, 400)
-            text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+            font_length = random.randint(3, 400)            
+            # text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
+            text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint, trim=False)
             if font_hint in (0,1,3,5):
                 clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0, trim=False)
@@ -247,11 +248,13 @@ def get_next_batch_for_gan(batch_size=128):
         trims_image = (255. - trims_image) / 255.  
         trim_images.append(trims_image)
 
-        if random.random()>0.5:
+        if random.random()>0.9:
             image = utils_font.add_noise(image)   
         image = np.asarray(image)
-        if random.random()>0.5:
+
+        if random.random()>0.9:
             image = image * random.uniform(0.3, 1)
+
         if random.random()>0.5:
             image = (255. - image) / 255.
         else:
