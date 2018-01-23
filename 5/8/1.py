@@ -134,7 +134,7 @@ def network():
     x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector(2048*5))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = paddle.layer.fc(input=x, size=28*28*3, act=paddle.activation.Relu())
+    layer = paddle.layer.fc(input=x, size=28*28*3, act=paddle.activation.Linear())
     #layer = resnet_cifar10(layer)   #1*1*64
     layer = simple_cnn(layer)
 
