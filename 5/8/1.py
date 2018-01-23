@@ -159,20 +159,28 @@ def network():
     return cost, parameters, adam_optimizer
 
  
-def reader_get_image_and_label():
+def reader_get_image_and_label(isTrain=True):
     def reader():
         if TEST:
             training_data, validation_data, testing_data = load_data_test()
         else:
             training_data, validation_data, testing_data = load_data() 
 
-        for data in training_data:
+        if isTrain:
+            datalist = training_data
+        else:
+            datalist = validation_data
+
+        for data in datalist:
             # data = random.choice(training_data)
             batch_data = np.zeros((2048,5))    
             if TEST:
                 v_data = np.random.random(data["shape"])
-            else:        
-                v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))
+            else:  
+                if isTrain:     
+                    v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))
+                else:
+                    v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))
             w = v_data.shape[0]
             label = np.zeros([w], dtype=np.int)
 

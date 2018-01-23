@@ -179,12 +179,15 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)  
 
-        if if_to_G and random.random()>0.5:
-            _h =  random.randint(9, image_height)
-            image = utils_pil.resize_by_height(image, _h) 
+        w, h = image.size
+        if if_to_G and random.random()>0.5 and h<image_height:
+            _h =  random.randint(h+1, image_height+1)
+            image = utils_pil.resize_by_height(image, _h, random.random()>0.5) 
 
         if if_to_G and random.random()>0.5:
             image, _ = utils_pil.random_space2(image, image,  image_height)
+        
+        if if_to_G and random.random()>0.5:
             image = utils_font.add_noise(image)   
     
         image = np.asarray(image) 
