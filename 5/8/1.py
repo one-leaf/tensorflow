@@ -376,6 +376,6 @@ def test(output, parameters):
 
     return result
 
-probs = test(output, parameters)
+result = test(output, parameters)
 
-print(probs)
+print(result)
