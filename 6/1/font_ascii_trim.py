@@ -48,7 +48,7 @@ MODEL_SAVE_NAME = "model_ascii"
 # 参考 https://github.com/kaonashi-tyc/zi2zi/blob/master/model/unet.py
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
-        layer, half_layer = utils_nn.pix2pix_g3(inputs, True)
+        layer, half_layer = utils_nn.pix2pix_g3(inputs)
         return layer, half_layer
 
 def TRIM_D(inputs, reuse=False):
@@ -428,7 +428,7 @@ def train():
                         _tran_img = train_trims[i]
                         _tran_img[_tran_img<0] = 0
 
-                        _img = np.vstack((train_inputs[i], _tran_img, _t_net_g)) 
+                        _img = np.vstack((train_inputs[i], _t_net_g)) 
                         cv2.imwrite(os.path.join(curr_dir,"test","T%s_%s.png"%(steps,i)), _img * 255) 
                         # _img = np.vstack((train_half_clears[i], _c_net_g)) 
                         # cv2.imwrite(os.path.join(curr_dir,"test","C%s_%s.png"%(steps,i)), _img * 255) 
