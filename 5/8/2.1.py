@@ -310,7 +310,7 @@ result["version"]="VERSION 1.0"
 result["results"]={}
 
 for id, item in items:
-    result["results"][id] = items
+    result["results"][id] = item
 
 with zipfile.ZipFile(result_json_file,"w") as f:
     json.dump(result,f)
