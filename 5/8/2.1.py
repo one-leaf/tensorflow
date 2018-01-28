@@ -135,7 +135,7 @@ if os.path.exists(param_file):
     
 
 def getTestData(testFileid):
-    v_data = np.load(os.path.join(data_path,"validation_data", "%s.pkl"%testFileid))
+    v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%testFileid))
     data = []
     batch_data = np.zeros((2048, train_size), dtype=np.float)  
     w = v_data.shape[0]
