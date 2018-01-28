@@ -14,17 +14,19 @@ import gc
 import commands, re  
 
 
-# curr_dir = os.path.dirname(__file__)
-#data_path = os.path.join(curr_dir,"data")
-data_path = "/mnt/BROAD-datasets/video/"
+home = os.path.dirname(__file__)
+data_path = os.path.join(home,"data")
+model_path = os.path.join(home,"model")
+param_file = os.path.join(model_path,"param2.tar")
+param_file_bak = os.path.join(model_path,"param2.tar,bak")
+result_json_file = os.path.join(model_path,"ai2.json")
+out_dir = os.path.join(model_path, "out")
 
-class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
-train_size = 64 # 学习的关键帧长度
-
-param_file = "/home/kesci/work/param2.data"
-param_file_bak = "/home/kesci/work/param2.data.bak"
-result_json_file = "/home/kesci/work/test.json"
-home = "/home/kesci/work/"
+# home = "/home/kesci/work/"
+# data_path = "/mnt/BROAD-datasets/video/"
+# param_file = "/home/kesci/work/param2.data"
+# param_file_bak = "/home/kesci/work/param2.data.bak"
+# result_json_file = "/home/kesci/work/ai2.json"
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -254,7 +256,6 @@ def conv_to_segment(probs):
   
     return items
 
-out_dir = os.path.join(home,"outv2")
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 def test():
