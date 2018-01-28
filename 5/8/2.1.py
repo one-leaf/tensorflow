@@ -268,9 +268,7 @@ def test():
     size = len(validation_data)
     for i, data_info in enumerate(validation_data):       
         data_id = data_info["id"]
-        json_file = os.path.join(out_dir,data_id)
-        if os.path.exists(json_file):
-            continue
+
         data = getTestData(data_id)  
         
         w = len(data)
