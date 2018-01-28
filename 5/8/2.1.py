@@ -135,7 +135,7 @@ if os.path.exists(param_file):
     
 
 def getTestData(testFileid):
-    v_data = np.load(os.path.join(data_path,"testing", "%s.pkl"%testFileid))
+    v_data = np.load(os.path.join(data_path,"validation_data", "%s.pkl"%testFileid))
     data = []
     batch_data = np.zeros((2048, train_size), dtype=np.float)  
     w = v_data.shape[0]
@@ -263,9 +263,9 @@ def conv_to_segment(probs):
     return items
 
 def test():
-    _, _, testing_data = load_data("testing") 
-    size = len(testing_data)
-    for i, data_info in enumerate(testing_data):       
+    _, validation_data, _ = load_data("validation") 
+    size = len(validation_data)
+    for i, data_info in enumerate(validation_data):       
         data_id = data_info["id"]
         json_file = os.path.join(out_dir,data_id)
         if os.path.exists(json_file):
