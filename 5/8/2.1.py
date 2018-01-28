@@ -28,6 +28,12 @@ out_dir = os.path.join(model_path, "out")
 # param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
+if not os.path.exists(model_path): os.mkdir(model_path)
+if not os.path.exists(out_dir): os.mkdir(out_dir)
+
+class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
+train_size = 64 # 学习的关键帧长度
+
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
     training_data = []
