@@ -123,7 +123,7 @@ def network():
 def reader_get_image_and_label():
     def reader():
         training_data, _, _ = load_data("training") 
-        for data in datalist:
+        for data in training_data:
             batch_data = np.zeros((2048, train_size))    
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
             print("\nstart train: %s.pkl, shape: %s"%(data["id"], v_data.shape))                
