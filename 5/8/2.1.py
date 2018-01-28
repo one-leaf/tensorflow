@@ -312,7 +312,7 @@ result["results"]={}
 for id, item in items:
     result["results"][id] = items
 
-with open(zipfile.ZipFile(result_json_file,"w")) as f:
+with zipfile.ZipFile(result_json_file,"w") as f:
     json.dump(result,f)
     
 print("OK")
