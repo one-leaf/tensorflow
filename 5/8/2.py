@@ -128,7 +128,7 @@ def reader_get_image_and_label(isTrain=True):
             datalist = validation_data
 
         size  = len(datalist)
-        
+
         for i, data in enumerate(datalist):
             # data = random.choice(datalist)  # 掉线的忍无可忍，只能做个随机选择数据
             batch_data = np.zeros((2048, train_size))    
@@ -192,10 +192,10 @@ if os.path.exists(param_file):
     
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
+# trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
 
 def getTestData(testFileid):
-    v_data = np.load(os.path.join(data_path,"testing", "%s.pkl"%testFileid))
+    v_data = np.load(os.path.join(data_path, "validation", "%s.pkl"%testFileid))
     data = []
     batch_data = np.zeros((2048, train_size), dtype=np.float)  
     w = v_data.shape[0]
