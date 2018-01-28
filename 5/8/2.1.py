@@ -122,7 +122,7 @@ def network():
       
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
-paddle.init(use_gpu=False, trainer_count=1)
+paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 
@@ -262,8 +262,6 @@ def conv_to_segment(probs):
   
     return items
 
-if not os.path.exists(out_dir): os.mkdir(out_dir)
-
 def test():
     _, _, testing_data = load_data("testing") 
     size = len(testing_data)
@@ -303,11 +301,8 @@ def test():
         
         del data
 
-paddle.init(use_gpu=True, trainer_count=1)
-
 logger = logging.getLogger('paddle')
 logger.setLevel(logging.ERROR)
-
 
 test()
 result={}
