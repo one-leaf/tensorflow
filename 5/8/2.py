@@ -127,7 +127,9 @@ def reader_get_image_and_label(isTrain=True):
         else:
             datalist = validation_data
 
-        for data in datalist:
+        size  = len(datalist)
+        
+        for i, data in enumerate(datalist):
             # data = random.choice(datalist)  # 掉线的忍无可忍，只能做个随机选择数据
             batch_data = np.zeros((2048, train_size))    
 
@@ -136,7 +138,7 @@ def reader_get_image_and_label(isTrain=True):
             else:
                 v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))
                 
-            print("start train: %s.pkl, shape: %s"%(data["id"], v_data.shape))
+            print("\nstart train (%s/%s): %s.pkl, shape: %s"%(i, size, data["id"], v_data.shape))
                 
             w = v_data.shape[0]
             label = np.zeros([w], dtype=np.int)
@@ -171,11 +173,11 @@ def event_handler(event):
             sys.stdout.flush()
         
 print("paddle init ...")
-paddle.init(use_gpu=False, trainer_count=1)
+paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(False), buf_size=4096), batch_size=64)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(False), buf_size=4096), batch_size=128)
 feeding={'x': 0, 'y': 1}
 
 if not os.path.exists(param_file):
