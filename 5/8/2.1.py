@@ -313,6 +313,6 @@ for id, item in items:
     result["results"][id] = item
 
 with zipfile.ZipFile(result_json_file,"w") as f:
-    json.dump(result,f)
+    f.write(json.dumps(result))
     
 print("OK")
