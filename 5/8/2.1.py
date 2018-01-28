@@ -12,14 +12,14 @@ import shutil
 import logging
 import gc
 import commands, re  
-
+import zipfile
 
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
 param_file = os.path.join(model_path,"param2.tar")
 param_file_bak = os.path.join(model_path,"param2.tar,bak")
-result_json_file = os.path.join(model_path,"ai2.json")
+result_json_file = os.path.join(model_path,"ai2.json.zip")
 out_dir = os.path.join(model_path, "out")
 
 # home = "/home/kesci/work/"
@@ -263,6 +263,7 @@ def conv_to_segment(probs):
     return items
 
 def test():
+    items = []
     _, validation_data, _ = load_data("validation") 
     size = len(validation_data)
     for i, data_info in enumerate(validation_data):       
@@ -294,26 +295,24 @@ def test():
             sys.stdout.flush() 
        
         _all_values = np.row_stack(all_values)
-        items = conv_to_segment(_all_values)
-
-        with open(json_file,'w') as f:
-            json.dump(items, f)
+        item = conv_to_segment(_all_values)
+        items.append((data_id, item))
         
         del data
+    return items
 
 logger = logging.getLogger('paddle')
 logger.setLevel(logging.ERROR)
 
-test()
+items = test()
 result={}
 result["version"]="VERSION 1.0"
 result["results"]={}
 
-for f in os.listdir(out_dir):
-    items = json.load(open(os.path.join(out_dir,f),'r'))
-    result["results"][f] = items
+for id, item in items:
+    result["results"][id] = items
 
-with open(result_json_file,"w") as f:
+with open(zipfile.ZipFile(result_json_file,"w")) as f:
     json.dump(result,f)
     
 print("OK")
