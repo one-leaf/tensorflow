@@ -167,11 +167,7 @@ print('set reader ...')
 train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=4096), batch_size=128)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
-
-if not os.path.exists(param_file):
-    if os.path.exists(param_file_bak):
-        shutil.copy(param_file_bak, param_file)
-   
+ 
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
 trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
