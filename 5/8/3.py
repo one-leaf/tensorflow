@@ -139,7 +139,13 @@ def reader_get_image_and_label():
                 if i>train_size:
                     s = sum(label[i-train_size+1:i+1]) / train_size
                     if s > 0.8 or (s < 0.2 and random.random()>0.5):
-                        yield np.ravel(batch_data), label[i-train_size//2]
+                        if label[i-train_size//2]==2:
+                            v=2
+                        elif s>0.8:
+                            v=1
+                        else:
+                            v=0 
+                        yield np.ravel(batch_data), v
             del v_data
     return reader
 
