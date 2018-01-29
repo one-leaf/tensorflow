@@ -155,7 +155,6 @@ def event_handler(event):
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
-                shutil.copy(param_file, param_file_bak)
         else:
             sys.stdout.write('.')
             sys.stdout.flush()
@@ -166,7 +165,7 @@ paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=2048), batch_size=256)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=2048), batch_size=1024)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
 
