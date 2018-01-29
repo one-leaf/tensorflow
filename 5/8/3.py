@@ -134,8 +134,8 @@ def reader_get_image_and_label():
 
                 _data = np.ravel(batch_data)   
                 if i>0 and i%block_size == 0: 
-                    if i>train_size and sum(label[i-train_size+1:i+1]) in (0,train_size) and random.random()>0.5:
-                        continue
+                    # if i>train_size and sum(label[i-train_size+1:i+1]) in (0,train_size) and random.random()>0.5:
+                    #     continue
                     yield _data, max(label[i-block_size+1:i+1])
 
             del v_data
@@ -158,8 +158,8 @@ paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-# train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=2048), batch_size=128)
-train_reader = paddle.batch(reader_get_image_and_label(), batch_size=128)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=4096), batch_size=128)
+# train_reader = paddle.batch(reader_get_image_and_label(), batch_size=128)
 feeding={'x': 0, 'y': 1}
 
    

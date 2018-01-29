@@ -30,7 +30,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 3  # 0 不是关键 1 是关键 2 重复关键
-train_size = 5 # 学习的关键帧长度
+train_size = 64 # 学习的关键帧长度
 block_size = 2 # 学习的块的大小
 
 def load_data(filter=None):
@@ -61,20 +61,20 @@ def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddl
         num_filters=ch_out,
         stride=stride,
         padding=(padding,0),
-        act=paddle.activation.Linear(),
+        act=paddle.activation.Relu(),
         bias_attr=False)
     return paddle.layer.batch_norm(input=tmp, act=active_type)
 
 def shortcut(ipt, n_in, n_out, stride):
     if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
+        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Relu())
     else:
         return ipt
 
 def basicblock(ipt, ch_out, stride):
     ch_in = ch_out * 2
     tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
+    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Relu())
     short = shortcut(ipt, ch_in, ch_out, stride)
     return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
 
@@ -97,13 +97,13 @@ def resnet_cifar10(ipt, depth=32):
     return pool
 
 def network():
-    x = paddle.layer.data(name='x', width=2048*block_size, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
+    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = resnet_cifar10(x,20)
     # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
-    sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=192, block_y=1)
+    sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=64, block_y=1)
     gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu())
     gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu(), reverse=True)
     output = paddle.layer.fc(input=[gru_forward,gru_backward], size=class_dim, act=paddle.activation.Softmax())
@@ -133,7 +133,7 @@ if os.path.exists(param_file):
 def getTestData(testFileid):
     v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%testFileid))
     data = []
-    batch_data = np.zeros((2048, train_size*block_size), dtype=np.float)  
+    batch_data = np.zeros((2048, train_size), dtype=np.float)  
     w = v_data.shape[0]
     label = np.zeros([w], dtype=np.int)
     for i in range(w):
@@ -275,10 +275,10 @@ def test():
         batch_size = 256
         count = w // batch_size
         print("need infer count:", count)
-        for i in range(count):
-            _data = data[i*batch_size:(i+1)*batch_size]
+        for j in range(count):
+            _data = data[j*batch_size:(j+1)*batch_size]
             probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-            for j in range(block_size):
+            for _ in range(block_size):
                 if len(all_values) < size:
                     all_values.append(probs)
             sys.stdout.write(".")
@@ -287,7 +287,7 @@ def test():
         if w % batch_size != 0:
             _data = data[count*batch_size:]
             probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-            for j in range(block_size):
+            for _ in range(block_size):
                 if len(all_values) < size:
                     all_values.append(probs)
             sys.stdout.write('.')
