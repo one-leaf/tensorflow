@@ -101,7 +101,7 @@ def network():
     x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = resnet_cifar10(x,8)
+    layer = resnet_cifar10(x)
     # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
     sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=64, block_y=1)
