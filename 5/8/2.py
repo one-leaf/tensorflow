@@ -97,33 +97,23 @@ def resnet(ipt, depth=32):
     res6 = layer_warp(basicblock, res5, 64, n, 2)
     res7 = layer_warp(basicblock, res6, 64, n, 2)
     res8 = layer_warp(basicblock, res7, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res8, pool_size=8, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
-    return pool
+    # pool = paddle.layer.img_pool(input=res8, pool_size=8, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
+    return res8
 
 def network():
     # -1 ,2048*5 
     x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
-    # y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
-    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(class_dim))
-    # y_emb = paddle.layer.embedding(input=y, size=train_size)
+    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = resnet(x, 8)
-    fc = paddle.layer.fc(input=layer,size=1024)
-    outputs=[]
-    for i in range(train_size):
-        outputs.append(paddle.layer.fc(input=fc,size=class_dim,act=paddle.activation.Softmax()))
-    output = paddle.layer.concat(input=outputs)
+    # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
-    # output = paddle.layer.fc(input=outputs, size=class_dim, act=paddle.activation.Softmax())
-
-    # output = paddle.layer.fc(input=layer,size=train_size,act=paddle.activation.Softmax())
-
-    # sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
-    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
-    # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
-    # output = paddle.layer.fc(input=[gru_forward, gru_backward, layer], size=class_dim, act=paddle.activation.Softmax())
+    sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
+    gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
+    output = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
     
-    cost = paddle.layer.cross_entropy_cost(input=output, label=y)
+    cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
         learning_rate=5e-3,
@@ -150,7 +140,7 @@ def reader_get_image_and_label():
             for i in range(w):
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-                yield np.ravel(batch_data), label[i-train_size+1:i+1]
+                yield np.ravel(batch_data), label[i]
             del v_data
     return reader
 
