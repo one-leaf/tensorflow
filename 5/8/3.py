@@ -93,8 +93,8 @@ def resnet(ipt, depth=32):
     res2 = layer_warp(basicblock, res1, 64, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
     res4 = layer_warp(basicblock, res3, train_size, n, 2)
-    pool = paddle.layer.img_pool(input=res4, pool_size=4, pool_size_y=1, stride=2, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
-    return pool
+    # pool = paddle.layer.img_pool(input=res4, pool_size=4, pool_size_y=1, stride=2, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
+    return res4
 
 def network():
     # -1 ,2048*5 
