@@ -32,7 +32,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
-train_size = 128 # 学习的关键帧长度
+train_size = 64 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -103,12 +103,12 @@ def network():
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = resnet_cifar10(x,20)
-    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
-    # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
-    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu())
-    # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu(), reverse=True)
-    # output = paddle.layer.fc(input=[gru_forward,gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
+    gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu(), reverse=True)
+    output = paddle.layer.fc(input=[gru_forward,gru_backward], size=class_dim, act=paddle.activation.Softmax())
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)

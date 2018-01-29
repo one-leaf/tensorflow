@@ -57,20 +57,20 @@ def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddl
         num_filters=ch_out,
         stride=stride,
         padding=(padding,0),
-        act=paddle.activation.Linear(),
+        act=paddle.activation.Relu(),
         bias_attr=False)
     return paddle.layer.batch_norm(input=tmp, act=active_type)
 
 def shortcut(ipt, n_in, n_out, stride):
     if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
+        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Relu())
     else:
         return ipt
 
 def basicblock(ipt, ch_out, stride):
     ch_in = ch_out * 2
     tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
+    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Relu())
     short = shortcut(ipt, ch_in, ch_out, stride)
     return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
 
@@ -163,4 +163,4 @@ feeding={'x': 0, 'y': 1}
    
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=2)
