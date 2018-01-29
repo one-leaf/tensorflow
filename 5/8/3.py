@@ -93,7 +93,6 @@ def resnet_cifar10(ipt, depth=32):
     return pool
 
 def network():
-    # -1 ,2048*5 
     x = paddle.layer.data(name='x', width=2048*block_size, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
@@ -164,4 +163,4 @@ feeding={'x': 0, 'y': 1}
    
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=5)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
