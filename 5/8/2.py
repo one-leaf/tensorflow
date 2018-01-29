@@ -104,7 +104,7 @@ def network():
     # -1 ,2048*5 
     x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
     # y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
-    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(3))
+    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(class_dim))
 
     layer = resnet(x, 8)
     # fc = paddle.layer.fc(input=layer,size=1024)
@@ -114,7 +114,7 @@ def network():
     
     # output = paddle.layer.concat(input=outputs)
 
-    output = paddle.layer.fc(input=layer,size=train_size,act=paddle.activation.Softmax())
+    output = paddle.layer.fc(input=layer,size=train_size*class_dim,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
