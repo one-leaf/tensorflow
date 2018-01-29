@@ -17,21 +17,21 @@ import zipfile
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
-param_file = os.path.join(model_path,"param3.tar")
+param_file = os.path.join(model_path,"param2.tar")
 result_json_file = os.path.join(model_path,"ai.json.zip")
 out_dir = os.path.join(model_path, "out")
 
 # home = "/home/kesci/work/"
 # data_path = "/mnt/BROAD-datasets/video/"
 # param_file = "/home/kesci/work/param2.data"
+# param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
-class_dim = 3  # 0 不是关键 1 是关键 2 重复关键
-train_size = 64 # 学习的关键帧长度
-block_size = 2 # 学习的块的大小
+class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
+train_size = 8 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -61,20 +61,20 @@ def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddl
         num_filters=ch_out,
         stride=stride,
         padding=(padding,0),
-        act=paddle.activation.Relu(),
+        act=paddle.activation.Linear(),
         bias_attr=False)
     return paddle.layer.batch_norm(input=tmp, act=active_type)
 
 def shortcut(ipt, n_in, n_out, stride):
     if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Relu())
+        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
     else:
         return ipt
 
 def basicblock(ipt, ch_out, stride):
     ch_in = ch_out * 2
     tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Relu())
+    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
     short = shortcut(ipt, ch_in, ch_out, stride)
     return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
 
@@ -84,34 +84,35 @@ def layer_warp(block_func, ipt, features, count, stride):
         tmp = block_func(tmp, features, 1)
     return tmp
 
-def resnet_cifar10(ipt, depth=32):
+def resnet(ipt, depth=32):
     # depth should be one of 20, 32, 44, 56, 110, 1202
     assert (depth - 2) % 6 == 0
     n = (depth - 2) / 6
-    nStages = {16, 64, 128}
-    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=16, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 16, n, 2)
-    res2 = layer_warp(basicblock, res1, 32, n, 2)
+    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=64, filter_size=3, stride=1, padding=1)
+    res1 = layer_warp(basicblock, conv1, 64, n, 2)
+    res2 = layer_warp(basicblock, res1, 64, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res3, pool_size=8, pool_size_y=1, stride=4, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
-    return pool
+    res4 = layer_warp(basicblock, res3, 64, n, 2)
+    # pool = paddle.layer.img_pool(input=res8, pool_size=8, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
+    return res4
 
 def network():
+    # -1 ,2048*5 
     x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = resnet_cifar10(x,20)
-    # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    layer = resnet(x)
+    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
-    sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=64, block_y=1)
-    gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu())
-    gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu(), reverse=True)
-    output = paddle.layer.fc(input=[gru_forward,gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    # sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
+    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
+    # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
+    # output = paddle.layer.fc(input=[gru_forward, gru_backward, layer], size=class_dim, act=paddle.activation.Softmax())
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
-        learning_rate=2e-3,
+        learning_rate=1e-3,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4),
         model_average=paddle.optimizer.ModelAverage(average_window=0.5))
     return cost, parameters, adam_optimizer, output
@@ -123,11 +124,10 @@ print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 
 # 预测时需要读取模型
-if os.path.exists(param_file):
-    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
-    print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-    print("loading parameters ...")
-    paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+print("loading parameters ...")
+paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
     
 
 def getTestData(testFileid):
@@ -139,8 +139,8 @@ def getTestData(testFileid):
     for i in range(w):
         _data = np.reshape(v_data[i], (2048,1))
         batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-        _data1 = np.ravel(batch_data)
-        data.append((_data1,))
+        _data = np.ravel(batch_data)
+        data.append((_data,))
     return data
 
 # 转换分类到段
@@ -268,27 +268,38 @@ def test():
         data = getTestData(data_id)  
         
         w = len(data)
-        print("\n%s/%s start infer:  %s size %s"%(i, size, data_id, w))
+        print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
         
         all_values=[]
         batch_size = 256
         count = w // batch_size
         print("need infer count:", count)
-        for j in range(count):
-            _data = data[j*batch_size:(j+1)*batch_size]
+        for i in range(count):
+            _data = data[i*batch_size:(i+1)*batch_size]
             probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
             all_values.append(probs)
             sys.stdout.write(".")
             sys.stdout.flush()           
             
-        if w % batch_size != 0:
+        if w%batch_size != 0:
             _data = data[count*batch_size:]
             probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
             all_values.append(probs)
-            sys.stdout.write('.')
+            sys.stdout.write('E')
             sys.stdout.flush() 
        
         _all_values = np.row_stack(all_values)
+
+        label = np.zeros([w], dtype=np.int)
+
+        for annotations in data_info["data"]:
+            segment = annotations['segment']
+            for i in range(int(segment[0]),int(segment[1]+1)):
+                label[i] += 1
+
+        print(label)
+        print(np.argsort(-_all_values)[:,0])
+
         item = conv_to_segment(_all_values)
         items.append((data_id, item))
         
@@ -297,6 +308,7 @@ def test():
 
 logger = logging.getLogger('paddle')
 logger.setLevel(logging.ERROR)
+np.set_printoptions(threshold=np.inf)
 
 items = test()
 result={}
@@ -307,6 +319,6 @@ for id, item in items:
     result["results"][id] = item
 
 with zipfile.ZipFile(result_json_file,"w") as f:
-    f.writestr('ai.json',json.dumps(result))
+    f.writestr('ai2.json',json.dumps(result))
     
 print("OK")
