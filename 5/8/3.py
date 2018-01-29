@@ -134,7 +134,7 @@ def reader_get_image_and_label():
 
                 _data = np.ravel(batch_data)   
                 if i>0 and i%block_size == 0: 
-                    if (i>train_size and sum(label[i-train_size+1:i+1]) in (0,train_size)) and random.random()>0.5):
+                    if i>train_size and sum(label[i-train_size+1:i+1]) in (0,train_size) and random.random()>0.5:
                         continue
                     yield _data, max(label[i-block_size+1:i+1])
 
