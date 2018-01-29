@@ -138,7 +138,7 @@ def reader_get_image_and_label():
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
                 if i>train_size and random.random()>0.75:
                     s = sum(label[i-train_size+1:i+1]) / train_size
-                    if s > 0.8 or (s < 0.2 and random.random()>0.5):
+                    if s > 0.8 or s < 0.2:
                         if label[i]==2:
                             v=2
                         elif s>0.8:
