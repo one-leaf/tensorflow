@@ -102,12 +102,13 @@ def resnet(ipt, depth=32):
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
+    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector_sequence(2048))
+    x_emb = paddle.layer.embedding(input=y, size=train_size)
+
     # y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(class_dim))
-    y_emb = paddle.layer.embedding(input=y, size=train_size)
 
-    layer = resnet(x, 8)
+    layer = resnet(x_emb, 8)
     # fc = paddle.layer.fc(input=layer,size=1024)
     # outputs=[]
     # for i in range(train_size):
@@ -122,7 +123,7 @@ def network():
     # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
     # output = paddle.layer.fc(input=[gru_forward, gru_backward, layer], size=class_dim, act=paddle.activation.Softmax())
     
-    cost = paddle.layer.classification_cost(input=output, label=y_emb)
+    cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
         learning_rate=5e-3,
