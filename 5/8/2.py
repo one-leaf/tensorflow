@@ -107,7 +107,7 @@ def network():
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(3))
 
     layer = resnet(x, 8)
-    fc = paddle.layer.fc(input=layer,size=1024)
+    # fc = paddle.layer.fc(input=layer,size=1024)
     # outputs=[]
     # for i in range(train_size):
     #     outputs.append(paddle.layer.fc(input=fc,size=class_dim,act=paddle.activation.Softmax()))
