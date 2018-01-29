@@ -140,9 +140,7 @@ def getTestData(testFileid):
     for i in range(w):
         _data = np.reshape(v_data[i], (2048,1))
         batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-
-        _data = np.transpose(batch_data,(1,0))
-        _data = np.ravel(_data)
+        _data = np.ravel(batch_data)
         data.append((_data,))
     return data
 

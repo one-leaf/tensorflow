@@ -84,16 +84,18 @@ def layer_warp(block_func, ipt, features, count, stride):
         tmp = block_func(tmp, features, 1)
     return tmp
 
-def resnet_cifar10(ipt, depth=32):
+def resnet(ipt, depth=32):
     # depth should be one of 20, 32, 44, 56, 110, 1202
     assert (depth - 2) % 6 == 0
     n = (depth - 2) / 6
-    nStages = {16, 64, 128}
-    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=16, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 16, n, 2)
-    res2 = layer_warp(basicblock, res1, 32, n, 2)
+    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=64, filter_size=3, stride=1, padding=1)
+    res1 = layer_warp(basicblock, conv1, 64, n, 2)
+    res2 = layer_warp(basicblock, res1, 64, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res3, pool_size=8, pool_size_y=1, stride=4, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
+    res4 = layer_warp(basicblock, res3, 64, n, 2)
+    res5 = layer_warp(basicblock, res4, 64, n, 2)
+    res6 = layer_warp(basicblock, res5, 64, n, 2)
+    pool = paddle.layer.img_pool(input=res6, pool_size=8, pool_size_y=1, stride=4, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
     return pool
 
 def network():
@@ -101,10 +103,10 @@ def network():
     x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = resnet_cifar10(x)
+    layer = resnet(x, 8)
     # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
-    sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=64, block_y=1)
+    sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
     gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
 #     gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=256, act=paddle.activation.Relu(), reverse=True)
 
@@ -137,12 +139,8 @@ def reader_get_image_and_label():
             for i in range(w):
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-
-                _data = np.transpose(batch_data,(1,0))
-                _data = np.ravel(_data)   
-
+                _data = np.ravel(batch_data)   
                 yield _data, label[i]
-
             del v_data
     return reader
 
