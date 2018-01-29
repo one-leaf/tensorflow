@@ -93,7 +93,7 @@ def resnet(ipt, depth=32):
     res2 = layer_warp(basicblock, res1, 64, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
     res4 = layer_warp(basicblock, res3, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res4, pool_size=2, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
+    pool = paddle.layer.img_pool(input=res4, pool_size=2, pool_size_y=1, stride=1, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
     return pool
 
 def network():
@@ -101,9 +101,9 @@ def network():
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector_sequence(2048*train_size))
     # y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(class_dim))
-    # x_emb = paddle.layer.embedding(input=x, size=train_size)
+    x_emb = paddle.layer.embedding(input=x, size=train_size)
 
-    layer = resnet(x, 8)
+    layer = resnet(x_emb, 8)
     # fc = paddle.layer.fc(input=layer,size=1024)
     # outputs=[]
     # for i in range(train_size):
