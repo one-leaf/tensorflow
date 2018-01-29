@@ -269,7 +269,7 @@ def test():
         data = getTestData(data_id)  
         
         w = len(data)
-        print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
+        print("\n%s/%s start infer:  %s size %s"%(i, size, data_id, w))
         
         all_values=[]
         batch_size = 256
