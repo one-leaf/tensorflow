@@ -304,7 +304,7 @@ def test():
                 label[i] += 1
 
         print(label)
-        print(np.argsort(-probs)[:,0])
+        print(np.argsort(-_all_values)[:,0])
 
         item = conv_to_segment(_all_values)
         items.append((data_id, item))
