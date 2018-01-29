@@ -307,6 +307,6 @@ for id, item in items:
     result["results"][id] = item
 
 with zipfile.ZipFile(result_json_file,"w") as f:
-    f.writestr('ai2.json',json.dumps(result))
+    f.writestr('ai.json',json.dumps(result))
     
 print("OK")
