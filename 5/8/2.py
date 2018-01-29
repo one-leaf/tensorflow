@@ -18,7 +18,6 @@ home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
 param_file = os.path.join(model_path,"param2.tar")
-param_file_bak = os.path.join(model_path,"param2.tar,bak")
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
 

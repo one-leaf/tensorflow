@@ -18,7 +18,6 @@ home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
 param_file = os.path.join(model_path,"param2.tar")
-param_file_bak = os.path.join(model_path,"param2.tar,bak")
 result_json_file = os.path.join(model_path,"ai.json.zip")
 out_dir = os.path.join(model_path, "out")
 
@@ -127,11 +126,10 @@ print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 
 # 预测时需要读取模型
-if os.path.exists(param_file):
-    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
-    print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-    print("loading parameters ...")
-    paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+print("loading parameters ...")
+paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
     
 
 def getTestData(testFileid):
