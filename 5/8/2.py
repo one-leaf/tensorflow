@@ -103,7 +103,7 @@ def resnet(ipt, depth=32):
 def network():
     # -1 ,2048*5 
     x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector_sequence(2048))
-    x_emb = paddle.layer.embedding(input=y, size=train_size)
+    x_emb = paddle.layer.embedding(input=x, size=train_size)
 
     # y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(class_dim))
