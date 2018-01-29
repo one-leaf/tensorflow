@@ -32,7 +32,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
-train_size = 16 # 学习的关键帧长度
+train_size = 128 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -140,8 +140,8 @@ def reader_get_image_and_label():
 
                 _data = np.ravel(batch_data)   
 
-                if (i>=train_size and sum(label[i-train_size:i]) not in (0,train_size)) or random.random()>0.75:
-                    yield _data, label[i]
+              #  if (i>=train_size and sum(label[i-train_size:i]) not in (0,train_size)) or random.random()>0.75:
+                yield _data, label[i]
 
             del v_data
     return reader
@@ -164,7 +164,7 @@ paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=2048), batch_size=64)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=2048), batch_size=256)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
 
