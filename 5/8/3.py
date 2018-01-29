@@ -31,7 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
-train_size = 8 # 学习的关键帧长度
+train_size = 64 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -101,7 +101,7 @@ def network():
     x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = resnet(x)
+    layer = resnet(x, 20)
     output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
