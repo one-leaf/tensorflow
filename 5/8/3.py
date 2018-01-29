@@ -134,7 +134,7 @@ def reader_get_image_and_label():
 
                 _data = np.ravel(batch_data)   
                 if i>0 and i%block_size == 0:
-                    yield _data, max(label[i-block_size:i])
+                    yield _data, max(label[i-block_size+1:i+1])
 
             del v_data
     return reader
