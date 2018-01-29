@@ -123,7 +123,7 @@ def network():
     # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
     # output = paddle.layer.fc(input=[gru_forward, gru_backward, layer], size=class_dim, act=paddle.activation.Softmax())
     
-    cost = paddle.layer.multi_binary_label_cross_entropy_cost(input=output, label=y)
+    cost = paddle.layer.cross_entropy_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
         learning_rate=5e-3,
