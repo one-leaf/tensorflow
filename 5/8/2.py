@@ -108,13 +108,13 @@ def network():
 
     layer = resnet(x, 8)
     fc = paddle.layer.fc(input=layer,size=1024)
-    outputs=[]
-    for i in range(train_size):
-        outputs.append(paddle.layer.fc(input=fc,size=class_dim,act=paddle.activation.Softmax()))
+    # outputs=[]
+    # for i in range(train_size):
+    #     outputs.append(paddle.layer.fc(input=fc,size=class_dim,act=paddle.activation.Softmax()))
     
-    output = paddle.layer.concat(input=outputs)
+    # output = paddle.layer.concat(input=outputs)
 
-    # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    output = paddle.layer.fc(input=layer,size=train_size,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
