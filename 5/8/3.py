@@ -89,21 +89,21 @@ def resnet_cifar10(ipt, depth=32):
     res1 = layer_warp(basicblock, conv1, 16, n, 2)
     res2 = layer_warp(basicblock, res1, 32, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res3, pool_size=4, pool_size_y=1, stride=2, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
+    pool = paddle.layer.img_pool(input=res3, pool_size=8, pool_size_y=1, stride=4, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
     return pool
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
+    x = paddle.layer.data(name='x', width=2048*block_size, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = resnet_cifar10(x,20)
-    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
-    # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
-    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu())
-    # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu(), reverse=True)
-    # output = paddle.layer.fc(input=[gru_forward,gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=192, block_y=1)
+    gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=128, act=paddle.activation.Relu(), reverse=True)
+    output = paddle.layer.fc(input=[gru_forward,gru_backward], size=class_dim, act=paddle.activation.Softmax())
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
