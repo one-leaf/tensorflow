@@ -95,7 +95,9 @@ def resnet(ipt, depth=32):
     res4 = layer_warp(basicblock, res3, 64, n, 2)
     res5 = layer_warp(basicblock, res4, 64, n, 2)
     res6 = layer_warp(basicblock, res5, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res6, pool_size=4, pool_size_y=1, stride=2, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
+    res7 = layer_warp(basicblock, res6, 64, n, 2)
+    res8 = layer_warp(basicblock, res7, 64, n, 2)
+    pool = paddle.layer.img_pool(input=res8, pool_size=8, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
     return pool
 
 def network():
@@ -104,13 +106,13 @@ def network():
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = resnet(x, 8)
-    # output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
 
-    sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
-    gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
+    # sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
+    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
 #     gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=256, act=paddle.activation.Relu(), reverse=True)
 
-    output = paddle.layer.fc(input=[gru_forward,layer], size=class_dim, act=paddle.activation.Softmax())
+    # output = paddle.layer.fc(input=[gru_forward,layer], size=class_dim, act=paddle.activation.Softmax())
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
