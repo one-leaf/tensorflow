@@ -94,7 +94,7 @@ def resnet_cifar10(ipt, depth=32):
     res1 = layer_warp(basicblock, conv1, 16, n, 2)
     res2 = layer_warp(basicblock, res1, 32, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res3, pool_size=8, pool_size_y=1, stride=4, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
+    pool = paddle.layer.img_pool(input=res3, pool_size=8, pool_size_y=1, stride=4, padding=1, padding_y=0, pool_type=paddle.pooling.Avg())
     return pool
 
 def network():
@@ -142,7 +142,7 @@ def reader_get_image_and_label():
 
                 _data = np.transpose(batch_data,(1,0))
                 _data = np.ravel(_data)   
-                
+
                 if (i>=train_size and sum(label[i-train_size+1:i+1]) not in (0,train_size)) or random.random()>0.25:
                     yield _data, label[i]
 
