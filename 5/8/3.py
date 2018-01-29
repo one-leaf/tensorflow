@@ -26,8 +26,8 @@ param_file = os.path.join(model_path,"param3.tar")
 if not os.path.exists(model_path): os.mkdir(model_path)
 
 class_dim = 3  # 0 不是关键 1 是关键 2 重复关键
-train_size = 10 # 学习的关键帧长度
-block_size = 3 # 学习的块的大小
+train_size = 15 # 学习的关键帧长度
+block_size = 2 # 学习的块的大小
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
