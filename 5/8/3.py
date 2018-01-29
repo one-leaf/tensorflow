@@ -116,7 +116,7 @@ def network():
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
-        learning_rate=5e-3,
+        learning_rate=2e-3,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4),
         model_average=paddle.optimizer.ModelAverage(average_window=0.5))
     return cost, parameters, adam_optimizer, output
@@ -142,7 +142,7 @@ def reader_get_image_and_label():
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
                 if i>train_size:
                     s = sum(label[i-train_size+1:i+1]) / train_size
-                    if s > 0.8 or s < 0.2 :
+                    if s > 0.8 or s < 0.1 or label[i]>0 :
                         yield np.ravel(batch_data), label[i]
             del v_data
     return reader
@@ -170,4 +170,4 @@ feeding={'x': 0, 'y': 1}
  
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=2)
