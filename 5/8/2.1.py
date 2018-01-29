@@ -304,8 +304,8 @@ def test():
                 label[i] += 1
 
         print(label)
-        print(_all_values)
-        
+        print([v[0] for v in np.argsort(-probs)])
+
         item = conv_to_segment(_all_values)
         items.append((data_id, item))
         
@@ -314,6 +314,7 @@ def test():
 
 logger = logging.getLogger('paddle')
 logger.setLevel(logging.ERROR)
+np.set_printoptions(threshold=np.inf)
 
 items = test()
 result={}
