@@ -139,9 +139,8 @@ def getTestData(testFileid):
     for i in range(w):
         _data = np.reshape(v_data[i], (2048,1))
         batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-        if i>0 and i%block_size==0:
-            _data1 = np.ravel(batch_data)
-            data.append((_data1,))
+        _data1 = np.ravel(batch_data)
+        data.append((_data1,))
     return data
 
 # 转换分类到段
@@ -278,18 +277,14 @@ def test():
         for j in range(count):
             _data = data[j*batch_size:(j+1)*batch_size]
             probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-            for _ in range(block_size):
-                if len(all_values) < size:
-                    all_values.append(probs)
+            all_values.append(probs)
             sys.stdout.write(".")
             sys.stdout.flush()           
             
         if w % batch_size != 0:
             _data = data[count*batch_size:]
             probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-            for _ in range(block_size):
-                if len(all_values) < size:
-                    all_values.append(probs)
+            all_values.append(probs)
             sys.stdout.write('.')
             sys.stdout.flush() 
        
