@@ -112,7 +112,7 @@ def network():
     outputs=[]
     for i in range(train_size):
         outputs.append(paddle.layer.fc(input=fc,size=class_dim,act=paddle.activation.Softmax()))
-    outputs = paddle.layer.concat(input=outputs)
+    output = paddle.layer.concat(input=outputs)
 
     # output = paddle.layer.fc(input=outputs, size=class_dim, act=paddle.activation.Softmax())
 
