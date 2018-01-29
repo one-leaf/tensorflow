@@ -98,12 +98,12 @@ def resnet(ipt, depth=32):
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector_sequence(2048))
+    x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector_sequence(2048))
     # y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value_sequence(class_dim))
-    x_emb = paddle.layer.embedding(input=x, width=2048, height=1, size=train_size)
+    x_emb = paddle.layer.embedding(input=x, size=train_size)
 
-    layer = resnet(x_emb, 8)
+    layer = resnet(x, 8)
     # fc = paddle.layer.fc(input=layer,size=1024)
     # outputs=[]
     # for i in range(train_size):
