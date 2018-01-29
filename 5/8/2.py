@@ -141,8 +141,7 @@ def reader_get_image_and_label():
             for i in range(w):
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-                _data = np.ravel(batch_data)   
-                yield _data, label[i]
+                yield np.ravel(batch_data), label[i]
             del v_data
     return reader
 
