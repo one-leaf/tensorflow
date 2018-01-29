@@ -295,6 +295,17 @@ def test():
             sys.stdout.flush() 
        
         _all_values = np.row_stack(all_values)
+
+        label = np.zeros([w], dtype=np.int)
+
+        for annotations in data_info["data"]:
+            segment = annotations['segment']
+            for i in range(int(segment[0]),int(segment[1]+1)):
+                label[i] += 1
+
+        print(label)
+        print(_all_values)
+        
         item = conv_to_segment(_all_values)
         items.append((data_id, item))
         
