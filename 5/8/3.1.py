@@ -30,7 +30,7 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
-class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
+class_dim = 2 # 0 不是关键 1 是关键 2 重复关键
 train_size = 16 # 学习的关键帧长度
 
 def load_data(filter=None):
