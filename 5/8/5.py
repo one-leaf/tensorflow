@@ -143,7 +143,7 @@ def reader_get_image_and_label():
                 train_zero = False
                 if i>train_size: 
                     s = sum(label[i-train_size+1:i+1]) / train_size
-                    if s < 0.6 and s > 0.4:
+                    if s < 0.7 and s > 0.3:
                         if sum(label[i-train_size+1:i-train_size//2+1])<sum(label[i-train_size//2+1:i+1]):
                             v = 1 
                         else:
