@@ -140,6 +140,7 @@ def reader_get_image_and_label():
             for i in range(w):
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
+                train_zero = False
                 if i>train_size: 
                     s = sum(label[i-train_size+1:i+1]) / train_size
                     if s < 0.6 and s > 0.4:
@@ -148,10 +149,12 @@ def reader_get_image_and_label():
                         else:
                             v = 2
                         yield np.ravel(batch_data), v
+                        train_zero = True
                     else:
                         v = 0 
-                        if random.random()>0.999:
+                        if train_zero:
                             yield np.ravel(batch_data), v
+                            train_zero = False
             del v_data
     return reader
 
