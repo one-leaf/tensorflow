@@ -103,7 +103,7 @@ def resnet(ipt, depth=32):
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
+    x = paddle.layer.data(name='x', width=2048*block_size, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = resnet(x, 8)

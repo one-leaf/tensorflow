@@ -31,7 +31,8 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 0 不是关键 1 是关键 2 重复关键
-train_size = 16 # 学习的关键帧长度
+train_size = 4 # 学习的关键帧长度
+block_size = 4 # 块的大小
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -102,7 +103,7 @@ def resnet(ipt, depth=32):
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
+    x = paddle.layer.data(name='x', width=2048*block_size, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
     layer = resnet(x, 8)
@@ -137,7 +138,7 @@ paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 def getTestData(testFileid):
     v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%testFileid))
     data = []
-    batch_data = np.zeros((2048, train_size), dtype=np.float)  
+    batch_data = np.zeros((2048, train_size*block_size), dtype=np.float)  
     w = v_data.shape[0]
     label = np.zeros([w], dtype=np.int)
     for i in range(w):
