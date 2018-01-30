@@ -154,7 +154,7 @@ def conv_to_segment(probs):
     items = []
     minsec1 = 5
     minsec2 = 10
-    avgsec = 30
+    avgsec = 20
     maxsec = 3600
     
     # score = 0
