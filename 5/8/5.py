@@ -175,10 +175,10 @@ paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=8192), batch_size=256)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=8192), batch_size=16)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
  
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=10)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=100)
