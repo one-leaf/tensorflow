@@ -31,7 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 3 # 0: 0  1:  0-->1 2: 1--->0
-train_size = 16 # 学习的关键帧长度
+train_size = 8 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -123,8 +123,8 @@ def reader_get_image_and_label():
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
                 if i > train_size: 
                     s = sum(label[i-train_size+1:i+1]) 
-                    if c > train_size and s > train_size*0.7 and random.random>0.5: continue
-                    if c < -train_size and s <train_size*0.3 and random.random>0.5: continue                    
+                    # if c > train_size and s > train_size*0.7 and random.random>0.5: continue
+                    # if c < -train_size and s <train_size*0.3 and random.random>0.5: continue                    
                     if s > train_size*0.7:
                         v = 2 
                         c += 1
