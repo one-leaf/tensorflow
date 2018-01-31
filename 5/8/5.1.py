@@ -220,7 +220,7 @@ def test():
             _data = data[count*batch_size:]
             probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
             all_values.append(probs)
-            sys.stdout.write('E')
+            sys.stdout.write('.')
             sys.stdout.flush() 
        
         _all_values = np.row_stack(all_values)
@@ -237,7 +237,7 @@ def test():
 
         item = conv_to_segment(_all_values)
         items.append((data_id, item))
-        
+        print(len(item))        
         del data
     return items
 
