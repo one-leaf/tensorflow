@@ -123,10 +123,10 @@ def reader_get_image_and_label():
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
                 if i > train_size: 
                     s = sum(label[i-train_size+1:i+1]) 
-                    if c > train_size and s == train_size and random.random>0.5: continue
-                    if c < -train_size and s == 0 and random.random>0.5: continue                    
-                    if s == 0 or s == train_size:
-                        if s == 0:
+                    if c > train_size and s > train_size*0.9 and random.random>0.5: continue
+                    if c < -train_size and s <train_size*0.1 and random.random>0.5: continue                    
+                    if s <train_size*0.1 or s > train_size*0.9:
+                        if s < train_size*0.1:
                             v = 0 
                             c -= 1
                         else:
