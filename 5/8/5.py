@@ -106,7 +106,7 @@ def reader_get_image_and_label():
         for i, data in enumerate(training_data):
             batch_data = np.zeros((2048, train_size))    
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
-            print("\nstart train: %s / %s %s.pkl, shape: %s"%(i, size, data["id"], v_data.shape))                
+            print("\nstart train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))                
             w = v_data.shape[0]
             label = np.zeros([w], dtype=np.int)
 
