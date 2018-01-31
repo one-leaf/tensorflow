@@ -30,8 +30,8 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
-class_dim = 3 # 0: 0  1:  0-->1 2: 1--->0
-train_size = 16 # 学习的关键帧长度
+class_dim = 2 # 0: 0  1:  0-->1 2: 1--->0
+train_size = 32 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -53,60 +53,40 @@ def load_data(filter=None):
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
 
-def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
-    tmp = paddle.layer.img_conv(
-        input=input,
-        filter_size=(filter_size,1),
-        num_channels=ch_in,
-        num_filters=ch_out,
-        stride=stride,
-        padding=(padding,0),
-        act=paddle.activation.Linear(),
-        bias_attr=False)
-    return paddle.layer.batch_norm(input=tmp, act=active_type)
-
-def shortcut(ipt, n_in, n_out, stride):
-    if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
-    else:
-        return ipt
-
-def basicblock(ipt, ch_out, stride):
-    ch_in = ch_out * 2
-    tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
-    short = shortcut(ipt, ch_in, ch_out, stride)
-    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
-
-def layer_warp(block_func, ipt, features, count, stride):
-    tmp = block_func(ipt, features, stride)
-    for i in range(1, count):
-        tmp = block_func(tmp, features, 1)
-    return tmp
-
-def resnet(ipt, depth=32):
-    # depth should be one of 20, 32, 44, 56, 110, 1202
-    assert (depth - 2) % 6 == 0
-    n = (depth - 2) / 6
-    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=64, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 64, n, 2)
-    res2 = layer_warp(basicblock, res1, 64, n, 2)
-    res3 = layer_warp(basicblock, res2, 64, n, 2)
-    res4 = layer_warp(basicblock, res3, 64, n, 2)
-    res5 = layer_warp(basicblock, res4, 64, n, 2)
-    res6 = layer_warp(basicblock, res5, 64, n, 2)
-    res7 = layer_warp(basicblock, res6, 64, n, 2)
-    res8 = layer_warp(basicblock, res7, 64, n, 2)
-    # pool = paddle.layer.img_pool(input=res8, pool_size=8, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
-    return res8
+def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
+    return paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels, 
+        num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
+    x = paddle.layer.data(name='x', width=2048, height=train_size, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = resnet(x, 8)
-    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    net0 = cnn(x,    9,  1, 64, 2, 4)
+    net0 = cnn(net0, 9, 64, 64, 2, 4)
+    net0 = cnn(net0, 9, 64, 64, 2, 4)
+    net0 = cnn(net0, 9, 64, 64, 2, 4)
+    net0 = cnn(net0, 9, 64, 64, 2, 4)
+
+    net1 = cnn(x,    7,  1, 64, 2, 3)
+    net1 = cnn(net1, 7, 64, 64, 2, 3)
+    net1 = cnn(net1, 7, 64, 64, 2, 3)
+    net1 = cnn(net1, 7, 64, 64, 2, 3)
+    net1 = cnn(net1, 7, 64, 64, 2, 3)
+    
+    net2 = cnn(x,    5,  1, 64, 2, 2)
+    net2 = cnn(net2, 5, 64, 64, 2, 2)
+    net2 = cnn(net2, 5, 64, 64, 2, 2)
+    net2 = cnn(net2, 5, 64, 64, 2, 2)
+    net2 = cnn(net2, 5, 64, 64, 2, 2)
+
+    net3 = cnn(x,    3,  1, 64, 2, 1)
+    net3 = cnn(net3, 3, 64, 64, 2, 1)
+    net3 = cnn(net3, 3, 64, 64, 2, 1)
+    net3 = cnn(net3, 3, 64, 64, 2, 1)
+    net3 = cnn(net3, 3, 64, 64, 2, 1)
+
+    output = paddle.layer.fc(input=[net0,net1,net2,net3],size=class_dim,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
@@ -140,21 +120,14 @@ def reader_get_image_and_label():
             for i in range(w):
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-                train_zero = False
-                if i>train_size: 
+                if i > train_size: 
                     s = sum(label[i-train_size+1:i+1]) * 1.0 / train_size
-                    if s < 0.6 and s > 0.4:
-                        if sum(label[i-train_size+1:i-train_size//2+1])<sum(label[i-train_size//2+1:i+1]):
-                            v = 1 
+                    if s < 0.1 or s > 0.9:
+                        if s < 0.1:
+                            v = 0 
                         else:
-                            v = 2
+                            v = 1
                         yield np.ravel(batch_data), v
-                        train_zero = True
-                    else:
-                        v = 0 
-                        if train_zero:
-                            yield np.ravel(batch_data), v
-                            train_zero = False
             del v_data
     return reader
 
@@ -170,12 +143,12 @@ def event_handler(event):
             sys.stdout.flush()
         
 print("paddle init ...")
-# paddle.init(use_gpu=False, trainer_count=2) 
-paddle.init(use_gpu=True, trainer_count=2)
+paddle.init(use_gpu=False, trainer_count=1) 
+#paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=8192), batch_size=16)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=8192), batch_size=32)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
  

@@ -31,7 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 0 不是关键 1 是关键 2 重复关键
-train_size = 4 # 学习的关键帧长度
+train_size = 32 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -161,57 +161,10 @@ def conv_to_segment(probs):
     avgsec = 50
     maxsec = 3600
     
-    # score = 0
-    # start = None
-    # end = None
-    # #先找重合的块：
-    # for i, v in enumerate(value_probs):  
-    #     # 如果 v == 2 或者往后 minsec 秒内还有>0的，都算
-    #     _continue = False
-    #     if start != None and w > i:
-    #         for j in range(min(w-i, minsec1)):
-    #             if value_probs[i+j]>0:
-    #                 _continue = True
-    #                 break
-    #         if _continue == False and end - start < maxsec:
-    #             for j in range(min(w-i, minsec2)):
-    #                 if value_probs[i+j]>0:
-    #                     _continue = True
-    #                     break
-                        
-    #     if v==2 or _continue :
-    #         if start==None:
-    #             start = i
-    #         end = i
-    #         if v > 0:
-    #             score += probs[i][v]
-    #         else:
-    #             score += probs[i][1]
-    #     else:
-    #         if start!=None:
-    #             seg_value ={}
-    #             seg_value["score"]=score/(end-start+1)
-    #             seg_value["segment"]=[start, end]
-    #             if sum(value_probs[start:end+1]) > avgsec:
-    #                 items.append(seg_value)
-    #             start = None
-    #             end = None
-    #             score = 0
-                
-    # if (start != None) and (end !=None):
-    #     seg_value ={}
-    #     seg_value["score"]=score/(end-start+1)
-    #     seg_value["segment"]=[start, end]
-    #     if sum(value_probs[start:end+1]) > avgsec:
-    #         items.append(seg_value)
-    #     start = None
-    #     end = None
-
-    # for seg_value in items:
-    #     start,end = seg_value["segment"]
-    #     for i in range(start,end):
-    #         value_probs[i] -= 1 
-
+    for i,v in enumerate(value_probs):
+        if probs[i][v]>0.9:
+            value_probs[i-train_size+1,i+1] = v
+    
 #     print(value_probs)
 #     return items
     # 再来找正常的块

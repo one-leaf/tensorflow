@@ -31,8 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 0 不是关键 1 是关键
-train_size = 4 # 学习的关键帧长度
-block_size = 4 # 块的大小
+train_size = 16 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -103,16 +102,12 @@ def resnet(ipt, depth=32):
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048*block_size, height=1, type=paddle.data_type.dense_vector(2048*train_size*block_size))
-    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
+    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
+    y = paddle.layer.data(name='y', type=paddle.data_type.dense_vector(train_size))
 
     layer = resnet(x, 8)
     output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
-
-    # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
-    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
-    # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
-    # output = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    costs
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
@@ -127,7 +122,7 @@ def reader_get_image_and_label():
         training_data, _, _ = load_data("training") 
         size = len(training_data)
         for i, data in enumerate(training_data):
-            batch_data = np.zeros((2048, train_size*block_size))    
+            batch_data = np.zeros((2048, train_size))    
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
             print("\nstart train: %s / %s %s.pkl, shape: %s"%(i, size, data["id"], v_data.shape))                
             w = v_data.shape[0]
@@ -142,9 +137,13 @@ def reader_get_image_and_label():
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
                 if i>train_size and random.random()>0.5:
-                    s = sum(label[i-block_size+1:i+1]) 
-                    if s == block_size or s == 0:
-                        yield np.ravel(batch_data), label[i]
+                    s = sum(label[i-train_size+1:i+1]) / train_size
+                    if s > 0.9 or s < 0.1:
+                        if s>0.9:
+                            v=1
+                        else:
+                            v=0 
+                        yield np.ravel(batch_data), v
             del v_data
     return reader
 
