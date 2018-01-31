@@ -133,8 +133,8 @@ def conv_to_segment(probs):
 #     print(value_probs)
     w=len(value_probs)
     items = []
-    minsec1 = 3
-    minsec2 = 5
+    minsec1 = 5
+    minsec2 = 10
     avgsec = 30
     maxsec = 3600
     

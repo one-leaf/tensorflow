@@ -82,7 +82,6 @@ def network():
     net3 = cnn(net3, 2, 64, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
 
-    # net = paddle.layer.concat()
     output = paddle.layer.fc(input=[net0,net1,net2,net3],size=class_dim,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
@@ -156,4 +155,4 @@ feeding={'x': 0, 'y': 1}
  
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=3)
