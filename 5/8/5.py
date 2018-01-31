@@ -61,32 +61,16 @@ def network():
     # -1 ,2048*5 
     x = paddle.layer.data(name='x', width=2048, height=train_size, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
+   
+    net = cnn(x,    8,  1, 64, 2, 2)
+    net = cnn(net, 6, 64, 64, 2, 2)
+    net = cnn(net, 4, 64, 64, 2, 1)
+    net = cnn(net, 3, 64, 64, 2, 1)
 
-    # net0 = cnn(x,    8,  1, 64, 2, 3)
-    # net0 = cnn(net0, 8, 64, 64, 2, 3)
-    # net0 = cnn(net0, 8, 64, 64, 2, 3)
-    # net0 = cnn(net0, 8, 64, 64, 2, 3)
-    # net0 = cnn(net0, 8, 64, 64, 2, 3)
-
-    # net1 = cnn(x,    6,  1, 64, 2, 2)
-    # net1 = cnn(net1, 6, 64, 64, 2, 2)
-    # net1 = cnn(net1, 6, 64, 64, 2, 2)
-    # net1 = cnn(net1, 6, 64, 64, 2, 2)
-    # net1 = cnn(net1, 6, 64, 64, 2, 2)
-    
-    net2 = cnn(x,    8,  1, 64, 2, 2)
-    net2 = cnn(net2, 6, 64, 64, 2, 2)
-    net2 = cnn(net2, 4, 64, 64, 2, 1)
-    net2 = cnn(net2, 3, 64, 64, 2, 1)
-    # net2 = cnn(net2, 4, 64, 64, 2, 1)
-
-    # net3 = cnn(x,    3,  1, 64, 2, 1)
-    # net3 = cnn(net3, 3, 64, 64, 2, 1)
-    # net3 = cnn(net3, 3, 64, 64, 2, 1)
-    # net3 = cnn(net3, 3, 64, 64, 2, 1)
-    # net3 = cnn(net3, 2, 64, 64, 2, 0)
-    layer = paddle.layer.fc(input=net2,size=256,act=paddle.activation.Softmax())
-    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    sliced_feature = paddle.layer.block_expand(input=net, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
+    gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
+    output = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
