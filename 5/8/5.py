@@ -122,10 +122,10 @@ def reader_get_image_and_label():
                     s = sum(label[i-train_size+1:i+1]) 
                     # if c > train_size and s > train_size*0.7 and random.random>0.5: continue
                     # if c < -train_size and s <train_size*0.3 and random.random>0.5: continue                    
-                    if s > train_size*0.7:
+                    if s > train_size*0.8:
                         v = 1 
                         c += 1
-                    elif s < train_size*0.3:
+                    elif s < train_size*0.2:
                         v = 0
                         c -= 1
                     else:
