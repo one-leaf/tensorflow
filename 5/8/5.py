@@ -55,7 +55,7 @@ def load_data(filter=None):
 
 def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
     return paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels, 
-        num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
+        num_filters=num_filters, stride=stride, padding=padding, bias_attr=False, act=paddle.activation.Relu())
 
 def network():
     # -1 ,2048*5 
