@@ -62,16 +62,16 @@ def network():
     x = paddle.layer.data(name='x', width=2048, height=train_size, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    net0 = cnn(x,    8,  1, 64, 2, 3)
-    net0 = cnn(net0, 8, 64, 64, 2, 3)
-    net0 = cnn(net0, 8, 64, 64, 2, 3)
-    net0 = cnn(net0, 8, 64, 64, 2, 3)
+    # net0 = cnn(x,    8,  1, 64, 2, 3)
+    # net0 = cnn(net0, 8, 64, 64, 2, 3)
+    # net0 = cnn(net0, 8, 64, 64, 2, 3)
+    # net0 = cnn(net0, 8, 64, 64, 2, 3)
     # net0 = cnn(net0, 8, 64, 64, 2, 3)
 
-    net1 = cnn(x,    6,  1, 64, 2, 2)
-    net1 = cnn(net1, 6, 64, 64, 2, 2)
-    net1 = cnn(net1, 6, 64, 64, 2, 2)
-    net1 = cnn(net1, 6, 64, 64, 2, 2)
+    # net1 = cnn(x,    6,  1, 64, 2, 2)
+    # net1 = cnn(net1, 6, 64, 64, 2, 2)
+    # net1 = cnn(net1, 6, 64, 64, 2, 2)
+    # net1 = cnn(net1, 6, 64, 64, 2, 2)
     # net1 = cnn(net1, 6, 64, 64, 2, 2)
     
     net2 = cnn(x,    4,  1, 64, 2, 1)
@@ -86,7 +86,7 @@ def network():
     net3 = cnn(net3, 2, 64, 64, 2, 0)
     # net3 = cnn(net3, 2, 64, 64, 2, 0)
 
-    output = paddle.layer.fc(input=[net0,net1,net2,net3],size=class_dim,act=paddle.activation.Softmax())
+    output = paddle.layer.fc(input=[net2,net3],size=class_dim,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
