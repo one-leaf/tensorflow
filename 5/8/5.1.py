@@ -53,70 +53,47 @@ def load_data(filter=None):
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
 
-def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
-    tmp = paddle.layer.img_conv(
-        input=input,
-        filter_size=(filter_size,1),
-        num_channels=ch_in,
-        num_filters=ch_out,
-        stride=stride,
-        padding=(padding,0),
-        act=paddle.activation.Linear(),
-        bias_attr=False)
-    return paddle.layer.batch_norm(input=tmp, act=active_type)
-
-def shortcut(ipt, n_in, n_out, stride):
-    if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
-    else:
-        return ipt
-
-def basicblock(ipt, ch_out, stride):
-    ch_in = ch_out * 2
-    tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
-    short = shortcut(ipt, ch_in, ch_out, stride)
-    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
-
-def layer_warp(block_func, ipt, features, count, stride):
-    tmp = block_func(ipt, features, stride)
-    for i in range(1, count):
-        tmp = block_func(tmp, features, 1)
-    return tmp
-
-def resnet(ipt, depth=32):
-    # depth should be one of 20, 32, 44, 56, 110, 1202
-    assert (depth - 2) % 6 == 0
-    n = (depth - 2) / 6
-    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=64, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 64, n, 2)
-    res2 = layer_warp(basicblock, res1, 64, n, 2)
-    res3 = layer_warp(basicblock, res2, 64, n, 2)
-    res4 = layer_warp(basicblock, res3, 64, n, 2)
-    res5 = layer_warp(basicblock, res4, 64, n, 2)
-    res6 = layer_warp(basicblock, res5, 64, n, 2)
-    res7 = layer_warp(basicblock, res6, 64, n, 2)
-    res8 = layer_warp(basicblock, res7, 64, n, 2)
-    # pool = paddle.layer.img_pool(input=res8, pool_size=8, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
-    return res8
+def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
+    return paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels, 
+        num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
 
 def network():
     # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
+    x = paddle.layer.data(name='x', width=2048, height=train_size, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
 
-    layer = resnet(x, 8)
-    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
+    net0 = cnn(x,    8,  1, 64, 2, 3)
+    net0 = cnn(net0, 8, 64, 64, 2, 3)
+    net0 = cnn(net0, 8, 64, 64, 2, 3)
+    net0 = cnn(net0, 8, 64, 64, 2, 3)
 
-    # sliced_feature = paddle.layer.block_expand(input=x, num_channels=train_size, stride_x=1, stride_y=1, block_x=2048, block_y=1)
+    net1 = cnn(x,    6,  1, 64, 2, 2)
+    net1 = cnn(net1, 6, 64, 64, 2, 2)
+    net1 = cnn(net1, 6, 64, 64, 2, 2)
+    net1 = cnn(net1, 6, 64, 64, 2, 2)
+    
+    net2 = cnn(x,    4,  1, 64, 2, 1)
+    net2 = cnn(net2, 4, 64, 64, 2, 1)
+    net2 = cnn(net2, 4, 64, 64, 2, 1)
+    net2 = cnn(net2, 4, 64, 64, 2, 1)
+
+    net3 = cnn(x,    2,  1, 64, 2, 0)
+    net3 = cnn(net3, 2, 64, 64, 2, 0)
+    net3 = cnn(net3, 2, 64, 64, 2, 0)
+    net3 = cnn(net3, 2, 64, 64, 2, 0)
+
+    # net = paddle.layer.concat()
+    output = paddle.layer.fc(input=[net0,net1,net2,net3],size=class_dim,act=paddle.activation.Softmax())
+
+    # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
     # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
-    # output = paddle.layer.fc(input=[gru_forward, gru_backward, layer], size=class_dim, act=paddle.activation.Softmax())
+    # output = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(
-        learning_rate=1e-3,
+        learning_rate=2e-3,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4),
         model_average=paddle.optimizer.ModelAverage(average_window=0.5))
     return cost, parameters, adam_optimizer, output
