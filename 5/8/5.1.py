@@ -228,9 +228,9 @@ def test():
                 sys.stdout.flush() 
         
             _all_values = np.row_stack(all_values)
-            np.save(_all_values,save_file)
+            np.save(_all_values,open(save_file,"wb"))
         else:
-            _all_values = np.load(save_file)
+            _all_values = np.load(open(save_file,"rb"))
 
         label = np.zeros([w], dtype=np.int)
 
