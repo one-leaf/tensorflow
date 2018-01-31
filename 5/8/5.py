@@ -63,10 +63,10 @@ def network():
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
    
     net = cnn(x,   3,  train_size, 64, 2, 1)
-    net = cnn(net, 3, 64, 64, 2, 1)
-    net = cnn(net, 3, 128, 64, 2, 1)
-    net = cnn(net, 3, 256, 64, 2, 1)
-    net = cnn(net, 3, 512, 64, 2, 1)
+    net = cnn(net, 3, 64, 128, 2, 1)
+    net = cnn(net, 3, 128, 256, 2, 1)
+    net = cnn(net, 3, 256, 512, 2, 1)
+    net = cnn(net, 3, 512, 1024, 2, 1)
 
     output = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
 
