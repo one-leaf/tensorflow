@@ -83,7 +83,7 @@ def reader_get_image_and_label():
         size = len(training_data)
         c = 0
         for i, data in enumerate(training_data):
-            batch_data = np.zeros((train_size, 2048))    
+            batch_data = np.zeros((2048, train_size))    
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
             print("\nstart train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))                
             w = v_data.shape[0]
@@ -95,8 +95,8 @@ def reader_get_image_and_label():
                     label[i] = 1
 
             for i in range(w):
-                _data = np.reshape(v_data[i], (1,2048))
-                batch_data = np.append(batch_data[1:, :], _data, axis=1)
+                _data = np.reshape(v_data[i], (2048,1))
+                batch_data = np.append(batch_data[:, 1:], _data, axis=1)
                 if i > train_size and random.random() > 0.75: 
                     s = sum(label[i-train_size+1:i+1]) 
                     if c > 32 and s == train_size and random.random() > 0.25: continue                    
@@ -108,8 +108,9 @@ def reader_get_image_and_label():
                         v = 0
                         c -= 1
                     else:
-                        continue                                      
-                    yield np.ravel(batch_data), v
+                        continue    
+                    _data = np.transpose(batch_data,(1,0))                                  
+                    yield np.ravel(_data), v
             del v_data
     return reader
 
