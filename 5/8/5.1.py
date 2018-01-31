@@ -161,6 +161,7 @@ def conv_to_segment(probs):
     avgsec = 50
     maxsec = 3600
     
+# 提高高概率得分    
     for i,v in enumerate(value_probs):
         if probs[i][v]>0.9:
             value_probs[i-train_size+1,i+1] = v
