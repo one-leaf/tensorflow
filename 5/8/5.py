@@ -95,10 +95,7 @@ def network():
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
-    adam_optimizer = paddle.optimizer.Adam(
-        learning_rate=1e-2,
-        regularization=paddle.optimizer.L2Regularization(rate=8e-4),
-        model_average=paddle.optimizer.ModelAverage(average_window=0.5))
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
     return cost, parameters, adam_optimizer, output
 
 def reader_get_image_and_label():
