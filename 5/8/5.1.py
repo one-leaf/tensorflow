@@ -125,7 +125,7 @@ def conv_to_segment(probs):
             value_probs[i-train_size+1:i+1] = v
        
     
-#     print(value_probs)
+    print(value_probs[0:1000])
 #     return items
     # 再来找正常的块
     score = 0
