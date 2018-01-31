@@ -133,9 +133,9 @@ def conv_to_segment(probs):
 #     print(value_probs)
     w=len(value_probs)
     items = []
-    minsec1 = 15
-    minsec2 = 25
-    avgsec = 50
+    minsec1 = 5
+    minsec2 = 10
+    avgsec = 30
     maxsec = 3600
     
 # 提高高概率得分    
@@ -254,6 +254,6 @@ for id, item in items:
     result["results"][id] = item
 
 with zipfile.ZipFile(result_json_file,"w") as f:
-    f.writestr('ai2.json',json.dumps(result))
+    f.writestr('ai.json',json.dumps(result))
     
 print("OK")
