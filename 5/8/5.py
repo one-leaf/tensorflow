@@ -65,19 +65,19 @@ def network():
     net0 = cnn(x,    8,  1, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
-    net0 = cnn(net0, 8, 64, 64, 2, 3)
+    # net0 = cnn(net0, 8, 64, 64, 2, 3)
     # net0 = cnn(net0, 8, 64, 64, 2, 3)
 
     net1 = cnn(x,    6,  1, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
-    net1 = cnn(net1, 6, 64, 64, 2, 2)
+    # net1 = cnn(net1, 6, 64, 64, 2, 2)
     # net1 = cnn(net1, 6, 64, 64, 2, 2)
     
     net2 = cnn(x,    4,  1, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
-    net2 = cnn(net2, 4, 64, 64, 2, 1)
+    # net2 = cnn(net2, 4, 64, 64, 2, 1)
     # net2 = cnn(net2, 4, 64, 64, 2, 1)
 
     net3 = cnn(x,    2,  1, 64, 2, 0)
