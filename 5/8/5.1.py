@@ -30,7 +30,7 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
-class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
+class_dim = 2 # 0 不是关键 1 是关键 2 重复关键
 train_size = 16 # 学习的关键帧长度
 
 def load_data(filter=None):
@@ -121,7 +121,7 @@ def conv_to_segment(probs):
     # print(value_probs)
     # print(np.max(probs,axis=1))
     for i,v in enumerate(value_probs):
-        if probs[i][v]>0.8:
+        if probs[i][v]>0.99:
             value_probs[i-train_size+1:i+1] = v
        
     
@@ -225,7 +225,7 @@ def test():
 
         value_probs = np.argsort(-_all_values)[:,0]
         for i,v in enumerate(value_probs):
-            if _all_values[i][v]>0.8:
+            if _all_values[i][v]>0.99:
                 value_probs[i-train_size+1:i+1] = v
         print(value_probs[0:999])
 
