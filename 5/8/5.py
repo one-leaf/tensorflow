@@ -30,7 +30,7 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
-class_dim = 3 # 0: 0  1:  0-->1 2: 1--->0
+class_dim = 2 # 0: 0  1:  0-->1 2: 1--->0
 train_size = 8 # 学习的关键帧长度
 
 def load_data(filter=None):
@@ -126,13 +126,13 @@ def reader_get_image_and_label():
                     # if c > train_size and s > train_size*0.7 and random.random>0.5: continue
                     # if c < -train_size and s <train_size*0.3 and random.random>0.5: continue                    
                     if s > train_size*0.7:
-                        v = 2 
+                        v = 1 
                         c += 1
                     elif s < train_size*0.3:
                         v = 0
                         c -= 1
                     else:
-                        v = 1                                       
+                        continue                                      
                     yield np.ravel(batch_data), v
             del v_data
     return reader
