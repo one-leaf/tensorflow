@@ -118,17 +118,21 @@ def reader_get_image_and_label():
                 for i in range(int(segment[0]),int(segment[1]+1)):
                     label[i] = 1
 
+            c = 0
             for i in range(w):
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
                 if i > train_size: 
                     s = sum(label[i-train_size+1:i+1]) * 1.0 / train_size
+                    if c>20 and s>0.9 and random.random>0.5: continue
+                    if c<-20 and s<0.1 and random.random>0.5: continue                    
                     if s < 0.1 or s > 0.9:
                         if s < 0.1:
                             v = 0 
+                            c -= 1
                         else:
                             v = 1
-                        # if v==0 and random.random>0.5: continue
+                            c += 1                                                    
                         yield np.ravel(batch_data), v
             del v_data
     return reader
