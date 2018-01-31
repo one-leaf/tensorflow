@@ -139,8 +139,8 @@ def conv_to_segment(probs):
     maxsec = 3600
     
 # 提高高概率得分    
-    print(value_probs)
-    print(np.max(probs,axis=1))
+    # print(value_probs)
+    # print(np.max(probs,axis=1))
     for i,v in enumerate(value_probs):
         if probs[i][v]>0.9:
             value_probs[i-train_size+1:i+1] = v
@@ -242,8 +242,9 @@ def test():
             for i in range(int(segment[0]),int(segment[1]+1)):
                 label[i] += 1
 
-        # print(label)
-        # print(np.argsort(-_all_values)[:,0])
+        print(label[0:1000])
+        print(np.argsort(-_all_values)[:,0][0:1000])
+        print(np.max(_all_values,axis=1)[0:1000])
 
         item = conv_to_segment(_all_values)
         items.append((data_id, item))
