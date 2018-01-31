@@ -134,7 +134,7 @@ def conv_to_segment(probs):
     w=len(value_probs)
     items = []
     minsec1 = 5
-    minsec2 = 10
+    minsec2 = 5
     avgsec = 30
     maxsec = 3600
     
@@ -209,21 +209,28 @@ def test():
         batch_size = 256
         count = w // batch_size
         print("need infer count:", count)
-        for i in range(count):
-            _data = data[i*batch_size:(i+1)*batch_size]
-            probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-            all_values.append(probs)
-            sys.stdout.write(".")
-            sys.stdout.flush()           
-            
-        if w%batch_size != 0:
-            _data = data[count*batch_size:]
-            probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-            all_values.append(probs)
-            sys.stdout.write('.')
-            sys.stdout.flush() 
-       
-        _all_values = np.row_stack(all_values)
+        
+        save_file = os.path.join(out_dir,data_id)
+        if not os.path.exists(save_file):
+
+            for i in range(count):
+                _data = data[i*batch_size:(i+1)*batch_size]
+                probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
+                all_values.append(probs)
+                sys.stdout.write(".")
+                sys.stdout.flush()           
+                
+            if w%batch_size != 0:
+                _data = data[count*batch_size:]
+                probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
+                all_values.append(probs)
+                sys.stdout.write('.')
+                sys.stdout.flush() 
+        
+            _all_values = np.row_stack(all_values)
+            np.save(_all_values,save_file)
+        else:
+            _all_values = np.load(save_file)
 
         label = np.zeros([w], dtype=np.int)
 
