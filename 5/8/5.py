@@ -62,7 +62,7 @@ def network():
     x = paddle.layer.data(name='x', height=train_size, width=2048//train_size, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
    
-    net = cnn(x,   8,  train_size, 64, 2, 2)
+    net = cnn(x,   8,  train_size, 64, 2, 3)
     net = cnn(net, 6, 64, 64, 2, 2)
     net = cnn(net, 4, 64, 64, 2, 1)
     net = cnn(net, 3, 64, 64, 2, 1)
