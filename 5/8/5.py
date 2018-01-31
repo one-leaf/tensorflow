@@ -31,7 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 0: 0  1:  0-->1 2: 1--->0
-train_size = 16 # 学习的关键帧长度
+train_size = 32 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -66,8 +66,10 @@ def network():
     net0 = cnn(net0, 8, 64, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
+    net0 = cnn(net0, 8, 64, 64, 2, 3)
 
     net1 = cnn(x,    6,  1, 64, 2, 2)
+    net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
@@ -76,8 +78,10 @@ def network():
     net2 = cnn(net2, 4, 64, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
+    net2 = cnn(net2, 4, 64, 64, 2, 1)
 
     net3 = cnn(x,    2,  1, 64, 2, 0)
+    net3 = cnn(net3, 2, 64, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
@@ -155,4 +159,4 @@ feeding={'x': 0, 'y': 1}
  
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=3)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=2)
