@@ -31,7 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 0: 0  1:  0-->1 2: 1--->0
-train_size = 8 # 学习的关键帧长度
+train_size = 16 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -65,25 +65,25 @@ def network():
     net0 = cnn(x,    8,  1, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
-    # net0 = cnn(net0, 8, 64, 64, 2, 3)
+    net0 = cnn(net0, 8, 64, 64, 2, 3)
     # net0 = cnn(net0, 8, 64, 64, 2, 3)
 
     net1 = cnn(x,    6,  1, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
-    # net1 = cnn(net1, 6, 64, 64, 2, 2)
+    net1 = cnn(net1, 6, 64, 64, 2, 2)
     # net1 = cnn(net1, 6, 64, 64, 2, 2)
     
     net2 = cnn(x,    4,  1, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
-    # net2 = cnn(net2, 4, 64, 64, 2, 1)
+    net2 = cnn(net2, 4, 64, 64, 2, 1)
     # net2 = cnn(net2, 4, 64, 64, 2, 1)
 
     net3 = cnn(x,    2,  1, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
-    # net3 = cnn(net3, 2, 64, 64, 2, 0)
+    net3 = cnn(net3, 2, 64, 64, 2, 0)
     # net3 = cnn(net3, 2, 64, 64, 2, 0)
 
     output = paddle.layer.fc(input=[net0,net1,net2,net3],size=class_dim,act=paddle.activation.Softmax())
@@ -95,7 +95,7 @@ def network():
     
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost, parameters, adam_optimizer, output
 
 def reader_get_image_and_label():
@@ -122,10 +122,10 @@ def reader_get_image_and_label():
                     s = sum(label[i-train_size+1:i+1]) 
                     # if c > train_size and s > train_size*0.7 and random.random>0.5: continue
                     # if c < -train_size and s <train_size*0.3 and random.random>0.5: continue                    
-                    if s > train_size*0.8:
+                    if s == train_size:
                         v = 1 
                         c += 1
-                    elif s < train_size*0.2:
+                    elif s == 0:
                         v = 0
                         c -= 1
                     else:
