@@ -127,6 +127,7 @@ def reader_get_image_and_label():
                             v = 0 
                         else:
                             v = 1
+                        if v==0 and random.random>0.5: continue
                         yield np.ravel(batch_data), v
             del v_data
     return reader
@@ -148,7 +149,7 @@ paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=8192), batch_size=32)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=8192), batch_size=64)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
  
