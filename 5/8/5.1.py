@@ -129,7 +129,7 @@ def getTestData(testFileid):
 # 0000000000001111111110
 def conv_to_segment(probs):
     sort_probs = np.argsort(-probs)
-    value_probs = [v[0] for v in sort_probs]
+    value_probs = sort_probs[:,0]
 #     print(value_probs)
     w=len(value_probs)
     items = []
