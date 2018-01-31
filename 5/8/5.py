@@ -31,7 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 3 # 0: 0  1:  0-->1 2: 1--->0
-train_size = 8 # 学习的关键帧长度
+train_size = 16 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -65,19 +65,19 @@ def network():
     net0 = cnn(x,    8,  1, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
-    # net0 = cnn(net0, 8, 64, 64, 2, 3)
+    net0 = cnn(net0, 8, 64, 64, 2, 3)
     # net0 = cnn(net0, 8, 64, 64, 2, 3)
 
     net1 = cnn(x,    6,  1, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
-    # net1 = cnn(net1, 6, 64, 64, 2, 2)
+    net1 = cnn(net1, 6, 64, 64, 2, 2)
     # net1 = cnn(net1, 6, 64, 64, 2, 2)
     
     net2 = cnn(x,    4,  1, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
-    # net2 = cnn(net2, 4, 64, 64, 2, 1)
+    net2 = cnn(net2, 4, 64, 64, 2, 1)
     # net2 = cnn(net2, 4, 64, 64, 2, 1)
 
     net3 = cnn(x,    2,  1, 64, 2, 0)
