@@ -121,7 +121,7 @@ def conv_to_segment(probs):
     # print(value_probs)
     # print(np.max(probs,axis=1))
     for i,v in enumerate(value_probs):
-        if probs[i][v]>0.99:
+        if probs[i][v]>0.99 and v==1:
             value_probs[i-train_size+1:i+1] = v
        
     
@@ -221,15 +221,15 @@ def test():
             for i in range(int(segment[0]),int(segment[1]+1)):
                 label[i] += 1
 
-        print(label[0:999])
+        # print(label[0:999])
 
-        value_probs = np.argsort(-_all_values)[:,0]
-        for i,v in enumerate(value_probs):
-            if _all_values[i][v]>0.99:
-                value_probs[i-train_size+1:i+1] = v
-        print(value_probs[0:999])
+        # value_probs = np.argsort(-_all_values)[:,0]
+        # for i,v in enumerate(value_probs):
+        #     if _all_values[i][v]>0.99 and v==1:
+        #         value_probs[i-train_size+1:i+1] = v
+        # print(value_probs[0:999])
 
-        print(np.argsort(-_all_values)[:,0][0:999])
+        # print(np.argsort(-_all_values)[:,0][0:999])
         # print(np.max(_all_values,axis=1)[0:999])
 
         item = conv_to_segment(_all_values)
