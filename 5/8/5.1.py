@@ -133,9 +133,9 @@ def conv_to_segment(probs):
 #     print(value_probs)
     w=len(value_probs)
     items = []
-    minsec1 = 15
-    minsec2 = 20
-    avgsec = 30
+    minsec1 = 10
+    minsec2 = 15
+    avgsec = 50
     maxsec = 3600
     
 # 提高高概率得分    
