@@ -228,7 +228,7 @@ def test():
                 sys.stdout.flush() 
         
             _all_values = np.row_stack(all_values)
-            np.save(_all_values,open(save_file,"wb"))
+            np.save(open(save_file,"wb"), _all_values)
         else:
             _all_values = np.load(open(save_file,"rb"))
 
