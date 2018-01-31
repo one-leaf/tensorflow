@@ -140,7 +140,7 @@ def conv_to_segment(probs):
     
 # 提高高概率得分    
     for i,v in enumerate(value_probs):
-        if probs[i][v]>0.8:
+        if probs[i][v]>0.95:
             value_probs[i-train_size+1:i+1] = v
     
 #     print(value_probs)
