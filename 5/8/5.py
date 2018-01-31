@@ -74,19 +74,19 @@ def network():
     # net1 = cnn(net1, 6, 64, 64, 2, 2)
     # net1 = cnn(net1, 6, 64, 64, 2, 2)
     
-    net2 = cnn(x,    4,  1, 64, 2, 1)
+    net2 = cnn(x,    8,  1, 64, 2, 2)
+    net2 = cnn(net2, 6, 64, 64, 2, 2)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
-    net2 = cnn(net2, 4, 64, 64, 2, 1)
-    net2 = cnn(net2, 4, 64, 64, 2, 1)
+    net2 = cnn(net2, 3, 64, 64, 2, 1)
     # net2 = cnn(net2, 4, 64, 64, 2, 1)
 
-    net3 = cnn(x,    3,  1, 64, 2, 1)
-    net3 = cnn(net3, 3, 64, 64, 2, 1)
-    net3 = cnn(net3, 3, 64, 64, 2, 1)
-    net3 = cnn(net3, 3, 64, 64, 2, 1)
+    # net3 = cnn(x,    3,  1, 64, 2, 1)
+    # net3 = cnn(net3, 3, 64, 64, 2, 1)
+    # net3 = cnn(net3, 3, 64, 64, 2, 1)
+    # net3 = cnn(net3, 3, 64, 64, 2, 1)
     # net3 = cnn(net3, 2, 64, 64, 2, 0)
 
-    output = paddle.layer.fc(input=[net2,net3],size=class_dim,act=paddle.activation.Softmax())
+    output = paddle.layer.fc(input=net2,size=class_dim,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
