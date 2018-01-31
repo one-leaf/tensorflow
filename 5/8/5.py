@@ -128,7 +128,8 @@ def reader_get_image_and_label():
                             v = 0 
                         else:
                             v = 1
-                        if v==0 and random.random>0.75: continue
+                        #if v==0 and random.random>0.75: continue
+                        if v== 0 :continue
                         yield np.ravel(batch_data), v
             del v_data
     return reader
