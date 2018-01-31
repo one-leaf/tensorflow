@@ -31,7 +31,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 0: 0  1:  0-->1 2: 1--->0
-train_size = 32 # 学习的关键帧长度
+train_size = 16 # 学习的关键帧长度
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -66,10 +66,8 @@ def network():
     net0 = cnn(net0, 8, 64, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
     net0 = cnn(net0, 8, 64, 64, 2, 3)
-    net0 = cnn(net0, 8, 64, 64, 2, 3)
 
     net1 = cnn(x,    6,  1, 64, 2, 2)
-    net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
     net1 = cnn(net1, 6, 64, 64, 2, 2)
@@ -78,16 +76,14 @@ def network():
     net2 = cnn(net2, 4, 64, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
     net2 = cnn(net2, 4, 64, 64, 2, 1)
-    net2 = cnn(net2, 4, 64, 64, 2, 1)
 
     net3 = cnn(x,    2,  1, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
     net3 = cnn(net3, 2, 64, 64, 2, 0)
-    net3 = cnn(net3, 2, 64, 64, 2, 0)
 
-    net = paddle.layer.concat([net0,net1,net2,net3])
-    output = paddle.layer.fc(input=net,size=class_dim,act=paddle.activation.Softmax())
+    # net = paddle.layer.concat()
+    output = paddle.layer.fc(input=[net0,net1,net2,net3],size=class_dim,act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
     # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
@@ -106,6 +102,7 @@ def reader_get_image_and_label():
     def reader():
         training_data, _, _ = load_data("training") 
         size = len(training_data)
+        c = 0
         for i, data in enumerate(training_data):
             batch_data = np.zeros((2048, train_size))    
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
@@ -118,7 +115,6 @@ def reader_get_image_and_label():
                 for i in range(int(segment[0]),int(segment[1]+1)):
                     label[i] = 1
 
-            c = 0
             for i in range(w):
                 _data = np.reshape(v_data[i], (2048,1))
                 batch_data = np.append(batch_data[:, 1:], _data, axis=1)
