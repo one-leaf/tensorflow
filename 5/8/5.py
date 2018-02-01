@@ -80,7 +80,10 @@ def network():
     return cost, parameters, adam_optimizer, output
 
 data_pool = []
+is_End = False
 def readDatatoPool():
+    global is_End
+    is_End = False
     training_data, _, _ = load_data("training")
     size = len(training_data)
     c = 0
@@ -114,13 +117,15 @@ def readDatatoPool():
                 while len(data_pool)>buf_size*2:
                     time.sleep(1)                                     
                 data_pool.append((np.ravel(batch_data), v))
-    
+    is_End=True
+
 def reader_get_image_and_label():
     def reader():
         thread.start_new_thread(readDatatoPool, ())
-        time.sleep(10)
-        while len(data_pool)>0:
-            x , y = data_pool.pop(1)
+        while not is_End:
+            while len(data_pool)==0:
+                time.sleep(1)
+            x , y = data_pool.pop(0)
             yield x, y
     return reader
 
