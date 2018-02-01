@@ -80,17 +80,14 @@ def network():
     return cost, parameters, adam_optimizer, output
 
 data_pool = []
-is_End = False
 def readDatatoPool():
-    global is_End
-    is_End = False
     training_data, _, _ = load_data("training")
     size = len(training_data)
     c = 0
     for i, data in enumerate(training_data):
         batch_data = np.zeros((2048, train_size))    
         v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
-        print("\nstart train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))     
+        print("start train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))     
         w = v_data.shape[0]
         label = np.zeros([w], dtype=np.int)
 
@@ -115,13 +112,13 @@ def readDatatoPool():
                 else:
                     continue 
                 while len(data_pool)>buf_size*2:
-                    time.sleep(1)                                     
+                    time.sleep(0.1)                                     
                 data_pool.append((np.ravel(batch_data), v))
-    is_End=True
 
 def reader_get_image_and_label():
     def reader():
-        thread.start_new_thread(readDatatoPool, ())
+        with thread.allocate_lock():
+            thread.start_new_thread(readDatatoPool, ())
         while not is_End:
             while len(data_pool)==0:
                 time.sleep(1)
@@ -132,13 +129,10 @@ def reader_get_image_and_label():
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 20 == 0:
-            print("\nPass %d, Batch %d, Cost %f, %s" % (
+            print("Pass %d, Batch %d, Cost %f, %s" % (
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
-        else:
-            sys.stdout.write('.')
-            sys.stdout.flush()
         
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=1) 
