@@ -80,14 +80,19 @@ def network():
     return cost, parameters, adam_optimizer, output
 
 data_pool = []
+training_data, validation_data, _ = load_data("training")
 def readDatatoPool():
-    training_data, _, _ = load_data("training")
-    size = len(training_data)
+    size = len(training_data)+len(validation_data)
     c = 0
-    for i, data in enumerate(training_data):
+    for i in range(size):
+        if i%2==0:
+            data = random.choice(training_data)
+            v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
+        else:
+            data = random.choice(validation_data)
+            v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
+            
         batch_data = np.zeros((2048, train_size))    
-        v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
-        print("start train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))     
         w = v_data.shape[0]
         label = np.zeros([w], dtype=np.int)
 
@@ -99,7 +104,7 @@ def readDatatoPool():
         for i in range(w):
             _data = np.reshape(v_data[i], (2048,1))
             batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-            if i > train_size and random.random() > 0.75: 
+            if i > train_size and random.random() > 0.25: 
                 s = sum(label[i-train_size+1:i+1]) 
                 if c > 32 and s == train_size and random.random() > 0.25: continue                    
                 if c < -32 and s == 0 and random.random() > 0.25: continue                    
@@ -113,10 +118,9 @@ def readDatatoPool():
                     continue 
 
                 data_pool.append((np.ravel(batch_data), v))
-                if len(data_pool)>buf_size:
-                    random.shuffle(data_pool)
-                while len(data_pool)>buf_size:
-                    time.sleep(0.1) 
+
+        while len(data_pool)>buf_size:
+            time.sleep(0.1) 
                     
 def reader_get_image_and_label():
     def reader():
@@ -125,7 +129,7 @@ def reader_get_image_and_label():
         while t1.isAlive():
             while len(data_pool)==0:
                 time.sleep(1)
-            x , y = data_pool.pop()
+            x , y = data_pool.pop(random.randrange(len(data_pool)))
             yield x, y
     return reader
 
