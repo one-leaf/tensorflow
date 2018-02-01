@@ -117,8 +117,7 @@ def readDatatoPool():
 
 def reader_get_image_and_label():
     def reader():
-        with thread.allocate_lock():
-            thread.start_new_thread(readDatatoPool, ())
+        thread.start_new_thread(readDatatoPool, ())
         while not is_End:
             while len(data_pool)==0:
                 time.sleep(1)
