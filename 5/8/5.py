@@ -140,12 +140,13 @@ def reader_get_image_and_label():
 
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
-        if event.batch_id>0 and event.batch_id % 20 == 0:
+        if event.batch_id>0 and event.batch_id % 10 == 0:
             print("Pass %d, Batch %d, Cost %f, %s" % (
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
-        
+        else:
+            print(".")
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=1) 
 paddle.init(use_gpu=True, trainer_count=2)
