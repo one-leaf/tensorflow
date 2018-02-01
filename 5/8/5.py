@@ -12,6 +12,7 @@ import shutil
 import logging
 import gc
 import commands, re  
+from paddle.trainer.PyDataProvider2 import *
 
 
 home = os.path.dirname(__file__)
@@ -60,7 +61,7 @@ def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
 def network():
     # -1 ,2048*5 
     x = paddle.layer.data(name='x', height=32, width=2048//32, type=paddle.data_type.dense_vector(2048*train_size))
-    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
+    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(class_dim))
    
     net = cnn(x,   4,  train_size, 16, 2, 1)
     net = cnn(net, 4, 16, 32, 2, 1)
@@ -81,6 +82,7 @@ def network():
     return cost, parameters, adam_optimizer, output
 
 def reader_get_image_and_label():
+    @provider(input_types={'x': dense_vector(2048*train_size), 'y': integer_value(class_dim)})    
     def reader():
         training_data, _, _ = load_data("training") 
         size = len(training_data)
@@ -129,8 +131,8 @@ def event_handler(event):
             sys.stdout.flush()
         
 print("paddle init ...")
-#paddle.init(use_gpu=False, trainer_count=1) 
-paddle.init(use_gpu=True, trainer_count=2)
+paddle.init(use_gpu=False, trainer_count=1) 
+# paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
