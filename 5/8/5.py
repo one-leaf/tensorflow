@@ -71,6 +71,7 @@ def network():
     net = cnn(net, 3, 64, 64, 2, 1)
     net = cnn(net, 3, 64, 64, 2, 1)
     net = cnn(net, 3, 64, 64, 2, 1)
+    net = cnn(net, 3, 64, 64, 2, 1)
 
     sliced_feature = paddle.layer.block_expand(input=net, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
     gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
