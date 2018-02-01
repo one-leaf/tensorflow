@@ -60,7 +60,7 @@ def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
 def network():
     # -1 ,2048*5 
     x = paddle.layer.data(name='x', width=2048, height=train_size, type=paddle.data_type.dense_vector(2048*train_size))
-    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
+    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(class_dim))
    
     net = cnn(x,    8,  1, 64, 2, 2)
     net = cnn(net, 6, 64, 64, 2, 2)
