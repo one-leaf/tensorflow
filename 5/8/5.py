@@ -32,6 +32,7 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 0: 0  1:  0-->1 2: 1--->0
 train_size = 16 # 学习的关键帧长度
+buf_size = 8192
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -77,40 +78,47 @@ def network():
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
     return cost, parameters, adam_optimizer, output
 
+data_pool = []
+def readDatatoPool():
+    training_data, _, _ = load_data("training")
+    for data in training_data:
+        batch_data = np.zeros((2048, train_size))    
+        v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
+        print("\nstart train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))     
+        w = v_data.shape[0]
+        label = np.zeros([w], dtype=np.int)
+
+        for annotations in data["data"]:
+            segment = annotations['segment']
+            for i in range(int(segment[0]),int(segment[1]+1)):
+                label[i] = 1
+
+        for i in range(w):
+            _data = np.reshape(v_data[i], (2048,1))
+            batch_data = np.append(batch_data[:, 1:], _data, axis=1)
+            if i > train_size and random.random() > 0.75: 
+                s = sum(label[i-train_size+1:i+1]) 
+                if c > 32 and s == train_size and random.random() > 0.25: continue                    
+                if c < -32 and s == 0 and random.random() > 0.25: continue                    
+                if s == train_size:
+                    v = 1 
+                    c += 1
+                elif s == 0:
+                    v = 0
+                    c -= 1
+                else:
+                    continue 
+                while len(data_pool)>buf_size*2:
+                    time.sleep(1000)                                     
+                data_pool.append((np.ravel(batch_data), v))
+    
 def reader_get_image_and_label():
     def reader():
-        training_data, _, _ = load_data("training") 
-        size = len(training_data)
-        c = 0
-        for i, data in enumerate(training_data):
-            batch_data = np.zeros((2048, train_size))    
-            v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
-            print("\nstart train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))                
-            w = v_data.shape[0]
-            label = np.zeros([w], dtype=np.int)
-
-            for annotations in data["data"]:
-                segment = annotations['segment']
-                for i in range(int(segment[0]),int(segment[1]+1)):
-                    label[i] = 1
-
-            for i in range(w):
-                _data = np.reshape(v_data[i], (2048,1))
-                batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-                if i > train_size and random.random() > 0.75: 
-                    s = sum(label[i-train_size+1:i+1]) 
-                    if c > 32 and s == train_size and random.random() > 0.25: continue                    
-                    if c < -32 and s == 0 and random.random() > 0.25: continue                    
-                    if s == train_size:
-                        v = 1 
-                        c += 1
-                    elif s == 0:
-                        v = 0
-                        c -= 1
-                    else:
-                        continue                                      
-                    yield np.ravel(batch_data), v
-            del v_data
+        thread.start_new_thread(readDatatoPool, ())
+        time.sleep(10)
+        while len(data_pool)>0:
+            x , y = data_pool.pop(1)
+            yield x, y
     return reader
 
 def event_handler(event):
