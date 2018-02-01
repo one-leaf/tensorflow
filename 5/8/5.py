@@ -82,7 +82,7 @@ def network():
 data_pool = []
 def readDatatoPool():
     training_data, _, _ = load_data("training")
-    for data in training_data:
+    for i, data in enumerate(training_data):
         batch_data = np.zeros((2048, train_size))    
         v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
         print("\nstart train: %s / %s %s.pkl, shape: %s, segment: %s"%(i, size, data["id"], v_data.shape, len(data["data"])))     
@@ -139,7 +139,7 @@ paddle.init(use_gpu=False, trainer_count=1)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=81920), batch_size=128)
+train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=buf_size), batch_size=128)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
  
