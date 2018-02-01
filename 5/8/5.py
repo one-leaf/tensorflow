@@ -12,7 +12,7 @@ import shutil
 import logging
 import gc
 import commands, re  
-import thread
+import threading
 
 
 home = os.path.dirname(__file__)
@@ -117,8 +117,9 @@ def readDatatoPool():
 
 def reader_get_image_and_label():
     def reader():
-        thread.start_new_thread(readDatatoPool, ())
-        while not is_End:
+        t1 = threading.Thread(target=readDatatoPool, args=())
+        t1.start()
+        while t1.isAlive():
             while len(data_pool)==0:
                 time.sleep(1)
             x , y = data_pool.pop(0)
