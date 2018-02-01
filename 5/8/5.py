@@ -110,7 +110,7 @@ def readDatatoPool():
                 else:
                     continue 
                 while len(data_pool)>buf_size*2:
-                    time.sleep(1000)                                     
+                    time.sleep(1)                                     
                 data_pool.append((np.ravel(batch_data), v))
     
 def reader_get_image_and_label():
