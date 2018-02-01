@@ -82,6 +82,7 @@ def network():
 data_pool = []
 def readDatatoPool():
     training_data, _, _ = load_data("training")
+    size = len(training_data)
     for i, data in enumerate(training_data):
         batch_data = np.zeros((2048, train_size))    
         v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
