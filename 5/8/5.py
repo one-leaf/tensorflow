@@ -111,10 +111,13 @@ def readDatatoPool():
                     c -= 1
                 else:
                     continue 
-                while len(data_pool)>buf_size*2:
-                    time.sleep(0.1)                                     
-                data_pool.append((np.ravel(batch_data), v))
 
+                data_pool.append((np.ravel(batch_data), v))
+                if len(data_pool)>buf_size:
+                    random.shuffle(data_pool)
+                while len(data_pool)>buf_size:
+                    time.sleep(0.1) 
+                    
 def reader_get_image_and_label():
     def reader():
         t1 = threading.Thread(target=readDatatoPool, args=())
@@ -122,7 +125,7 @@ def reader_get_image_and_label():
         while t1.isAlive():
             while len(data_pool)==0:
                 time.sleep(1)
-            x , y = data_pool.pop(0)
+            x , y = data_pool.pop()
             yield x, y
     return reader
 
@@ -140,7 +143,7 @@ paddle.init(use_gpu=True, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=buf_size), batch_size=128)
+train_reader = paddle.batch(reader_get_image_and_label(), batch_size=128)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
  
