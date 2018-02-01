@@ -12,6 +12,7 @@ import shutil
 import logging
 import gc
 import commands, re  
+import thread
 
 
 home = os.path.dirname(__file__)
