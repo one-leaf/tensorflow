@@ -68,7 +68,7 @@ def network():
     net = cnn(net, 4, 16, 32, 2, 1)
     net = cnn(net, 4, 32, 64, 2, 1)
     net = cnn(net, 4, 64, 64, 2, 1)
-    net = cnn(net, 4, 64, 64, 2, 1)
+    # net = cnn(net, 4, 64, 64, 2, 1)
     output = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
 
     # sliced_feature = paddle.layer.block_expand(input=net, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
