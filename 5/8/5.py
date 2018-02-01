@@ -80,7 +80,7 @@ def network():
     return cost, parameters, adam_optimizer, output
 
 data_pool = []
-training_data, validation_data, _ = load_data("training")
+training_data, validation_data, _ = load_data()
 def readDatatoPool():
     size = len(training_data)+len(validation_data)
     c = 0
