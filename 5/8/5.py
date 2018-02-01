@@ -137,7 +137,7 @@ print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
 reader = reader_get_image_and_label()
-print(reader)
+print(dir(reader))
 train_reader = paddle.batch(paddle.reader.shuffle(reader, buf_size=8192), batch_size=128)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
