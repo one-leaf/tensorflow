@@ -55,66 +55,33 @@ def load_data(filter=None):
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
 
-def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
-    tmp = paddle.layer.img_conv(
-        input=input,
-        filter_size=filter_size,
-        num_channels=ch_in,
-        num_filters=ch_out,
-        stride=stride,
-        padding=padding,
-        act=paddle.activation.Linear(),
-        bias_attr=False)
-    return paddle.layer.batch_norm(input=tmp, act=active_type)
+def cnn2(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
+    return paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
+        num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
 
-def shortcut(ipt, n_in, n_out, stride):
-    if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
-    else:
-        return ipt
-
-def basicblock(ipt, ch_out, stride):
-    ch_in = ch_out * 2
-    tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
-    short = shortcut(ipt, ch_in, ch_out, stride)
-    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
-
-def layer_warp(block_func, ipt, features, count, stride):
-    tmp = block_func(ipt, features, stride)
-    for i in range(1, count):
-        tmp = block_func(tmp, features, 1)
-    return tmp
-
-def resnet_cifar10(ipt, depth=32):
-    # depth should be one of 20, 32, 44, 56, 110, 1202
-    assert (depth - 2) % 6 == 0
-    n = (depth - 2) / 6
-    nStages = {16, 64, 128}
-    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=16, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 16, n, 1)
-    res2 = layer_warp(basicblock, res1, 32, n, 2)
-    res3 = layer_warp(basicblock, res2, 64, n, 2)
-    pool = paddle.layer.img_pool(input=res3, pool_size=8, stride=1, pool_type=paddle.pooling.Avg())
-    return pool
+def cnn1(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
+    return paddle.layer.img_conv(input=input, filter_size=(filter_size,1), num_channels=num_channels,
+        num_filters=num_filters, stride=(stride,1), padding=(padding,0), act=paddle.activation.Relu())
 
 def network():
-    # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048//32, height=32, type=paddle.data_type.dense_vector(2048*train_size))
+    x = paddle.layer.data(name='x', height=32, width=2048//32, type=paddle.data_type.dense_vector(2048*train_size))
     y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(class_dim))
-   
-    net = resnet_cifar10(x,20)
-    output = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
 
+    net = cnn1(x, 3, train_size, 64, 1, 0)
+    net = cnn2(net, 4, 64, 64, 2, 0)
+    net = cnn1(net, 3, 64, 64, 1, 0)
+    net = cnn2(net, 4, 64, 64, 2, 0)
+    net = cnn1(net, 3, 64, 64, 1, 0)
+    net = cnn2(net, 4, 64, 64, 2, 0)
+    net = cnn1(net, 3, 64, 64, 1, 0)
+    net = cnn2(net, 2, 64, 64, 2, 0)
 
-    # sliced_feature = paddle.layer.block_expand(input=net, num_channels=64, stride_x=1, stride_y=1, block_x=128, block_y=1)
-    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
-    # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
-    # output = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
-  
+    drop = paddle.layer.dropout(input=net, dropout_rate=0.1)
+    output = paddle.layer.fc(input=drop, size=class_dim, act=paddle.activation.Softmax())
+ 
     cost = paddle.layer.classification_cost(input=output, label=y)
     parameters = paddle.parameters.create(cost)
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
+    adam_optimizer = paddle.optimizer.Adam(0.001)
     return cost, parameters, adam_optimizer, output
 
 data_pool = []
