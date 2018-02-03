@@ -128,7 +128,8 @@ def readDatatoPool():
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
             
-        batch_data = np.zeros((2048, train_size))    
+        # batch_data = np.zeros((2048, train_size))    
+        batch_data = [np.zeros(2048) for _ in range(train_size)]   
         w = v_data.shape[0]
         label = np.zeros([w], dtype=np.int)
 
@@ -139,8 +140,10 @@ def readDatatoPool():
                 label[i] = 1
 
         for i in range(w):
-            _data = np.reshape(v_data[i], (2048,1))
-            batch_data = np.append(batch_data[:, 1:], _data, axis=1)
+            # _data = np.reshape(v_data[i], (2048,1))
+            # batch_data = np.append(batch_data[:, 1:], _data, axis=1)
+            batch_data.append(v_data[i])
+            batch_data.pop(0)
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
@@ -148,8 +151,8 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0,segment[0]-i-train_size),min(train_size,i-segment[1])])
                 out_c, out_b = calc_value(fix_segments)
-                data_pool.append((np.ravel(batch_data), out_c, out_b))
-
+                # data_pool.append((np.ravel(batch_data), out_c, out_b))
+                data_pool.append(batch_data, out_c, out_b))
         while len(data_pool)>buf_size:
             # print('r')
             time.sleep(0.1) 
@@ -171,8 +174,8 @@ def calc_iou(src, dst):
     
 # 计算
 def calc_value(segments):
-    out_c=np.zeros(train_size)
-    out_b=np.zeros((train_size,2))
+    out_c=[0 for _ in range(train_size)]
+    out_b=[np.zeros(2) for _ in range(train_size)]
 
     for i in range(train_size):
         src = (max(i-train_size//2,0),min(i+train_size//2,train_size))
