@@ -104,7 +104,6 @@ def network():
 
     net_class = paddle.layer.fc(input=nets_class, size=class_dim, act=paddle.activation.Softmax())
     net_cost = paddle.layer.classification_cost(input=net_class, label=c)
-    print("net_box:",net_box,net_box.num_filters,net_box.height,net_box.width,net_box.size)
 
     # net_box = paddle.layer.concat(input=nets_box)
     box_cost = paddle.layer.square_error_cost(input=nets_box, label=b)
