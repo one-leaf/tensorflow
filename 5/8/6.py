@@ -68,7 +68,7 @@ def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act
          num_filters=num_filters, stride=(stride,1), padding=(padding,0), act=act)
 
 def printLayer(layer):
-    print(json.dumps(layer))
+    print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
 
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
