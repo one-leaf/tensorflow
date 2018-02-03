@@ -33,7 +33,7 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 128 # 学习的关键帧长度
+train_size = 256 # 学习的关键帧长度
 buf_size = 8192
 batch_size = 16
 
@@ -113,13 +113,10 @@ def network():
     
     # net_class = paddle.layer.concat(input=nets_class)
     # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
-    printLayer(net)
     block_expand = paddle.layer.block_expand(input= net, num_channels=64, stride_x=2, stride_y=2, block_x=2, block_y=2)
     # block_expand = net
-    printLayer(block_expand)
 
     net_class = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
-    printLayer(net_class)
     
     net_cost = paddle.layer.classification_cost(input=net_class, label=c)
   
