@@ -73,7 +73,7 @@ def printLayer(layer):
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector_sequence(2048))  
-    x_emb = paddle.layer.embedding(input=x, size=train_size*2048)
+    x_emb = paddle.layer.embedding(input=x, height=train_size, width=2048, size=train_size*2048)
 
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     c_emb = paddle.layer.embedding(input=c, size=train_size)
