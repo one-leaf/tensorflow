@@ -114,7 +114,7 @@ def network():
     # net_class = paddle.layer.concat(input=nets_class)
     # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
     printLayer(net)
-    block_expand = paddle.layer.block_expand(input= net, num_channels=train_size, stride_x=1, stride_y=2, block_x=1, block_y=2)
+    block_expand = paddle.layer.block_expand(input= net, num_channels=train_size, stride_x=1, stride_y=1, block_x=5, block_y=5)
     # block_expand = net
     printLayer(block_expand)
 
