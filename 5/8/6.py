@@ -32,7 +32,6 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 1，背景， 2，精彩
-anchors_dim = 5 # 窗口的大小，（0.75，0.625，0.5，0.25，0.125）
 train_size = 32 # 学习的关键帧长度
 anchors_num = 16*32 + 8*16 + 4*8 + 2*4 + 1*2  
 buf_size = 8192
@@ -72,7 +71,7 @@ def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(2048*train_size))  
 
-    c = paddle.layer.data(name='c', type=paddle.data_type.dense_vector(train_size*anchors_dim*class_dim))
+    c = paddle.layer.data(name='c', type=paddle.data_type.dense_vector(train_size*class_dim))
     b = paddle.layer.data(name='b_1024', type=paddle.data_type.dense_vector(train_size*2))
   
     main_nets = []
@@ -95,7 +94,7 @@ def network():
     for i  in range(len(main_nets)):
         w = main_nets[i].width
         print(main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
-        net = cnn1(main_nets[i], w//16, 64, anchors_dim*class_dim, w//16, 0, act=paddle.activation.Softmax())
+        net = cnn1(main_nets[i], w//16, 64, class_dim, w//16, 0, act=paddle.activation.Softmax())
         print(net.num_filters,net.height,net.width)
         nets_class.append(net)
         net = cnn1(main_nets[i], w//16, 64, 2, w//16, 0)
