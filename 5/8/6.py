@@ -63,15 +63,29 @@ def cnn2(input,filter_size,num_channels,num_filters=64, padding=1):
     net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
     return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=1, stride=2, stride_y=1, pool_type=paddle.pooling.Max())
 
-def cnn1(input,filter_size,num_channels,num_filters=64, padding=1):
+def cnn1(input,filter_size,num_channels,num_filters=64, padding=1, act=paddle.activation.Linear()):
     return  paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
-         num_filters=num_filters, stride=1, padding=padding, act=paddle.activation.Relu())
+         num_filters=num_filters, stride=1, padding=padding, act=act)
 
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
-    x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(2048*train_size))    
-    y = paddle.layer.data(name='y', type=paddle.data_type.dense_vector(anchors_num*train_size*class_dim))
-   
+    x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(2048*train_size))  
+
+    c_1024 = paddle.layer.data(name='c_1024', type=paddle.data_type.dense_vector(1024*train_size*class_dim))
+    c_512 = paddle.layer.data(name='c_512', type=paddle.data_type.dense_vector(512*train_size*class_dim))
+    c_256 = paddle.layer.data(name='c_256', type=paddle.data_type.dense_vector(256*train_size*class_dim))
+    c_128 = paddle.layer.data(name='c_128', type=paddle.data_type.dense_vector(128*train_size*class_dim))
+    c_64 = paddle.layer.data(name='c_64', type=paddle.data_type.dense_vector(64*train_size*class_dim))
+
+    b_1024 = paddle.layer.data(name='b_1024', type=paddle.data_type.dense_vector(1024*2))
+    b_512 = paddle.layer.data(name='b_512', type=paddle.data_type.dense_vector(512*2))
+    b_256 = paddle.layer.data(name='b_256', type=paddle.data_type.dense_vector(256*2))
+    b_128 = paddle.layer.data(name='b_128', type=paddle.data_type.dense_vector(128*2))
+    b_64 = paddle.layer.data(name='b_64', type=paddle.data_type.dense_vector(64*2))
+
+    c = [c_1024, c_512, c_256, c_128, c_64]
+    b = [b_1024, b_512, b_256, b_128, b_64]
+
     main_nets = []
     net = cnn2(x,  3,  train_size, 64, 1)
     main_nets.append(net)
@@ -83,31 +97,27 @@ def network():
     main_nets.append(net)
     net = cnn2(net,  3,  64, 64, 1)
     main_nets.append(net)
- 
-    
+  
     # 分类网络
     nets_class = []
-    # # box网络
-    # nets_box = []
+    # box网络
+    nets_box = []
 
     for i  in range(len(main_nets)):
-        net = cnn1(main_nets[i], 3, 64 ,anchors_dim*class_dim, 1)
-        # print(net.num_filters, net.height, net.width, net.size)
+        net = cnn1(main_nets[i], 3, 64 ,anchors_dim*class_dim, 1, act=paddle.activation.Softmax())
         nets_class.append(net)
-        # nets_box.append(cnn1(main_nets[i], 3, 64 ,anchors_dim*4, 1))
-   
-    net_class = paddle.layer.concat(input = nets_class)
-    # print(net_class.num_filters, net_class.height, net_class.width)
-    # net_class = paddle.layer.trans(net_class)
-    # print(net_class.num_filters, net_class.height, net_class.width)
-    # net_box = paddle.layer.concat(input = box_nets)
-    output =   paddle.layer.img_conv(input=net_class, filter_size=1, num_channels=anchors_num*train_size*class_dim, num_filters=anchors_dim*class_dim, stride=1, padding=0, act=paddle.activation.Softmax())
-    cost = paddle.layer.classification_cost(input=output, label=y)
-    # cost_net   = paddle.layer.square_error_cost(input=y_predict, label=y)
+        net = cnn1(main_nets[i], 3, 64 ,2, 1)
+        nets_box.append(net)
+        
+    costs =[]
+    for i in range(len(main_nets)):
+        net_cost = paddle.layer.classification_cost(input=nets_class[i], label=c[i])
+        box_cost = paddle.layer.square_error_cost(input=nets_box[i], label=b[i])
+        costs += [net_cost, box_cost]
 
-    parameters = paddle.parameters.create(cost)
+    parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return cost, parameters, adam_optimizer, output
+    return costs, parameters, adam_optimizer, output
 
 
 data_pool = []
