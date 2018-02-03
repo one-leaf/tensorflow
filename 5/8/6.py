@@ -121,7 +121,6 @@ def readDatatoPool():
     size = len(training_data)+len(validation_data)
     c = 0
     for i in range(size):
-        print(i)
         if i%2==0:
             data = random.choice(training_data)
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
@@ -184,7 +183,8 @@ def calc_value(segments):
         max_ious_index = ious.index(max_ious)
         if max_ious>0.5:
             out_c[i]=2
-            out_b[i]=((segments[max_ious_index][0]-src[0])/train_size,(segments[max_ious_index][1]-src[1])/train_size)
+            out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
+            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size
         else:
             out_c[i]=1            
         
