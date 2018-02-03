@@ -74,10 +74,10 @@ def network():
     emb_x = paddle.layer.embedding(input=x, size=train_size)
 
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
-    src_c = paddle.layer.embedding(input=c, size=train_size)
+    # src_c = paddle.layer.embedding(input=c, size=train_size)
 
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
-    src_b = paddle.layer.embedding(input=b, size=train_size)
+    # src_b = paddle.layer.embedding(input=b, size=train_size)
   
     main_nets = []
     net = cnn2(x,  3,  1, 64, 1)
@@ -97,23 +97,17 @@ def network():
     nets_box = []
 
     for i  in range(len(main_nets)):
-        w = main_nets[i].width
-        # print(i,main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
-        # net = cnn1(main_nets[i], w//16, 64, class_dim, w//16, 0, act=paddle.activation.Softmax())
-        net = cnn1(main_nets[i], w//16, 64, class_dim, w//16, 0)
-        # print(i,net.num_filters,net.height,net.width)
+        net = cnn1(main_nets[i], 3, 64, class_dim, 1, 0)
         nets_class.append(net)
-        net = cnn1(main_nets[i], w//16, 64, box_dim, w//16, 0)
-        # print(i,net.num_filters,net.height,net.width)
+        net = cnn1(main_nets[i], 3, 64, box_dim, 1, 0)
         nets_box.append(net)
 
-    net_class = paddle.layer.concat(input=nets_class)
-    net_class = paddle.layer.recurrent(input=net_class,act=paddle.activation.Softmax())
-    net_cost = paddle.layer.classification_cost(input=net_class, label=src_c)
+    net_class = paddle.layer.fc(input=nets_class, size=class_dim, act=paddle.activation.Softmax())
+    net_cost = paddle.layer.classification_cost(input=net_class, label=c)
     print("net_box:",net_box,net_box.num_filters,net_box.height,net_box.width,net_box.size)
 
-    net_box = paddle.layer.concat(input=nets_box)
-    box_cost = paddle.layer.square_error_cost(input=net_box, label=src_b)
+    # net_box = paddle.layer.concat(input=nets_box)
+    box_cost = paddle.layer.square_error_cost(input=nets_box, label=b)
     costs = [net_cost + box_cost]
 
     parameters = paddle.parameters.create(costs)
