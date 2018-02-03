@@ -61,7 +61,7 @@ def cnn2(input,filter_size,num_channels,num_filters=64, padding=1):
     net = paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
          num_filters=num_filters, stride=1, padding=padding, act=paddle.activation.Linear())
     net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
-    return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=1, stride=2, stride_y=1, pool_type=paddle.pooling.Max())
+    return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=2, stride_y=2, pool_type=paddle.pooling.Max())
 
 def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act=paddle.activation.Linear()):
     return  paddle.layer.img_conv(input=input, filter_size=(filter_size,1), num_channels=num_channels,
@@ -73,10 +73,7 @@ def printLayer(layer):
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector_sequence(2048))  
-    x_emb = paddle.layer.concat(input=x)
-    x_emb_2 = paddle.layer.embedding(input=x, size=train_size*2048)
-    printLayer(x_emb)
-    printLayer(x_emb_2)
+    x_emb = paddle.layer.embedding(input=x, size=train_size*2048)
 
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     c_emb = paddle.layer.embedding(input=c, size=train_size)
@@ -85,7 +82,7 @@ def network():
     b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
-    net = cnn2(x_emb_2,  3,  1, 64, 1)
+    net = cnn2(x_emb,  3,  1, 64, 1)
     main_nets.append(net)
     net = cnn2(net, 3, 64, 64, 1)
     main_nets.append(net)
