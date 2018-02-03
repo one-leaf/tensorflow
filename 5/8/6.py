@@ -113,7 +113,7 @@ def network():
     
     # net_class = paddle.layer.concat(input=nets_class)
     # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
-    block_expand = paddle.layer.block_expand(input= net, num_channels=64, stride_x=2, stride_y=2, block_x=2, block_y=2)
+    block_expand = paddle.layer.block_expand(input= net, num_channels=64, stride_x=1, stride_y=2, block_x=1, block_y=2)
     # block_expand = net
 
     net_class = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
