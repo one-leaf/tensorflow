@@ -32,6 +32,7 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 1，背景， 2，精彩
+box_dim = 2 # 偏移，左，右
 train_size = 32 # 学习的关键帧长度
 anchors_num = 16*32 + 8*16 + 4*8 + 2*4 + 1*2  
 buf_size = 8192
@@ -71,8 +72,11 @@ def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(2048*train_size))  
 
-    c = paddle.layer.data(name='c', type=paddle.data_type.dense_vector(train_size*class_dim))
-    b = paddle.layer.data(name='b_1024', type=paddle.data_type.dense_vector(train_size*2))
+    c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
+    src_c = paddle.layer.embedding(input=c, size=train_size)
+
+    b = paddle.layer.data(name='b', type=paddle.v2.data_type.dense_vector_sequence(box_dim))
+    src_b = paddle.layer.embedding(input=b, size=train_size)
   
     main_nets = []
     net = cnn2(x,  3,  train_size, 64, 1)
@@ -93,25 +97,23 @@ def network():
 
     for i  in range(len(main_nets)):
         w = main_nets[i].width
-        print(main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
+        print(i,main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
         net = cnn1(main_nets[i], w//16, 64, class_dim, w//16, 0, act=paddle.activation.Softmax())
-        print(net.num_filters,net.height,net.width)
+        print(i,net.num_filters,net.height,net.width)
         nets_class.append(net)
-        net = cnn1(main_nets[i], w//16, 64, 2, w//16, 0)
-        print(net.num_filters,net.height,net.width)
+        net = cnn1(main_nets[i], w//16, 64, box_dim, w//16, 0)
+        print(i,net.num_filters,net.height,net.width)
         nets_box.append(net)
 
     net_class = paddle.layer.concat(input=nets_class)
-    print("net_class:",net_class,net_class.num_filters,net_class.height,net_class.width,net_class.size)
+    print("net_class:",dir(net_class),net_class.num_filters,net_class.height,net_class.width,net_class.size)
 
     net_box = paddle.layer.concat(input=nets_box)
     print("net_box:",net_box,net_box.num_filters,net_box.height,net_box.width,net_box.size)
 
-    costs =[]
-    for i in range(len(main_nets)):
-        net_cost = paddle.layer.classification_cost(input=nets_class[i], label=c)
-        box_cost = paddle.layer.square_error_cost(input=nets_box[i], label=b)
-        costs += [net_cost, box_cost]
+    net_cost = paddle.layer.classification_cost(input=net_class, label=src_c)
+    box_cost = paddle.layer.square_error_cost(input=net_box, label=src_b)
+    costs = [net_cost, box_cost]
 
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.1/batch_size)
@@ -136,6 +138,7 @@ def readDatatoPool():
         w = v_data.shape[0]
         label = np.zeros([w], dtype=np.int)
 
+        fix_segments =[]
         for annotations in data["data"]:
             segment = annotations['segment']
             for i in range(int(segment[0]),int(segment[1]+1)):
@@ -144,27 +147,56 @@ def readDatatoPool():
         for i in range(w):
             _data = np.reshape(v_data[i], (2048,1))
             batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-            if i > train_size and random.random() > 0.25: 
-                s = sum(label[i-train_size+1:i+1]) 
-                if c > 32 and s == train_size and random.random() > 0.25: continue                    
-                if c < -32 and s == 0 and random.random() > 0.25: continue                    
-                if s == train_size:
-                    v = 1 
-                    c += 1
-                elif s == 0:
-                    v = 0
-                    c -= 1
-                else:
-                    continue 
-
-                data_pool.append((np.ravel(batch_data), v))
+            fix_segments =[]
+            for annotations in data["data"]:
+                segment = annotations['segment']
+                if segment[0]>i or segment[1]<i- train_size:
+                    continue
+                fix_segments.append([max(0,segment[0]-i-train_size),min(train_size,i-segment[1])])
+                out_c, out_b = calc_value(fix_segments)
+                data_pool.append((np.ravel(batch_data), out_c, out_b))
 
         while len(data_pool)>buf_size:
             # print('r')
             time.sleep(0.1) 
 
-def calc_class(label):
-    out=np.zeros((train_size,1))
+# 计算 IOU,输入为 x1,x2 坐标
+def calc_iou(src, dst):
+    if src[1]<dst[0] or dst[1]<src[0]:
+        return 0
+    if dst[1]>src[1]:
+        if dst[0]>src[0]:
+            return (src[1]-dst[0])/(dst[1]-src[0])
+        else:
+            return (src[1]-src[0])/(dst[1]-dst[0])
+    else:
+        if src[0]>dst[0]:
+            return (dst[1]-src[0])/(src[1]-dst[0])
+        else:
+            return (dst[1]-dst[0])/(src[1]-src[0])         
+    
+# 计算
+def calc_value(segments):
+    out_c=np.zeros(train_size)
+    out_b=np.zeros((train_size,2))
+
+    for i in range(train_size):
+        src = (max(i-train_size//2,0),min(i+train_size//2,train_size))
+        ious = []
+        for dst in segments:
+            ious.append(calc_iou(src, dst))
+        max_ious = max(ious)
+        max_ious_index = ious.index(max_ious)
+        if max_ious>0.5:
+            out_c[i]=2
+            out_b[i]=((segments[max_ious_index][0]-src[0])/train_size,(segments[max_ious_index][1]-src[1])/train_size)
+        else:
+            out_c[i]=1            
+        
+    return out_c, out_b
+                
+
+
 
 def reader_get_image_and_label():
     def reader():
@@ -174,8 +206,8 @@ def reader_get_image_and_label():
             while len(data_pool)==0:
                 # print('w')
                 time.sleep(1)
-            x , y = data_pool.pop(random.randrange(len(data_pool)))
-            yield x, y
+            x , y, z = data_pool.pop(random.randrange(len(data_pool)))
+            yield x, y, z
     return reader
 
 def event_handler(event):
@@ -195,7 +227,7 @@ cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
 train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
-feeding={'x': 0, 'y': 1}
+feeding={'x':0, 'c':1, 'b':2}
  
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
