@@ -108,7 +108,7 @@ def network():
 
     net_class = paddle.layer.concat(input=nets_class)
     net_class = paddle.layer.recurrent(input=net_class,act=paddle.activation.Softmax())
-    net_cost = paddle.layer.classification_cost(input=nets_class, label=src_c)
+    net_cost = paddle.layer.classification_cost(input=net_class, label=src_c)
     print("net_box:",net_box,net_box.num_filters,net_box.height,net_box.width,net_box.size)
 
     net_box = paddle.layer.concat(input=nets_box)
