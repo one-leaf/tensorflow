@@ -102,10 +102,10 @@ def network():
         nets_box.append(net)
 
     net_class = paddle.layer.concat(input=nets_class)
-    print(net_class.num_filters,net_class.height,net_class.width)
+    print("net_class:",net_class.num_filters,net_class.height,net_class.width,net_class.size)
 
     net_box = paddle.layer.concat(input=nets_box)
-    print(net_class.num_filters,net_class.height,net_class.width)
+    print("net_box:".net_class.num_filters,net_class.height,net_class.width,net_class.size)
 
     costs =[]
     for i in range(len(main_nets)):
