@@ -106,7 +106,8 @@ def network():
     net_cost = paddle.layer.classification_cost(input=net_class, label=c)
 
     # net_box = paddle.layer.concat(input=nets_box)
-    box_cost = paddle.layer.square_error_cost(input=nets_box, label=b)
+    net_box = paddle.layer.fc(input=nets_box, size=box_dim, act=paddle.activation.Tanh())
+    box_cost = paddle.layer.square_error_cost(input=net_box, label=b)
     costs = [net_cost + box_cost]
 
     parameters = paddle.parameters.create(costs)
