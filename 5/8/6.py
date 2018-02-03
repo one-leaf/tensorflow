@@ -98,22 +98,20 @@ def network():
     for i  in range(len(main_nets)):
         w = main_nets[i].width
         print(i,main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
-        net = cnn1(main_nets[i], w//16, 64, 64, w//16, 0, act=paddle.activation.Relu())
+        net = cnn1(main_nets[i], w//16, 64, class_dim, w//16, 0, act=paddle.activation.Softmax())
         print(i,net.num_filters,net.height,net.width)
         nets_class.append(net)
         net = cnn1(main_nets[i], w//16, 64, box_dim, w//16, 0)
         print(i,net.num_filters,net.height,net.width)
         nets_box.append(net)
 
-    net_class = paddle.layer.concat(input=nets_class)
-    print("net_class1:",net_class.depth,net_class.num_filters,net_class.height,net_class.width,net_class.size)
-    net_class = cnn1(net_class, 1, 64, class_dim, 1, 0, act=paddle.activation.Softmax())
-    print("net_class2:",net_class.depth,net_class.num_filters,net_class.height,net_class.width,net_class.size)
+    # net_class = paddle.layer.concat(input=nets_class)
+    # print("net_class:",dir(net_class),net_class.num_filters,net_class.height,net_class.width,net_class.size)
 
     net_box = paddle.layer.concat(input=nets_box)
     print("net_box:",net_box,net_box.num_filters,net_box.height,net_box.width,net_box.size)
 
-    net_cost = paddle.layer.classification_cost(input=net_class, label=src_c)
+    net_cost = paddle.layer.classification_cost(input=nets_class, label=src_c)
     box_cost = paddle.layer.square_error_cost(input=net_box, label=src_b)
     costs = [net_cost, box_cost]
 
