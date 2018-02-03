@@ -101,11 +101,15 @@ def network():
         net = cnn1(main_nets[i], 3, 64, box_dim, 1, 0)
         nets_box.append(net)
 
-    net_class = paddle.layer.fc(input=nets_class, size=class_dim, act=paddle.activation.Softmax())
+    gru_forward = paddle.networks.simple_gru(input=nets_class, size=128, act=paddle.activation.Relu())
+
+    net_class = paddle.layer.fc(input=gru_forward, size=class_dim, act=paddle.activation.Softmax())
     net_cost = paddle.layer.classification_cost(input=net_class, label=c)
 
+    gru_forward = paddle.networks.simple_gru(input=nets_box, size=128, act=paddle.activation.Relu())
+
     # net_box = paddle.layer.concat(input=nets_box)
-    net_box = paddle.layer.fc(input=nets_box, size=box_dim, act=paddle.activation.Tanh())
+    net_box = paddle.layer.fc(input=gru_forward, size=box_dim, act=paddle.activation.Tanh())
     box_cost = paddle.layer.square_error_cost(input=net_box, label=b)
     costs = [net_cost + box_cost]
 
