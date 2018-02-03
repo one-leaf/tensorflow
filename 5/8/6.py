@@ -106,8 +106,9 @@ def network():
         nets_box.append(net)
 
     net_class = paddle.layer.concat(input=nets_class)
+    print("net_class1:",dir(net_class),net_class.num_filters,net_class.height,net_class.width,net_class.size)
     net_class = cnn1(net_class, 1, 64, class_dim, 1, 0, act=paddle.activation.Softmax())
-    print("net_class:",dir(net_class),net_class.num_filters,net_class.height,net_class.width,net_class.size)
+    print("net_class2:",dir(net_class),net_class.num_filters,net_class.height,net_class.width,net_class.size)
 
     net_box = paddle.layer.concat(input=nets_box)
     print("net_box:",net_box,net_box.num_filters,net_box.height,net_box.width,net_box.size)
