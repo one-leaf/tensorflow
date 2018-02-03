@@ -129,7 +129,7 @@ def readDatatoPool():
             
         # batch_data = np.zeros((2048, train_size))    
         batch_data = [np.zeros(2048) for _ in range(train_size)]   
-        # w = v_data.shape[0]
+        w = v_data.shape[0]
         # label = np.zeros([w], dtype=np.int)
 
         # fix_segments =[]
