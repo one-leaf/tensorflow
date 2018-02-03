@@ -64,9 +64,9 @@ def cnn2(input,filter_size,num_channels,num_filters=64, padding=1):
     net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
     return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=1, stride=2, stride_y=1, pool_type=paddle.pooling.Max())
 
-def cnn1(input,filter_size,num_channels,num_filters=64, padding=1, act=paddle.activation.Linear()):
-    return  paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
-         num_filters=num_filters, stride=1, padding=padding, act=act)
+def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act=paddle.activation.Linear()):
+    return  paddle.layer.img_conv(input=input, filter_size=(filter_size,1), num_channels=num_channels,
+         num_filters=num_filters, stride=(stride,1), padding=(padding,0), act=act)
 
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
@@ -75,9 +75,6 @@ def network():
     c = paddle.layer.data(name='c', type=paddle.data_type.dense_vector(train_size*anchors_dim*class_dim))
     b = paddle.layer.data(name='b_1024', type=paddle.data_type.dense_vector(train_size*2))
   
-    c = [c_1024, c_512, c_256, c_128, c_64]
-    b = [b_1024, b_512, b_256, b_128, b_64]
-
     main_nets = []
     net = cnn2(x,  3,  train_size, 64, 1)
     main_nets.append(net)
@@ -96,15 +93,19 @@ def network():
     nets_box = []
 
     for i  in range(len(main_nets)):
-        net = cnn1(main_nets[i], 3, 64, train_size*anchors_dim*class_dim, 1, act=paddle.activation.Softmax())
+        w = main_nets[i].width
+        print(main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
+        net = cnn1(main_nets[i], w//16, 64, anchors_dim*class_dim, w//16, 0, act=paddle.activation.Softmax())
+        print(net.num_filters,net.height,net.width)
         nets_class.append(net)
-        net = cnn1(main_nets[i], 3, 64, train_size*2, 1)
+        net = cnn1(main_nets[i], w//16, 64, 2, w//16, 0)
+        print(net.num_filters,net.height,net.width)
         nets_box.append(net)
         
     costs =[]
     for i in range(len(main_nets)):
         net_cost = paddle.layer.classification_cost(input=nets_class[i], label=c)
-        box_cost = paddle.layer.square_error_cost(input=nets_box[i], label=b)
+        box_cost = paddle.layer.square_error_cost(input=nets_box[i][0], label=b)
         costs += [net_cost, box_cost]
 
     parameters = paddle.parameters.create(costs)
@@ -156,7 +157,10 @@ def readDatatoPool():
         while len(data_pool)>buf_size:
             # print('r')
             time.sleep(0.1) 
-                    
+
+def calc_class(label):
+    out=np.zeros((train_size,1))
+
 def reader_get_image_and_label():
     def reader():
         t1 = threading.Thread(target=readDatatoPool, args=())
