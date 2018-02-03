@@ -68,13 +68,13 @@ def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act
          num_filters=num_filters, stride=(stride,1), padding=(padding,0), act=act)
 
 def printLayer(layer):
-
+    print(json.dumps(layer))
 
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector_sequence(2048))  
     x_emb = paddle.layer.concat(input=x)
-    print(dir(x_emb))
+    printLayer(x_emb)
 
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     c_emb = paddle.layer.embedding(input=c, size=train_size)
