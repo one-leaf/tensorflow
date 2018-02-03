@@ -33,7 +33,7 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 128 # 学习的关键帧长度
+train_size = 32 # 学习的关键帧长度
 buf_size = 8192
 batch_size = 4
 
