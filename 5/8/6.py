@@ -33,10 +33,9 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 32 # 学习的关键帧长度
-anchors_num = 16*32 + 8*16 + 4*8 + 2*4 + 1*2  
+train_size = 64 # 学习的关键帧长度
 buf_size = 8192
-batch_size = 128
+batch_size = 64
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -130,20 +129,21 @@ def readDatatoPool():
             
         # batch_data = np.zeros((2048, train_size))    
         batch_data = [np.zeros(2048) for _ in range(train_size)]   
-        w = v_data.shape[0]
-        label = np.zeros([w], dtype=np.int)
+        # w = v_data.shape[0]
+        # label = np.zeros([w], dtype=np.int)
 
-        fix_segments =[]
-        for annotations in data["data"]:
-            segment = annotations['segment']
-            for i in range(int(segment[0]),int(segment[1]+1)):
-                label[i] = 1
+        # fix_segments =[]
+        # for annotations in data["data"]:
+        #     segment = annotations['segment']
+        #     for i in range(int(segment[0]),int(segment[1]+1)):
+        #         label[i] = 1
 
         for i in range(w):
             # _data = np.reshape(v_data[i], (2048,1))
             # batch_data = np.append(batch_data[:, 1:], _data, axis=1)
             batch_data.append(v_data[i])
             batch_data.pop(0)
+            if random.random()>0.9: continue
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
