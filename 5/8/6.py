@@ -100,7 +100,7 @@ def network():
 
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
-        block_expand = block_expand(input= main_net, num_channels=1, stride_x=1, stride_y=1, block_x=main_net.width, block_y=main_net.height)
+        block_expand = paddle.layer.block_expand(input= main_net, num_channels=1, stride_x=1, stride_y=1, block_x=main_net.width, block_y=main_net.height)
 
         net = cnn1(block_expand, 3, 64, class_dim, 1, 0)
         nets_class.append(net)
