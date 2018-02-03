@@ -75,7 +75,7 @@ def network():
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     src_c = paddle.layer.embedding(input=c, size=train_size)
 
-    b = paddle.layer.data(name='b', type=paddle.v2.data_type.dense_vector_sequence(box_dim))
+    b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
     src_b = paddle.layer.embedding(input=b, size=train_size)
   
     main_nets = []
@@ -195,9 +195,6 @@ def calc_value(segments):
         
     return out_c, out_b
                 
-
-
-
 def reader_get_image_and_label():
     def reader():
         t1 = threading.Thread(target=readDatatoPool, args=())
