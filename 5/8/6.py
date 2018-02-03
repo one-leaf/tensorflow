@@ -212,8 +212,8 @@ def event_handler(event):
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
-        else:
-            print(".")
+        # else:
+            # print(".")
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=2)
