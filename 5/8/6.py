@@ -95,14 +95,18 @@ def network():
     # box网络
     nets_box = []
 
+    nets_class_cost = []
+
     for i  in range(len(main_nets)):
         w = main_nets[i].width
-        print(i,main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
+        # print(i,main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
         net = cnn1(main_nets[i], w//16, 64, class_dim, w//16, 0, act=paddle.activation.Softmax())
-        print(i,net.num_filters,net.height,net.width)
+        net_cost = paddle.layer.classification_cost(input=net, label=src_c)
+        # print(i,net.num_filters,net.height,net.width)
         nets_class.append(net)
+        nets_class_cost.append(net_cost)
         net = cnn1(main_nets[i], w//16, 64, box_dim, w//16, 0)
-        print(i,net.num_filters,net.height,net.width)
+        # print(i,net.num_filters,net.height,net.width)
         nets_box.append(net)
 
     # net_class = paddle.layer.concat(input=nets_class)
@@ -111,9 +115,9 @@ def network():
     net_box = paddle.layer.concat(input=nets_box)
     print("net_box:",net_box,net_box.num_filters,net_box.height,net_box.width,net_box.size)
 
-    net_cost = paddle.layer.classification_cost(input=nets_class, label=src_c)
+    # net_cost = paddle.layer.classification_cost(input=nets_class, label=src_c)
     box_cost = paddle.layer.square_error_cost(input=net_box, label=src_b)
-    costs = [net_cost, box_cost]
+    costs = nets_class_cost + [box_cost]
 
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.1/batch_size)
