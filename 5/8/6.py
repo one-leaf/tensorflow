@@ -150,7 +150,7 @@ def readDatatoPool():
             batch_data.append(v_data[i])
             batch_data.pop(0)
             # if random.random()>0.9: continue
-            if i==0 or i%train_size!=0: continue
+            if random.random() > 1.0/(train_size//2): continue
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
