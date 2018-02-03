@@ -100,7 +100,13 @@ def network():
         net = cnn1(main_nets[i], w//16, 64, 2, w//16, 0)
         print(net.num_filters,net.height,net.width)
         nets_box.append(net)
-        
+
+    net_class = paddle.layer.concat(input=nets_class)
+    print(net_class.num_filters,net_class.height,net_class.width)
+
+    net_box = paddle.layer.concat(input=nets_box)
+    print(net_class.num_filters,net_class.height,net_class.width)
+
     costs =[]
     for i in range(len(main_nets)):
         net_cost = paddle.layer.classification_cost(input=nets_class[i], label=c)
