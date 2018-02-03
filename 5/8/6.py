@@ -149,7 +149,8 @@ def readDatatoPool():
             # batch_data = np.append(batch_data[:, 1:], _data, axis=1)
             batch_data.append(v_data[i])
             batch_data.pop(0)
-            if random.random()>0.9: continue
+            # if random.random()>0.9: continue
+            if i==0 or i%train_size!=0: continue
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
