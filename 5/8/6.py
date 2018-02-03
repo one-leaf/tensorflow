@@ -93,33 +93,34 @@ def network():
     net = cnn2(net,  3,  train_size, train_size, 1)
     main_nets.append(net)
   
-    # 分类网络
-    nets_class = []
-    # box网络
-    nets_box = []
+    # # 分类网络
+    # nets_class = []
+    # # box网络
+    # nets_box = []
 
-    for i  in range(len(main_nets)):
-        main_net = main_nets[i]
-        printLayer(main_net)
-        block_expand = paddle.layer.block_expand(input= main_net, num_channels=1, stride_x=1, stride_y=1, block_x=main_net.width, block_y=main_net.height)
-        printLayer(block_expand)
+    # for i  in range(len(main_nets)):
+    #     main_net = main_nets[i]
+    #     printLayer(main_net)
+    #     block_expand = paddle.layer.block_expand(input= main_net, num_channels=1, stride_x=1, stride_y=1, block_x=main_net.width, block_y=main_net.height)
+    #     printLayer(block_expand)
 
-        net = cnn1(block_expand, 3, 1, class_dim, 1, 0)
-        nets_class.append(net)
-        net = cnn1(block_expand, 3, 1, box_dim, 1, 0)
-        nets_box.append(net)
+    #     net = cnn1(block_expand, 3, 1, class_dim, 1, 0)
+    #     nets_class.append(net)
+    #     net = cnn1(block_expand, 3, 1, box_dim, 1, 0)
+    #     nets_box.append(net)
 
     
     # net_class = paddle.layer.concat(input=nets_class)
     # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
-
-    net_class = paddle.layer.fc(input=nets_class[-1], size=class_dim, act=paddle.activation.Softmax())
+    
+    block_expand = paddle.layer.block_expand(input= net, num_channels=1, stride_x=1, stride_y=1, block_x=net.width, block_y=net.height)
+    net_class = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
     net_cost = paddle.layer.classification_cost(input=net_class, label=c)
   
     # net_box = paddle.layer.concat(input=nets_box)
     # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
 
-    net_box = paddle.layer.fc(input=nets_box[-1], size=box_dim, act=paddle.activation.Tanh())
+    net_box = paddle.layer.fc(input=block_expand, size=box_dim, act=paddle.activation.Tanh())
     box_cost = paddle.layer.square_error_cost(input=net_box, label=b)
     costs = [net_cost + box_cost]
 
