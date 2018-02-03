@@ -98,7 +98,7 @@ def network():
     for i  in range(len(main_nets)):
         w = main_nets[i].width
         print(i,main_nets[i].num_filters,main_nets[i].height,main_nets[i].width)
-        net = cnn1(main_nets[i], w//16, 64, class_dim, w//16, 0, act=paddle.activation.Softmax())
+        net = cnn1(main_nets[i], w//16, 64, 64, w//16, 0, act=paddle.activation.Relu())
         print(i,net.num_filters,net.height,net.width)
         nets_class.append(net)
         net = cnn1(main_nets[i], w//16, 64, box_dim, w//16, 0)
@@ -106,6 +106,7 @@ def network():
         nets_box.append(net)
 
     net_class = paddle.layer.concat(input=nets_class)
+    net_class = cnn1(net_class, 1, 64, class_dim, 1, 0, act=paddle.activation.Softmax())
     print("net_class:",dir(net_class),net_class.num_filters,net_class.height,net_class.width,net_class.size)
 
     net_box = paddle.layer.concat(input=nets_box)
