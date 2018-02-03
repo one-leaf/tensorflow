@@ -32,8 +32,9 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 1，背景， 2，精彩
-anchors_dim = 5 # 窗口的大小，（1.5，1.25，1，0.5，0.25）
+anchors_dim = 5 # 窗口的大小，（0.75，0.625，0.5，0.25，0.125）
 train_size = 32 # 学习的关键帧长度
+anchors_num = 16*32 + 8*16 + 4*8 + 2*4 + 1*2  
 buf_size = 8192
 
 def load_data(filter=None):
@@ -60,7 +61,7 @@ def cnn2(input,filter_size,num_channels,num_filters=64, padding=1):
     net = paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
          num_filters=num_filters, stride=1, padding=padding, act=paddle.activation.Linear())
     net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
-    return paddle.layer.img_pool(input=net, pool_size=2, stride=1, pool_type=paddle.pooling.Max())
+    return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=1, stride=2, stride_y=1, pool_type=paddle.pooling.Max())
 
 def cnn1(input,filter_size,num_channels,num_filters=64, padding=1):
     return  paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
@@ -68,11 +69,9 @@ def cnn1(input,filter_size,num_channels,num_filters=64, padding=1):
 
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
-    x = paddle.layer.data(name='x', height=32, width=2048//32, type=paddle.data_type.dense_vector(2048*train_size))    
-    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(class_dim))
+    x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(2048*train_size))    
+    y = paddle.layer.data(name='y', type=paddle.data_type.dense_vector(anchors_num*train_size*class_dim))
    
-    net = 
-
     main_nets = []
     net = cnn2(x,  3,  train_size, 64, 1)
     main_nets.append(net)
@@ -84,21 +83,27 @@ def network():
     main_nets.append(net)
     net = cnn2(net,  3,  64, 64, 1)
     main_nets.append(net)
+ 
     
     # 分类网络
     nets_class = []
-    # box网络
-    nets_box = []
+    # # box网络
+    # nets_box = []
 
     for i  in range(len(main_nets)):
-        nets_class.append(cnn1(main_nets[i], 3, 64 ,anchors_dim*class_dim, 1))
-        nets_box.append(cnn1(main_nets[i], 3, 64 ,anchors_dim*4, 1))
+        net = cnn1(main_nets[i], 3, 64 ,anchors_dim*class_dim, 1)
+        # print(net.num_filters, net.height, net.width, net.size)
+        nets_class.append(net)
+        # nets_box.append(cnn1(main_nets[i], 3, 64 ,anchors_dim*4, 1))
    
-    net_class = paddle.layer.concat(input = class_nets)
-    net_box = paddle.layer.concat(input = box_nets)
-    net_class =   paddle.layer.img_conv(input=net_class, filter_size=1, num_filters=1, stride=1, padding=0, act=paddle.activation.Softmax())
-    cost_class = paddle.layer.classification_cost(input=output, label=y)
-    cost_net   = paddle.layer.square_error_cost(input=y_predict, label=y)
+    net_class = paddle.layer.concat(input = nets_class)
+    # print(net_class.num_filters, net_class.height, net_class.width)
+    # net_class = paddle.layer.trans(net_class)
+    # print(net_class.num_filters, net_class.height, net_class.width)
+    # net_box = paddle.layer.concat(input = box_nets)
+    output =   paddle.layer.img_conv(input=net_class, filter_size=1, num_channels=anchors_num*train_size*class_dim, num_filters=anchors_dim*class_dim, stride=1, padding=0, act=paddle.activation.Softmax())
+    cost = paddle.layer.classification_cost(input=output, label=y)
+    # cost_net   = paddle.layer.square_error_cost(input=y_predict, label=y)
 
     parameters = paddle.parameters.create(cost)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
