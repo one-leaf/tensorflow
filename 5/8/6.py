@@ -110,7 +110,7 @@ def network():
     costs = [net_cost + box_cost]
 
     parameters = paddle.parameters.create(costs)
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=0.1/batch_size)
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
     return costs, parameters, adam_optimizer, (nets_class, nets_box) 
 
 
