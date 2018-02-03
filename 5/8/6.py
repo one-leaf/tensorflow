@@ -83,15 +83,15 @@ def network():
     # b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
-    net = cnn2(x,  3,  1, train_size, 1)
+    net = cnn2(x,  4,  1, train_size, 1)
     main_nets.append(net)
-    net = cnn2(net, 3, train_size, train_size, 1)
+    net = cnn2(net, 4, train_size, train_size, 1)
     main_nets.append(net)
-    net = cnn2(net,  3,  train_size, train_size, 1)
+    net = cnn2(net,  4,  train_size, train_size, 1)
     main_nets.append(net)
-    net = cnn2(net,  3,  train_size, train_size, 1)
+    net = cnn2(net,  4,  train_size, train_size, 1)
     main_nets.append(net)
-    net = cnn2(net,  3,  train_size, train_size, 1)
+    net = cnn2(net,  4,  train_size, train_size, 1)
     main_nets.append(net)
   
     # # 分类网络
@@ -249,4 +249,4 @@ feeding={'x':0, 'c':1, 'b':2}
  
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=8)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=train_size)
