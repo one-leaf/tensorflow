@@ -163,6 +163,7 @@ def readDatatoPool():
                 data_pool.append((np.ravel(batch_data), v))
 
         while len(data_pool)>buf_size:
+            print('r')
             time.sleep(0.1) 
                     
 def reader_get_image_and_label():
@@ -171,6 +172,7 @@ def reader_get_image_and_label():
         t1.start()
         while t1.isAlive():
             while len(data_pool)==0:
+                print('w')
                 time.sleep(1)
             x , y = data_pool.pop(random.randrange(len(data_pool)))
             yield x, y
