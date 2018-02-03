@@ -36,6 +36,7 @@ anchors_dim = 5 # 窗口的大小，（0.75，0.625，0.5，0.25，0.125）
 train_size = 32 # 学习的关键帧长度
 anchors_num = 16*32 + 8*16 + 4*8 + 2*4 + 1*2  
 buf_size = 8192
+batch_size = 128
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -116,8 +117,8 @@ def network():
         costs += [net_cost, box_cost]
 
     parameters = paddle.parameters.create(costs)
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return costs, parameters, adam_optimizer, output
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=0.1/batch_size)
+    return costs, parameters, adam_optimizer, (nets_class, nets_box) 
 
 
 data_pool = []
@@ -190,7 +191,7 @@ paddle.init(use_gpu=False, trainer_count=2)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
-train_reader = paddle.batch(reader_get_image_and_label(), batch_size=128)
+train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
 # train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x': 0, 'y': 1}
  
