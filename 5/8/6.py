@@ -104,7 +104,7 @@ def network():
     costs =[]
     for i in range(len(main_nets)):
         net_cost = paddle.layer.classification_cost(input=nets_class[i], label=c)
-        box_cost = paddle.layer.square_error_cost(input=nets_box[i][0], label=b)
+        box_cost = paddle.layer.square_error_cost(input=nets_box[i], label=b)
         costs += [net_cost, box_cost]
 
     parameters = paddle.parameters.create(costs)
