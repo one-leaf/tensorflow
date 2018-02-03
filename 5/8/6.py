@@ -72,18 +72,9 @@ def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(2048*train_size))  
 
-    c_1024 = paddle.layer.data(name='c_1024', type=paddle.data_type.dense_vector(1024*train_size*class_dim))
-    c_512 = paddle.layer.data(name='c_512', type=paddle.data_type.dense_vector(512*train_size*class_dim))
-    c_256 = paddle.layer.data(name='c_256', type=paddle.data_type.dense_vector(256*train_size*class_dim))
-    c_128 = paddle.layer.data(name='c_128', type=paddle.data_type.dense_vector(128*train_size*class_dim))
-    c_64 = paddle.layer.data(name='c_64', type=paddle.data_type.dense_vector(64*train_size*class_dim))
-
-    b_1024 = paddle.layer.data(name='b_1024', type=paddle.data_type.dense_vector(1024*2))
-    b_512 = paddle.layer.data(name='b_512', type=paddle.data_type.dense_vector(512*2))
-    b_256 = paddle.layer.data(name='b_256', type=paddle.data_type.dense_vector(256*2))
-    b_128 = paddle.layer.data(name='b_128', type=paddle.data_type.dense_vector(128*2))
-    b_64 = paddle.layer.data(name='b_64', type=paddle.data_type.dense_vector(64*2))
-
+    c = paddle.layer.data(name='c', type=paddle.data_type.dense_vector(train_size*anchors_dim*class_dim))
+    b = paddle.layer.data(name='b_1024', type=paddle.data_type.dense_vector(train_size*2))
+  
     c = [c_1024, c_512, c_256, c_128, c_64]
     b = [b_1024, b_512, b_256, b_128, b_64]
 
@@ -105,15 +96,15 @@ def network():
     nets_box = []
 
     for i  in range(len(main_nets)):
-        net = cnn1(main_nets[i], 3, 64 ,anchors_dim*class_dim, 1, act=paddle.activation.Softmax())
+        net = cnn1(main_nets[i], 3, 64, train_size*anchors_dim*class_dim, 1, act=paddle.activation.Softmax())
         nets_class.append(net)
-        net = cnn1(main_nets[i], 3, 64 ,2, 1)
+        net = cnn1(main_nets[i], 3, 64, train_size*2, 1)
         nets_box.append(net)
         
     costs =[]
     for i in range(len(main_nets)):
-        net_cost = paddle.layer.classification_cost(input=nets_class[i], label=c[i])
-        box_cost = paddle.layer.square_error_cost(input=nets_box[i], label=b[i])
+        net_cost = paddle.layer.classification_cost(input=nets_class[i], label=c)
+        box_cost = paddle.layer.square_error_cost(input=nets_box[i], label=b)
         costs += [net_cost, box_cost]
 
     parameters = paddle.parameters.create(costs)
