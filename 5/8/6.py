@@ -70,16 +70,16 @@ def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector_sequence(2048))  
-    # emb_x = paddle.layer.embedding(input=x, size=train_size)
+    x_emb = paddle.layer.embedding(input=x, size=train_size)
 
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
-    # src_c = paddle.layer.embedding(input=c, size=train_size)
+    c_emb = paddle.layer.embedding(input=c, size=train_size)
 
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
-    # src_b = paddle.layer.embedding(input=b, size=train_size)
-  
+    b_emb = paddle.layer.embedding(input=b, size=train_size)
+
     main_nets = []
-    net = cnn2(x,  3,  1, 64, 1)
+    net = cnn2(x_emb,  3,  1, 64, 1)
     main_nets.append(net)
     net = cnn2(net, 3, 64, 64, 1)
     main_nets.append(net)
@@ -103,13 +103,13 @@ def network():
 
     
     # net_class = paddle.layer.concat(input=nets_class)
-    gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
+    # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
 
     net_class = paddle.layer.fc(input=gru_forward, size=class_dim, act=paddle.activation.Softmax())
     net_cost = paddle.layer.classification_cost(input=net_class, label=c)
   
     # net_box = paddle.layer.concat(input=nets_box)
-    gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
+    # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
 
     net_box = paddle.layer.fc(input=gru_forward, size=box_dim, act=paddle.activation.Tanh())
     box_cost = paddle.layer.square_error_cost(input=net_box, label=b)
