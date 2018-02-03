@@ -31,7 +31,7 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
-class_dim = 2 # 分类 1，背景， 2，精彩
+class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
 train_size = 32 # 学习的关键帧长度
 anchors_num = 16*32 + 8*16 + 4*8 + 2*4 + 1*2  
@@ -182,11 +182,11 @@ def calc_value(segments):
         max_ious = max(ious)
         max_ious_index = ious.index(max_ious)
         if max_ious>0.5:
-            out_c[i]=2
+            out_c[i]=1
             out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
             out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size
         else:
-            out_c[i]=1            
+            out_c[i]=0            
         
     return out_c, out_b
                 
