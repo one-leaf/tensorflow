@@ -64,8 +64,8 @@ def cnn2(input,filter_size,num_channels,num_filters=64, padding=1):
     return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=2, stride_y=2, pool_type=paddle.pooling.Max())
 
 def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act=paddle.activation.Linear()):
-    return  paddle.layer.img_conv(input=input, filter_size=(filter_size,1), num_channels=num_channels,
-         num_filters=num_filters, stride=(stride,1), padding=(padding,0), act=act)
+    return  paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
+         num_filters=num_filters, stride=stride, padding=padding, act=act)
 
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
