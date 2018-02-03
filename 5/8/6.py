@@ -233,7 +233,7 @@ def event_handler(event):
             # print(".")
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
-paddle.init(use_gpu=True, trainer_count=2)
+paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
