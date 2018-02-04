@@ -198,8 +198,8 @@ def test():
                 print(value_probs)
                 print("value_probs",len(value_probs))
 
-                print(label[i*train_size:(i+1)*train_size])
-                print(len(label[i*train_size:(i+1)*train_size]))
+                print(label[i:i+train_size])
+                print(len(label[i:i+train_size]))
                 q = (1.25, 1, 0.75, 0.5)
                 for i in sort[0:5]:
                     if has_class[i]<0.5: break
