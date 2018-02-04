@@ -116,7 +116,7 @@ def network():
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return costs, parameters, adam_optimizer, (net_class_fc, net_box_fc) 
+    return costs, parameters, adam_optimizer, [net_class_fc, net_box_fc] 
       
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
@@ -166,6 +166,7 @@ def test():
 
             for i in range(count):
                 _data = data[i*batch_size:(i+1)*batch_size]
+                print(output)
                 probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
                 print(probs)
                 return
