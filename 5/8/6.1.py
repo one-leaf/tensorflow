@@ -162,7 +162,14 @@ def test():
         batch_size = 1
         count = w // batch_size
         print("need infer count:", count)
-        
+
+        label = np.zeros([w], dtype=np.int)
+
+        for annotations in data_info["data"]:
+            segment = annotations['segment']
+            for i in range(int(segment[0]),int(segment[1]+1)):
+                label[i] += 1
+
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
 
@@ -175,10 +182,10 @@ def test():
 
                 sort_probs = np.argsort(-probs_class)
                 value_probs = sort_probs[:,0]
-                print(probs_class)
-                print(sort_probs)
+                # print(probs_class)
+                # print(sort_probs)
                 print(value_probs)
-
+                print(label[0:train_size])
                 return
                 all_values.append(probs)
                 sys.stdout.write(".")
@@ -196,12 +203,7 @@ def test():
         else:
             _all_values = np.load(open(save_file,"rb"))
 
-        label = np.zeros([w], dtype=np.int)
 
-        for annotations in data_info["data"]:
-            segment = annotations['segment']
-            for i in range(int(segment[0]),int(segment[1]+1)):
-                label[i] += 1
 
         # print(label[0:999])
 
