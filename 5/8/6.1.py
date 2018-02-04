@@ -214,7 +214,8 @@ def test():
                     for x in range(int(src[0]),int(src[1]+1)):
                         label2[x] = 1
                     print(label2[0:train_size]) 
-                if has_class[0]>0.8 : return
+
+                if raw_input("press any key to continue:"): pass
             #     all_values.append(probs)
             #     sys.stdout.write(".")
             #     sys.stdout.flush()           
