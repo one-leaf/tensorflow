@@ -142,7 +142,7 @@ def getTestData(testFileid):
         batch_data = np.append(batch_data[:, 1:], _data, axis=1)
         if i>0 and i%train_size==0:
        # if i>train_size:
-            data.append((np.ravel(batch_data),))
+            data.append((np.ravel(batch_data),), i)
     return data, w
 
 def test():
@@ -160,9 +160,7 @@ def test():
         print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
         
         all_values=[]
-        batch_size = 1
-        count = w // batch_size
-        print("need infer count:", count)
+        print("need infer count:", w)
 
         label = np.zeros([label_size], dtype=np.int)
 
@@ -174,46 +172,35 @@ def test():
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
 
-            for i in range(count):
-                _data = data[i*batch_size:(i+1)*batch_size]
+            for _data, i in data:
                 probs = inferer.infer(input=_data)
 
                 probs_class = probs[0:256]
                 # print(probs_class)
-                print("probs_class",len(probs_class))
                 has_class = probs_class[:,1]
                 sort = np.argsort(-has_class)
-                print(sort[0:5])
-                print(has_class[sort[0:5]])
+                print(u"前五最高：",sort[0:5])
+                print(u"概率如下：",has_class[sort[0:5]])
 
                 probs_net = probs[256:]
                 # print(probs_net)
-                print("probs_net",len(probs_net))
-                print(probs_net[sort[0:5]])
-                sort_probs = np.argsort(-probs_class)
-                print("sort_probs",len(sort_probs))
-                value_probs = sort_probs[:,0]
-                # print(probs_class)
-                # print(sort_probs)
-                print(value_probs)
-                print("value_probs",len(value_probs))
+                print(u"对应偏移：",probs_net[sort[0:5]])
 
-                print(label[i*train_size:(i+1)*train_size])
-                print(len(label[i*train_size:(i+1)*train_size]))
+                print(u"正确目标：",label[i-train_size+1:i+1])
                 q = (1.25, 1, 0.75, 0.5)
                 for s in sort[0:5]:
                     if has_class[s]<0.5: break
                     j = s//4
                     k = s%4
-                    print(s, has_class[s],probs_net[s])
-                    print(max(j*4-block_size*q[k], 0), min(j*4+block_size*q[k], train_size))
-                    print(probs_net[s]*train_size)
+                    print(s, has_class[s], probs_net[s])
+                    print(u"分类坐标：", max(j*4-block_size*q[k], 0), min(j*4+block_size*q[k], train_size))
+                    print(u"偏移量：", probs_net[s]*train_size)
                     src= [max((j*4-block_size)*q[k], 0)+probs_net[s][0]*train_size, min((j*4+block_size)*q[k], train_size)+probs_net[s][1]*train_size]
-                    print(src)
+                    print(u"预测坐标：", src)
                     label2 = np.zeros([label_size], dtype=np.int)        
                     for x in range(int(src[0]),int(src[1]+1)):
                         label2[x] = 1
-                    print(label2[0:train_size]) 
+                    print(u"预测目标：",label2[0:train_size]) 
 
                 if raw_input("press any key to continue:"): pass
             #     all_values.append(probs)
