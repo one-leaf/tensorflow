@@ -247,7 +247,7 @@ if os.path.exists(param_file):
     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
     print("loading parameters ...")
-    parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+    paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
