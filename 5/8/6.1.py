@@ -134,15 +134,15 @@ paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 def getTestData(testFileid):
     v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%testFileid))
     data = []
-    batch_data = [np.zeros(2048) for _ in range(train_size)]   
+    batch_data = np.zeros((2048, train_size))    
     w = v_data.shape[0]
     label = np.zeros([w], dtype=np.int)
     for i in range(w):
-        batch_data.append(v_data[i])
-        batch_data.pop(0)
+        _data = np.reshape(v_data[i], (2048,1))
+        batch_data = np.append(batch_data[:, 1:], _data, axis=1)
         if i>0 and i%train_size==0:
        # if i>train_size:
-            data.append((batch_data,))
+            data.append((np.ravel(batch_data),))
     return data, w
 
 def test():
