@@ -180,8 +180,10 @@ def test():
                 probs_class = probs[0:256]
                 print(probs_class)
                 print("probs_class",len(probs_class))
-
-                print(probs_class[:,1])
+                has_class = probs_class[:,1]
+                sort = np.argsort(has_class)
+                print(sort)
+                print(has_class[sort[0:5]])
 
                 probs_net = probs[256:]
                 print(probs_net)
