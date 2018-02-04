@@ -140,9 +140,9 @@ def getTestData(testFileid):
     for i in range(w):
         batch_data.append(v_data[i])
         batch_data.pop(0)
-       # if i>0 and i%train_size==0:
+        if i>0 and i%train_size==0:
        # if i>train_size:
-        data.append((batch_data,))
+            data.append((batch_data,))
     return data, w
 
 def test():
@@ -198,8 +198,8 @@ def test():
                 print(value_probs)
                 print("value_probs",len(value_probs))
 
-                print(label[i:i+train_size])
-                print(len(label[i:i+train_size]))
+                print(label[i*train_size:(i+1)*train_size])
+                print(len(label[i*train_size:(i+1)*train_size]))
                 q = (1.25, 1, 0.75, 0.5)
                 for i in sort[0:5]:
                     if has_class[i]<0.5: break
