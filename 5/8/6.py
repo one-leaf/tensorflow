@@ -117,7 +117,7 @@ def network():
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return costs, parameters, adam_optimizer, (net_class, net_box) 
+    return costs, parameters, adam_optimizer, (nets_class, nets_box) 
 
 
 data_pool = []
