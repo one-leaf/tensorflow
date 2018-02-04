@@ -142,7 +142,7 @@ def getTestData(testFileid):
         batch_data.pop(0)
         if i>0 and i%train_size==0:
             data.append((batch_data,))
-    return data, len(w)
+    return data, w
 
 def test():
     items = []
