@@ -175,13 +175,15 @@ def test():
 
             for i in range(count):
                 _data = data[i*batch_size:(i+1)*batch_size]
-                probs = inferer.infer(input=_data,field=["value","value"])
+                probs = inferer.infer(input=_data)
 
-                probs_class = probs[0]
+                probs_class = probs[0][0:256]
                 print(probs_class)
                 print("probs_class",len(probs_class))
 
-                probs_box = probs[1]
+                probs_net = probs[0][256:]
+                print(probs_net)
+                print("probs_net",len(probs_net))
 
                 sort_probs = np.argsort(-probs_class)
                 print("sort_probs",len(sort_probs))
