@@ -167,13 +167,13 @@ def calc_value(segments):
     out_b=[np.zeros(2) for _ in range(train_size)]
 
     for i in range(train_size):
-        src = [max(i-3,0),min(i+3,train_size)]
+        src = [max(i-block_size,0),min(i+block_size,train_size)]
         ious = []
         for dst in segments:
             ious.append(calc_iou(src, dst))
         max_ious = max(ious)
         max_ious_index = ious.index(max_ious)
-        if max_ious>0.5:
+        if max_ious>=0.5:
             out_c[i]=1
             out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
             out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
