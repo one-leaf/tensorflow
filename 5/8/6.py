@@ -157,10 +157,10 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0,segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_c, out_b = calc_value(fix_segments)
-                print("size:",i-train_size,i)
-                print("segments:", fix_segments)
-                print(out_c)    
-                print(out_b)    
+                # print("size:",i-train_size,i)
+                # print("segments:", fix_segments)
+                # print(out_c)    
+                # print(out_b)    
                 data_pool.append((batch_data, out_c, out_b))
         while len(data_pool)>buf_size:
             # print('r')
