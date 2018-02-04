@@ -181,28 +181,28 @@ def test():
                 # print(probs_class)
                 has_class = probs_class[:,1]
                 sort = np.argsort(-has_class)
-                print(u"前五最高：",sort[0:5])
-                print(u"概率如下：",has_class[sort[0:5]])
+                print("前五最高：",sort[0:5])
+                print("概率如下：",has_class[sort[0:5]])
 
                 probs_net = probs[256:]
                 # print(probs_net)
-                print(u"对应偏移：",probs_net[sort[0:5]])
+                print("对应偏移：",probs_net[sort[0:5]])
 
-                print(u"正确目标：",label[i-train_size+1:i+1])
+                print("正确目标：",label[i-train_size+1:i+1])
                 q = (1.25, 1, 0.75, 0.5)
                 for s in sort[0:5]:
                     if has_class[s]<0.5: break
                     j = s//4
                     k = s%4
                     print(s, has_class[s], probs_net[s])
-                    print(u"分类坐标：", max(j*4-block_size*q[k], 0), min(j*4+block_size*q[k], train_size))
-                    print(u"偏移量：", probs_net[s]*train_size)
+                    print("分类坐标：", max(j*4-block_size*q[k], 0), min(j*4+block_size*q[k], train_size))
+                    print("偏移量：", probs_net[s]*train_size)
                     src= [max((j*4-block_size)*q[k], 0)+probs_net[s][0]*train_size, min((j*4+block_size)*q[k], train_size)+probs_net[s][1]*train_size]
-                    print(u"预测坐标：", src)
+                    print("预测坐标：", src)
                     label2 = np.zeros([label_size], dtype=np.int)        
                     for x in range(int(src[0]),int(src[1]+1)):
                         label2[x] = 1
-                    print(u"预测目标：",label2[0:train_size]) 
+                    print("预测目标：",label2[0:train_size]) 
 
                 if raw_input("press any key to continue:"): pass
             #     all_values.append(probs)
