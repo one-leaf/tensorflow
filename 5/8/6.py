@@ -84,18 +84,21 @@ def network():
 
     main_nets = []
     net = cnn2(x,  3,  1, 64, 1, 1)
-    main_nets.append(net)
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)
-    net = cnn2(net,  3,  64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)
-    net = cnn2(net,  3,  64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)
-    net = cnn2(net,  3,  64, 64, 1, 1)
-    main_nets.append(net)
-    net = cnn2(net,  3,  64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)  
-
+    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
+    main_nets.append(net)  
+ 
     # 分类网络
     nets_class = []
     # box网络
