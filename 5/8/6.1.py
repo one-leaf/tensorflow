@@ -179,8 +179,8 @@ def test():
                 # print(probs_class)
                 has_class = probs_class[:,1]
                 sort = np.argsort(-has_class)
-                print("前五最高：",sort[0:5])
-                print("概率如下：",has_class[sort[0:5]])
+                print "前五最高：",sort[0:5]
+                print u"概率如下：",has_class[sort[0:5]]
 
                 probs_net = probs[256:]
                 # print(probs_net)
