@@ -168,7 +168,7 @@ def test():
 
             for i in range(count):
                 _data = data[i*batch_size:(i+1)*batch_size]
-                probs = inferer.infer(input=_data)
+                probs = inferer.infer(input=_data,field=["value","value"])
                 print(probs)
                 print("-------------")
                 print(len(probs))
