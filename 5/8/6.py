@@ -181,7 +181,7 @@ def calc_value(segments):
     out_b=[np.zeros(2) for _ in range(train_size)]
 
     for i in range(train_size):
-        src = [max(i-15,0),min(i+15,train_size)]
+        src = [max(i-3,0),min(i+3,train_size)]
         ious = []
         for dst in segments:
             ious.append(calc_iou(src, dst))
