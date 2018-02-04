@@ -178,7 +178,7 @@ def test():
                 probs = inferer.infer(input=_data)
 
                 probs_class = probs[0:256]
-                print(probs_class)
+                # print(probs_class)
                 print("probs_class",len(probs_class))
                 has_class = probs_class[:,1]
                 sort = np.argsort(-has_class)
@@ -186,9 +186,9 @@ def test():
                 print(has_class[sort[0:5]])
 
                 probs_net = probs[256:]
-                print(probs_net)
+                # print(probs_net)
                 print("probs_net",len(probs_net))
-
+                print(probs_net[sort[0:5]])
                 sort_probs = np.argsort(-probs_class)
                 print("sort_probs",len(sort_probs))
                 value_probs = sort_probs[:,0]
