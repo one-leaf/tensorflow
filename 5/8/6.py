@@ -99,26 +99,15 @@ def network():
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)  
  
-    # 分类网络
-    nets_class = []
-    # box网络
-    nets_box = []
+    blocks = []
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
         block_expand = paddle.layer.block_expand(input= main_net, num_channels=64, stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-        # net_class_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
-        nets_class.append(block_expand)
-        # net_box_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Tanh())
-        nets_box.append(block_expand)
+        blocks.append(block_expand)
 
     costs=[]
-    # for i in range(len(main_nets)):
-    #     cost_class = paddle.layer.classification_cost(input=nets_class[i], label=c)
-    #     cost_box = paddle.layer.square_error_cost(input=nets_box[i], label=b)
-    #     costs.append(cost_class)
-    #     costs.append(cost_box)
-    net_class_fc = paddle.layer.fc(input=nets_class, size=class_dim, act=paddle.activation.Softmax())
-    net_box_fc = paddle.layer.fc(input=nets_box, size=class_dim, act=paddle.activation.Tanh())
+    net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
+    net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=c)
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
     costs.append(cost_class)
