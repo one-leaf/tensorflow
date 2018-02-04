@@ -126,8 +126,8 @@ def readDatatoPool():
     size = len(training_data)+len(validation_data)
     c = 0
     for i in range(size):
-        # if i%2==0:
-        if True:
+        if i%2==0:
+        # if True:
             data = random.choice(training_data)
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
         else:
