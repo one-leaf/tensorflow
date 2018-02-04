@@ -12,14 +12,13 @@ import shutil
 import logging
 import gc
 import commands, re  
-import threading
-
+import zipfile
 
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
 param_file = os.path.join(model_path,"param2.tar")
-result_json_file = os.path.join(model_path,"ai2.json")
+result_json_file = os.path.join(model_path,"ai.json.zip")
 out_dir = os.path.join(model_path, "out")
 
 # home = "/home/kesci/work/"
@@ -37,6 +36,7 @@ train_size = 256 # 学习的关键帧长度
 buf_size = 8192
 batch_size = 4
 block_size = 64
+
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -117,106 +117,111 @@ def network():
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
     return costs, parameters, adam_optimizer, (net_class_fc, net_box_fc) 
-
-
-data_pool = []
-training_data, validation_data, _ = load_data()
-def readDatatoPool():
-    size = len(training_data)+len(validation_data)
-    c = 0
-    for i in range(size):
-        # if i%2==0:
-        if True:
-            data = random.choice(training_data)
-            v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
-        else:
-            data = random.choice(validation_data)
-            v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
-            
-        batch_data = [np.zeros(2048) for _ in range(train_size)]   
-        w = v_data.shape[0]
-
-        for i in range(w):
-            batch_data.append(v_data[i])
-            batch_data.pop(0)
-            if i< train_size or random.random() > 1.0/(train_size//2): continue
-            fix_segments =[]
-            for annotations in data["data"]:
-                segment = annotations['segment']
-                if segment[0]>=i or segment[1]<=i- train_size:
-                    continue
-                fix_segments.append([max(0,segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
-                out_c, out_b = calc_value(fix_segments)
-                data_pool.append((batch_data, out_c, out_b))
-        while len(data_pool)>buf_size:
-            # print('r')
-            time.sleep(0.1) 
-
-# 计算 IOU,输入为 x1,x2 坐标
-def calc_iou(src, dst):
-    all_size = src[1]-src[0]+dst[1]-dst[0]
-    full_size = max(src+dst)-min(src+dst)
-    if full_size >= all_size:
-        return 0
-    else:
-        return (all_size - full_size)/full_size
-    
-# 按 block_size 格计算,前后各 block_size 格
-def calc_value(segments):
-    out_c=[0 for _ in range(train_size)]
-    out_b=[np.zeros(2) for _ in range(train_size)]
-
-    for i in range(train_size):
-        if i%4!=0: continue
-        for k in (1.25, 1, 0.75, 0.5):
-            src = [max((i-block_size)*k,0),min((i+block_size)*k,train_size)]
-            ious = []
-            for dst in segments:
-                ious.append(calc_iou(src, dst))
-            max_ious = max(ious)
-            max_ious_index = ious.index(max_ious)
-            if max_ious>=0.5:
-                out_c[i]=1
-                out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
-                out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
-    return out_c, out_b
-                
-def reader_get_image_and_label():
-    def reader():
-        t1 = threading.Thread(target=readDatatoPool, args=())
-        t1.start()
-        while t1.isAlive():
-            while len(data_pool)==0:
-                # print('w')
-                time.sleep(1)
-            x , y, z = data_pool.pop(random.randrange(len(data_pool)))
-            yield x, y, z
-    return reader
-
-def event_handler(event):
-    if isinstance(event, paddle.event.EndIteration):
-        if event.batch_id>0 and event.batch_id % 10 == 0:
-            print("Pass %d, Batch %d, Cost %f, %s" % (
-                event.pass_id, event.batch_id, event.cost, event.metrics) )
-            with open(param_file, 'wb') as f:
-                paddle_parameters.to_tar(f)
-        # else:
-            # print(".")
+      
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
-print('set reader ...')
-train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-feeding={'x':0, 'c':1, 'b':2}
- 
-if os.path.exists(param_file):
-    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
-    print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-    print("loading parameters ...")
-    paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
-trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
-print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=train_size)
+# 预测时需要读取模型
+(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+print("loading parameters ...")
+paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+    
+
+def getTestData(testFileid):
+    v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%testFileid))
+    data = []
+    batch_data = np.zeros((2048, train_size), dtype=np.float)  
+    w = v_data.shape[0]
+    label = np.zeros([w], dtype=np.int)
+    for i in range(w):
+        _data = np.reshape(v_data[i], (2048,1))
+        batch_data = np.append(batch_data[:, 1:], _data, axis=1)
+        _data = np.ravel(batch_data)
+        data.append((_data,))
+    return data
+
+def test():
+    items = []
+    _, validation_data, _ = load_data("validation") 
+    size = len(validation_data)
+    for i, data_info in enumerate(validation_data):       
+        data_id = data_info["id"]
+
+        data = getTestData(data_id)  
+        
+        w = len(data)
+        print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
+        
+        all_values=[]
+        batch_size = 256
+        count = w // batch_size
+        print("need infer count:", count)
+        
+        save_file = os.path.join(out_dir,data_id)
+        if not os.path.exists(save_file):
+
+            for i in range(count):
+                _data = data[i*batch_size:(i+1)*batch_size]
+                probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
+                print(probs)
+                return
+                all_values.append(probs)
+                sys.stdout.write(".")
+                sys.stdout.flush()           
+                
+            if w%batch_size != 0:
+                _data = data[count*batch_size:]
+                probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
+                all_values.append(probs)
+                sys.stdout.write('.')
+                sys.stdout.flush() 
+        
+            _all_values = np.row_stack(all_values)
+            np.save(open(save_file,"wb"), _all_values)
+        else:
+            _all_values = np.load(open(save_file,"rb"))
+
+        label = np.zeros([w], dtype=np.int)
+
+        for annotations in data_info["data"]:
+            segment = annotations['segment']
+            for i in range(int(segment[0]),int(segment[1]+1)):
+                label[i] += 1
+
+        # print(label[0:999])
+
+        # value_probs = np.argsort(-_all_values)[:,0]
+        # for i,v in enumerate(value_probs):
+        #     if _all_values[i][v]>0.99 and v==1:
+        #         value_probs[i-train_size+1:i+1] = v
+        # print(value_probs[0:999])
+
+        # print(np.argsort(-_all_values)[:,0][0:999])
+        # print(np.max(_all_values,axis=1)[0:999])
+
+        item = conv_to_segment(_all_values)
+        items.append((data_id, item))
+        print(len(item))        
+        del data
+    return items
+
+logger = logging.getLogger('paddle')
+logger.setLevel(logging.ERROR)
+np.set_printoptions(threshold=np.inf)
+
+items = test()
+result={}
+result["version"]="VERSION 1.0"
+result["results"]={}
+
+for id, item in items:
+    result["results"][id] = item
+
+with zipfile.ZipFile(result_json_file,"w") as f:
+    f.writestr('ai.json',json.dumps(result))
+    
+print("OK")
