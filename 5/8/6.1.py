@@ -140,7 +140,8 @@ def getTestData(testFileid):
     for i in range(w):
         batch_data.append(v_data[i])
         batch_data.pop(0)
-        if i>0 and i%train_size==0:
+        # if i>0 and i%train_size==0:
+        if i>train_size:
             data.append((batch_data,))
     return data, w
 
@@ -213,17 +214,17 @@ def test():
                     for x in range(int(src[0]),int(src[1]+1)):
                         label2[x] = 1
                     print(label2[0:train_size]) 
-                return
-                all_values.append(probs)
-                sys.stdout.write(".")
-                sys.stdout.flush()           
+                if has_class[0]>0.8 : return
+            #     all_values.append(probs)
+            #     sys.stdout.write(".")
+            #     sys.stdout.flush()           
                 
-            if w%batch_size != 0:
-                _data = data[count*batch_size:]
-                probs = inferer.infer(input=_data)
-                all_values.append(probs)
-                sys.stdout.write('.')
-                sys.stdout.flush() 
+            # if w%batch_size != 0:
+            #     _data = data[count*batch_size:]
+            #     probs = inferer.infer(input=_data)
+            #     all_values.append(probs)
+            #     sys.stdout.write('.')
+            #     sys.stdout.flush() 
         
             _all_values = np.row_stack(all_values)
             np.save(open(save_file,"wb"), _all_values)
