@@ -178,14 +178,17 @@ def test():
                 probs = inferer.infer(input=_data,field=["value","value"])
 
                 probs_class = probs[0]
+                print("probs_class",len(probs_class))
+
                 probs_box = probs[1]
 
                 sort_probs = np.argsort(-probs_class)
+                print("sort_probs",len(sort_probs))
                 value_probs = sort_probs[:,0]
                 # print(probs_class)
                 # print(sort_probs)
                 print(value_probs)
-                print(len(value_probs))
+                print("value_probs",len(value_probs))
 
                 print(label[0:train_size])
                 print(len(label[0:train_size]))
