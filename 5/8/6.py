@@ -36,6 +36,7 @@ box_dim = 2 # 偏移，左，右
 train_size = 256 # 学习的关键帧长度
 buf_size = 8192
 batch_size = 4
+block_size = 64
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -132,23 +133,12 @@ def readDatatoPool():
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
             
-        # batch_data = np.zeros((2048, train_size))    
         batch_data = [np.zeros(2048) for _ in range(train_size)]   
         w = v_data.shape[0]
-        # label = np.zeros([w], dtype=np.int)
-
-        # fix_segments =[]
-        # for annotations in data["data"]:
-        #     segment = annotations['segment']
-        #     for i in range(int(segment[0]),int(segment[1]+1)):
-        #         label[i] = 1
 
         for i in range(w):
-            # _data = np.reshape(v_data[i], (2048,1))
-            # batch_data = np.append(batch_data[:, 1:], _data, axis=1)
             batch_data.append(v_data[i])
             batch_data.pop(0)
-            # if random.random()>0.9: continue
             if i< train_size or random.random() > 1.0/(train_size//2): continue
             fix_segments =[]
             for annotations in data["data"]:
@@ -157,10 +147,6 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0,segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_c, out_b = calc_value(fix_segments)
-                # print("size:",i-train_size,i)
-                # print("segments:", fix_segments)
-                # print(out_c)    
-                # print(out_b)    
                 data_pool.append((batch_data, out_c, out_b))
         while len(data_pool)>buf_size:
             # print('r')
@@ -173,7 +159,7 @@ def calc_iou(src, dst):
     if full_size >= all_size:
         return 0
     else:
-        return (all_size - full_size)/(src[1]-src[0])
+        return (all_size - full_size)/all_size
     
 # 按31格计算,前后各15格
 def calc_value(segments):
@@ -187,14 +173,10 @@ def calc_value(segments):
             ious.append(calc_iou(src, dst))
         max_ious = max(ious)
         max_ious_index = ious.index(max_ious)
-        if max_ious == 1:
+        if max_ious>0.5:
             out_c[i]=1
-        elif max_ious>0.5:
-            out_c[i]=1
-            if segments[max_ious_index][0]<src[0]:
-                out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
-            if segments[max_ious_index][1]>src[1]:            
-                out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
+            out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
+            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
     return out_c, out_b
                 
 def reader_get_image_and_label():
