@@ -142,7 +142,7 @@ def getTestData(testFileid):
         batch_data.pop(0)
         if i>0 and i%train_size==0:
             data.append((batch_data,))
-    return data
+    return data, len(w)
 
 def test():
     items = []
@@ -153,7 +153,7 @@ def test():
     for i, data_info in enumerate(validation_data):       
         data_id = data_info["id"]
 
-        data = getTestData(data_id)  
+        data, label_size = getTestData(data_id)  
         
         w = len(data)
         print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
@@ -163,7 +163,7 @@ def test():
         count = w // batch_size
         print("need infer count:", count)
 
-        label = np.zeros([w], dtype=np.int)
+        label = np.zeros([label_size], dtype=np.int)
 
         for annotations in data_info["data"]:
             segment = annotations['segment']
