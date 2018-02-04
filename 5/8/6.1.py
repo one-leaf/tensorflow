@@ -181,7 +181,7 @@ def test():
                 print(probs_class)
                 print("probs_class",len(probs_class))
                 has_class = probs_class[:,1]
-                sort = np.argsort(has_class)
+                sort = np.argsort(-has_class)
                 print(sort)
                 print(has_class[sort[0:5]])
 
