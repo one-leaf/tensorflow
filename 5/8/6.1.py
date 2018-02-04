@@ -148,7 +148,7 @@ def test():
     items = []
     _, validation_data, _ = load_data("validation") 
     size = len(validation_data)
-    inferer = Inference(output_layer=[net_class_fc, net_box_fc], parameters=paddle_parameters)
+    inferer = paddle.Inference(output_layer=[net_class_fc, net_box_fc], parameters=paddle_parameters)
 
     for i, data_info in enumerate(validation_data):       
         data_id = data_info["id"]
@@ -177,7 +177,7 @@ def test():
                 
             if w%batch_size != 0:
                 _data = data[count*batch_size:]
-                probs = inferer.infer(output_layer=output, parameters=paddle_parameters, input=_data)
+                probs = inferer.infer(input=_data)
                 all_values.append(probs)
                 sys.stdout.write('.')
                 sys.stdout.flush() 
