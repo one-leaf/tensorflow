@@ -157,7 +157,7 @@ def test():
         print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
         
         all_values=[]
-        batch_size = 4
+        batch_size = 1
         count = w // batch_size
         print("need infer count:", count)
         
