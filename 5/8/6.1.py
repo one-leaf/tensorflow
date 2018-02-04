@@ -164,6 +164,7 @@ def test():
         print("need infer count:", count)
 
         label = np.zeros([label_size], dtype=np.int)
+        label2 = np.zeros([label_size], dtype=np.int)
 
         for annotations in data_info["data"]:
             segment = annotations['segment']
@@ -199,7 +200,16 @@ def test():
 
                 print(label[0:train_size])
                 print(len(label[0:train_size]))
-
+                q = (1.25, 1, 0.75, 0.5)
+                for i in sort[0:5]:
+                    if has_class[i]<0.5: break
+                    j = i//4
+                    k = i%4
+                    src= [max(j*4-train_size,0)*q[k]+probs_net[i][0]*train_size, min(j*4+train_size)*q[k]+probs_net[i][1]*train_size]
+                    print(src)
+                    for x in range(int(src[0]),int(src[1]+1)):
+                        label2[x] = 1
+                print(label2[0:train_size]) 
                 return
                 all_values.append(probs)
                 sys.stdout.write(".")
