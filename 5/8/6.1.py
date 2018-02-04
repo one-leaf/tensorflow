@@ -172,10 +172,8 @@ def test():
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
 
-            for _data in data:
-                probs_data = _data[0]
-                i = _data[1]
-                probs = inferer.infer(input=[probs_data])
+            for _data, i in data:
+                probs = inferer.infer(input=[_data])
 
                 probs_class = probs[0:256]
                 # print(probs_class)
