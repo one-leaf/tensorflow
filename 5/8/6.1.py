@@ -169,9 +169,15 @@ def test():
             for i in range(count):
                 _data = data[i*batch_size:(i+1)*batch_size]
                 probs = inferer.infer(input=_data,field=["value","value"])
-                print(probs)
-                print("-------------")
-                print(len(probs))
+
+                probs_class = probs[0]
+                probs_box = probs[1]
+
+                sort_probs = np.argsort(-probs_class)
+                value_probs = sort_probs[:,0]
+                print(probs_class)
+                print(sort_probs)
+                print(value_probs)
 
                 return
                 all_values.append(probs)
