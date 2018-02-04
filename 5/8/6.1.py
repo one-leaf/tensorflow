@@ -140,7 +140,8 @@ def getTestData(testFileid):
     for i in range(w):
         batch_data.append(v_data[i])
         batch_data.pop(0)
-        data.append((batch_data,))
+        if i>0 and i%train_size==0:
+            data.append((batch_data,))
     return data
 
 def test():
