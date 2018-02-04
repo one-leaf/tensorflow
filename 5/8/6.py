@@ -187,12 +187,14 @@ def calc_value(segments):
             ious.append(calc_iou(src, dst))
         max_ious = max(ious)
         max_ious_index = ious.index(max_ious)
-        if max_ious>0.5:
+        if max_ious == 1:
             out_c[i]=1
-            out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
-            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size
-        else:
-            out_c[i]=0            
+        elif max_ious>0.5:
+            out_c[i]=1
+            if segments[max_ious_index][0]<src[0]:
+                out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
+            if segments[max_ious_index][1]>src[1]:            
+                out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
     return out_c, out_b
                 
 def reader_get_image_and_label():
