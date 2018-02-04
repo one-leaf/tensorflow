@@ -229,7 +229,6 @@ print("get network ...")
 cost, paddle_parameters, adam_optimizer, output = network()
 print('set reader ...')
 train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-# train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
 feeding={'x':0, 'c':1, 'b':2}
  
 if os.path.exists(param_file):
