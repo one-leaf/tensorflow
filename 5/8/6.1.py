@@ -116,13 +116,13 @@ def network():
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return costs, parameters, adam_optimizer, [net_class_fc, net_box_fc] 
+    return costs, parameters, adam_optimizer, net_class_fc, net_box_fc 
       
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
-cost, paddle_parameters, adam_optimizer, output = network()
+cost, paddle_parameters, adam_optimizer, net_class_fc, net_box_fc = network()
 
 # 预测时需要读取模型
 (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
@@ -166,10 +166,8 @@ def test():
 
             for i in range(count):
                 _data = data[i*batch_size:(i+1)*batch_size]
-                print(output)
-                probs1, probs2 = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-                print(probs1)
-                print(probs2)
+                probs = paddle.infer(output_layer=[net_class_fc, net_box_fc], parameters=paddle_parameters, input=_data)
+                print(probs)
                 return
                 all_values.append(probs)
                 sys.stdout.write(".")
