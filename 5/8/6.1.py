@@ -202,7 +202,8 @@ def test():
         # print(np.argsort(-_all_values)[:,0][0:999])
         # print(np.max(_all_values,axis=1)[0:999])
 
-        item = conv_to_segment(_all_values)
+        # item = conv_to_segment(_all_values)
+        item =[]
         items.append((data_id, item))
         print(len(item))        
         del data
