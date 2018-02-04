@@ -108,12 +108,16 @@ def network():
         net_box_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Tanh())
         nets_box.append(net_box_fc)
 
-    costs=[]
-    for i in range(len(main_nets)):
-        cost_class = paddle.layer.classification_cost(input=nets_class[i], label=c)
-        cost_box = paddle.layer.square_error_cost(input=nets_box[i], label=b)
-        costs.append(cost_class)
-        costs.append(cost_box)
+    # costs=[]
+    # for i in range(len(main_nets)):
+    #     cost_class = paddle.layer.classification_cost(input=nets_class[i], label=c)
+    #     cost_box = paddle.layer.square_error_cost(input=nets_box[i], label=b)
+    #     costs.append(cost_class)
+    #     costs.append(cost_box)
+    cost_class = paddle.layer.classification_cost(input=nets_class, label=c)
+    cost_box = paddle.layer.square_error_cost(input=nets_box, label=b)
+    costs.append(cost_class)
+    costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
