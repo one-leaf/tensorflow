@@ -185,7 +185,11 @@ def test():
                 # print(probs_class)
                 # print(sort_probs)
                 print(value_probs)
+                print(len(value_probs))
+
                 print(label[0:train_size])
+                print(len(label[0:train_size]))
+
                 return
                 all_values.append(probs)
                 sys.stdout.write(".")
