@@ -205,6 +205,7 @@ def test():
                     if has_class[i]<0.5: break
                     j = i//4
                     k = i%4
+                    print(i, has_class[i], probs_net[i])
                     src= [max(j*4-train_size,0)*q[k]+probs_net[i][0]*train_size, min(j*4+train_size)*q[k]+probs_net[i][1]*train_size]
                     print(src)
                     for x in range(int(src[0]),int(src[1]+1)):
