@@ -153,9 +153,9 @@ def readDatatoPool():
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
-                if segment[0]>i or segment[1]<i- train_size:
+                if segment[0]>=i or segment[1]<=i- train_size:
                     continue
-                fix_segments.append([max(0,segment[0]-i-train_size),min(train_size,i-segment[1])])
+                fix_segments.append([max(0,segment[0]-(i-train_size)),min(train_size,segment[1]-(i-train_size))])
                 out_c, out_b = calc_value(fix_segments)
                 print(fix_segments)
                 print(out_c[train_size//2])    
