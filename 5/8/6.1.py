@@ -178,6 +178,7 @@ def test():
                 probs = inferer.infer(input=_data,field=["value","value"])
 
                 probs_class = probs[0]
+                print(probs_class)
                 print("probs_class",len(probs_class))
 
                 probs_box = probs[1]
