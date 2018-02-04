@@ -170,6 +170,9 @@ def test():
                 _data = data[i*batch_size:(i+1)*batch_size]
                 probs = inferer.infer(input=_data)
                 print(probs)
+                print("-------------")
+                print(len(probs))
+
                 return
                 all_values.append(probs)
                 sys.stdout.write(".")
