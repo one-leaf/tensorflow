@@ -37,6 +37,7 @@ train_size = 256 # 学习的关键帧长度
 buf_size = 8192
 batch_size = 4
 block_size = 64
+area_ratio = (1.25, 1, 0.75, 0.5)
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -160,25 +161,39 @@ def calc_iou(src, dst):
         return 0
     else:
         return (all_size - full_size)/full_size
-    
+
+# 创建box
+def get_boxs():
+    boxs=[]
+    for i in range(train_size):
+        if i%4==0:
+            for ratio in area_ratio:
+                src = [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+                boxs.append(src)
+    return boxs
+
+# 根据坐标返回box
+def get_box_point(point):
+    i = point - point%4
+    ratio = area_ratio[point%4]
+    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+
 # 按 block_size 格计算,前后各 block_size 格
 def calc_value(segments):
     out_c=[0 for _ in range(train_size)]
     out_b=[np.zeros(2) for _ in range(train_size)]
 
-    for i in range(train_size):
-        if i%4!=0: continue
-        for k in (1.25, 1, 0.75, 0.5):
-            src = [max((i-block_size)*k,0),min((i+block_size)*k,train_size)]
-            ious = []
-            for dst in segments:
-                ious.append(calc_iou(src, dst))
-            max_ious = max(ious)
-            max_ious_index = ious.index(max_ious)
-            if max_ious>=0.5:
-                out_c[i]=1
-                out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
-                out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
+    boxs = get_boxs()
+    for src in boxs:
+        ious = []
+        for dst in segments:
+            ious.append(calc_iou(src, dst))
+        max_ious = max(ious)
+        max_ious_index = ious.index(max_ious)
+        if max_ious>=0.5:
+            out_c[i]=1
+            out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
+            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
     return out_c, out_b
                 
 def reader_get_image_and_label():

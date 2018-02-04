@@ -36,6 +36,7 @@ train_size = 256 # 学习的关键帧长度
 buf_size = 8192
 batch_size = 4
 block_size = 64
+area_ratio = (1.25, 1, 0.75, 0.5)
 
 
 def load_data(filter=None):
@@ -145,6 +146,22 @@ def getTestData(testFileid):
             data.append([(np.ravel(batch_data),), i])
     return data, w
 
+# 创建box
+def get_boxs():
+    boxs=[]
+    for i in range(train_size):
+        if i%4==0:
+            for ratio in area_ratio:
+                src = [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+                boxs.append(src)
+    return boxs
+
+# 根据坐标返回box
+def get_box_point(point):
+    i = point - point%4
+    ratio = area_ratio[point%4]
+    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+
 def test():
     items = []
     _, validation_data, _ = load_data("validation") 
@@ -190,12 +207,11 @@ def test():
                 q = (1.25, 1, 0.75, 0.5)
                 for s in sort[0:5]:
                     if has_class[s]<0.5: break
-                    j = s//4
-                    k = s%4
+                    src = get_box_point(s)
                     print s, has_class[s], probs_net[s]
-                    print "分类坐标：", max(j*4-block_size*q[k], 0), min(j*4+block_size*q[k], train_size)
+                    print "分类坐标：", src
                     print "偏移量：", probs_net[s]*train_size
-                    src= [max((j*4-block_size)*q[k], 0)+probs_net[s][0]*train_size, min((j*4+block_size)*q[k], train_size)+probs_net[s][1]*train_size]
+                    src= [src[0]+probs_net[s][0]*train_size,src[1]+probs_net[s][1]*train_size]
                     print "预测坐标：", src
                     label2 = np.zeros([label_size], dtype=np.int)        
                     for x in range(int(src[0]),int(src[1]+1)):
