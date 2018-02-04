@@ -95,39 +95,26 @@ def network():
     main_nets.append(net)
     net = cnn2(net,  3,  64, 64, 1, 1)
     main_nets.append(net)  
-    # # 分类网络
-    # nets_class = []
-    # # box网络
-    # nets_box = []
 
-    # for i  in range(len(main_nets)):
-    #     main_net = main_nets[i]
-    #     printLayer(main_net)
-    #     block_expand = paddle.layer.block_expand(input= main_net, num_channels=1, stride_x=1, stride_y=1, block_x=main_net.width, block_y=main_net.height)
-    #     printLayer(block_expand)
+    # 分类网络
+    nets_class = []
+    # box网络
+    nets_box = []
+    for i  in range(len(main_nets)):
+        main_net = main_nets[i]
+        block_expand = paddle.layer.block_expand(input= main_net, num_channels=64, stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
+        net_class_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
+        nets_class.append(net_class_fc)
+        net_box_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Tanh())
+        nets_box.append(net_box_fc)
 
-    #     net = cnn1(block_expand, 3, 1, class_dim, 1, 0)
-    #     nets_class.append(net)
-    #     net = cnn1(block_expand, 3, 1, box_dim, 1, 0)
-    #     nets_box.append(net)
-
+    costs=[]
+    for i in range(len(main_nets)):
+        cost_class = paddle.layer.classification_cost(input=nets_class[i], label=c)
+        cost_box = paddle.layer.square_error_cost(input=nets_box[i], label=b)
+        costs.append(cost_class)
+        costs.append(cost_box)
     
-    # net_class = paddle.layer.concat(input=nets_class)
-    # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
-    block_expand = paddle.layer.block_expand(input= net, num_channels=64, stride_x=1, stride_y=1, block_x=32, block_y=1)
-    # block_expand = net
-
-    net_class = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
-    
-    net_cost = paddle.layer.classification_cost(input=net_class, label=c)
-  
-    # net_box = paddle.layer.concat(input=nets_box)
-    # gru_forward = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Relu())
-
-    net_box = paddle.layer.fc(input=block_expand, size=box_dim, act=paddle.activation.Tanh())
-    box_cost = paddle.layer.square_error_cost(input=net_box, label=b)
-    costs = [net_cost + box_cost]
-
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
     return costs, parameters, adam_optimizer, (net_class, net_box) 
