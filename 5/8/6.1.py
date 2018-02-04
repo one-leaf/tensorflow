@@ -142,7 +142,7 @@ def getTestData(testFileid):
         batch_data = np.append(batch_data[:, 1:], _data, axis=1)
         if i>0 and i%train_size==0:
        # if i>train_size:
-            data.append(([np.ravel(batch_data),], i))
+            data.append([(np.ravel(batch_data),), i])
     return data, w
 
 def test():
@@ -172,8 +172,10 @@ def test():
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
 
-            for _data, i in data:
-                probs = inferer.infer(input=_data)
+            for _data in data:
+                probs_data = _data[0]
+                i = _data[1]
+                probs = inferer.infer(input=probs_data)
 
                 probs_class = probs[0:256]
                 # print(probs_class)
