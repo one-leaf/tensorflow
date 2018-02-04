@@ -142,7 +142,7 @@ def getTestData(testFileid):
         batch_data = np.append(batch_data[:, 1:], _data, axis=1)
         if i>0 and i%train_size==0:
        # if i>train_size:
-            data.append([(np.ravel(batch_data),), i])
+            data.append(([np.ravel(batch_data),], i))
     return data, w
 
 def test():
