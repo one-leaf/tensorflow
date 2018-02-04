@@ -177,7 +177,7 @@ def test():
                 
             if w%batch_size != 0:
                 _data = data[count*batch_size:]
-                probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
+                probs = inferer.infer(output_layer=output, parameters=paddle_parameters, input=_data)
                 all_values.append(probs)
                 sys.stdout.write('.')
                 sys.stdout.flush() 
