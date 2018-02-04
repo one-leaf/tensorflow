@@ -168,32 +168,26 @@ def readDatatoPool():
 
 # 计算 IOU,输入为 x1,x2 坐标
 def calc_iou(src, dst):
-    if src[1]<dst[0] or dst[1]<src[0]:
+    all_size = src[1]-src[0]+dst[1]-dst[0]
+    full_size = max(src+dst)-min(src+dst)
+    if full_size >= all_size:
         return 0
-    if dst[1]>src[1]:
-        if dst[0]>src[0]:
-            return (src[1]-dst[0])/(dst[1]-src[0])
-        else:
-            return (src[1]-src[0])/(dst[1]-dst[0])
     else:
-        if src[0]>dst[0]:
-            return (dst[1]-src[0])/(src[1]-dst[0])
-        else:
-            return (dst[1]-dst[0])/(src[1]-src[0])         
+        return (all_size - full_size)/full_size
     
-# 计算
+# 按31格计算,前后各15格
 def calc_value(segments):
     out_c=[0 for _ in range(train_size)]
     out_b=[np.zeros(2) for _ in range(train_size)]
 
     for i in range(train_size):
-        src = (max(i-train_size//2,0),min(i+train_size//2,train_size))
+        src = [max(i-15,0),min(i+15,train_size)]
         ious = []
         for dst in segments:
             ious.append(calc_iou(src, dst))
         max_ious = max(ious)
         max_ious_index = ious.index(max_ious)
-        if max_ious>0.75:
+        if max_ious>0.5:
             out_c[i]=1
             out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
             out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size
