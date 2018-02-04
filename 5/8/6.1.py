@@ -206,7 +206,8 @@ def test():
                     j = i//4
                     k = i%4
                     print(i, has_class[i], probs_net[i])
-                    src= [max(j*4-train_size, 0)*q[k]+probs_net[i][0]*train_size, min(j*4+train_size, train_size)*q[k]+probs_net[i][1]*train_size]
+                    print(max(j*4-train_size*q[k], 0), min(j*4+train_size*q[k], train_size))
+                    src= [max((j*4-train_size)*q[k], 0)+probs_net[i][0]*train_size, min((j*4+train_size)*q[k], train_size)+probs_net[i][1]*train_size]
                     print(src)
                     for x in range(int(src[0]),int(src[1]+1)):
                         label2[x] = 1
