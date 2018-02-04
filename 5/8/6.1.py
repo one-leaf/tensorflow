@@ -201,14 +201,14 @@ def test():
                 print(label[i*train_size:(i+1)*train_size])
                 print(len(label[i*train_size:(i+1)*train_size]))
                 q = (1.25, 1, 0.75, 0.5)
-                for i in sort[0:5]:
-                    if has_class[i]<0.5: break
-                    j = i//4
-                    k = i%4
-                    print(i, has_class[i],probs_net[i])
-                    print(max(j*4-train_size*q[k], 0), min(j*4+train_size*q[k], train_size))
-                    print(probs_net[i]*train_size)
-                    src= [max((j*4-train_size)*q[k], 0)+probs_net[i][0]*train_size, min((j*4+train_size)*q[k], train_size)+probs_net[i][1]*train_size]
+                for s in sort[0:5]:
+                    if has_class[s]<0.5: break
+                    j = s//4
+                    k = s%4
+                    print(s, has_class[s],probs_net[s])
+                    print(max(j*4-block_size*q[k], 0), min(j*4+block_size*q[k], train_size))
+                    print(probs_net[s]*train_size)
+                    src= [max((j*4-block_size)*q[k], 0)+probs_net[s][0]*train_size, min((j*4+block_size)*q[k], train_size)+probs_net[s][1]*train_size]
                     print(src)
                     label2 = np.zeros([label_size], dtype=np.int)        
                     for x in range(int(src[0]),int(src[1]+1)):
