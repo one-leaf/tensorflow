@@ -183,7 +183,7 @@ def test():
                 print("probs_class",len(probs_class))
                 has_class = probs_class[:,1]
                 sort = np.argsort(-has_class)
-                print(sort)
+                print(sort[0:5])
                 print(has_class[sort[0:5]])
 
                 probs_net = probs[256:]
