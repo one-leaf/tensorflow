@@ -181,6 +181,8 @@ def test():
                 print(probs_class)
                 print("probs_class",len(probs_class))
 
+                print(probs_class[:,0])
+
                 probs_net = probs[256:]
                 print(probs_net)
                 print("probs_net",len(probs_net))
