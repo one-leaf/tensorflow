@@ -184,7 +184,7 @@ def calc_value(segments):
     out_b=[np.zeros(2) for _ in range(train_size)]
 
     boxs = get_boxs()
-    for src in boxs:
+    for i, src in enumerate(boxs):
         ious = []
         for dst in segments:
             ious.append(calc_iou(src, dst))
