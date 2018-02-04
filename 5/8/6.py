@@ -159,7 +159,7 @@ def calc_iou(src, dst):
     if full_size >= all_size:
         return 0
     else:
-        return (all_size - full_size)/all_size
+        return (all_size - full_size)/full_size
     
 # 按31格计算,前后各15格
 def calc_value(segments):
