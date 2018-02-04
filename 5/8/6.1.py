@@ -148,7 +148,7 @@ def test():
     items = []
     _, validation_data, _ = load_data("validation") 
     size = len(validation_data)
-    inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=paddle_parameters)
+    inferer = paddle.inference.Inference(output_layer=net_box_fc, parameters=paddle_parameters)
 
     for i, data_info in enumerate(validation_data):       
         data_id = data_info["id"]
