@@ -83,15 +83,15 @@ def network():
     # b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
-    net = cnn2(x,  4,  1, 64, 2, 2)
+    net = cnn2(x,  4,  1, 64, 2, 1)
     main_nets.append(net)
-    net = cnn2(net, 4, 64, 64, 2, 2)
+    net = cnn2(net, 4, 64, 64, 2, 1)
     main_nets.append(net)
-    net = cnn2(net,  4,  64, 64, 2, 2)
+    net = cnn2(net,  4,  64, 64, 2, 1)
     main_nets.append(net)
-    net = cnn2(net,  4,  64, 64, 2, 2)
+    net = cnn2(net,  4,  64, 64, 2, 1)
     main_nets.append(net)
-    net = cnn2(net,  4,  64, 64, 2, 2)
+    net = cnn2(net,  4,  64, 64, 2, 1)
     main_nets.append(net)
   
     # # 分类网络
