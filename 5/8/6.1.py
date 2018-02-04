@@ -167,8 +167,9 @@ def test():
             for i in range(count):
                 _data = data[i*batch_size:(i+1)*batch_size]
                 print(output)
-                probs = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
-                print(probs)
+                probs1, probs2 = paddle.infer(output_layer=output, parameters=paddle_parameters, input=_data)
+                print(probs1)
+                print(probs2)
                 return
                 all_values.append(probs)
                 sys.stdout.write(".")
