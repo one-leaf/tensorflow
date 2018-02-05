@@ -205,8 +205,8 @@ def calc_value(segments):
             # out_b[i][1]=(segments[max_ious_index][1]-segments[max_ious_index][0] - src[1]+src[0])/train_size 
             out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
             out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size         
-        if max_ious > 0.9:
-            print u"正确的:",segments[max_ious_index],u"接近的:", src, u"拟合度：", max_ious,u"偏移：", out_b[i]
+        # if max_ious > 0.9:
+        #     print u"正确的:",segments[max_ious_index],u"接近的:", src, u"拟合度：", max_ious,u"偏移：", out_b[i]
     return out_c, out_b
                 
 def reader_get_image_and_label():
