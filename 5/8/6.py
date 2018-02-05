@@ -34,7 +34,7 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
 train_size = 256 # 学习的关键帧长度
-buf_size = 8192
+buf_size = 10240
 batch_size = 4
 block_size = 64
 area_ratio = (1.25, 1, 0.5, 0.25)
@@ -142,7 +142,7 @@ def readDatatoPool():
         for i in range(w):
             _data = np.reshape(v_data[i], (2048,1))
             batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-            if i< train_size or random.random() > 0.02: continue
+            if i< train_size or random.random() > 1./16: continue
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
