@@ -199,9 +199,7 @@ def test():
                 sort = np.argsort(-has_class)
                 print "前五最高：",sort[0:5]
                 print "概率如下：",has_class[sort[0:5]]
-
                 probs_net = probs[256:]
-                # print(probs_net)
                 print "对应偏移：",probs_net[sort[0:5]]
 
                 print "正确目标：",label[i-train_size+1:i+1]
