@@ -140,7 +140,7 @@ def readDatatoPool():
         for i in range(w):
             _data = np.reshape(v_data[i], (2048,1))
             batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-            if i< train_size or random.random() > 1.0/(train_size//2): continue
+            if i< train_size or random.random() > 0.5: continue
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
