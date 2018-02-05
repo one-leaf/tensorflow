@@ -193,17 +193,16 @@ def test():
             for _data, i in data:
                 probs = inferer.infer(input=[_data])
 
-                probs_class = probs[0:256]
+                probs_class = probs[0:train_size]
                 # print(probs_class)
                 has_class = probs_class[:,1]
                 sort = np.argsort(-has_class)
                 print "前五最高：",sort[0:5]
                 print "概率如下：",has_class[sort[0:5]]
-                probs_net = probs[256:]
+                probs_net = probs[train_size:]
                 print "对应偏移：",probs_net[sort[0:5]]
 
                 print "正确目标：",label[i-train_size+1:i+1]
-                q = (1.25, 1, 0.75, 0.5)
                 for s in sort[0:5]:
                     if has_class[s]<0.5: break
                     src = get_box_point(s)
