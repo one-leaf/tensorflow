@@ -36,7 +36,7 @@ box_dim = 2 # 偏移，左，右
 train_size = 1024 # 学习的关键帧长度
 buf_size = 128
 batch_size = 1
-block_size = 256
+block_size = train_size//4
 area_ratio = (1.25, 1, 0.75, 0.5)
 
 
