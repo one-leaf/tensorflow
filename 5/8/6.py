@@ -166,7 +166,7 @@ def calc_iou(src, dst):
         return (all_size - full_size)/full_size
 
 # 创建box
-def get_boxs():
+def get_boxs(train_size=train_size):
     boxs=[]
     for i in range(train_size):
         if i%4==0:
@@ -230,6 +230,19 @@ def event_handler(event):
                 paddle_parameters.to_tar(f)
         # else:
             # print(".")
+
+bs = get_boxs(100)
+src = ["-" for _ in range(100)]
+print src
+for b in bs:
+    x = copy(src)
+    for i in range(b[0],b[1]+1):
+        x[i]="+"
+    print x
+
+
+
+
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
