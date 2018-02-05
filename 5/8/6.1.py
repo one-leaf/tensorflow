@@ -213,11 +213,11 @@ def test():
                     label2 = np.zeros([label_size], dtype=np.int)        
                     for x in range(int(fix_src[0]),int(fix_src[1]+1)):
                         label2[x] = 1
-                    label2[s]=8
+                    label2[int(s)]=8
                     if src[0]>=0:
-                        label2[src[0]]=7
+                        label2[int(src[0])]=7
                     if src[1]<train_size:
-                        label2[src[1]]=9
+                        label2[int(src[1])]=9
                     print "预测目标：", label2[0:train_size] 
 
                 if raw_input("press any key to continue:"): pass
