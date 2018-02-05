@@ -110,8 +110,9 @@ def network():
         blocks.append(block_expand)
 
     costs=[]
-    net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
+    drop = paddle.layer.dropout(input=blocks, dropout_rate=0.5)
+    net_class_fc = paddle.layer.fc(input=drop, size=class_dim, act=paddle.activation.Softmax())
+    net_box_fc = paddle.layer.fc(input=drop, size=class_dim, act=paddle.activation.Tanh())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=c)
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
     costs.append(cost_class)
