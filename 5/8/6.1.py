@@ -36,7 +36,7 @@ train_size = 256 # 学习的关键帧长度
 buf_size = 8192
 batch_size = 4
 block_size = 64
-area_ratio = (1.25, 1, 0.75, 0.5)
+area_ratio = (1.25, 1, 0.5, 0.25)
 
 
 def load_data(filter=None):
