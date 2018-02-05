@@ -231,11 +231,11 @@ def event_handler(event):
         # else:
             # print(".")
 
-bs = get_boxs(100)
-src = ["-" for _ in range(100)]
+bs = get_boxs(128)
+src = ["-" for _ in range(128)]
 print src
 for b in bs:
-    x = copy(src)
+    x = ["-" for _ in range(128)]
     for i in range(b[0],b[1]+1):
         x[i]="+"
     print x
