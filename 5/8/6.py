@@ -170,7 +170,7 @@ def get_boxs():
     for i in range(train_size):
         if i%4==0:
             for ratio in area_ratio:
-                src = [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+                src = (i-block_size)*ratio, (i+block_size)*ratio
                 boxs.append(src)
     return boxs
 
@@ -178,9 +178,11 @@ def get_boxs():
 def get_box_point(point):
     i = point - point%4
     ratio = area_ratio[point%4]
-    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+    return (i-block_size)*ratio, (i+block_size)*ratio
 
 # 按 block_size 格计算,前后各 block_size 格
+# out_c iou 比
+# out_b 中心点的偏离比 和 缺少量的长度比
 def calc_value(segments):
     out_c=[0 for _ in range(train_size)]
     out_b=[np.zeros(2) for _ in range(train_size)]
@@ -194,8 +196,8 @@ def calc_value(segments):
         max_ious_index = ious.index(max_ious)
         if max_ious>=0.5:
             out_c[i]=1
-            out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
-            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
+            out_b[i][0]=(segments[max_ious_index][1]+segments[max_ious_index][0] - src[1]-src[0])/(2*train_size)
+            out_b[i][1]=(segments[max_ious_index][1]-segments[max_ious_index][0] - src[1]+src[0])/train_size          
     return out_c, out_b
                 
 def reader_get_image_and_label():
