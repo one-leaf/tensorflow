@@ -191,8 +191,12 @@ def calc_value(segments):
     boxs = get_boxs()
     for i, src in enumerate(boxs):
         ious = []
+
+        # 计算这个方框和所有的标注之间的拟合度
         for dst in segments:
             ious.append(calc_iou(src, dst))
+
+        # 选择最大拟合度的记录下来
         max_ious = max(ious)
         max_ious_index = ious.index(max_ious)
         if max_ious>=0.5:
@@ -201,7 +205,8 @@ def calc_value(segments):
             # out_b[i][1]=(segments[max_ious_index][1]-segments[max_ious_index][0] - src[1]+src[0])/train_size 
             out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
             out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size         
-            # print u"正确的:",segments[max_ious_index],u"相似的:", src, u"iou：", max_ious,"偏移：", out_b[i]
+        if max_ious > 0.9:
+            print u"正确的:",segments[max_ious_index],u"接近的:", src, u"拟合度：", max_ious,"偏移：", out_b[i]
     return out_c, out_b
                 
 def reader_get_image_and_label():
