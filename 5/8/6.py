@@ -35,7 +35,7 @@ class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
 train_size = 256 # 学习的关键帧长度
 buf_size = 10240
-batch_size = 1
+batch_size = 4
 block_size = 64
 area_ratio = (1.25, 1, 0.5, 0.25)
 
@@ -106,8 +106,8 @@ def network():
     blocks = []
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
-        block_expand = paddle.layer.block_expand(input= main_net, num_channels=256, 
-            stride_x=1, stride_y=1, block_x=main_net.width, block_y=main_net.height)
+        block_expand = paddle.layer.block_expand(input= main_net, num_channels=256,
+            stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
         blocks.append(block_expand)
 
     costs=[]
