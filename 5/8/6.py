@@ -170,7 +170,7 @@ def get_boxs():
     for i in range(train_size):
         if i%4==0:
             for ratio in area_ratio:
-                src = (i-block_size)*ratio, (i+block_size)*ratio
+                src = [(i-block_size)*ratio, (i+block_size)*ratio]
                 boxs.append(src)
     return boxs
 
@@ -178,7 +178,7 @@ def get_boxs():
 def get_box_point(point):
     i = point - point%4
     ratio = area_ratio[point%4]
-    return (i-block_size)*ratio, (i+block_size)*ratio
+    return [(i-block_size)*ratio, (i+block_size)*ratio]
 
 # 按 block_size 格计算,前后各 block_size 格
 # out_c iou 比
