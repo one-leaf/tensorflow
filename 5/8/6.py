@@ -150,7 +150,7 @@ def readDatatoPool():
                 out_c, out_b = calc_value(fix_segments)
                 data_pool.append((np.ravel(batch_data), out_c, out_b))
         while len(data_pool)>buf_size:
-            # print('r')
+            print('r')
             time.sleep(0.1) 
 
 # 计算 IOU,输入为 x1,x2 坐标
@@ -202,7 +202,7 @@ def reader_get_image_and_label():
         t1.start()
         while t1.isAlive():
             while len(data_pool)==0:
-                # print('w')
+                print('w')
                 time.sleep(1)
             x , y, z = data_pool.pop(random.randrange(len(data_pool)))
             yield x, y, z
