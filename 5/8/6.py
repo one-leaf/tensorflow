@@ -105,15 +105,14 @@ def network():
     blocks = []
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
-        block_expand = paddle.layer.block_expand(input= main_net, num_channels=64, 
+        main_net_drop = paddle.layer.dropout(input=main_net, dropout_rate=0.5)
+        block_expand = paddle.layer.block_expand(input= main_net_drop, num_channels=64, 
             stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
         blocks.append(block_expand)
 
     costs=[]
-    layer = paddle.layer.concat(blocks)
-    drop = paddle.layer.dropout(input=layer, dropout_rate=0.5)
-    net_class_fc = paddle.layer.fc(input=drop, size=class_dim, act=paddle.activation.Softmax())
-    net_box_fc = paddle.layer.fc(input=drop, size=class_dim, act=paddle.activation.Tanh())
+    net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
+    net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=c)
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
     costs.append(cost_class)
