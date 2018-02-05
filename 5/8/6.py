@@ -236,7 +236,7 @@ src = ["-" for _ in range(128)]
 print "".join(src)
 for b in bs:
     x = ["-" for _ in range(128)]
-    for i in range(b[0],b[1]+1):
+    for i in range(int(b[0]),int(b[1])+1):
         x[i]="+"
     print "".join(x)
 
