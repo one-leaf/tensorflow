@@ -87,7 +87,7 @@ def network():
     main_nets = []
     net = cnn2(x,  3,  1, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
-    main_nets.append(net)
+    # main_nets.append(net)
     net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)
@@ -127,7 +127,7 @@ def readDatatoPool():
     c = 0
     for i in range(size):
         # if i%2==0:
-        if False:
+        if True:
             data = random.choice(training_data)
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
         else:

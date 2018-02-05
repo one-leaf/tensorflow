@@ -132,8 +132,8 @@ print("loading parameters ...")
 paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
     
 
-def getTestData(testFileid):
-    v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%testFileid))
+def getTestData(testFileid, path="training"):
+    v_data = np.load(os.path.join(data_path, path, "%s.pkl"%testFileid))
     data = []
     batch_data = np.zeros((2048, train_size))    
     w = v_data.shape[0]
@@ -164,14 +164,14 @@ def get_box_point(point):
 
 def test():
     items = []
-    _, validation_data, _ = load_data("validation") 
-    size = len(validation_data)
+    training_data, validation_data, _ = load_data() 
+    size = len(training_data)
     inferer = paddle.inference.Inference(output_layer=[net_class_fc,net_box_fc], parameters=paddle_parameters)
 
-    for i, data_info in enumerate(validation_data):       
+    for i, data_info in enumerate(training_data):       
         data_id = data_info["id"]
 
-        data, label_size = getTestData(data_id)  
+        data, label_size = getTestData(data_id,"training")  
         
         w = len(data)
         print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
