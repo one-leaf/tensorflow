@@ -39,6 +39,7 @@ batch_size = 1
 block_size = 256
 area_ratio = (1.25, 1, 0.75, 0.5)
 
+
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
     training_data = []
@@ -87,10 +88,9 @@ def network():
     main_nets = []
     net = cnn2(x,  3,  1, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
-    main_nets.append(net)
     net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
-    main_nets.append(net)
+    net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)
@@ -98,13 +98,15 @@ def network():
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)  
     net = cnn2(net, 3, 64, 64, 1, 1)
+    main_nets.append(net)  
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)  
  
     blocks = []
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
-        block_expand = paddle.layer.block_expand(input= main_net, num_channels=64, stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
+        block_expand = paddle.layer.block_expand(input= main_net, num_channels=64, 
+            stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
         blocks.append(block_expand)
 
     costs=[]
@@ -126,8 +128,8 @@ def readDatatoPool():
     size = len(training_data)+len(validation_data)
     c = 0
     for i in range(size):
-        if i%2==0:
-        # if True:
+        # if i%2==0:
+        if True:
             data = random.choice(training_data)
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
         else:
@@ -140,7 +142,7 @@ def readDatatoPool():
         for i in range(w):
             _data = np.reshape(v_data[i], (2048,1))
             batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-            if i< train_size or random.random() > 1.0/(train_size//2): continue
+            if i< train_size or random.random() > 1./16: continue
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
@@ -150,8 +152,8 @@ def readDatatoPool():
                 out_c, out_b = calc_value(fix_segments)
                 data_pool.append((np.ravel(batch_data), out_c, out_b))
         while len(data_pool)>buf_size:
-            # print('r')
-            time.sleep(0.1) 
+            print('r')
+            time.sleep(1) 
 
 # 计算 IOU,输入为 x1,x2 坐标
 def calc_iou(src, dst):
@@ -168,7 +170,7 @@ def get_boxs():
     for i in range(train_size):
         if i%4==0:
             for ratio in area_ratio:
-                src = [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+                src = [(i-block_size)*ratio, (i+block_size)*ratio]
                 boxs.append(src)
     return boxs
 
@@ -176,9 +178,11 @@ def get_boxs():
 def get_box_point(point):
     i = point - point%4
     ratio = area_ratio[point%4]
-    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+    return [(i-block_size)*ratio, (i+block_size)*ratio]
 
 # 按 block_size 格计算,前后各 block_size 格
+# out_c iou 比例
+# out_b 左偏移 和 右偏移
 def calc_value(segments):
     out_c=[0 for _ in range(train_size)]
     out_b=[np.zeros(2) for _ in range(train_size)]
@@ -192,8 +196,10 @@ def calc_value(segments):
         max_ious_index = ious.index(max_ious)
         if max_ious>=0.5:
             out_c[i]=1
+            # out_b[i][0]=(segments[max_ious_index][1]+segments[max_ious_index][0] - src[1]-src[0])/(2*train_size)
+            # out_b[i][1]=(segments[max_ious_index][1]-segments[max_ious_index][0] - src[1]+src[0])/train_size 
             out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
-            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size          
+            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size         
     return out_c, out_b
                 
 def reader_get_image_and_label():
@@ -202,7 +208,7 @@ def reader_get_image_and_label():
         t1.start()
         while t1.isAlive():
             while len(data_pool)==0:
-                # print('w')
+                print('w')
                 time.sleep(1)
             x , y, z = data_pool.pop(random.randrange(len(data_pool)))
             yield x, y, z
