@@ -86,27 +86,28 @@ def network():
 
     main_nets = []
     net = cnn2(x,  3,  1, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 128, 1, 1)
+    net = cnn2(net, 3, 128, 256, 1, 1)
     main_nets.append(net)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 256, 512, 1, 1)
+    net = cnn2(net, 3, 512, 256, 1, 1)
     main_nets.append(net)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 256, 512, 1, 1)
+    net = cnn2(net, 3, 512, 256, 1, 1)
     main_nets.append(net)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 256, 512, 1, 1)
+    net = cnn2(net, 3, 512, 256, 1, 1)
     main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 256, 256, 1, 1)
     main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 256, 256, 1, 1)
     main_nets.append(net)  
  
     blocks = []
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
-        block_expand = paddle.layer.block_expand(input= main_net, num_channels=64, stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
+        block_expand = paddle.layer.block_expand(input= main_net, num_channels=1, 
+            stride_x=1, stride_y=main_net.hight, block_x=main_net.width, block_y=1)
         blocks.append(block_expand)
 
     costs=[]
