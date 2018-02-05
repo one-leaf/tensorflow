@@ -200,7 +200,6 @@ def test():
                 print "前五最高：",sort[0:5]
                 print "概率如下：",has_class[sort[0:5]]
                 probs_net = probs[train_size:]
-                print "对应偏移：",probs_net[sort[0:5]]
 
                 print "正确目标：",label[i-train_size+1:i+1]
                 for s in sort[0:5]:
@@ -209,11 +208,16 @@ def test():
                     print s, has_class[s], probs_net[s]
                     print "分类坐标：", src
                     print "偏移量：", probs_net[s]*train_size
-                    src= [src[0]+probs_net[s][0]*train_size,src[1]+probs_net[s][1]*train_size]
-                    print "预测坐标：", src
+                    fix_src= [src[0]+probs_net[s][0]*train_size,src[1]+probs_net[s][1]*train_size]
+                    print "预测坐标：", fix_src
                     label2 = np.zeros([label_size], dtype=np.int)        
-                    for x in range(int(src[0]),int(src[1]+1)):
+                    for x in range(int(fix_src[0]),int(fix_src[1]+1)):
                         label2[x] = 1
+                    label2[s]="8"
+                    if src[0]>=0:
+                        label2[src[0]]="7"
+                    if src[1]<train_size:
+                        label2[src[1]]="9"
                     print "预测目标：", label2[0:train_size] 
 
                 if raw_input("press any key to continue:"): pass
