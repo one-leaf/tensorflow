@@ -87,7 +87,8 @@ def network():
     main_nets = []
     net = cnn2(x,  3,  1, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
-    # main_nets.append(net)
+    net = cnn2(net, 3, 64, 64, 1, 1)
+    main_nets.append(net)
     net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)
@@ -98,6 +99,7 @@ def network():
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)  
     net = cnn2(net, 3, 64, 64, 1, 1)
+    main_nets.append(net)  
     net = cnn2(net, 3, 64, 64, 1, 1)
     main_nets.append(net)  
  
@@ -151,7 +153,7 @@ def readDatatoPool():
                 data_pool.append((np.ravel(batch_data), out_c, out_b))
         while len(data_pool)>buf_size:
             print('r')
-            time.sleep(0.1) 
+            time.sleep(1) 
 
 # 计算 IOU,输入为 x1,x2 坐标
 def calc_iou(src, dst):
