@@ -33,11 +33,11 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 128 # 学习的关键帧长度
+train_size = 1024 # 学习的关键帧长度
 buf_size = 128
 batch_size = 2
 block_size = train_size//4
-area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.05 )
+area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 
 
 def load_data(filter=None):
@@ -149,7 +149,7 @@ def readDatatoPool():
                 segment = annotations['segment']
                 if segment[0]>=i or segment[1]<=i- train_size:
                     continue
-                fix_segments.append([max(0,segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
+                fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_c, out_b = calc_value(fix_segments)
                 data_pool.append((np.ravel(batch_data), out_c, out_b))
         while len(data_pool)>buf_size:
@@ -171,7 +171,7 @@ def get_boxs():
     for i in range(train_size):
         if i%8==0:
             for ratio in area_ratio:
-                src = [(i-block_size)*ratio, (i+block_size)*ratio]
+                src = [max((i-block_size)*ratio, 0), min((i+block_size)*ratio, train_size-1)]
                 boxs.append(src)
     return boxs
 
@@ -231,15 +231,15 @@ def event_handler(event):
         # else:
             # print(".")
 
-bs = get_boxs()
-src = ["-" for _ in range(128)]
-print "".join(src)
-for b in bs:
-    x = ["-" for _ in range(128)]
-    for i in range(int(b[0]),int(b[1])+1):
-        if i>=0 and i<128:
-            x[i]="+"
-    print "".join(x)
+# bs = get_boxs()
+# src = ["-" for _ in range(128)]
+# print "".join(src)
+# for b in bs:
+#     x = ["-" for _ in range(128)]
+#     for i in range(int(b[0]),int(b[1])+1):
+#         if i>=0 and i<128:
+#             x[i]="+"
+#     print "".join(x)
 
 
 
