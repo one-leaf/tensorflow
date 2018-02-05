@@ -181,8 +181,8 @@ def get_box_point(point):
     return [(i-block_size)*ratio, (i+block_size)*ratio]
 
 # 按 block_size 格计算,前后各 block_size 格
-# out_c iou 比
-# out_b 中心点的偏离比 和 缺少量的长度比
+# out_c iou 比例
+# out_b 左偏移 和 右偏移
 def calc_value(segments):
     out_c=[0 for _ in range(train_size)]
     out_b=[np.zeros(2) for _ in range(train_size)]
@@ -196,8 +196,10 @@ def calc_value(segments):
         max_ious_index = ious.index(max_ious)
         if max_ious>=0.5:
             out_c[i]=1
-            out_b[i][0]=(segments[max_ious_index][1]+segments[max_ious_index][0] - src[1]-src[0])/(2*train_size)
-            out_b[i][1]=(segments[max_ious_index][1]-segments[max_ious_index][0] - src[1]+src[0])/train_size          
+            # out_b[i][0]=(segments[max_ious_index][1]+segments[max_ious_index][0] - src[1]-src[0])/(2*train_size)
+            # out_b[i][1]=(segments[max_ious_index][1]-segments[max_ious_index][0] - src[1]+src[0])/train_size 
+            out_b[i][0]=(segments[max_ious_index][0]-src[0])/train_size
+            out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size         
     return out_c, out_b
                 
 def reader_get_image_and_label():
