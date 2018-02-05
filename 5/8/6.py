@@ -231,7 +231,7 @@ def event_handler(event):
         # else:
             # print(".")
 
-bs = get_boxs(128)
+bs = get_boxs()
 src = ["-" for _ in range(128)]
 print "".join(src)
 for b in bs:
