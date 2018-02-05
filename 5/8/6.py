@@ -105,12 +105,10 @@ def network():
     blocks = []
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
-        printLayer(main_net)
-        main_net_drop = paddle.layer.dropout(input=main_net, dropout_rate=0.5)
-        printLayer(main_net_drop)
-        block_expand = paddle.layer.block_expand(input= main_net_drop, num_channels=64, 
+        block_expand = paddle.layer.block_expand(input=main_net, num_channels=64, 
             stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-        blocks.append(block_expand)
+        block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
+        blocks.append(block_expand_drop)
 
     costs=[]
     net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
