@@ -32,11 +32,11 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 256 # 学习的关键帧长度
-buf_size = 8192
-batch_size = 4
-block_size = 64
-area_ratio = (1.25, 1, 0.5, 0.25)
+train_size = 1024 # 学习的关键帧长度
+buf_size = 128
+batch_size = 1
+block_size = 256
+area_ratio = (1.25, 1, 0.75, 0.5)
 
 
 def load_data(filter=None):
