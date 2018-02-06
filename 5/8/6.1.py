@@ -64,22 +64,6 @@ print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), siz
 print("loading parameters ...")
 paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
     
-
-def getTestData(testFileid, path="training"):
-    
-    data = []
-    batch_data = np.zeros((2048, train_size))    
-    w = v_data.shape[0]
-    label = np.zeros([w], dtype=np.int)
-    for i in range(w):
-        _data = np.reshape(v_data[i], (2048,1))
-        batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-        if i>0 and i%train_size==0:
-       # if i>train_size:
-            data.append([(np.ravel(batch_data),), i])
-    return data, w
-
-
 def test():
     items = []
     training_data, validation_data, _ = load_data() 
