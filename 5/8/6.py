@@ -216,7 +216,7 @@ def reader_get_image_and_label():
         while t1.isAlive():
             while len(data_pool)==0:
                 time.sleep(1)
-            if len(data_pool)<buf_size//2:
+            if len(data_pool)<buf_size//2 and random.random()>0.5:
                 x , y, z = random.choice(data_pool)
             else:    
                 x , y, z = data_pool.pop(random.randrange(len(data_pool)))
