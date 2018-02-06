@@ -78,13 +78,13 @@ def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
     x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))  
-    # x_emb = paddle.layer.embedding(input=x, size=train_size*2048)  # emb一定要interger数据？
 
+    # 是否精彩分类
+    a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
+    # box 分类器
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
-    # c_emb = paddle.layer.embedding(input=c, size=train_size)
-
+    # box 边缘修正
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
-    # b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
     net = cnn2(x,   3, channels_num, 64, 1, 1)    #32
@@ -112,10 +112,15 @@ def network():
 
     costs=[]
     net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=c)
+
+    net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
+    cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
+
+    net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
     costs.append(cost_class)
+    costs.append(cost_box_class)
     costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
@@ -157,8 +162,8 @@ def readDatatoPool():
                 if segment[0]>=i or segment[1]<=i-train_size:
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
-                out_c, out_b = calc_value(fix_segments)
-                data_pool.append((_data, out_c, out_b))
+                out_a, out_c, out_b = calc_value(fix_segments)
+                data_pool.append((_data, out_a, out_c, out_b))
         while len(data_pool)>buf_size:
             print('r')
             time.sleep(1) 
@@ -192,8 +197,13 @@ def get_box_point(point):
 # out_c iou 比例
 # out_b 左偏移 和 右偏移
 def calc_value(segments):
+    out_a=[0 for _ in range(train_size)]
     out_c=[0 for _ in range(train_size)]
     out_b=[np.zeros(2) for _ in range(train_size)]
+
+    for dst in segments:
+        for i in range(int(dst[0]), int(dst[1])+1):
+            out_a[i] = 1
 
     boxs = get_boxs()
     for i, src in enumerate(boxs):
@@ -214,7 +224,7 @@ def calc_value(segments):
             out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size         
         # if max_ious > 0.9:
         #     print u"正确的:",segments[max_ious_index],u"接近的:", src, u"拟合度：", max_ious,u"偏移：", out_b[i]
-    return out_c, out_b
+    return out_a, out_c, out_b
                 
 def reader_get_image_and_label():
     def reader():
@@ -224,10 +234,10 @@ def reader_get_image_and_label():
             while len(data_pool)==0:
                 time.sleep(1)
             if len(data_pool)<buf_size//2 and random.random()>0.5:
-                x , y, z = random.choice(data_pool)
+                d, a, c, b = random.choice(data_pool)
             else:    
-                x , y, z = data_pool.pop(random.randrange(len(data_pool)))
-            yield x, y, z
+                d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
+            yield d, a, c, b
     return reader
 
 def event_handler(event):
@@ -250,9 +260,6 @@ def event_handler(event):
 #             x[i]="+"
 #     print "".join(x)
 
-
-
-
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
@@ -260,7 +267,7 @@ print("get network ...")
 cost, paddle_parameters, adam_optimizer, _, _ = network()
 print('set reader ...')
 train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-feeding={'x':0, 'c':1, 'b':2}
+feeding={'x':0, 'a':1, 'c':2, 'b':3}
  
 # if os.path.exists(param_file):
 #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
