@@ -88,9 +88,9 @@ def network():
     main_nets = []
     net = cnn2(x,   5, 32, 64, 1, 2)    #32
     main_nets.append(net)
-    net = cnn2(net, 3, 64, 64, 1, 2)    #16
-    net = cnn2(net, 3, 64, 64, 1, 1)    #8
-    net = cnn2(net, 3, 64, 64, 1, 1)    #4
+    net = cnn2(net, 3, 64, 128, 1, 1)    #16
+    net = cnn2(net, 3, 128, 256, 1, 1)    #8
+    net = cnn2(net, 3, 256, 64, 1, 1)    #4
     main_nets.append(net)  
     net = cnn2(net, 3, 64, 64, 1, 1)    #2
     main_nets.append(net)  
