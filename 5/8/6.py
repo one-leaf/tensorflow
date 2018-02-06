@@ -36,7 +36,7 @@ class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
 train_size = 512 # 学习的关键帧长度
 buf_size = 8192
-batch_size = 4
+batch_size = 8
 block_size = train_size//4
 area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 
@@ -90,17 +90,19 @@ def network():
     net = cnn2(x,   5, channels_num, 64, 1, 2)    #32
     net = cnn2(net, 3, 64, 128, 1, 1)    #16
     net = cnn2(net, 3, 128, 256, 1, 1)    #8
-    net = cnn2(net, 3, 256, 64, 1, 1)    #4
+    net = cnn2(net, 3, 256, 256, 1, 1)    #4
     main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)    #2
+    net = cnn2(net, 3, 256, 256, 1, 1)    #2
     main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)    #1
+    net = cnn2(net, 3, 256, 256, 1, 1)    #1
     main_nets.append(net)  
- 
+    net = cnn2(net, 3, 256, 256, 1, 1)    #1
+    main_nets.append(net)  
+
     blocks = []
     for i  in range(len(main_nets)):
         main_net = main_nets[i]
-        block_expand = paddle.layer.block_expand(input=main_net, num_channels=64, 
+        block_expand = paddle.layer.block_expand(input=main_net, num_channels=main_net.num_filters, 
             stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
         block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
         blocks.append(block_expand_drop)
