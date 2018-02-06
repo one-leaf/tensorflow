@@ -121,7 +121,7 @@ def network():
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
     costs.append(cost_class)
     costs.append(cost_box_class)
-    costs.append(cost_box)
+    # costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
