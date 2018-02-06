@@ -139,9 +139,9 @@ def readDatatoPool():
         for i in range(w):
             _data = np.reshape(v_data[i], (1, 2048))
             batch_data = np.append(batch_data[1:, :], _data, axis=0)
-            batch_data = np.reshape(batch_data,(train_size, channels_num, 2048//channels_num))
+            fix_batch_data = np.reshape(batch_data,(train_size, channels_num, 2048//channels_num))
             # hcm => chm
-            batch_data = np.transpose(batch_data,(1, 0, 2))
+            fix_batch_data = np.transpose(fix_batch_data,(1, 0, 2))
             if i!=w-1 and (i< train_size or random.random() > 1./32): continue
             fix_segments =[]
             for annotations in data["data"]:
@@ -150,7 +150,7 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_c, out_b = calc_value(fix_segments)
-                data_pool.append((np.ravel(batch_data), out_c, out_b))
+                data_pool.append((np.ravel(fix_batch_data), out_c, out_b))
         while len(data_pool)>buf_size:
             print('r')
             time.sleep(1) 
