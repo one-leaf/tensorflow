@@ -131,18 +131,18 @@ def readDatatoPool():
         else:
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
-        batch_data = np.zeros((train_size, 2048))    
+        batch_data = np.zeros((train_size, channels_num, 2048//channels_num))    
         w = v_data.shape[0]
         print "reading", data["id"], v_data.shape 
 
         for i in range(w):
-            _data = np.reshape(v_data[i], (1, 2048))
-            batch_data = np.append(batch_data[1:, :], _data, axis=0)
+            _data = np.reshape(v_data[i], (1, channels_num, 2048//channels_num))
+            batch_data = np.append(batch_data[1:, :, :], _data, axis=0)
             if i!=w-1 and (i< train_size or random.random() > 1./32): continue
 
-            fix_batch_data = np.reshape(batch_data,(train_size, channels_num, 2048//channels_num))
+            # fix_batch_data = np.reshape(batch_data,(train_size, channels_num, 2048//channels_num))
             # hcm => chm
-            fix_batch_data = np.transpose(fix_batch_data,(1, 0, 2))
+            fix_batch_data = np.transpose(batch_data,(1, 0, 2))
 
             fix_segments =[]
             for annotations in data["data"]:
