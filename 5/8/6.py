@@ -31,6 +31,7 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
+num_channels = 32   # 图片先分层
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
 train_size = 512 # 学习的关键帧长度
@@ -76,7 +77,7 @@ def printLayer(layer):
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    x = paddle.layer.data(name='x', height=train_size, width=2048//32, type=paddle.data_type.dense_vector(train_size*2048))  
+    x = paddle.layer.data(name='x', height=train_size, width=2048//num_channels, type=paddle.data_type.dense_vector(train_size*2048))  
     # x_emb = paddle.layer.embedding(input=x, size=train_size*2048)  # emb一定要interger数据？
 
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
@@ -86,7 +87,7 @@ def network():
     # b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
-    net = cnn2(x,   5, 32, 64, 1, 2)    #32
+    net = cnn2(x,   5, num_channels, 64, 1, 2)    #32
     main_nets.append(net)
     net = cnn2(net, 3, 64, 128, 1, 1)    #16
     net = cnn2(net, 3, 128, 256, 1, 1)    #8
@@ -131,13 +132,15 @@ def readDatatoPool():
         else:
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
-        batch_data = np.zeros((train_size, 2048))    
+        batch_data = np.zeros((train_size, num_channels, 2048//num_channels))    
         w = v_data.shape[0]
         print "reading", data["id"], v_data.shape 
 
         for i in range(w):
-            _data = np.reshape(v_data[i], (1, 2048))
-            batch_data = np.append(batch_data[1:, :], _data, axis=0)
+            _data = np.reshape(v_data[i], (1, num_channels, 2048//num_channels))
+            batch_data = np.append(batch_data[1:, :, :], _data, axis=0)
+            # hcm => chm
+            batch_data = np.transpose(batch_data,(1, 0, 2))
             if i!=w-1 and (i< train_size or random.random() > 1./32): continue
             fix_segments =[]
             for annotations in data["data"]:
