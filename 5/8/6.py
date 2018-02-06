@@ -86,8 +86,8 @@ def network():
     # b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
-    net = cnn2(x,   7,  1, 64, 1, 3)
-    net = cnn2(net, 5, 64, 64, 1, 2)
+    net = cnn2(x,   3,  1, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
     net = cnn2(net, 3, 64, 64, 1, 1)
@@ -137,12 +137,12 @@ def readDatatoPool():
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
             
-        batch_data = np.zeros((2048, train_size))    
+        batch_data = np.zeros((train_size, 2048))    
         w = v_data.shape[0]
 
         for i in range(w):
-            _data = np.reshape(v_data[i], (2048,1))
-            batch_data = np.append(batch_data[:, 1:], _data, axis=1)
+            _data = np.reshape(v_data[i], (1, 2048))
+            batch_data = np.append(batch_data[1:, :], _data, axis=0)
             if i!=w-1 and (i< train_size or random.random() > 1./32): continue
             fix_segments =[]
             for annotations in data["data"]:
