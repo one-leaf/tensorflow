@@ -87,17 +87,20 @@ def network():
     # b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
-    net = cnn2(x,   5, channels_num, 64, 1, 2)    #32
+    net = cnn2(x,   3, channels_num, 64, 1, 1)    #32
     net = cnn2(net, 3, 64, 128, 1, 1)    #16
     net = cnn2(net, 3, 128, 256, 1, 1)    #8
-    net = cnn2(net, 3, 256, 256, 1, 1)    #4
+    net = cnn2(net, 3, 256, 512, 1, 1)    #4
+    net = cnn2(net, 3, 512, 1024, 1, 1)    #2
     main_nets.append(net)  
-    net = cnn2(net, 3, 256, 256, 1, 1)    #2
+    net = cnn2(net, 3, 1024, 512, 1, 1)    #2
     main_nets.append(net)  
-    net = cnn2(net, 3, 256, 256, 1, 1)    #1
+    net = cnn2(net, 3, 512, 256, 1, 1)    #1
     main_nets.append(net)  
-    net = cnn2(net, 3, 256, 256, 1, 1)    #1
+    net = cnn2(net, 3, 256, 128, 1, 1)    #1
     main_nets.append(net)  
+    net = cnn2(net, 3, 128, 64, 1, 1)    #1
+    main_nets.append(net) 
 
     blocks = []
     for i  in range(len(main_nets)):
@@ -267,4 +270,4 @@ feeding={'x':0, 'c':1, 'b':2}
 
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=4)
