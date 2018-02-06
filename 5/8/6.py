@@ -217,7 +217,10 @@ def reader_get_image_and_label():
             while len(data_pool)==0:
                 print('w')
                 time.sleep(1)
-            x , y, z = data_pool.pop(random.randrange(len(data_pool)))
+            if len(data_pool)<buf_size//2:
+                x , y, z = random.choice(data_pool)
+            else:    
+                x , y, z = data_pool.pop(random.randrange(len(data_pool)))
             yield x, y, z
     return reader
 
