@@ -136,9 +136,9 @@ def readDatatoPool():
         else:
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
-            
         batch_data = np.zeros((train_size, 2048))    
         w = v_data.shape[0]
+        print "reading", data["id"], v_data.shape 
 
         for i in range(w):
             _data = np.reshape(v_data[i], (1, 2048))
