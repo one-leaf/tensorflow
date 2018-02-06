@@ -119,7 +119,7 @@ def network():
 
 def read_data(v_data):
     batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
-    w = len(v_data.shape[0])
+    w = v_data.shape[0]
     for i in range(w):
         _data = np.reshape(v_data[i], (1, channels_num, 2048//channels_num))
         batch_data = np.append(batch_data[1:, :, :], _data, axis=0)

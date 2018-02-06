@@ -75,7 +75,7 @@ def test():
         v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%testFileid))
 
         # 得到直观分布图
-        w = len(v_data.shape[0])
+        w = v_data.shape[0]
         label = np.zeros([w], dtype=np.int)
         for annotations in data_info["data"]:
             segment = annotations['segment']
