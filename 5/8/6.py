@@ -76,7 +76,7 @@ def printLayer(layer):
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    x = paddle.layer.data(name='x', height=train_size, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
+    x = paddle.layer.data(name='x', height=train_size, width=2048//32, type=paddle.data_type.dense_vector(train_size*2048))  
     # x_emb = paddle.layer.embedding(input=x, size=train_size*2048)  # emb一定要interger数据？
 
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
@@ -86,20 +86,15 @@ def network():
     # b_emb = paddle.layer.embedding(input=b, size=train_size)
 
     main_nets = []
-    net = cnn2(x,   7,  1, 64, 1, 3)
-    net = cnn2(net, 7, 64, 64, 1, 3)
-    net = cnn2(net, 5, 64, 64, 1, 2)
-    net = cnn2(net, 5, 64, 64, 1, 2)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(x,   5, 32, 64, 1, 2)    #32
+    net = cnn2(net, 5, 64, 64, 1, 2)    #16
     main_nets.append(net)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)    #8
+    net = cnn2(net, 3, 64, 64, 1, 1)    #4
     main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)    #2
     main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)
+    net = cnn2(net, 3, 64, 64, 1, 1)    #1
     main_nets.append(net)  
  
     blocks = []
