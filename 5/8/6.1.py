@@ -14,6 +14,7 @@ import gc
 import commands, re  
 import zipfile
 
+model = __import__('6')
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
@@ -29,15 +30,6 @@ out_dir = os.path.join(model_path, "out")
 
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
-
-class_dim = 2 # 分类 0，背景， 1，精彩
-box_dim = 2 # 偏移，左，右
-train_size = 512 # 学习的关键帧长度
-buf_size = 128
-batch_size = 1
-block_size = train_size//4
-area_ratio = (1.5, 1, 0.75, 0.5)
-
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -59,72 +51,12 @@ def load_data(filter=None):
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
 
-def cnn2(input,filter_size,num_channels, num_filters=64, stride=1, padding=1):
-    net = paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
-         num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Linear())
-    net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
-    return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=1, stride=2, stride_y=1, pool_type=paddle.pooling.Max())
-
-def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act=paddle.activation.Linear()):
-    return  paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
-         num_filters=num_filters, stride=stride, padding=padding, act=act)
-
-def printLayer(layer):
-    print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
-
-def network():
-    # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
-    # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    x = paddle.layer.data(name='x', height=train_size, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    # x_emb = paddle.layer.embedding(input=x, size=train_size*2048)  # emb一定要interger数据？
-
-    c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
-    # c_emb = paddle.layer.embedding(input=c, size=train_size)
-
-    b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
-    # b_emb = paddle.layer.embedding(input=b, size=train_size)
-
-    main_nets = []
-    net = cnn2(x,  3,  1, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    main_nets.append(net)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)
-    main_nets.append(net)  
- 
-    blocks = []
-    for i  in range(len(main_nets)):
-        main_net = main_nets[i]
-        block_expand = paddle.layer.block_expand(input= main_net, num_channels=64, 
-            stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-        blocks.append(block_expand)
-
-    costs=[]
-    net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
-    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=c)
-    cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
-    costs.append(cost_class)
-    costs.append(cost_box)
-    
-    parameters = paddle.parameters.create(costs)
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return costs, parameters, adam_optimizer, net_class_fc, net_box_fc 
       
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
-cost, paddle_parameters, adam_optimizer, net_class_fc, net_box_fc = network()
+cost, paddle_parameters, adam_optimizer, net_class_fc, net_box_fc = model.network()
 
 # 预测时需要读取模型
 (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
@@ -134,7 +66,7 @@ paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
     
 
 def getTestData(testFileid, path="training"):
-    v_data = np.load(os.path.join(data_path, path, "%s.pkl"%testFileid))
+    
     data = []
     batch_data = np.zeros((2048, train_size))    
     w = v_data.shape[0]
@@ -147,21 +79,6 @@ def getTestData(testFileid, path="training"):
             data.append([(np.ravel(batch_data),), i])
     return data, w
 
-# 创建box
-def get_boxs():
-    boxs=[]
-    for i in range(train_size):
-        if i%4==0:
-            for ratio in area_ratio:
-                src = [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
-                boxs.append(src)
-    return boxs
-
-# 根据坐标返回box
-def get_box_point(point):
-    i = point - point%4
-    ratio = area_ratio[point%4]
-    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
 
 def test():
     items = []
@@ -171,17 +88,11 @@ def test():
 
     for i, data_info in enumerate(training_data):       
         data_id = data_info["id"]
+        v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%testFileid))
 
-        data, label_size = getTestData(data_id,"training")  
-        
-        w = len(data)
-        print("\nstart infer: %s / %s  %s size %s"%(i, size, data_id, w))
-        
-        all_values=[]
-        print("need infer count:", w)
-
-        label = np.zeros([label_size], dtype=np.int)
-
+        # 得到直观分布图
+        w = len(v_data.shape[0])
+        label = np.zeros([w], dtype=np.int)
         for annotations in data_info["data"]:
             segment = annotations['segment']
             for i in range(int(segment[0]),int(segment[1]+1)):
@@ -190,7 +101,7 @@ def test():
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
 
-            for _data, i in data:
+            for i, _data = model.read_data(v_data):
                 probs = inferer.infer(input=[_data])
 
                 probs_class = probs[0:train_size]
@@ -201,7 +112,7 @@ def test():
                 print "概率如下：",has_class[sort[0:5]]
                 probs_net = probs[train_size:]
 
-                print "正确目标：",label[i-train_size+1:i+1]
+                print "正确目标：",label[i-train_size:i]
                 for s in sort[0:5]:
                     if has_class[s]<0.5: break
                     src = get_box_point(s)

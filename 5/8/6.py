@@ -115,8 +115,19 @@ def network():
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return costs, parameters, adam_optimizer, (net_class_fc, net_box_fc) 
+    return costs, parameters, adam_optimizer, net_class_fc, net_box_fc 
 
+def read_data(v_data):
+    batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
+    w = len(v_data.shape[0])
+    for i in range(w):
+        _data = np.reshape(v_data[i], (1, channels_num, 2048//channels_num))
+        batch_data = np.append(batch_data[1:, :, :], _data, axis=0)
+        if i>0 and (i+1)%train_size==0:
+            fix_batch_data = np.transpose(batch_data,(1, 0, 2))
+            yield i, np.ravel(fix_batch_data)
+    if w%train_size!=0:
+        yield w-1,np.ravel(fix_batch_data)
 
 data_pool = []
 training_data, validation_data, _ = load_data()
@@ -131,27 +142,18 @@ def readDatatoPool():
         else:
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
-        batch_data = np.zeros((train_size, channels_num, 2048//channels_num))    
-        w = v_data.shape[0]
+
         print "reading", data["id"], v_data.shape 
 
-        for i in range(w):
-            _data = np.reshape(v_data[i], (1, channels_num, 2048//channels_num))
-            batch_data = np.append(batch_data[1:, :, :], _data, axis=0)
-            if i!=w-1 and (i< train_size or random.random() > 1./32): continue
-
-            # fix_batch_data = np.reshape(batch_data,(train_size, channels_num, 2048//channels_num))
-            # hcm => chm
-            fix_batch_data = np.transpose(batch_data,(1, 0, 2))
-
+        for i, _data in read_data(v_data):
             fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
-                if segment[0]>=i or segment[1]<=i- train_size:
+                if segment[0]>=i or segment[1]<=i-train_size:
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_c, out_b = calc_value(fix_segments)
-                data_pool.append((np.ravel(fix_batch_data), out_c, out_b))
+                data_pool.append((_data, out_c, out_b))
         while len(data_pool)>buf_size:
             print('r')
             time.sleep(1) 
@@ -250,7 +252,7 @@ print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
-cost, paddle_parameters, adam_optimizer, output = network()
+cost, paddle_parameters, adam_optimizer, _, _ = network()
 print('set reader ...')
 train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
 feeding={'x':0, 'c':1, 'b':2}
