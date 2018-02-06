@@ -33,9 +33,9 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 1024 # 学习的关键帧长度
+train_size = 512 # 学习的关键帧长度
 buf_size = 128
-batch_size = 2
+batch_size = 4
 block_size = train_size//4
 area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 
