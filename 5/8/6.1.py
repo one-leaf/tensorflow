@@ -72,11 +72,11 @@ def test():
                 print "前五最高：",sort[0:5]
                 print "概率如下：",has_class[sort[0:5]]
                 probs_net = probs[model.train_size:]
-
+                print i-model.train_size, i
                 print "正确目标：",label[i-model.train_size:i]
                 for s in sort[0:5]:
                     if has_class[s]<0.5: break
-                    src = get_box_point(s)
+                    src = model.get_box_point(s)
                     print s, has_class[s], probs_net[s]
                     print "分类坐标：", src
                     print "偏移量：", probs_net[s]*model.train_size
