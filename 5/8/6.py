@@ -132,14 +132,26 @@ def network():
     # return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc 
     return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc
 
+# def read_data(v_data):
+#     batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
+#     w = v_data.shape[0]
+#     for i in range(w):
+#         _data = np.reshape(v_data[i], (1, channels_num, 2048//channels_num))
+#         batch_data = np.append(batch_data[1:, :, :], _data, axis=0)
+#         if i>0 and (i+1)%(train_size//4)==0:
+#             fix_batch_data = np.transpose(batch_data,(1, 0, 2))
+#             yield i, np.ravel(fix_batch_data)
+#     if w%train_size!=0:
+#         yield w-1,np.ravel(fix_batch_data)
+
 def read_data(v_data):
-    batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
+    batch_data = np.zeros((train_size, 2048))  
     w = v_data.shape[0]
     for i in range(w):
-        _data = np.reshape(v_data[i], (1, channels_num, 2048//channels_num))
-        batch_data = np.append(batch_data[1:, :, :], _data, axis=0)
+        _data = np.reshape(v_data[i], (1, 2048))
+        batch_data = np.append(batch_data[1:, :], _data, axis=0)
         if i>0 and (i+1)%(train_size//4)==0:
-            fix_batch_data = np.transpose(batch_data,(1, 0, 2))
+            fix_batch_data = np.reshape(batch_data,(channels_num, train_size, 2048//channels_num))
             yield i, np.ravel(fix_batch_data)
     if w%train_size!=0:
         yield w-1,np.ravel(fix_batch_data)
