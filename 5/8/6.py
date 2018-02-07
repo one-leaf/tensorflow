@@ -87,34 +87,34 @@ def network():
     # # box 边缘修正
     # b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
-    # main_nets = []
+    main_nets = []
     net = cnn2(x,   3, channels_num, 64, 1, 1)    #32
     net = cnn2(net, 3, 64, 128, 1, 1)    #16
     net = cnn2(net, 3, 128, 256, 1, 1)    #8
     net = cnn2(net, 3, 256, 512, 1, 1)    #4
     net = cnn2(net, 3, 512, 1024, 1, 1)    #2
-    # main_nets.append(net)  
+    main_nets.append(net)  
     net = cnn2(net, 3, 1024, 512, 1, 1)    #2
-    # main_nets.append(net)  
+    main_nets.append(net)  
     net = cnn2(net, 3, 512, 256, 1, 1)    #1
-    # main_nets.append(net)  
+    main_nets.append(net)  
     net = cnn2(net, 3, 256, 128, 1, 1)    #1
-    # main_nets.append(net)  
+    main_nets.append(net)  
     net = cnn2(net, 3, 128, 64, 1, 1)    #1
-    # main_nets.append(net) 
+    main_nets.append(net) 
 
-    # blocks = []
-    # for i  in range(len(main_nets)):
-    #     main_net = main_nets[i]
-    #     block_expand = paddle.layer.block_expand(input=main_net, num_channels=main_net.num_filters, 
-    #         stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-    #     # block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
-    #     # blocks.append(block_expand_drop)
-    #     blocks.append(block_expand)
-    block_expand = paddle.layer.block_expand(input=net, num_channels=net.num_filters, 
-        stride_x=1, stride_y=1, block_x=net.width, block_y=1)
+    blocks = []
+    for i  in range(len(main_nets)):
+        main_net = main_nets[i]
+        block_expand = paddle.layer.block_expand(input=main_net, num_channels=main_net.num_filters, 
+            stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
+        # block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
+        # blocks.append(block_expand_drop)
+        blocks.append(block_expand)
+    # block_expand = paddle.layer.block_expand(input=net, num_channels=net.num_filters, 
+    #     stride_x=1, stride_y=1, block_x=net.width, block_y=1)
     costs=[]
-    net_class_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
+    net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
