@@ -243,7 +243,8 @@ def reader_get_image_and_label():
             else:    
                 d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
             # print len(d),len(a),len(c),len(b)
-            # print a
+            print d
+            print a
             # print c
             # print b
             yield d, a, c, b
