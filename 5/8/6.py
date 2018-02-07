@@ -111,11 +111,11 @@ def network():
         blocks.append(block_expand_drop)
 
     costs=[]
-    # net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    # cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
+    net_class_fc = paddle.layer.fc(input=blocks[0], size=class_dim, act=paddle.activation.Softmax())
+    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
-    net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
+    # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
+    # cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
     # net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     # cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
@@ -123,7 +123,7 @@ def network():
     # costs.append(cost_box_class)
     # costs.append(cost_box)
     
-    parameters = paddle.parameters.create(cost_box_class)
+    parameters = paddle.parameters.create(cost_class)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
     # return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc 
     return costs, parameters, adam_optimizer,0,0
