@@ -72,7 +72,7 @@ def test():
 
     for i, data_info in enumerate(training_data):       
         data_id = data_info["id"]
-        v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%testFileid))
+        v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%data_id))
 
         # 得到直观分布图
         w = v_data.shape[0]
