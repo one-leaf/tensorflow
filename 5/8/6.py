@@ -94,12 +94,12 @@ def network():
     net = cnn2(net, 3, 64, 64, 1, 1)    #4
     net = cnn2(net, 3, 64, 64, 1, 1)    #2
     net = cnn2(net, 3, 64, 64, 1, 1)    #2
-    net = cnn2(net, 3, 64, 64, 1, 1)    #1
     main_nets.append(net)  
     net = cnn2(net, 3, 64, 64, 1, 1)    #1
-    main_nets.append(net)  
     net = cnn2(net, 3, 64, 64, 1, 1)    #1
-    main_nets.append(net) 
+    main_nets.append(net)  
+    # net = cnn2(net, 3, 64, 64, 1, 1)    #1
+    # main_nets.append(net) 
 
     blocks = []
     for i  in range(len(main_nets)):
