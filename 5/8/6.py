@@ -115,13 +115,13 @@ def network():
     net_class_fc = paddle.layer.fc(input=blocks[-1], size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
-    # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    # cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
+    net_box_class_fc = paddle.layer.fc(input=blocks[-1], size=class_dim, act=paddle.activation.Softmax())
+    cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
     # net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     # cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
     costs.append(cost_class)
-    # costs.append(cost_box_class)
+    costs.append(cost_box_class)
     # costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
@@ -129,7 +129,7 @@ def network():
     print parameter_names
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
     # return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc 
-    return costs, parameters, adam_optimizer,0,0
+    return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc
 
 def read_data(v_data):
     batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
@@ -246,7 +246,7 @@ def reader_get_image_and_label():
             # print a
             # print c
             # print b
-            yield d, a #, c, b
+            yield d, a, c, b
     return reader
 
 def event_handler(event):
@@ -254,8 +254,8 @@ def event_handler(event):
         if event.batch_id>0 and event.batch_id % 10 == 0:
             print("Pass %d, Batch %d, Cost %f, %s" % (
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
-            # with open(param_file, 'wb') as f:
-            #     paddle_parameters.to_tar(f)
+            with open(param_file, 'wb') as f:
+                paddle_parameters.to_tar(f)
         # else:
             # print(".")
 
@@ -276,8 +276,8 @@ print("get network ...")
 cost, paddle_parameters, adam_optimizer, _, _ = network()
 print('set reader ...')
 train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-# feeding={'x':0, 'a':1, 'c':2, 'b':3}
-feeding={'x':0, 'a':1} 
+feeding={'x':0, 'a':1, 'c':2, 'b':3}
+# feeding={'x':0, 'a':1} 
 # if os.path.exists(param_file):
 #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
 #     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
