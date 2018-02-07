@@ -82,9 +82,9 @@ def network():
     # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
     # box 分类器
-    c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
-    # box 边缘修正
-    b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
+    # c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
+    # # box 边缘修正
+    # b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
     # main_nets = []
     net = cnn2(x,   3, channels_num, 64, 1, 1)    #32
@@ -247,7 +247,7 @@ def reader_get_image_and_label():
             # print a
             # print c
             # print b
-            yield d, a#, c, b
+            yield d, a #, c, b
     return reader
 
 def event_handler(event):
