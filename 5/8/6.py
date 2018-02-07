@@ -277,34 +277,23 @@ def event_handler(event):
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
-        # else:
-            # print(".")
 
-# bs = get_boxs()
-# src = ["-" for _ in range(128)]
-# print "".join(src)
-# for b in bs:
-#     x = ["-" for _ in range(128)]
-#     for i in range(int(b[0]),int(b[1])+1):
-#         if i>=0 and i<128:
-#             x[i]="+"
-#     print "".join(x)
+if __name__ == '__main__':
+    print("paddle init ...")
+    # paddle.init(use_gpu=False, trainer_count=2) 
+    paddle.init(use_gpu=True, trainer_count=1)
+    print("get network ...")
+    cost, paddle_parameters, adam_optimizer, _, _ = network()
+    print('set reader ...')
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    feeding={'x':0, 'a':1, 'c':2, 'b':3}
+    # feeding={'x':0, 'a':1} 
+    if os.path.exists(param_file):
+        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+        print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+        print("loading parameters ...")
+        paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
-print("paddle init ...")
-# paddle.init(use_gpu=False, trainer_count=2) 
-paddle.init(use_gpu=True, trainer_count=1)
-print("get network ...")
-cost, paddle_parameters, adam_optimizer, _, _ = network()
-print('set reader ...')
-train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-feeding={'x':0, 'a':1, 'c':2, 'b':3}
-# feeding={'x':0, 'a':1} 
-if os.path.exists(param_file):
-    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
-    print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-    print("loading parameters ...")
-    paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
-
-trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
-print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=8)
+    trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
+    print("start train ...")
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=8)
