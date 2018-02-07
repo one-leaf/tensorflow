@@ -243,11 +243,11 @@ def reader_get_image_and_label():
             else:    
                 d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
             # print len(d),len(a),len(c),len(b)
-            print d
-            print a
+            # print d
+            # print a
             # print c
             # print b
-            yield d, a, c, b
+            yield d, a#, c, b
     return reader
 
 def event_handler(event):
@@ -277,8 +277,8 @@ print("get network ...")
 cost, paddle_parameters, adam_optimizer, _, _ = network()
 print('set reader ...')
 train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-feeding={'x':0, 'a':1, 'c':2, 'b':3}
- 
+# feeding={'x':0, 'a':1, 'c':2, 'b':3}
+feeding={'x':0, 'a':1} 
 # if os.path.exists(param_file):
 #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
 #     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
