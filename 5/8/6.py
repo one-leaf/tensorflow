@@ -77,7 +77,8 @@ def printLayer(layer):
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))  
+    # x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
+    x = paddle.layer.data(name='x', height=1, width=2048//channels_num, type=paddle.data_type.dense_vector_sequence(2048))   
 
     # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
@@ -110,10 +111,10 @@ def network():
     #     # block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
     #     # blocks.append(block_expand_drop)
     #     blocks.append(block_expand)
-    block_expand = paddle.layer.block_expand(input=net, num_channels=net.num_filters, 
-        stride_x=1, stride_y=1, block_x=net.width, block_y=1)
-    costs=[]
-    net_class_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
+    # block_expand = paddle.layer.block_expand(input=net, num_channels=net.num_filters, 
+    #     stride_x=1, stride_y=1, block_x=net.width, block_y=1)
+    # costs=[]
+    net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
