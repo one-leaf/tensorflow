@@ -173,7 +173,7 @@ def readDatatoPool():
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
 
-        print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
+        # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
 
         for i, _data in read_data(v_data):
             fix_segments =[]
@@ -255,7 +255,7 @@ def reader_get_image_and_label():
         t1.start()
         while t1.isAlive():
             while len(data_pool_1)==0:
-                print("wait", len(data_pool_0), len(data_pool_1))
+                # print("wait", len(data_pool_0), len(data_pool_1))
                 time.sleep(1)
             if random.random()>0.5 and len(data_pool_0)>0:
                 data_pool = data_pool_0
