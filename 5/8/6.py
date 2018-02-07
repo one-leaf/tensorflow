@@ -254,8 +254,8 @@ def event_handler(event):
         if event.batch_id>0 and event.batch_id % 10 == 0:
             print("Pass %d, Batch %d, Cost %f, %s" % (
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
-            with open(param_file, 'wb') as f:
-                paddle_parameters.to_tar(f)
+            # with open(param_file, 'wb') as f:
+            #     paddle_parameters.to_tar(f)
         # else:
             # print(".")
 
