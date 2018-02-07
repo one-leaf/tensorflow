@@ -299,11 +299,11 @@ print('set reader ...')
 train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
 feeding={'x':0, 'a':1, 'c':2, 'b':3}
 # feeding={'x':0, 'a':1} 
-# if os.path.exists(param_file):
-#     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
-#     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-#     print("loading parameters ...")
-#     paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+if os.path.exists(param_file):
+    (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+    print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+    print("loading parameters ...")
+    paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
