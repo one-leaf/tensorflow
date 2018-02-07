@@ -187,7 +187,7 @@ def readDatatoPool():
                     data_pool_1.append((_data, out_a, out_c, out_b))
                 else:
                     data_pool_0.append((_data, out_a, out_c, out_b))
-        while len(data_pool_1)+len(data_pool_0)>buf_size:
+        while len(data_pool_1)>buf_size and len(data_pool_0)>buf_size:
             time.sleep(1) 
 
 # 计算 IOU,输入为 x1,x2 坐标
@@ -253,7 +253,7 @@ def reader_get_image_and_label():
         t1 = threading.Thread(target=readDatatoPool, args=())
         t1.start()
         while t1.isAlive():
-            while len(data_pool)==0:
+            while len(data_pool_1)==0 or len(data_pool_0)==0:
                 time.sleep(1)
             if random.random()>0.5:
                 data_pool = data_pool_0
