@@ -184,12 +184,10 @@ def readDatatoPool():
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_a, out_c, out_b = calc_value(fix_segments)
                 if max(out_a)>0:                   
-                    print 1
                     data_pool_1.append((_data, out_a, out_c, out_b))
                 else:
-                    print 0
                     data_pool_0.append((_data, out_a, out_c, out_b))
-        while len(data_pool_1)>buf_size and len(data_pool_0)>buf_size:
+        while len(data_pool_1)>buf_size:
             # print("r")
             time.sleep(1) 
 
@@ -256,10 +254,10 @@ def reader_get_image_and_label():
         t1 = threading.Thread(target=readDatatoPool, args=())
         t1.start()
         while t1.isAlive():
-            while len(data_pool_1)==0 or len(data_pool_0)==0:
+            while len(data_pool_1)==0:
                 print("wait", len(data_pool_0), len(data_pool_1))
                 time.sleep(1)
-            if random.random()>0.5:
+            if random.random()>0.5 and len(data_pool_0)>0:
                 data_pool = data_pool_0
             else:
                 data_pool = data_pool_1
