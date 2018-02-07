@@ -99,8 +99,8 @@ def network():
     net = cnn2(net, 3, 512, 256, 1, 1)    #1
     # main_nets.append(net)  
     net = cnn2(net, 3, 256, 128, 1, 1)    #1
-    # main_nets.append(net)  
-    # net = cnn2(net, 3, 128, 64, 1, 1)    #1
+    main_nets.append(net)  
+    net = cnn2(net, 3, 128, 64, 1, 1)    #1
     # main_nets.append(net) 
 
     # blocks = []
@@ -111,10 +111,10 @@ def network():
     #     # block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
     #     # blocks.append(block_expand_drop)
     #     blocks.append(block_expand)
-    # block_expand = paddle.layer.block_expand(input=net, num_channels=net.num_filters, 
-    #     stride_x=1, stride_y=1, block_x=net.width, block_y=1)
+    block_expand = paddle.layer.block_expand(input=net, num_channels=net.num_filters, 
+        stride_x=1, stride_y=1, block_x=net.width, block_y=1)
     costs=[]
-    net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
+    net_class_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
