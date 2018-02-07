@@ -92,13 +92,13 @@ def network():
     net = cnn2(net, 3, 128, 256, 1, 1)    #8
     net = cnn2(net, 3, 256, 512, 1, 1)    #4
     net = cnn2(net, 3, 512, 1024, 1, 1)    #2
-    main_nets.append(net)  
+    # main_nets.append(net)  
     net = cnn2(net, 3, 1024, 512, 1, 1)    #2
-    main_nets.append(net)  
+    # main_nets.append(net)  
     net = cnn2(net, 3, 512, 256, 1, 1)    #1
-    main_nets.append(net)  
+    # main_nets.append(net)  
     net = cnn2(net, 3, 256, 128, 1, 1)    #1
-    main_nets.append(net)  
+    # main_nets.append(net)  
     net = cnn2(net, 3, 128, 64, 1, 1)    #1
     main_nets.append(net) 
 
