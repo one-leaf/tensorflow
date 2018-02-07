@@ -84,8 +84,7 @@ def test():
 
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
-
-            for i, _data = model.read_data(v_data):
+            for i, _data in model.read_data(v_data):
                 probs = inferer.infer(input=[_data])
 
                 probs_class = probs[0:train_size]
