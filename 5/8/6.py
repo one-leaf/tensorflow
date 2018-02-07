@@ -77,8 +77,8 @@ def printLayer(layer):
 def network():
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    # x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
-    x = paddle.layer.data(name='x', height=1, width=2048//channels_num, type=paddle.data_type.dense_vector_sequence(2048))   
+    x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
+    # x = paddle.layer.data(name='x', height=1, width=2048//channels_num, type=paddle.data_type.dense_vector_sequence(2048))   
 
     # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
