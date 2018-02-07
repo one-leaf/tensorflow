@@ -82,7 +82,7 @@ def test():
                     print "偏移量：", probs_net[s]*model.train_size
                     fix_src= [src[0]+probs_net[s][0]*model.train_size,src[1]+probs_net[s][1]*model.train_size]
                     print "预测坐标：", fix_src
-                    label2 = np.zeros([label_size], dtype=np.int)        
+                    label2 = np.zeros([model.train_size], dtype=np.int)        
                     for x in range(int(fix_src[0]),int(fix_src[1]+1)):
                         label2[x] = 1
                     label2[int(s)]=8
