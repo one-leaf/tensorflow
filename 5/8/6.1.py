@@ -31,26 +31,6 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 
-def load_data(filter=None):
-    data = json.loads(open(os.path.join(data_path,"meta.json")).read())
-    training_data = []
-    validation_data = []
-    testing_data = []
-    for data_id in data['database']:
-        if filter!=None and data['database'][data_id]['subset']!=filter:
-            continue
-        if data['database'][data_id]['subset'] == 'training':
-            if os.path.exists(os.path.join(data_path,"training", "%s.pkl"%data_id)):
-                training_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
-        elif data['database'][data_id]['subset'] == 'validation':
-            if os.path.exists(os.path.join(data_path,"validation", "%s.pkl"%data_id)):
-                validation_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
-        elif data['database'][data_id]['subset'] == 'testing':
-            if os.path.exists(os.path.join(data_path,"testing", "%s.pkl"%data_id)):
-                testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
-    print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
-    return training_data, validation_data, testing_data
-
       
 print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
@@ -66,11 +46,9 @@ paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
     
 def test():
     items = []
-    training_data, validation_data, _ = load_data() 
-    size = len(training_data)
     inferer = paddle.inference.Inference(output_layer=[net_class_fc,net_box_fc], parameters=paddle_parameters)
 
-    for i, data_info in enumerate(training_data):       
+    for i, data_info in enumerate(model.training_data):       
         data_id = data_info["id"]
         v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%data_id))
 
@@ -85,7 +63,7 @@ def test():
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
             for i, _data in model.read_data(v_data):
-                probs = inferer.infer(input=[_data])
+                probs = inferer.infer(input=[(_data,)])
 
                 probs_class = probs[0:train_size]
                 # print(probs_class)
