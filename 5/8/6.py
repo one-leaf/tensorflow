@@ -119,7 +119,7 @@ def network():
 
     net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
-    
+
     costs.append(cost_class)
     costs.append(cost_box_class)
     # costs.append(cost_box)
@@ -286,4 +286,4 @@ feeding={'x':0, 'a':1, 'c':2, 'b':3}
 
 trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
 print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=4)
+trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=1)
