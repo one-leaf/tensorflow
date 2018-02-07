@@ -183,6 +183,7 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_a, out_c, out_b = calc_value(fix_segments)
+                print out_a
                 if max(out_a)>0:                   
                     data_pool_1.append((_data, out_a, out_c, out_b))
                 else:
@@ -267,7 +268,7 @@ def reader_get_image_and_label():
                 d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
             # print len(d),len(a),len(c),len(b)
             # print d
-            print a
+            # print a
             # print c
             # print b
             yield d, a, c, b
