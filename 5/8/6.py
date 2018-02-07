@@ -63,8 +63,8 @@ def load_data(filter=None):
 
 def cnn2(input,filter_size,num_channels, num_filters=64, stride=1, padding=1):
     net = paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
-         num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
-    # net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
+         num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Linear())
+    net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
     return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=1, stride=2, stride_y=1, pool_type=paddle.pooling.Max())
 
 def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act=paddle.activation.Linear()):
@@ -93,11 +93,13 @@ def network():
     net = cnn2(net, 3, 64, 64, 1, 1)    #8
     net = cnn2(net, 3, 64, 64, 1, 1)    #4
     net = cnn2(net, 3, 64, 64, 1, 1)    #2
-    net = cnn2(net, 3, 64, 64, 1, 1)    #2
-    main_nets.append(net)  
-    net = cnn2(net, 3, 64, 64, 1, 1)    #1
-    net = cnn2(net, 3, 64, 64, 1, 1)    #1
-    main_nets.append(net)  
+    net = paddle.layer.img_pool(input=net, pool_size=8, pool_size_y=1, stride=1, stride_y=1, pool_type=paddle.pooling.Avg())
+
+    # net = cnn2(net, 3, 64, 64, 1, 1)    #2
+    # main_nets.append(net)  
+    # net = cnn2(net, 3, 64, 64, 1, 1)    #1
+    # net = cnn2(net, 3, 64, 64, 1, 1)    #1
+    # main_nets.append(net)  
     # net = cnn2(net, 3, 64, 64, 1, 1)    #1
     # main_nets.append(net) 
 
