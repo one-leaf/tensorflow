@@ -92,15 +92,10 @@ def network():
     net = cnn2(net, 3, 64, 64, 1, 1)    #16
     net = cnn2(net, 3, 64, 64, 1, 1)    #8
     net = cnn2(net, 3, 64, 64, 1, 1)    #4
+    main_nets.append(net) 
     net = cnn2(net, 3, 64, 64, 1, 1)    #2
+    main_nets.append(net) 
     net = paddle.layer.img_pool(input=net, pool_size=8, pool_size_y=1, stride=1, stride_y=1, pool_type=paddle.pooling.Avg())
-
-    # net = cnn2(net, 3, 64, 64, 1, 1)    #2
-    # main_nets.append(net)  
-    # net = cnn2(net, 3, 64, 64, 1, 1)    #1
-    # net = cnn2(net, 3, 64, 64, 1, 1)    #1
-    # main_nets.append(net)  
-    # net = cnn2(net, 3, 64, 64, 1, 1)    #1
     main_nets.append(net) 
 
     blocks = []
@@ -117,15 +112,15 @@ def network():
     net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
-    net_box_class_fc = paddle.layer.fc(input=blocks[-1], size=class_dim, act=paddle.activation.Softmax())
+    net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
     net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
     costs.append(cost_class)
-    # costs.append(cost_box_class)
-    # costs.append(cost_box)
+    costs.append(cost_box_class)
+    costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
     parameter_names = parameters.names()
