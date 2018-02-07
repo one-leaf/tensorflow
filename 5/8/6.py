@@ -114,7 +114,7 @@ def network():
         stride_x=1, stride_y=1, block_x=net.width, block_y=1)
     costs=[]
     net_class_fc = paddle.layer.fc(input=block_expand, size=class_dim, act=paddle.activation.Softmax())
-    cost_class = paddle.layer.multi_binary_label_cross_entropy_cost(input=net_class_fc, label=a)
+    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
     # cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
