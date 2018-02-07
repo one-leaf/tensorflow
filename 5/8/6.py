@@ -237,8 +237,10 @@ def reader_get_image_and_label():
                 d, a, c, b = random.choice(data_pool)
             else:    
                 d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
-            print len(d),len(a),len(c),len(b)
-            print d[0].shape, a[0].shape, c[0].shape, b[0].shape
+            # print len(d),len(a),len(c),len(b)
+            print a
+            print c
+            print b
             yield d, a, c, b
     return reader
 
