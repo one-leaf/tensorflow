@@ -149,7 +149,7 @@ def read_data(v_data):
     for i in range(w):
         _data = np.reshape(v_data[i], (1, 2048))
         batch_data = np.append(batch_data[1:, :], _data, axis=0)
-        if i>0 and (i+1)%16==0:
+        if i>=train_size and (i+1)%16==0:
             fix_batch_data = np.reshape(batch_data,(channels_num, train_size, 2048//channels_num))
             yield i, np.ravel(fix_batch_data)
     if w%train_size!=0:
