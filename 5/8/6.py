@@ -114,18 +114,18 @@ def network():
     net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
-    # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    # cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
+    net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
+    cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
-    # net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
-    # cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
+    net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
+    cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
     costs.append(cost_class)
     # costs.append(cost_box_class)
     # costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
-    return costs, parameters, adam_optimizer, net_class_fc, net_box_fc 
+    return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc 
 
 def read_data(v_data):
     batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
