@@ -126,7 +126,7 @@ def network():
     # costs.append(cost_box_class)
     # costs.append(cost_box)
     
-    parameters = paddle.parameters.create(cost_class)
+    parameters = paddle.parameters.create(costs)
     parameter_names = parameters.names()
     print parameter_names
     adam_optimizer = paddle.optimizer.Adam(learning_rate=0.001)
