@@ -111,7 +111,8 @@ def network():
         blocks.append(block_expand)
 
     costs=[]
-    net_class_fc = paddle.layer.fc(input=blocks[-1], size=class_dim, act=paddle.activation.Softmax())
+    net_class_gru = paddle.networks.simple_gru(input=blocks[-1], size=8, act=paddle.activation.Relu())
+    net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     net_box_class_fc = paddle.layer.fc(input=blocks[-1], size=class_dim, act=paddle.activation.Softmax())
@@ -121,7 +122,7 @@ def network():
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
     costs.append(cost_class)
-    costs.append(cost_box_class)
+    # costs.append(cost_box_class)
     # costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
