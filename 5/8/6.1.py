@@ -62,7 +62,7 @@ def test():
             segment = annotations['segment']
             for i in range(int(segment[0]),int(segment[1]+1)):
                 label[i] += 1
-        print label
+        # print label
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
             for i, _data in model.read_data(v_data):
