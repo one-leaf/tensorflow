@@ -102,7 +102,7 @@ def test():
                         label2[int(src[1])]=9
                     print "预测目标：", label2[0:model.train_size] 
 
-                if raw_input("press any key to continue:"): pass
+                if raw_input("==========================================================================="): pass
             #     all_values.append(probs)
             #     sys.stdout.write(".")
             #     sys.stdout.flush()           
