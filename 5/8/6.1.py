@@ -56,6 +56,7 @@ def test():
 
         # 得到直观分布图
         w = v_data.shape[0]
+        print "读取数据:", v_data.shape
         label = np.zeros([w], dtype=np.int)
         for annotations in data_info["data"]:
             segment = annotations['segment']
