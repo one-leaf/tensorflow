@@ -64,12 +64,13 @@ def test():
         if not os.path.exists(save_file):
             for i, _data in model.read_data(v_data):
                 probs = inferer.infer(input=[(_data,)])
+                print "正确目标：",label[i-model.train_size:i]
 
                 # 预测当前方块是否是精华或非精华
                 probs_class = probs[0: model.train_size]
                 sort = np.argsort(-probs_class)
                 value_probs = sort[:,0]
-                print("判断分类",value_probs)
+                print  "判断分类",value_probs
 
                 # print(probs_class)
                 probs_box_class = probs[model.train_size: model.train_size*2]
@@ -79,7 +80,6 @@ def test():
                 print "概率如下：",has_class[sort[0:5]]
                 probs_net = probs[model.train_size*2:]
                 print i-model.train_size, i
-                print "正确目标：",label[i-model.train_size:i]
                 for s in sort[0:5]:
                     if has_class[s]<0.5: break
                     src = model.get_box_point(s)
