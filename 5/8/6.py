@@ -85,14 +85,14 @@ def network():
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
     main_nets = []
-    net = cnn2(x,   3, channels_num, 64, 1, 1)    #32
-    net = cnn2(net, 3, 64, 64, 1, 1)    #16
-    net = cnn2(net, 3, 64, 64, 1, 1)    #8
-    net = cnn2(net, 3, 64, 64, 1, 1)    #4
+    net = cnn2(x,   17, channels_num, 64, 1, 8)    #32
+    net = cnn2(net, 9, 64, 64, 1, 4)    #16
+    net = cnn2(net, 7, 64, 64, 1, 3)    #8
+    net = cnn2(net, 5, 64, 64, 1, 2)    #4
     # main_nets.append(net) 
     net = cnn2(net, 3, 64, 64, 1, 1)    #2
     # main_nets.append(net) 
-    net = paddle.layer.img_pool(input=net, pool_size=8, pool_size_y=1, stride=1, stride_y=1, pool_type=paddle.pooling.Avg())
+    net = paddle.layer.img_pool(input=net, pool_size=net.width, pool_size_y=1, stride=1, stride_y=1, pool_type=paddle.pooling.Avg())
     main_nets.append(net) 
 
     blocks = []
