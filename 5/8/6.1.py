@@ -67,7 +67,7 @@ def test():
 
                 # 预测当前方块是否是精华或非精华
                 probs_class = probs[0: model.train_size]
-                sort = np.argsort(-has_class)
+                sort = np.argsort(-probs_class)
                 value_probs = sort[:,0]
                 print("判断分类",value_probs)
 
