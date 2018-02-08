@@ -211,7 +211,7 @@ def get_boxs():
 def get_box_point(point):
     i = point - point%4
     ratio = area_ratio[point%4]
-    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size)]
+    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size-1)]
 
 # 按 block_size 格计算,前后各 block_size 格
 # out_c iou 比例
