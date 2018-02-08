@@ -120,7 +120,7 @@ def network():
     net_box_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Tanh())
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
-    costs.append(cost_class)
+    # costs.append(cost_class)
     costs.append(cost_box_class)
     costs.append(cost_box)
     
