@@ -69,7 +69,7 @@ def test():
                 probs_class = probs[0: model.train_size]
                 sort = np.argsort(-has_class)
                 value_probs = sort[:,0]
-                print(value_probs)
+                print("判断分类",value_probs)
 
                 # print(probs_class)
                 probs_box_class = probs[model.train_size: model.train_size*2]
