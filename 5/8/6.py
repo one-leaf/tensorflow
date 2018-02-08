@@ -20,9 +20,6 @@ import threading
 # param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
-if not os.path.exists(model_path): os.mkdir(model_path)
-if not os.path.exists(out_dir): os.mkdir(out_dir)
-
 channels_num = 8   # 图片先分层
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
@@ -32,14 +29,14 @@ batch_size = 2048//train_size
 block_size = train_size//4
 area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 
-
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
 param_file = os.path.join(model_path,"param_%sx%s.tar"%(train_size,channels_num))
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
-
+if not os.path.exists(model_path): os.mkdir(model_path)
+if not os.path.exists(out_dir): os.mkdir(out_dir)
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
