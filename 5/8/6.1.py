@@ -84,7 +84,7 @@ def test():
                 print "概率如下：",has_class[sort[0:5]]
                 probs_net = probs[model.train_size*2:]
                 print i-model.train_size, i
-                for s in sort[0:5]:
+                for s in sort[0:1]:
                     if has_class[s]<0.5: break
                     src = model.get_box_point(s)
                     print s, has_class[s], probs_net[s]
