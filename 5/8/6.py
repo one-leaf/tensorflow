@@ -155,7 +155,7 @@ def read_data(v_data):
 #     if w%train_size!=0:
 #         yield w-1,np.ravel(fix_batch_data)
 
-data_pool_0 = []    #负样本
+data_pool_0 = []    #干净样本
 data_pool_1 = []    #正样本
 training_data, validation_data, _ = load_data()
 def readDatatoPool():
@@ -180,10 +180,10 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_a, out_c, out_b = calc_value(fix_segments)
-                if max(out_a)>0:                   
-                    data_pool_1.append((_data, out_a, out_c, out_b))
-                else:
+                if sum(out_a) < train_size * 0.1 and sum(out_a) > train_size * 0.9:                   
                     data_pool_0.append((_data, out_a, out_c, out_b))
+                else:
+                    data_pool_1.append((_data, out_a, out_c, out_b))
         while len(data_pool_1)>buf_size:
             # print("r")
             time.sleep(1) 
