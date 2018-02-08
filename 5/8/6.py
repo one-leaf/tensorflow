@@ -100,9 +100,9 @@ def network():
         main_net = main_nets[i]
         block_expand = paddle.layer.block_expand(input=main_net, num_channels=main_net.num_filters, 
             stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-        # block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
-        # blocks.append(block_expand_drop)
-        blocks.append(block_expand)
+        block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
+        blocks.append(block_expand_drop)
+        # blocks.append(block_expand)
 
     costs=[]
     net_class_gru = paddle.networks.simple_gru(input=blocks[-1], size=block_size, act=paddle.activation.Tanh())
