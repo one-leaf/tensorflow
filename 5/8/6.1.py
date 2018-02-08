@@ -36,7 +36,7 @@ print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
-cost, paddle_parameters, adam_optimizer, net_class_fc, net_box_fc = model.network()
+cost, paddle_parameters, adam_optimizer, net_class_fc, net_class_box_fc, net_box_fc = model.network()
 
 # 预测时需要读取模型
 (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
@@ -46,7 +46,7 @@ paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
     
 def test():
     items = []
-    inferer = paddle.inference.Inference(output_layer=[net_class_fc,net_box_fc], parameters=paddle_parameters)
+    inferer = paddle.inference.Inference(output_layer=[net_class_fc,net_class_box_fc,net_box_fc], parameters=paddle_parameters)
 
     for i, data_info in enumerate(model.training_data):       
         data_id = data_info["id"]
@@ -65,13 +65,19 @@ def test():
             for i, _data in model.read_data(v_data):
                 probs = inferer.infer(input=[(_data,)])
 
+                # 预测当前方块是否是精华或非精华
                 probs_class = probs[0: model.train_size]
+                sort = np.argsort(-has_class)
+                value_probs = sort[:,0]
+                print(value_probs)
+
                 # print(probs_class)
-                has_class = probs_class[:,1]
+                probs_box_class = probs[model.train_size: model.train_size*2]
+                has_class = probs_box_class[:,1]
                 sort = np.argsort(-has_class)
                 print "前五最高：",sort[0:5]
                 print "概率如下：",has_class[sort[0:5]]
-                probs_net = probs[model.train_size:]
+                probs_net = probs[model.train_size*2:]
                 print i-model.train_size, i
                 print "正确目标：",label[i-model.train_size:i]
                 for s in sort[0:5]:

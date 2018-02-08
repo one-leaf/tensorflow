@@ -129,7 +129,7 @@ def network():
     print parameter_names
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
     # return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc 
-    return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc
+    return costs, parameters, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
 
 # def read_data(v_data):
 #     batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
@@ -283,7 +283,7 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    cost, paddle_parameters, adam_optimizer, _, _ = network()
+    cost, paddle_parameters, adam_optimizer, _, _, _ = network()
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
     feeding={'x':0, 'a':1, 'c':2, 'b':3}
