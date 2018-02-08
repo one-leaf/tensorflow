@@ -34,7 +34,7 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 channels_num = 8   # 图片先分层
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 128 # 学习的关键帧长度
+train_size = 2018 # 学习的关键帧长度
 buf_size = 4096
 batch_size = 2048//train_size
 block_size = train_size//4
