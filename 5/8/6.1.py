@@ -48,9 +48,11 @@ def test():
     items = []
     inferer = paddle.inference.Inference(output_layer=[net_class_fc,net_class_box_fc,net_box_fc], parameters=paddle_parameters)
 
-    for i, data_info in enumerate(model.training_data):       
+    # for i, data_info in enumerate(model.training_data):    
+    for i, data_info in enumerate(model.validation_data):    
         data_id = data_info["id"]
-        v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%data_id))
+        # v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%data_id))
+        v_data = np.load(os.path.join(data_path, "validation", "%s.pkl"%data_id))
 
         # 得到直观分布图
         w = v_data.shape[0]
