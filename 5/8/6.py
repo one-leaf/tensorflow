@@ -280,8 +280,8 @@ def event_handler(event):
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
 
-for i in range(train_size):
-    print(i,get_box_point(i)) 
+# for i in range(train_size):
+#     print(i,get_box_point(i)) 
 
 if __name__ == '__main__':
     print("paddle init ...")
