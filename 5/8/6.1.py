@@ -62,12 +62,13 @@ def test():
             segment = annotations['segment']
             for i in range(int(segment[0]),int(segment[1]+1)):
                 label[i] += 1
-
+        print label
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
             for i, _data in model.read_data(v_data):
-                probs = inferer.infer(input=[(_data,)])
                 print "正确目标：",label[i-model.train_size:i]
+
+                probs = inferer.infer(input=[(_data,)])
 
                 # 预测当前方块是否是精华或非精华
                 probs_class = probs[0: model.train_size]
