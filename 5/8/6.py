@@ -203,7 +203,8 @@ def get_boxs():
     for i in range(train_size):
         if i%8==0:
             for ratio in area_ratio:
-                src = [max((i-block_size)*ratio, 0), min((i+block_size)*ratio, train_size-1)]
+                off = block_size * ratio
+                src = [max(i-off, 0), min(i+off, train_size-1)]
                 boxs.append(src)
     return boxs
 
@@ -211,7 +212,8 @@ def get_boxs():
 def get_box_point(point):
     i = point - point%4
     ratio = area_ratio[point%4]
-    return [max((i-block_size)*ratio,0), min((i+block_size)*ratio,train_size-1)]
+    off = block_size * ratio
+    return [max(i-off,0), min(i+off,train_size-1)]
 
 # 按 block_size 格计算,前后各 block_size 格
 # out_c iou 比例
@@ -277,6 +279,9 @@ def event_handler(event):
                 event.pass_id, event.batch_id, event.cost, event.metrics) )
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
+
+for i in range(train_size):
+    print(i,get_box_point(i)) 
 
 if __name__ == '__main__':
     print("paddle init ...")
