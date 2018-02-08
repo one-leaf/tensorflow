@@ -36,7 +36,7 @@ area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
-param_file = os.path.join(model_path,"param_%.tar"%train_size)
+param_file = os.path.join(model_path,"param_%sx%s.tar"%(train_size,channels_num))
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
 
