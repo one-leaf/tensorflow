@@ -111,7 +111,7 @@ def network(drop=True):
     # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value(class_dim))
 
-    net = resnet(x, 56)
+    net = resnet(x, 32)
     net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     costs = paddle.layer.classification_cost(input=net_class_fc, label=a)
     
