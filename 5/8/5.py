@@ -114,7 +114,7 @@ def network(drop=True):
     net = paddle.layer.dropout(input=net, dropout_rate=0.5)
     net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     costs = paddle.layer.classification_cost(input=net_class_fc, label=a)
-    
+   
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
