@@ -134,7 +134,7 @@ def network(drop=True):
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
     # BOX的偏移量回归预测
-    net_box_gru = paddle.networks.simple_gru(input=blocks[-1], size=8, act=paddle.activation.Tanh())
+    net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
     net_box_fc = paddle.layer.fc(input=blocks, size=net_box_gru, act=paddle.activation.Tanh())
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
