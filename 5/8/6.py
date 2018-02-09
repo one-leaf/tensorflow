@@ -271,14 +271,14 @@ def reader_get_image_and_label():
     return reader
 
 status ={}
-status["starttime"]=time.time
-status["steptime"]=time.time
+status["starttime"]=time.time()
+status["steptime"]=time.time()
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 10 == 0:
             print("Time %.2f, Pass %d, Batch %d, Cost %f, %s" % (
-                time.time - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics) )
-            status["steptime"]=time.time
+                time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics) )
+            status["steptime"]=time.time()
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
 
@@ -304,4 +304,4 @@ if __name__ == '__main__':
     trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=8)
-    print("paid:", time.time - status["starttime"])
+    print("paid:", time.time() - status["starttime"])
