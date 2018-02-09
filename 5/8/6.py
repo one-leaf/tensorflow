@@ -94,7 +94,7 @@ def resnet(ipt, depth=32):
     # depth should be one of 20, 32, 44, 56, 110, 1202
     assert (depth - 2) % 6 == 0
     n = (depth - 2) / 6
-    conv1 = conv_bn_layer(ipt, ch_in=channels_num, ch_out=64, filter_size=3, stride=1, padding=1)
+    conv1 = conv_bn_layer(ipt, ch_in=2048*block_size//64//64, ch_out=64, filter_size=3, stride=1, padding=1)
     res1 = layer_warp(basicblock, conv1, 64, n, 2)
     res2 = layer_warp(basicblock, res1, 64, n, 2)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
