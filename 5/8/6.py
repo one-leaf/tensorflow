@@ -20,7 +20,7 @@ import threading
 # param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
-channels_num = 8   # 图片先分层
+channels_num = 4   # 图片先分层
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
 train_size = 64 # 学习的关键帧长度
@@ -85,11 +85,12 @@ def network(drop=True):
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
     main_nets = []
-    net = cnn2(x,   11, channels_num, 64, 1, 5)    #32
-    net = cnn2(net, 9, 64, 64, 1, 4)    #16
-    net = cnn2(net, 7, 64, 64, 1, 3)    #8
+    net = cnn2(x,   5, channels_num, 64, 1, 2)    #32
+    net = cnn2(net, 5, 64, 64, 1, 2)    #16
+    net = cnn2(net, 5, 64, 64, 1, 2)    #8
     net = cnn2(net, 5, 64, 64, 1, 2)    #4
     # main_nets.append(net) 
+    net = cnn2(net, 3, 64, 64, 1, 1)    #2
     net = cnn2(net, 3, 64, 64, 1, 1)    #2
     # main_nets.append(net) 
     net = paddle.layer.img_pool(input=net, pool_size=net.width, pool_size_y=1, stride=1, stride_y=1, pool_type=paddle.pooling.Avg())
