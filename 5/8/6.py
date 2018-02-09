@@ -85,7 +85,7 @@ def network():
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
     main_nets = []
-    net = cnn2(x,   17, channels_num, 64, 1, 8)    #32
+    net = cnn2(x,   11, channels_num, 64, 1, 5)    #32
     net = cnn2(net, 9, 64, 64, 1, 4)    #16
     net = cnn2(net, 7, 64, 64, 1, 3)    #8
     net = cnn2(net, 5, 64, 64, 1, 2)    #4
@@ -100,7 +100,7 @@ def network():
         main_net = main_nets[i]
         block_expand = paddle.layer.block_expand(input=main_net, num_channels=main_net.num_filters, 
             stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-        block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.5)
+        block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.1)
         blocks.append(block_expand_drop)
         # blocks.append(block_expand)
 
