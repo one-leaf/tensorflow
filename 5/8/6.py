@@ -178,7 +178,7 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_a, out_c, out_b = calc_value(fix_segments)
-                if sum(out_a) < train_size * 0.1 and sum(out_a) > train_size * 0.9:                   
+                if sum(out_a) < train_size * 0.5:                   
                     data_pool_0.append((_data, out_a, out_c, out_b))
                 else:
                     data_pool_1.append((_data, out_a, out_c, out_b))
