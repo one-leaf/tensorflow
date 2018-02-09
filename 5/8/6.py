@@ -71,7 +71,7 @@ def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
 
-def network():
+def network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
     x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
@@ -100,8 +100,9 @@ def network():
         main_net = main_nets[i]
         block_expand = paddle.layer.block_expand(input=main_net, num_channels=main_net.num_filters, 
             stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-        block_expand_drop = paddle.layer.dropout(input=block_expand, dropout_rate=0.1)
-        blocks.append(block_expand_drop)
+        if drop:
+            block_expand = paddle.layer.dropout(input=block_expand, dropout_rate=0.1)
+        blocks.append(block_expand)
         # blocks.append(block_expand)
 
     costs=[]
@@ -118,8 +119,8 @@ def network():
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
     costs.append(cost_class)
-    costs.append(cost_box_class)
-    costs.append(cost_box)
+    # costs.append(cost_box_class)
+    # costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
     parameter_names = parameters.names()

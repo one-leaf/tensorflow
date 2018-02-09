@@ -36,7 +36,7 @@ print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
-cost, paddle_parameters, adam_optimizer, net_class_fc, net_class_box_fc, net_box_fc = model.network()
+cost, paddle_parameters, adam_optimizer, net_class_fc, net_class_box_fc, net_box_fc = model.network(drop=False)
 
 # 预测时需要读取模型
 (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
