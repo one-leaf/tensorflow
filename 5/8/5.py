@@ -151,7 +151,8 @@ def readDatatoPool():
             segment = annotations['segment']
             for i in range(int(segment[0]),int(segment[1]+1)):
                 label[i] == 1
-
+        print label
+        
         for i, _data in read_data(v_data): 
             out_a = label[i-train_size:i]         
             if sum(out_a) == train_size :                   
