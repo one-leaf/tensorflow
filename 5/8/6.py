@@ -154,7 +154,7 @@ def read_data(v_data):
     batch_data = np.zeros((train_size, 2048*block_size))  
     w = v_data.shape[0]
     for i in range(block_size, w):
-        _data = np.stack([v_data[j] for j in range(i-block_size,j)])
+        _data = np.stack([v_data[j] for j in range(i-block_size,i)])
         _data = np.reshape(_data, (1, 2048*block_size))
         batch_data = np.append(batch_data[1:, :], _data, axis=0)
         if i>=train_size and (i+1)%16==0:
