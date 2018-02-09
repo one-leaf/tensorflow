@@ -166,12 +166,11 @@ def read_data(v_data):
 data_pool_0 = []    #干净样本
 data_pool_1 = []    #正样本
 training_data, validation_data, _ = load_data()
-def readDatatoPool():
+def readDatatoPool(isBox=False):
     size = len(training_data)+len(validation_data)
     c = 0
     for i in range(size):
-        # if i%2==0:
-        if True:
+        if i%2==0:
             data = random.choice(training_data)
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
         else:
@@ -179,20 +178,32 @@ def readDatatoPool():
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
 
         # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
-
-        for i, _data in read_data(v_data):
-            fix_segments =[]
+        if not isBox:
+            label = np.zeros([v_data.shape[0]], dtype=np.int)
             for annotations in data["data"]:
                 segment = annotations['segment']
-                if segment[0]>=i or segment[1]<=i-train_size:
-                    continue
-                fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
-                out_a, out_c, out_b = calc_value(fix_segments)
-                # print sum(out_a), out_a
-                if sum(out_a) < train_size * 0.1 and sum(out_a) > train_size * 0.9:                   
-                    data_pool_0.append((_data, out_a, out_c, out_b))
-                else:
-                    data_pool_1.append((_data, out_a, out_c, out_b))
+                for i in range(int(segment[0]),int(segment[1]+1)):
+                    label[i] = 1
+
+        for i, _data in read_data(v_data):
+            if not isBox:
+                out_a = label[i-train_size:i]         
+                if sum(out_a) == train_size :                   
+                    data_pool_0.append((_data, 1))
+                elif sum(out_a) == 0:
+                    data_pool_1.append((_data, 0))
+            else:
+                fix_segments =[]
+                for annotations in data["data"]:
+                    segment = annotations['segment']
+                    if segment[0]>=i or segment[1]<=i-train_size:
+                        continue
+                    fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
+                    out_a, out_c, out_b = calc_value(fix_segments)
+                    if sum(out_a) < train_size * 0.5:                   
+                        data_pool_0.append((_data, out_a, out_c, out_b))
+                    else:
+                        data_pool_1.append((_data, out_a, out_c, out_b))
         while len(data_pool_1)>buf_size:
             # print("r")
             time.sleep(1) 
@@ -257,29 +268,26 @@ def calc_value(segments):
         #     print u"正确的:",segments[max_ious_index],u"接近的:", src, u"拟合度：", max_ious,u"偏移：", out_b[i]
     return out_a, out_c, out_b
                 
-def reader_get_image_and_label():
+def reader_get_image_and_label(isBox=False):
     def reader():
-        t1 = threading.Thread(target=readDatatoPool, args=())
+        t1 = threading.Thread(target=readDatatoPool(isBox), args=())
         t1.start()
         while t1.isAlive():
             while len(data_pool_1)==0:
-                # print("wait", len(data_pool_0), len(data_pool_1))
                 time.sleep(1)
             if random.random()>0.5 and len(data_pool_0)>0:
                 data_pool = data_pool_0
                 v = 1.0*len(data_pool_0)/len(data_pool_1)
             else:
                 data_pool = data_pool_1
-                v = 0.9
+                if len(data_pool_0)!=0:
+                    v = 1.0*len(data_pool_1)/len(data_pool_0)
+                else: 
+                    v = 1.0
             if random.random()>v:
                 d, a, c, b = random.choice(data_pool)
             else:    
                 d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
-            # print len(d),len(a),len(c),len(b)
-            # print d
-            # print a
-            # print c
-            # print b
             yield d, a, c, b
     return reader
 
@@ -305,8 +313,10 @@ if __name__ == '__main__':
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
     cost, paddle_parameters, adam_optimizer, _, _, _ = network()
+    
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    train_reader_class = paddle.batch(reader_get_image_and_label(False), batch_size=batch_size)
+    train_reader_box = paddle.batch(reader_get_image_and_label(True), batch_size=batch_size)
     feeding={'x':0, 'a':1, 'c':2, 'b':3}
     # feeding={'x':0, 'a':1} 
     if os.path.exists(param_file):
