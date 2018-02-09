@@ -187,8 +187,9 @@ status["steptime"]=time.time()
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 10 == 0:
-            print("Time %.2f, Pass %d, Batch %d, Cost %f, %s" % (
-                time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics) )
+            print("Time %.2f, Pass %d, Batch %d, Cost %f, %s (%s/%s)" % (
+                time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics,
+                len(data_pool_0), len(data_pool_1)) )
             status["steptime"]=time.time()
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
