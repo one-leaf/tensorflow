@@ -20,13 +20,14 @@ import threading
 # param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
-channels_num = 4   # 图片先分层
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
 train_size = 64 # 学习的关键帧长度
+block_size = 8
+
 buf_size = 4096
 batch_size = 2048//train_size
-block_size = train_size//4
+box_size = train_size//4
 area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 
 home = os.path.dirname(__file__)
@@ -58,15 +59,49 @@ def load_data(filter=None):
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
 
-def cnn2(input,filter_size,num_channels, num_filters=64, stride=1, padding=1):
-    net = paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
-         num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Linear())
-    net = paddle.layer.batch_norm(input=net, act=paddle.activation.Relu())
-    return paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=1, stride=2, stride_y=1, pool_type=paddle.pooling.Max())
+def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
+    tmp = paddle.layer.img_conv(
+        input=input,
+        filter_size=filter_size,
+        num_channels=ch_in,
+        num_filters=ch_out,
+        stride=stride,
+        padding=padding,
+        act=paddle.activation.Linear(),
+        bias_attr=False)
+    return paddle.layer.batch_norm(input=tmp, act=active_type)
+    
+def shortcut(ipt, n_in, n_out, stride):
+    if n_in != n_out:
+        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
+    else:
+        return ipt
 
-def cnn1(input,filter_size,num_channels,num_filters=64, stride=1, padding=1, act=paddle.activation.Linear()):
-    return  paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels,
-         num_filters=num_filters, stride=stride, padding=padding, act=act)
+def basicblock(ipt, ch_out, stride):
+    ch_in = ch_out * 2
+    tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
+    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
+    short = shortcut(ipt, ch_in, ch_out, stride)
+    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
+
+def layer_warp(block_func, ipt, features, count, stride):
+    tmp = block_func(ipt, features, stride)
+    for i in range(1, count):
+        tmp = block_func(tmp, features, 1)
+    return tmp
+
+def resnet(ipt, depth=32):
+    # depth should be one of 20, 32, 44, 56, 110, 1202
+    assert (depth - 2) % 6 == 0
+    n = (depth - 2) / 6
+    conv1 = conv_bn_layer(ipt, ch_in=channels_num, ch_out=64, filter_size=3, stride=1, padding=1)
+    res1 = layer_warp(basicblock, conv1, 64, n, 2)
+    res2 = layer_warp(basicblock, res1, 64, n, 2)
+    res3 = layer_warp(basicblock, res2, 64, n, 2)
+    res4 = layer_warp(basicblock, res3, 64, n, 2)
+    res5 = layer_warp(basicblock, res4, 64, n, 2)
+    res6 = layer_warp(basicblock, res5, 64, n, 2)
+    return res6
 
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
@@ -74,8 +109,8 @@ def printLayer(layer):
 def network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
-    # x = paddle.layer.data(name='x', height=1, width=2048//channels_num, type=paddle.data_type.dense_vector_sequence(2048))   
+    #x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
+    x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
 
     # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
@@ -84,75 +119,45 @@ def network(drop=True):
     # box 边缘修正
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
-    main_nets = []
-    net = cnn2(x,   5, channels_num, 64, 1, 2)    #32
-    net = cnn2(net, 5, 64, 64, 1, 2)    #16
-    net = cnn2(net, 5, 64, 64, 1, 2)    #8
-    net = cnn2(net, 5, 64, 64, 1, 2)    #4
-    # main_nets.append(net) 
-    net = cnn2(net, 3, 64, 64, 1, 1)    #2
-    net = cnn2(net, 3, 64, 64, 1, 1)    #2
-    # main_nets.append(net) 
-    net = paddle.layer.img_pool(input=net, pool_size=net.width, pool_size_y=1, stride=1, stride_y=1, pool_type=paddle.pooling.Avg())
-    main_nets.append(net) 
+    net = resnet(x, 20)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)
 
-    blocks = []
-    for i  in range(len(main_nets)):
-        main_net = main_nets[i]
-        block_expand = paddle.layer.block_expand(input=main_net, num_channels=main_net.num_filters, 
-            stride_x=1, stride_y=1, block_x=main_net.width, block_y=1)
-        if drop:
-            block_expand = paddle.layer.dropout(input=block_expand, dropout_rate=0.1)
-        blocks.append(block_expand)
-
-    costs=[]
-    # net_class_gru = paddle.networks.simple_gru(input=blocks[-1], size=8, act=paddle.activation.Tanh())
-    net_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
+    net_class_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
+    net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
-    # # net_class_gru = paddle.networks.simple_gru(input=blocks[-1], size=8, act=paddle.activation.Tanh())
-    # net_box_class_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Softmax())
-    # cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
+    net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
+    net_box_class_fc = paddle.layer.fc(input=net_box_class_gru, size=class_dim, act=paddle.activation.Softmax())
+    cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
-    # # net_class_gru = paddle.networks.simple_gru(input=blocks[-1], size=8, act=paddle.activation.Tanh())
-    # net_box_fc = paddle.layer.fc(input=blocks, size=class_dim, act=paddle.activation.Tanh())
-    # cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
+    net_box_gru = paddle.networks.simple_gru(input=blocks[-1], size=8, act=paddle.activation.Tanh())
+    net_box_fc = paddle.layer.fc(input=blocks, size=net_box_gru, act=paddle.activation.Tanh())
+    cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
+    costs=[]
     costs.append(cost_class)
-    # costs.append(cost_box_class)
-    # costs.append(cost_box)
+    costs.append(cost_box_class)
+    costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
     # parameter_names = parameters.names()
     # print parameter_names
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
-    # return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc 
-    return costs, parameters, adam_optimizer, net_class_fc, 0,0 #net_box_class_fc, net_box_fc
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
+        learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
+    return costs, parameters, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
 
 def read_data(v_data):
-    batch_data = np.zeros((train_size, channels_num, 2048//channels_num))  
+    batch_data = np.zeros((train_size, 2048*block_size))  
     w = v_data.shape[0]
-    for i in range(w):
-        _data = np.reshape(v_data[i], (1, channels_num, 2048//channels_num))
-        batch_data = np.append(batch_data[1:, :, :], _data, axis=0)
-        if i>=train_size and (i+1)%(train_size//4)==0:
-            fix_batch_data = np.transpose(batch_data,(1, 0, 2))
-            yield i, np.ravel(fix_batch_data)
+    for i in range(block_size, w):
+        _data = np.stack([v_data[j] for j in range(i-block_size,j)])
+        _data = np.reshape(_data, (1, 2048*block_size))
+        batch_data = np.append(batch_data[1:, :], _data, axis=0)
+        if i>=train_size and (i+1)%16==0:
+            yield i, np.ravel(batch_data)
     if w%train_size!=0:
-        fix_batch_data = np.transpose(batch_data,(1, 0, 2))
-        yield w-1, np.ravel(fix_batch_data)
-
-# def read_data(v_data):
-#     batch_data = np.zeros((train_size, 2048))  
-#     w = v_data.shape[0]
-#     for i in range(w):
-#         _data = np.reshape(v_data[i], (1, 2048))
-#         batch_data = np.append(batch_data[1:, :], _data, axis=0)
-#         if i>=train_size and (i+1)%16==0:
-#             fix_batch_data = np.reshape(batch_data,(channels_num, train_size, 2048//channels_num))
-#             yield i, np.ravel(fix_batch_data)
-#     if w%train_size!=0:
-#         yield w-1,np.ravel(fix_batch_data)
+        yield w-1,np.ravel(batch_data)
 
 data_pool_0 = []    #干净样本
 data_pool_1 = []    #正样本
@@ -179,7 +184,7 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_a, out_c, out_b = calc_value(fix_segments)
-                if sum(out_a) < train_size * 0.5:                   
+                if sum(out_a) < train_size * 0.1 and sum(out_a) > train_size * 0.9:                   
                     data_pool_0.append((_data, out_a, out_c, out_b))
                 else:
                     data_pool_1.append((_data, out_a, out_c, out_b))
@@ -202,7 +207,7 @@ def get_boxs():
     for i in range(train_size):
         if i%8==0:
             for ratio in area_ratio:
-                off = block_size * ratio
+                off = box_size * ratio
                 src = [max(i-off, 0), min(i+off, train_size-1)]
                 boxs.append(src)
     return boxs
@@ -211,10 +216,10 @@ def get_boxs():
 def get_box_point(point):
     i = point - point%4
     ratio = area_ratio[point%4]
-    off = block_size * ratio
+    off = box_size * ratio
     return [max(i-off,0), min(i+off,train_size-1)]
 
-# 按 block_size 格计算,前后各 block_size 格
+# 按 box_size 格计算,前后各 box_size 格
 # out_c iou 比例
 # out_b 左偏移 和 右偏移
 def calc_value(segments):
@@ -271,15 +276,11 @@ def reader_get_image_and_label():
             yield d, a, c, b
     return reader
 
-status ={}
-status["starttime"]=time.time()
-status["steptime"]=time.time()
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 10 == 0:
-            print("Time %.2f, Pass %d, Batch %d, Cost %f, %s" % (
-                time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics) )
-            status["steptime"]=time.time()
+            print("Pass %d, Batch %d, Cost %f, %s" % (
+                event.pass_id, event.batch_id, event.cost, event.metrics) )
             with open(param_file, 'wb') as f:
                 paddle_parameters.to_tar(f)
 
@@ -299,10 +300,9 @@ if __name__ == '__main__':
     if os.path.exists(param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading parameters %s ..."%param_file)
+        print("loading parameters ...")
         paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=8)
-    print("paid:", time.time() - status["starttime"])

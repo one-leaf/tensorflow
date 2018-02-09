@@ -100,7 +100,6 @@ def resnet(ipt, depth=32):
     res6 = layer_warp(basicblock, res5, 64, n, 2)
     return res6
 
-
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
 
