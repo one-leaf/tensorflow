@@ -13,7 +13,7 @@ curr_dir = os.path.dirname(__file__)
 data_path = os.path.join(curr_dir,"data")
 param_file = "/home/kesci/work/param.data"
 
-class_dim = 3 # 0 不是关键 1 是关键 2 重复关键
+class_dim = 2 # 0 不是关键 1 是关键
 
 TEST = True
 
