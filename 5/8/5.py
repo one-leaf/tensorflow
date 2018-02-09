@@ -173,10 +173,10 @@ def reader_get_image_and_label():
                 time.sleep(1)
             if random.random()>0.5 and len(data_pool_0)>0:
                 data_pool = data_pool_0
-                v = data_pool_0/data_pool_1
+                v = 1.0*len(data_pool_0)/len(data_pool_1)
             else:
                 data_pool = data_pool_1
-                v = data_pool_1/data_pool_0
+                v = 1.0*len(data_pool_1)/len(data_pool_0)
             if random.random()>v:
                 x, a = random.choice(data_pool)
             else:    
