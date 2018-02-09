@@ -151,16 +151,16 @@ def network(drop=True):
     return costs, parameters, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
 
 def read_data(v_data):
-    batch_data = np.zeros((train_size, 2048*block_size))  
+    batch_data=[np.zeros(2048*block_size) for _ in range(train_size)]   
     w = v_data.shape[0]
     for i in range(block_size, w):
         _data = np.stack([v_data[j] for j in range(i-block_size,i)])
-        _data = np.reshape(_data, (1, 2048*block_size))
-        batch_data = np.append(batch_data[1:, :], _data, axis=0)
+        batch_data.append(_data)
+        batch_data.pop(0)
         if i>=train_size and (i+1)%16==0:
-            yield i, np.ravel(batch_data)
+            yield i, batch_data
     if w%train_size!=0:
-        yield w-1,np.ravel(batch_data)
+        yield w-1, batch_data
 
 data_pool_0 = []    #干净样本
 data_pool_1 = []    #正样本
