@@ -116,7 +116,7 @@ def network(drop=True):
     costs = paddle.layer.classification_cost(input=net_class_fc, label=a)
     
     parameters = paddle.parameters.create(costs)
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-4)
     return costs, parameters, adam_optimizer, net_class_fc
 
 def read_data(v_data):
