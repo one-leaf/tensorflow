@@ -188,7 +188,7 @@ def readDatatoPool():
                     continue
                 fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
                 out_a, out_c, out_b = calc_value(fix_segments)
-                print sum(out_a), out_a
+                # print sum(out_a), out_a
                 if sum(out_a) < train_size * 0.1 and sum(out_a) > train_size * 0.9:                   
                     data_pool_0.append((_data, out_a, out_c, out_b))
                 else:
@@ -267,9 +267,11 @@ def reader_get_image_and_label():
                 time.sleep(1)
             if random.random()>0.5 and len(data_pool_0)>0:
                 data_pool = data_pool_0
+                v = 1.0*len(data_pool_0)/len(data_pool_1)
             else:
                 data_pool = data_pool_1
-            if len(data_pool)<buf_size//2 and random.random()>0.5:
+                v = 0.9
+            if random.random()>v:
                 d, a, c, b = random.choice(data_pool)
             else:    
                 d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
