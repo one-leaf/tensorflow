@@ -23,7 +23,7 @@ import threading
 channels_num = 4   # 图片先分层
 class_dim = 2 # 分类 0，背景， 1，精彩
 train_size = 8 # 学习的关键帧长度
-buf_size = 4096
+buf_size = 10240
 batch_size = 2048//train_size
 
 home = os.path.dirname(__file__)
