@@ -119,12 +119,12 @@ def network(drop=True):
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
     costs.append(cost_class)
-    # costs.append(cost_box_class)
+    costs.append(cost_box_class)
     # costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
-    parameter_names = parameters.names()
-    print parameter_names
+    # parameter_names = parameters.names()
+    # print parameter_names
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
     # return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc 
     return costs, parameters, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
@@ -299,7 +299,7 @@ if __name__ == '__main__':
     if os.path.exists(param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading parameters ...")
+        print("loading parameters %s ..."%param_file)
         paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
