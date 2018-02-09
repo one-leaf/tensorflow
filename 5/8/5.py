@@ -112,6 +112,7 @@ def network(drop=True):
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value(class_dim))
 
     net = resnet(x, 20)
+    net = paddle.layer.dropout(input=net, dropout_rate=0.5)
     net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     costs = paddle.layer.classification_cost(input=net_class_fc, label=a)
     
