@@ -118,7 +118,7 @@ def network(drop=True):
     
     parameters = paddle.parameters.create(costs)
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
-        learning_rate_decay_a=0.5, learning_rate_decay_b=0.75, learning_rate_schedule="poly",)
+        learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return costs, parameters, adam_optimizer, net_class_fc
 
 def read_data(v_data):
