@@ -103,7 +103,6 @@ def network(drop=True):
         if drop:
             block_expand = paddle.layer.dropout(input=block_expand, dropout_rate=0.1)
         blocks.append(block_expand)
-        # blocks.append(block_expand)
 
     costs=[]
     # net_class_gru = paddle.networks.simple_gru(input=blocks[-1], size=8, act=paddle.activation.Tanh())
@@ -119,7 +118,7 @@ def network(drop=True):
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
     costs.append(cost_class)
-    costs.append(cost_box_class)
+    # costs.append(cost_box_class)
     # costs.append(cost_box)
     
     parameters = paddle.parameters.create(costs)
