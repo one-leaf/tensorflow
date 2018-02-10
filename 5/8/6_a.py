@@ -353,17 +353,17 @@ if __name__ == '__main__':
     else:
         cls_parameters = paddle.parameters.create(costs[0])
 
-    if os.path.exists(box_param_file):
-        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
-        print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading box parameters %s ..."%box_param_file)
-        box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
-    else:
-        print("init box parameters %s ..."%box_param_file)
-        box_parameters = paddle.parameters.create(costs[1:])
+    # if os.path.exists(box_param_file):
+    #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
+    #     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+    #     print("loading box parameters %s ..."%box_param_file)
+    #     box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
+    # else:
+    #     print("init box parameters %s ..."%box_param_file)
+    #     box_parameters = paddle.parameters.create(costs[1:])
     
-    if os.path.exists(cls_param_file):
-        box_parameters.init_from_tar(open(cls_param_file,"rb"))
+    # if os.path.exists(cls_param_file):
+    #     box_parameters.init_from_tar(open(cls_param_file,"rb"))
 
     # print "cls_parameters"
     # print cls_parameters.keys()
@@ -382,8 +382,8 @@ if __name__ == '__main__':
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
 
-    is_trin_box = True
-    trainer = paddle.trainer.SGD(cost=costs[1:], parameters=box_parameters, update_equation=adam_optimizer)
-    print("start train box ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=1)
-    print("paid:", time.time() - status["starttime"])    
+    # is_trin_box = True
+    # trainer = paddle.trainer.SGD(cost=costs[1:], parameters=box_parameters, update_equation=adam_optimizer)
+    # print("start train box ...")
+    # trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=1)
+    # print("paid:", time.time() - status["starttime"])    
