@@ -284,6 +284,7 @@ def reader_get_image_and_label():
     def reader():
         t1 = threading.Thread(target=readDatatoPool(), args=())
         t1.start()
+        print("rrrrrrr")
         while t1.isAlive():
             print("sssssssss")
             if is_trin_box:
