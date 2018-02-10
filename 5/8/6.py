@@ -134,7 +134,7 @@ def box_network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
     #x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
-    x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
+    x = paddle.layer.data(name='y', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
     # box 分类器
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     # box 边缘修正
@@ -384,7 +384,7 @@ if __name__ == '__main__':
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
-    feeding_box={'x':0, 'c':1, 'b':2}
+    feeding_box={'y':0, 'c':1, 'b':2}
 
     is_trin_box = False
     trainer = paddle.trainer.SGD(cost=cls_cost, parameters=cls_parameters, update_equation=cls_adam_optimizer)
