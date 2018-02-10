@@ -376,3 +376,4 @@ if __name__ == '__main__':
     print("start train box ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=1)
     print("paid:", time.time() - status["starttime"])    
+    
