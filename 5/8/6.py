@@ -141,9 +141,9 @@ def network(drop=True):
     net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
 
     # 不知道咋搞，训练 cost_class 时，需要将 cost_class 放前面，反之需要放到后面，晕
+    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
-    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     costs=[]
     costs.append(cost_class)
