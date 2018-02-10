@@ -345,17 +345,17 @@ if __name__ == '__main__':
     costs, adam_optimizer, _, _, _ = network()
 
     if os.path.exists(cls_param_file):
-        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading parameters ...")
+        print("loading cls parameters ...")
         cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
     else:
         cls_parameters = paddle.parameters.create(costs[0])
 
     if os.path.exists(box_param_file):
-        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading parameters ...")
+        print("loading box parameters ...")
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
         box_parameters = paddle.parameters.create(costs[1:])
