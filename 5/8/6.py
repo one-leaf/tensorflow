@@ -308,16 +308,13 @@ def reader_get_image_and_label(isBox=False):
                     while len(data_pool_1)==0 or len(data_pool_0)==0:
                         print("w", len(data_pool_0), len(data_pool_1))
                         time.sleep(1)
-                        
+
                     if random.random()>0.5 and len(data_pool_0)>0:
                         data_pool = data_pool_0
                         v = 1.0*len(data_pool_0)/len(data_pool_1)
                     else:
                         data_pool = data_pool_1
-                        if len(data_pool_0)!=0:
-                            v = 1.0*len(data_pool_1)/len(data_pool_0)
-                        else: 
-                            v = 1.0
+                        v = 1.0*len(data_pool_1)/len(data_pool_0)
 
                     if random.random()>v:
                         d, a = random.choice(data_pool)
