@@ -358,7 +358,7 @@ if __name__ == '__main__':
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
     cls_cost, cls_parameters, cls_adam_optimizer, net_class_fc = cls_network()
-    box_cost, box_parameters, box_adam_optimizer, net_box_class_fc, net_box_fc = cls_network()
+    box_cost, box_parameters, box_adam_optimizer, net_box_class_fc, net_box_fc = box_network()
 
     if os.path.exists(cls_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
