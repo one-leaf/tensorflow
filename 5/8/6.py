@@ -360,8 +360,8 @@ if __name__ == '__main__':
         print("init box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.create(costs[1:])
     
-    if os.path.exists(cls_param_file):
-        box_parameters.init_from_tar(open(cls_param_file,"rb"))
+    # if os.path.exists(cls_param_file):
+    #     box_parameters.init_from_tar(open(cls_param_file,"rb"))
     # print "cls_parameters"
     # print cls_parameters.keys()
         
