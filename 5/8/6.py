@@ -283,6 +283,7 @@ def reader_get_image_and_label(isBox=False):
         t1 = threading.Thread(target=readDatatoPool(isBox), args=())
         t1.start()
         while t1.isAlive():
+            print("sssssssss")
             if isBox:
                 while len(data_pool_1)==0:
                     print("w", len(data_pool_0), len(data_pool_1))
