@@ -155,8 +155,7 @@ def network(drop=True):
 def read_data_cls(v_data, label): 
     w = v_data.shape[0]
     for i in range(block_size, w):
-        print(label)
-        _avg = 1.*sum(label[i-block_size,i])/block_size
+        _avg = 1.*sum(label[i-block_size:i])/block_size
         # 只要全部是精彩或全部是非精彩的片段
         if (_avg == 1 or _avg == 0) and random.random()>1./2:
             _data = np.stack([v_data[j] for j in range(i-block_size,i)])
