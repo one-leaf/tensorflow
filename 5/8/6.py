@@ -282,6 +282,7 @@ def calc_value(segments):
                 
 def reader_get_image_and_label():
     def reader():
+        print("0000000000000")
         t1 = threading.Thread(target=readDatatoPool(), args=())
         print("11111111")
         t1.start()
