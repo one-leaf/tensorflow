@@ -131,7 +131,6 @@ def network(drop=True):
     # 当前图片精彩或非精彩分类
     net_class_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
     net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
-    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     # BOX位置是否是背景和还是有效区域分类
     net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
@@ -142,6 +141,8 @@ def network(drop=True):
     net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
     net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
+
+    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     costs=[]
     costs.append(cost_class)
