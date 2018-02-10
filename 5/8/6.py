@@ -286,22 +286,31 @@ def reader_get_image_and_label(isBox=False):
             while len(data_pool_1)==0:
                 print("w")
                 time.sleep(1)
-            if random.random()>0.5 and len(data_pool_0)>0:
-                data_pool = data_pool_0
-                v = 1.0*len(data_pool_0)/len(data_pool_1)
-            else:
-                data_pool = data_pool_1
-                if len(data_pool_0)!=0:
-                    v = 1.0*len(data_pool_1)/len(data_pool_0)
-                else: 
-                    v = 1.0
             if isBox:
-                if random.random()>v:
-                    d, c, b = random.choice(data_pool)
-                else:    
-                    d, c, b = data_pool.pop(random.randrange(len(data_pool)))
-                yield d, a, c, b
+                if random.random()>0.5 and len(data_pool_0)>0:
+                    data_pool = data_pool_0
+                    v = 1.0*len(data_pool_0)/len(data_pool_1)
+                else:
+                    data_pool = data_pool_1
+                    if len(data_pool_0)!=0:
+                        v = 1.0*len(data_pool_1)/len(data_pool_0)
+                    else: 
+                        v = 1.0
+                    if random.random()>v:
+                        d, c, b = random.choice(data_pool)
+                    else:    
+                        d, c, b = data_pool.pop(random.randrange(len(data_pool)))
+                    yield d, a, c, b
             else:
+                if random.random()>0.5 and len(data_pool_0)>0:
+                    data_pool = data_pool_0
+                    v = 1.0*len(data_pool_0)/len(data_pool_1)
+                else:
+                    data_pool = data_pool_1
+                    if len(data_pool_0)!=0:
+                        v = 1.0*len(data_pool_1)/len(data_pool_0)
+                    else: 
+                        v = 1.0
                 datas=[]
                 labels=[]
                 while (len(datas)<train_size):
