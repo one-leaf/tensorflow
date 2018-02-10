@@ -360,7 +360,7 @@ if __name__ == '__main__':
     feeding_box={'x':0, 'c':2, 'b':3}
 
     is_trin_box = False
-    trainer = paddle.trainer.SGD(cost=costs[1:], parameters=paddle_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs, parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train class ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
