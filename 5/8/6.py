@@ -26,7 +26,7 @@ train_size = 64 # 学习的关键帧长度
 block_size = 8
 
 buf_size = 4096
-batch_size = 1#2048//(train_size*block_size)
+batch_size = 2048//(train_size*block_size)
 box_size = train_size//4
 area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 
@@ -277,10 +277,10 @@ def calc_value(segments):
                 
 def reader_get_image_and_label():
     def reader():
+        print "ssssss"
         t1 = threading.Thread(target=readDatatoPool(), args=())
         t1.start()
         while t1.isAlive():
-            print "ti start"
             if is_trin_box:
                 while len(data_pool_1)==0:
                     print("w", len(data_pool_0), len(data_pool_1))
@@ -298,7 +298,6 @@ def reader_get_image_and_label():
                     d, c, b = random.choice(data_pool)
                 else:    
                     d, c, b = data_pool.pop(random.randrange(len(data_pool)))
-                print "d,c,b"                        
                 yield d, c, b
             else:
                 datas=[]
@@ -307,21 +306,18 @@ def reader_get_image_and_label():
                     while len(data_pool_1)==0 or len(data_pool_0)==0:
                         print("w", len(data_pool_0), len(data_pool_1))
                         time.sleep(1)
-
                     if random.random()>0.5 and len(data_pool_0)>0:
                         data_pool = data_pool_0
                         v = 1.0*len(data_pool_0)/len(data_pool_1)
                     else:
                         data_pool = data_pool_1
                         v = 1.0*len(data_pool_1)/len(data_pool_0)
-
                     if random.random()>v:
                         d, a = random.choice(data_pool)
                     else:    
                         d, a = data_pool.pop(random.randrange(len(data_pool)))
                     datas.append(d)
                     labels.append(a)
-                print("a")
                 yield datas, labels    
     return reader
 
