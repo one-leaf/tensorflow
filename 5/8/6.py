@@ -277,7 +277,6 @@ def calc_value(segments):
                 
 def reader_get_image_and_label():
     def reader():
-        print "ssssss"
         t1 = threading.Thread(target=readDatatoPool(), args=())
         t1.start()
         while t1.isAlive():            
