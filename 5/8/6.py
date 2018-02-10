@@ -151,19 +151,30 @@ def network(drop=True):
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return costs, parameters, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
 
-def read_data(v_data):
-    batch_data=[np.zeros(2048*block_size) for _ in range(train_size)]   
+# 读取精彩和非精彩, 离散数据
+def read_data_cls(v_data, label): 
+    w = v_data.shape[0]
+    for i in range(block_size, w):
+        _avg = 1.*sum(label[i-block_size,i])/block_size
+        # 只要全部是精彩或全部是非精彩的片段
+        if (_avg == 1 or _avg == 0) and random.random()>1./2:
+            _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+            yield i, _data, int(_avg)
+
+# 读取BOX数据，连续数据
+def read_data_box(v_data):
+    batch_data = [np.zeros(2048*block_size) for _ in range(train_size)]   
     w = v_data.shape[0]
     for i in range(block_size, w):
         _data = np.stack([v_data[j] for j in range(i-block_size,i)])
         batch_data.append(_data)
         batch_data.pop(0)
-        if i>=train_size and (i+1)%16==0:
+        if i>=train_size and random.random()>1./16:
             yield i, batch_data
     if w%train_size!=0:
         yield w-1, batch_data
 
-data_pool_0 = []    #干净样本
+data_pool_0 = []    #负样本
 data_pool_1 = []    #正样本
 training_data, validation_data, _ = load_data()
 def readDatatoPool(isBox=False):
@@ -178,32 +189,31 @@ def readDatatoPool(isBox=False):
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
 
         # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
-        if not isBox:
-            label = np.zeros([v_data.shape[0]], dtype=np.int)
-            for annotations in data["data"]:
-                segment = annotations['segment']
-                for i in range(int(segment[0]),int(segment[1]+1)):
-                    label[i] = 1
-
-        for i, _data in read_data(v_data):
-            if not isBox:
-                out_a = label[i-train_size:i]         
-                if sum(out_a) == train_size :                   
-                    data_pool_0.append((_data, 1))
-                elif sum(out_a) == 0:
-                    data_pool_1.append((_data, 0))
-            else:
+        if isBox:
+            for i, _data in read_data_box(v_data):
                 fix_segments =[]
                 for annotations in data["data"]:
                     segment = annotations['segment']
                     if segment[0]>=i or segment[1]<=i-train_size:
                         continue
                     fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
-                    out_a, out_c, out_b = calc_value(fix_segments)
+                    out_c, out_b = calc_value(fix_segments)
                     if sum(out_a) < train_size * 0.5:                   
-                        data_pool_0.append((_data, out_a, out_c, out_b))
+                        data_pool_0.append((_data, out_c, out_b))
                     else:
-                        data_pool_1.append((_data, out_a, out_c, out_b))
+                        data_pool_1.append((_data, out_c, out_b))
+        else:
+            label = np.zeros([v_data.shape[0]], dtype=np.int)
+            for annotations in data["data"]:
+                segment = annotations['segment']
+                for i in range(int(segment[0]),int(segment[1]+1)):
+                    label[i] = 1
+            for i, _data, _label in read_data_cls(v_data, label):
+                if _label==0:
+                    data_pool_0.append((_data, _label))
+                else:
+                    data_pool_1.append((_data, _label))
+
         while len(data_pool_1)>buf_size:
             # print("r")
             time.sleep(1) 
@@ -284,11 +294,23 @@ def reader_get_image_and_label(isBox=False):
                     v = 1.0*len(data_pool_1)/len(data_pool_0)
                 else: 
                     v = 1.0
-            if random.random()>v:
-                d, a, c, b = random.choice(data_pool)
-            else:    
-                d, a, c, b = data_pool.pop(random.randrange(len(data_pool)))
-            yield d, a, c, b
+            if isBox:
+                if random.random()>v:
+                    d, c, b = random.choice(data_pool)
+                else:    
+                    d, c, b = data_pool.pop(random.randrange(len(data_pool)))
+                yield d, a, c, b
+            else:
+                datas=[]
+                labels=[]
+                while (len(datas)<train_size):
+                    if random.random()>v:
+                        d, a = random.choice(data_pool)
+                    else:    
+                        d, a = data_pool.pop(random.randrange(len(data_pool)))
+                    datas.append(d)
+                    labels.append(a)
+                yield datas, labels    
     return reader
 
 status ={}
@@ -313,19 +335,25 @@ if __name__ == '__main__':
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
     cost, paddle_parameters, adam_optimizer, _, _, _ = network()
-    
-    print('set reader ...')
-    train_reader_class = paddle.batch(reader_get_image_and_label(False), batch_size=batch_size)
-    train_reader_box = paddle.batch(reader_get_image_and_label(True), batch_size=batch_size)
-    feeding={'x':0, 'a':1, 'c':2, 'b':3}
-    # feeding={'x':0, 'a':1} 
+
     if os.path.exists(param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
         print("loading parameters ...")
         paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
-    trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
-    print("start train ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=8)
+    print('set reader ...')
+    train_reader_class = paddle.batch(reader_get_image_and_label(False), batch_size=batch_size)
+    train_reader_box = paddle.batch(reader_get_image_and_label(True), batch_size=batch_size)
+    feeding_class={'x':0, 'a':1} 
+    feeding_box={'x':0, 'a':1, 'c':2, 'b':3}
+
+    trainer = paddle.trainer.SGD(cost=cost[0], parameters=paddle_parameters, update_equation=adam_optimizer)
+    print("start train class ...")
+    trainer.train(reader=train_reader_class, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
+
+    trainer = paddle.trainer.SGD(cost=cost[1:], parameters=paddle_parameters, update_equation=adam_optimizer)
+    print("start train box ...")
+    trainer.train(reader=train_reader_box, event_handler=event_handler, feeding=feeding_box, num_passes=5)
+    print("paid:", time.time() - status["starttime"])    
