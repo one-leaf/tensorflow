@@ -140,9 +140,9 @@ def network(drop=True):
     net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
     net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
 
-    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
+    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     costs=[]
     costs.append(cost_class)
@@ -350,7 +350,7 @@ if __name__ == '__main__':
         print("loading cls parameters %s ..."%cls_param_file)
         cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
     else:
-        cls_parameters = paddle.parameters.create(net_class_fc)
+        cls_parameters = paddle.parameters.create(costs[0])
 
     if os.path.exists(box_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
@@ -359,7 +359,7 @@ if __name__ == '__main__':
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
         print("init box parameters %s ..."%box_param_file)
-        box_parameters = paddle.parameters.create([net_box_class_fc, net_box_fc])
+        box_parameters = paddle.parameters.create(costs[1:])
     
     if os.path.exists(cls_param_file):
         box_parameters.init_from_tar(open(cls_param_file,"rb"))
