@@ -328,10 +328,10 @@ def event_handler(event):
                 time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics,
                 len(data_pool_0), len(data_pool_1)) )
             status["steptime"]=time.time()
-            if is_trin_box:
-                box_parameters.to_tar(open(box_param_file, 'wb'))
-            else:
-                cls_parameters.to_tar(open(cls_param_file, 'wb'))
+            # if is_trin_box:
+            #     box_parameters.to_tar(open(box_param_file, 'wb'))
+            # else:
+            #     cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 # for i in range(train_size):
 #     print(i,get_box_point(i)) 
@@ -359,6 +359,8 @@ if __name__ == '__main__':
     else:
         print("init box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.create(costs[1:])
+    
+    if os.path.exists(cls_param_file):
         box_parameters.init_from_tar(open(cls_param_file,"rb"))
     # print "cls_parameters"
     # print cls_parameters.keys()
