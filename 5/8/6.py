@@ -371,8 +371,8 @@ if __name__ == '__main__':
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
 
-    # is_trin_box = True
-    # trainer = paddle.trainer.SGD(cost=cost[1:], parameters=paddle_parameters, update_equation=adam_optimizer)
-    # print("start train box ...")
-    # trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=5)
-    # print("paid:", time.time() - status["starttime"])    
+    is_trin_box = True
+    trainer = paddle.trainer.SGD(cost=cost[1:], parameters=box_parameters, update_equation=adam_optimizer)
+    print("start train box ...")
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=5)
+    print("paid:", time.time() - status["starttime"])    
