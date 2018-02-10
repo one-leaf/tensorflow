@@ -111,14 +111,30 @@ def resnet(ipt, depth=32):
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
 
-def network(drop=True):
+def cls_network(drop=True): 
+    x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
+    # 是否精彩分类
+    a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
+
+    net = resnet(x, 20)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)
+
+    # 当前图片精彩或非精彩分类
+    net_class_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
+    net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
+    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
+   
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
+        learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
+    parameters = paddle.parameters.create(cost_class)        
+    return cost_class, parameters, adam_optimizer, net_class_fc
+
+def box_network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
     #x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
     x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
-
-    # 是否精彩分类
-    a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
     # box 分类器
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     # box 边缘修正
@@ -142,16 +158,15 @@ def network(drop=True):
 
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
-    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     costs=[]
-    costs.append(cost_class)
     costs.append(cost_box_class)
     costs.append(cost_box)
     
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
-    return costs, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
+    parameters = paddle.parameters.create(costs)        
+    return costs, parameters, adam_optimizer, net_box_class_fc, net_box_fc
 
 # 读取精彩和非精彩, 离散数据
 def read_data_cls(v_data, label): 
@@ -342,24 +357,20 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    costs, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc = network()
+    cls_cost, cls_parameters, cls_adam_optimizer, net_class_fc = cls_network()
+    box_cost, box_parameters, box_adam_optimizer, net_box_class_fc, net_box_fc = cls_network()
 
     if os.path.exists(cls_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
         print("loading cls parameters %s ..."%cls_param_file)
         cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
-    else:
-        cls_parameters = paddle.parameters.create(costs[0])
 
     if os.path.exists(box_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
         print("loading box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
-    else:
-        print("init box parameters %s ..."%box_param_file)
-        box_parameters = paddle.parameters.create(costs[1:])
     
     if os.path.exists(cls_param_file):
         box_parameters.init_from_tar(open(cls_param_file,"rb"))
@@ -376,13 +387,13 @@ if __name__ == '__main__':
     feeding_box={'x':0, 'c':1, 'b':2}
 
     is_trin_box = False
-    trainer = paddle.trainer.SGD(cost=costs[0], parameters=cls_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=cls_cost, parameters=cls_parameters, update_equation=cls_adam_optimizer)
     print("start train class ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
 
     is_trin_box = True
-    trainer = paddle.trainer.SGD(cost=costs[1:], parameters=box_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=box_cost, parameters=box_parameters, update_equation=box_adam_optimizer)
     print("start train box ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=1)
     print("paid:", time.time() - status["starttime"])    
