@@ -358,7 +358,7 @@ if __name__ == '__main__':
         print("loading box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
-        box_parameters = paddle.parameters.create(costs[1:])
+        box_parameters = paddle.parameters.create(costs)
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
