@@ -251,13 +251,8 @@ def get_box_point(point):
 # out_c iou 比例
 # out_b 左偏移 和 右偏移
 def calc_value(segments):
-    out_a=[0 for _ in range(train_size)]
     out_c=[0 for _ in range(train_size)]
     out_b=[np.zeros(2) for _ in range(train_size)]
-
-    for dst in segments:
-        for i in range(int(dst[0]), int(dst[1])+1):
-            out_a[i] = 1
 
     boxs = get_boxs()
     for i, src in enumerate(boxs):
@@ -278,7 +273,7 @@ def calc_value(segments):
             out_b[i][1]=(segments[max_ious_index][1]-src[1])/train_size         
         # if max_ious > 0.9:
         #     print u"正确的:",segments[max_ious_index],u"接近的:", src, u"拟合度：", max_ious,u"偏移：", out_b[i]
-    return out_a, out_c, out_b
+    return out_c, out_b
                 
 def reader_get_image_and_label():
     def reader():
@@ -302,7 +297,7 @@ def reader_get_image_and_label():
                         d, c, b = random.choice(data_pool)
                     else:    
                         d, c, b = data_pool.pop(random.randrange(len(data_pool)))
-                    yield d, a, c, b
+                    yield d, c, b
             else:
                 datas=[]
                 labels=[]
@@ -356,19 +351,15 @@ if __name__ == '__main__':
         print("loading parameters ...")
         paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-    sess = paddle.executor()
-    class_step = d_optim.minimize(cost[0], paddle_parameters)
-    for data, label in train_reader:  
-        sess.run(class_step, feed_dict = {x: data, a: label})
-
     print('set reader ...')
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
     feeding_box={'x':0, 'c':2, 'b':3}
+
     is_trin_box = False
-    trainer = paddle.trainer.SGD(cost=cost[0], parameters=paddle_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs, parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
 
     # is_trin_box = True
