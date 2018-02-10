@@ -203,7 +203,7 @@ def readDatatoPool(isBox=False):
                     else:
                         data_pool_1.append((_data, out_c, out_b))
         else:
-            label = np.zeros([v_data.shape[0]], dtype=np.int)
+            label = [0 for _ in range(v_data.shape[0])]
             for annotations in data["data"]:
                 segment = annotations['segment']
                 for i in range(int(segment[0]),int(segment[1]+1)):
