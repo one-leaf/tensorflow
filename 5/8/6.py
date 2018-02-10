@@ -216,7 +216,7 @@ def readDatatoPool():
                     data_pool_1.append((_data, _label))
 
         while len(data_pool_1)>buf_size:
-            print("r", len(data_pool_0), len(data_pool_1))
+            # print("r", len(data_pool_0), len(data_pool_1))
             time.sleep(1) 
 
 # 计算 IOU,输入为 x1,x2 坐标
