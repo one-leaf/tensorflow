@@ -215,7 +215,7 @@ def readDatatoPool(isBox=False):
                     data_pool_1.append((_data, _label))
 
         while len(data_pool_1)>buf_size:
-            print("r")
+            print("r", len(data_pool_0), len(data_pool_1))
             time.sleep(1) 
 
 # 计算 IOU,输入为 x1,x2 坐标
@@ -283,10 +283,10 @@ def reader_get_image_and_label(isBox=False):
         t1 = threading.Thread(target=readDatatoPool(isBox), args=())
         t1.start()
         while t1.isAlive():
-            while len(data_pool_1)==0:
-                print("w")
-                time.sleep(1)
             if isBox:
+                while len(data_pool_1)==0:
+                    print("w", len(data_pool_0), len(data_pool_1))
+                    time.sleep(1)
                 if random.random()>0.5 and len(data_pool_0)>0:
                     data_pool = data_pool_0
                     v = 1.0*len(data_pool_0)/len(data_pool_1)
@@ -302,18 +302,23 @@ def reader_get_image_and_label(isBox=False):
                         d, c, b = data_pool.pop(random.randrange(len(data_pool)))
                     yield d, a, c, b
             else:
-                if random.random()>0.5 and len(data_pool_0)>0:
-                    data_pool = data_pool_0
-                    v = 1.0*len(data_pool_0)/len(data_pool_1)
-                else:
-                    data_pool = data_pool_1
-                    if len(data_pool_0)!=0:
-                        v = 1.0*len(data_pool_1)/len(data_pool_0)
-                    else: 
-                        v = 1.0
                 datas=[]
                 labels=[]
                 while (len(datas)<train_size):
+                    while len(data_pool_1)==0 or len(data_pool_0)==0:
+                        print("w", len(data_pool_0), len(data_pool_1))
+                        time.sleep(1)
+                        
+                    if random.random()>0.5 and len(data_pool_0)>0:
+                        data_pool = data_pool_0
+                        v = 1.0*len(data_pool_0)/len(data_pool_1)
+                    else:
+                        data_pool = data_pool_1
+                        if len(data_pool_0)!=0:
+                            v = 1.0*len(data_pool_1)/len(data_pool_0)
+                        else: 
+                            v = 1.0
+
                     if random.random()>v:
                         d, a = random.choice(data_pool)
                     else:    
