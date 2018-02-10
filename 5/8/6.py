@@ -277,10 +277,8 @@ def calc_value(segments):
                 
 def reader_get_image_and_label():
     def reader():
-        print "is_trin_box1", is_trin_box
         t1 = threading.Thread(target=readDatatoPool, args=())
         t1.start()
-        print "is_trin_box2", is_trin_box
         while t1.isAlive():            
             if is_trin_box:
                 while len(data_pool_1)==0:
@@ -299,7 +297,7 @@ def reader_get_image_and_label():
                     d, c, b = random.choice(data_pool)
                 else:    
                     d, c, b = data_pool.pop(random.randrange(len(data_pool)))
-                out = (d, c, b)
+                yield d, c, b
             else:
                 datas=[]
                 labels=[]
@@ -319,8 +317,7 @@ def reader_get_image_and_label():
                         d, a = data_pool.pop(random.randrange(len(data_pool)))
                     datas.append(d)
                     labels.append(a)
-                out = (datas, labels)   
-            yield out 
+                yield datas, labels   
     return reader
 
 status ={}
@@ -358,7 +355,7 @@ if __name__ == '__main__':
     feeding_box={'x':0, 'c':2, 'b':3}
 
     is_trin_box = False
-    trainer = paddle.trainer.SGD(cost=costs, parameters=paddle_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs[0], parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train class ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
