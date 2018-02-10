@@ -363,7 +363,7 @@ if __name__ == '__main__':
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
-    feeding_box={'x':0, 'c':2, 'b':3}
+    feeding_box={'x':0, 'c':1, 'b':2}
 
     # is_trin_box = False
     # trainer = paddle.trainer.SGD(cost=costs[0], parameters=cls_parameters, update_equation=adam_optimizer)
