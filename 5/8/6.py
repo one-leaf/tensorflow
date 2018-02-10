@@ -343,7 +343,7 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    cost, paddle_parameters, adam_optimizer, x, a, c, b = network()
+    costs, paddle_parameters, adam_optimizer, x, a, c, b = network()
 
     if os.path.exists(param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
@@ -357,7 +357,7 @@ if __name__ == '__main__':
     feeding_box={'x':0, 'c':2, 'b':3}
 
     is_trin_box = False
-    trainer = paddle.trainer.SGD(cost=costs, parameters=paddle_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs[1:], parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train class ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
