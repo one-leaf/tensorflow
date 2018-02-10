@@ -280,7 +280,7 @@ def reader_get_image_and_label():
         print "ssssss"
         t1 = threading.Thread(target=readDatatoPool(), args=())
         t1.start()
-        while t1.isAlive():
+        while t1.isAlive():            
             if is_trin_box:
                 while len(data_pool_1)==0:
                     print("w", len(data_pool_0), len(data_pool_1))
@@ -298,7 +298,7 @@ def reader_get_image_and_label():
                     d, c, b = random.choice(data_pool)
                 else:    
                     d, c, b = data_pool.pop(random.randrange(len(data_pool)))
-                yield d, c, b
+                out = (d, c, b)
             else:
                 datas=[]
                 labels=[]
@@ -318,7 +318,8 @@ def reader_get_image_and_label():
                         d, a = data_pool.pop(random.randrange(len(data_pool)))
                     datas.append(d)
                     labels.append(a)
-                yield datas, labels    
+                out = (datas, labels)   
+            yield out 
     return reader
 
 status ={}
