@@ -134,13 +134,13 @@ def box_network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
     #x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
-    x = paddle.layer.data(name='y', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
+    y = paddle.layer.data(name='y', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
     # box 分类器
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     # box 边缘修正
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
-    net = resnet(x, 20)
+    net = resnet(y, 20)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)
 
