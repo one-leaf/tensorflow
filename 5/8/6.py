@@ -322,6 +322,8 @@ def reader_get_image_and_label(isBox=False):
                         d, a = data_pool.pop(random.randrange(len(data_pool)))
                     datas.append(d)
                     labels.append(a)
+                    print("+++++++")
+                print("oooooo")
                 yield datas, labels    
     return reader
 
