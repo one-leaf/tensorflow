@@ -135,14 +135,14 @@ def network(drop=True):
     # BOX位置是否是背景和还是有效区域分类
     net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
     net_box_class_fc = paddle.layer.fc(input=net_box_class_gru, size=class_dim, act=paddle.activation.Softmax())
-    cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
     # BOX的偏移量回归预测
     net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
     net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
-    cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
+    cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
+    cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
     costs=[]
     costs.append(cost_class)
@@ -342,15 +342,15 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    costs, adam_optimizer, _, _, _ = network()
+    costs, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc = network()
 
-    # if os.path.exists(cls_param_file):
-    #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
-    #     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-    #     print("loading cls parameters %s ..."%cls_param_file)
-    #     cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
-    # else:
-    #     cls_parameters = paddle.parameters.create(costs[0])
+    if os.path.exists(cls_param_file):
+        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
+        print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+        print("loading cls parameters %s ..."%cls_param_file)
+        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
+    else:
+        cls_parameters = paddle.parameters.create(net_class_fc)
 
     if os.path.exists(box_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
@@ -359,15 +359,16 @@ if __name__ == '__main__':
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
         print("init box parameters %s ..."%box_param_file)
-        box_parameters = paddle.parameters.create(costs[1:])
+        box_parameters = paddle.parameters.create([net_box_class_fc, net_box_fc]])
     
-    # if os.path.exists(cls_param_file):
-    #     box_parameters.init_from_tar(open(cls_param_file,"rb"))
+    if os.path.exists(cls_param_file):
+        box_parameters.init_from_tar(open(cls_param_file,"rb"))
+
     # print "cls_parameters"
     # print cls_parameters.keys()
         
-    print "box_parameters"
-    print box_parameters.keys()
+    # print "box_parameters"
+    # print box_parameters.keys()
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
