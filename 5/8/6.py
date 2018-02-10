@@ -33,7 +33,9 @@ area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
-param_file = os.path.join(model_path,"param_%sx%s.tar"%(train_size,box_size))
+cls_param_file = os.path.join(model_path,"param_cls_%sx%s.tar"%(train_size,box_size))
+box_param_file = os.path.join(model_path,"param_box_%sx%s.tar"%(train_size,box_size))
+
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
@@ -146,12 +148,9 @@ def network(drop=True):
     costs.append(cost_box_class)
     costs.append(cost_box)
     
-    parameters = paddle.parameters.create(costs)
-    # parameter_names = parameters.names()
-    # print parameter_names
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
-    return costs, parameters, adam_optimizer, x, a, c, b
+    return costs, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
 
 # 读取精彩和非精彩, 离散数据
 def read_data_cls(v_data, label): 
@@ -330,8 +329,10 @@ def event_handler(event):
                 time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics,
                 len(data_pool_0), len(data_pool_1)) )
             status["steptime"]=time.time()
-            with open(param_file, 'wb') as f:
-                paddle_parameters.to_tar(f)
+            if is_trin_box:
+                box_parameters.to_tar(open(box_param_file, 'wb'))
+            else:
+                cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 # for i in range(train_size):
 #     print(i,get_box_point(i)) 
@@ -341,13 +342,23 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    costs, paddle_parameters, adam_optimizer, x, a, c, b = network()
+    costs, adam_optimizer, _, _, _ = network()
 
-    if os.path.exists(param_file):
+    if os.path.exists(cls_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
         print("loading parameters ...")
-        paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
+    else:
+        cls_parameters = paddle.parameters.create(costs[0])
+
+    if os.path.exists(box_param_file):
+        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+        print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+        print("loading parameters ...")
+        box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
+    else:
+        box_parameters = paddle.parameters.create(costs[1:])
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
@@ -355,7 +366,7 @@ if __name__ == '__main__':
     feeding_box={'x':0, 'c':2, 'b':3}
 
     is_trin_box = False
-    trainer = paddle.trainer.SGD(cost=costs[0], parameters=paddle_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs[0], parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
