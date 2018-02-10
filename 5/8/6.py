@@ -329,10 +329,10 @@ def event_handler(event):
                 time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics,
                 len(data_pool_0), len(data_pool_1)) )
             status["steptime"]=time.time()
-            # if is_trin_box:
-            #     box_parameters.to_tar(open(box_param_file, 'wb'))
-            # else:
-            #     cls_parameters.to_tar(open(cls_param_file, 'wb'))
+            if is_trin_box:
+                box_parameters.to_tar(open(box_param_file, 'wb'))
+            else:
+                cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 # for i in range(train_size):
 #     print(i,get_box_point(i)) 
@@ -358,7 +358,7 @@ if __name__ == '__main__':
         print("loading box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
-        box_parameters = paddle.parameters.create(costs)
+        box_parameters = paddle.parameters.create(costs[1])
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
@@ -372,7 +372,7 @@ if __name__ == '__main__':
     # print("paid:", time.time() - status["starttime"])
 
     is_trin_box = True
-    trainer = paddle.trainer.SGD(cost=costs[1:], parameters=box_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs[1], parameters=box_parameters, update_equation=adam_optimizer)
     print("start train box ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=1)
     print("paid:", time.time() - status["starttime"])    
