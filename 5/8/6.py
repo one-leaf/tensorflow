@@ -39,6 +39,8 @@ out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 np.set_printoptions(threshold=np.inf)
+is_trin_box=False
+
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -177,7 +179,7 @@ def read_data_box(v_data):
 data_pool_0 = []    #负样本
 data_pool_1 = []    #正样本
 training_data, validation_data, _ = load_data()
-def readDatatoPool(isBox=False):
+def readDatatoPool():
     size = len(training_data)+len(validation_data)
     c = 0
     for i in range(size):
@@ -189,7 +191,7 @@ def readDatatoPool(isBox=False):
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
 
         # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
-        if isBox:
+        if is_trin_box:
             for i, _data in read_data_box(v_data):
                 fix_segments =[]
                 for annotations in data["data"]:
@@ -278,13 +280,13 @@ def calc_value(segments):
         #     print u"正确的:",segments[max_ious_index],u"接近的:", src, u"拟合度：", max_ious,u"偏移：", out_b[i]
     return out_a, out_c, out_b
                 
-def reader_get_image_and_label(isBox=False):
+def reader_get_image_and_label():
     def reader():
-        t1 = threading.Thread(target=readDatatoPool(isBox), args=())
+        t1 = threading.Thread(target=readDatatoPool(), args=())
         t1.start()
         while t1.isAlive():
             print("sssssssss")
-            if isBox:
+            if is_trin_box:
                 while len(data_pool_1)==0:
                     print("w", len(data_pool_0), len(data_pool_1))
                     time.sleep(1)
@@ -358,16 +360,17 @@ if __name__ == '__main__':
         paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
     print('set reader ...')
-    train_reader_class = paddle.batch(reader_get_image_and_label(False), batch_size=batch_size)
-    train_reader_box = paddle.batch(reader_get_image_and_label(True), batch_size=batch_size)
+    train_reader_class = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    train_reader_box = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
     feeding_box={'x':0, 'a':1, 'c':2, 'b':3}
-
+    is_trin_box = False
     trainer = paddle.trainer.SGD(cost=cost[0], parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train class ...")
     trainer.train(reader=train_reader_class, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
 
+    is_trin_box = True
     trainer = paddle.trainer.SGD(cost=cost[1:], parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train box ...")
     trainer.train(reader=train_reader_box, event_handler=event_handler, feeding=feeding_box, num_passes=5)
