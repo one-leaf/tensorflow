@@ -343,13 +343,13 @@ if __name__ == '__main__':
     print("get network ...")
     costs, adam_optimizer, _, _, _ = network()
 
-    if os.path.exists(cls_param_file):
-        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
-        print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading cls parameters %s ..."%cls_param_file)
-        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
-    else:
-        cls_parameters = paddle.parameters.create(costs[0])
+    # if os.path.exists(cls_param_file):
+    #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
+    #     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+    #     print("loading cls parameters %s ..."%cls_param_file)
+    #     cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
+    # else:
+    #     cls_parameters = paddle.parameters.create(costs[0])
 
     if os.path.exists(box_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
@@ -365,8 +365,8 @@ if __name__ == '__main__':
     # print "cls_parameters"
     # print cls_parameters.keys()
         
-    # print "box_parameters"
-    # print box_parameters.keys()
+    print "box_parameters"
+    print box_parameters.keys()
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
