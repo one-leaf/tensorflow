@@ -151,7 +151,7 @@ def network(drop=True):
     # print parameter_names
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
-    return costs, parameters, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
+    return costs, parameters, adam_optimizer, x, a, c, b
 
 # 读取精彩和非精彩, 离散数据
 def read_data_cls(v_data, label): 
@@ -282,13 +282,9 @@ def calc_value(segments):
                 
 def reader_get_image_and_label():
     def reader():
-        print("0000000000000")
         t1 = threading.Thread(target=readDatatoPool(), args=())
-        print("11111111")
         t1.start()
-        print("rrrrrrr")
         while t1.isAlive():
-            print("sssssssss")
             if is_trin_box:
                 while len(data_pool_1)==0:
                     print("w", len(data_pool_0), len(data_pool_1))
@@ -328,8 +324,6 @@ def reader_get_image_and_label():
                         d, a = data_pool.pop(random.randrange(len(data_pool)))
                     datas.append(d)
                     labels.append(a)
-                    print("+++++++")
-                print("oooooo")
                 yield datas, labels    
     return reader
 
@@ -354,7 +348,7 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    cost, paddle_parameters, adam_optimizer, _, _, _ = network()
+    cost, paddle_parameters, adam_optimizer, x, a, c, b = network()
 
     if os.path.exists(param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
@@ -362,8 +356,13 @@ if __name__ == '__main__':
         print("loading parameters ...")
         paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
-    print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    sess = paddle.executor()
+    class_step = d_optim.minimize(cost[0], paddle_parameters)
+    for data, label in train_reader:  
+        sess.run(class_step, feed_dict = {x: data, a: label})
+
+    print('set reader ...')
     feeding_class={'x':0, 'a':1} 
     feeding_box={'x':0, 'c':2, 'b':3}
     is_trin_box = False
