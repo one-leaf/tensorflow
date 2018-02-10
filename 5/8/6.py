@@ -134,12 +134,12 @@ def network(drop=True):
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     # BOX位置是否是背景和还是有效区域分类
-    net_box_class_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
+    net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
     net_box_class_fc = paddle.layer.fc(input=net_box_class_gru, size=class_dim, act=paddle.activation.Softmax())
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
 
     # BOX的偏移量回归预测
-    net_box_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
+    net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
     net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
 
@@ -357,13 +357,14 @@ if __name__ == '__main__':
         print("loading box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
+        print("init box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.create(costs[1:])
-
-    print "cls_parameters"
-    print cls_parameters.keys()
+        box_parameters.init_from_tar(open(cls_param_file,"rb"))
+    # print "cls_parameters"
+    # print cls_parameters.keys()
         
-    print "box_parameters"
-    print box_parameters.keys()
+    # print "box_parameters"
+    # print box_parameters.keys()
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
