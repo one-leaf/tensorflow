@@ -277,9 +277,10 @@ def calc_value(segments):
                 
 def reader_get_image_and_label():
     def reader():
-        print "is_trin_box", is_trin_box
+        print "is_trin_box1", is_trin_box
         t1 = threading.Thread(target=readDatatoPool(), args=())
         t1.start()
+        print "is_trin_box2", is_trin_box
         while t1.isAlive():            
             if is_trin_box:
                 while len(data_pool_1)==0:
