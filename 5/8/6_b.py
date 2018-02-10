@@ -22,7 +22,7 @@ import threading
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 box_dim = 2 # 偏移，左，右
-train_size = 64 # 学习的关键帧长度
+train_size = 256 # 学习的关键帧长度
 block_size = 8
 
 buf_size = 4096
