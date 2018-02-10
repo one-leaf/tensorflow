@@ -359,7 +359,7 @@ if __name__ == '__main__':
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
         print("init box parameters %s ..."%box_param_file)
-        box_parameters = paddle.parameters.create([net_box_class_fc, net_box_fc]])
+        box_parameters = paddle.parameters.create([net_box_class_fc, net_box_fc])
     
     if os.path.exists(cls_param_file):
         box_parameters.init_from_tar(open(cls_param_file,"rb"))
