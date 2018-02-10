@@ -215,7 +215,7 @@ def readDatatoPool(isBox=False):
                     data_pool_1.append((_data, _label))
 
         while len(data_pool_1)>buf_size:
-            # print("r")
+            print("r")
             time.sleep(1) 
 
 # 计算 IOU,输入为 x1,x2 坐标
@@ -284,6 +284,7 @@ def reader_get_image_and_label(isBox=False):
         t1.start()
         while t1.isAlive():
             while len(data_pool_1)==0:
+                print("w")
                 time.sleep(1)
             if random.random()>0.5 and len(data_pool_0)>0:
                 data_pool = data_pool_0
