@@ -281,7 +281,6 @@ def reader_get_image_and_label():
         while t1.isAlive():            
             if is_trin_box:
                 while len(data_pool_1)==0:
-                    print("w", len(data_pool_0), len(data_pool_1))
                     time.sleep(1)
                 if random.random()>0.5 and len(data_pool_0)>0:
                     data_pool = data_pool_0
@@ -358,7 +357,13 @@ if __name__ == '__main__':
         print("loading box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
-        box_parameters = paddle.parameters.create(costs[1])
+        box_parameters = paddle.parameters.create(costs[1:])
+
+    print "cls_parameters"
+    print cls_parameters.keys()
+        
+    print "box_parameters"
+    print box_parameters.keys()
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
@@ -372,7 +377,7 @@ if __name__ == '__main__':
     # print("paid:", time.time() - status["starttime"])
 
     is_trin_box = True
-    trainer = paddle.trainer.SGD(cost=costs[1], parameters=box_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs[1:], parameters=box_parameters, update_equation=adam_optimizer)
     print("start train box ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=1)
     print("paid:", time.time() - status["starttime"])    
