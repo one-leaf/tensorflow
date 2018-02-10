@@ -360,18 +360,17 @@ if __name__ == '__main__':
         paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
 
     print('set reader ...')
-    train_reader_class = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-    train_reader_box = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
-    feeding_box={'x':0, 'a':1, 'c':2, 'b':3}
+    feeding_box={'x':0, 'c':2, 'b':3}
     is_trin_box = False
     trainer = paddle.trainer.SGD(cost=cost[0], parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader_class, event_handler=event_handler, feeding=feeding_class, num_passes=5)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
 
     is_trin_box = True
     trainer = paddle.trainer.SGD(cost=cost[1:], parameters=paddle_parameters, update_equation=adam_optimizer)
     print("start train box ...")
-    trainer.train(reader=train_reader_box, event_handler=event_handler, feeding=feeding_box, num_passes=5)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=5)
     print("paid:", time.time() - status["starttime"])    
