@@ -347,7 +347,7 @@ if __name__ == '__main__':
     if os.path.exists(cls_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading cls parameters ...")
+        print("loading cls parameters %s ..."%cls_param_file)
         cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
     else:
         cls_parameters = paddle.parameters.create(costs[0])
@@ -355,7 +355,7 @@ if __name__ == '__main__':
     if os.path.exists(box_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
         print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading box parameters ...")
+        print("loading box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
         box_parameters = paddle.parameters.create(costs[1:])
