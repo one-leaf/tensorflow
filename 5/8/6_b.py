@@ -33,8 +33,8 @@ area_ratio = (1.75, 1.5, 1.25, 1, 0.75, 0.5, 0.25, 0.125)
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
-cls_param_file = os.path.join(model_path,"param_cls_%sx%s.tar"%(train_size,box_size))
-box_param_file = os.path.join(model_path,"param_box_%sx%s.tar"%(train_size,box_size))
+cls_param_file = os.path.join(model_path,"param_cls.tar")
+box_param_file = os.path.join(model_path,"param_box.tar")
 
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
@@ -365,7 +365,7 @@ if __name__ == '__main__':
         box_parameters = paddle.parameters.create(costs[1:])
     
     if os.path.exists(cls_param_file):
-        print("init box parameters", cls_param_file)
+        print("init cls parameters %s ..."% cls_param_file)
         box_parameters.init_from_tar(open(cls_param_file,"rb"))
 
     # print "cls_parameters"
