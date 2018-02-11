@@ -43,6 +43,7 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 np.set_printoptions(threshold=np.inf)
 is_trin_box=False
 
+is_static = paddle.attr.Param(is_static=True)
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -73,8 +74,9 @@ def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddl
         stride=stride,
         padding=padding,
         act=paddle.activation.Linear(),
-        bias_attr=False)
-    return paddle.layer.batch_norm(input=tmp, act=active_type)
+        bias_attr=False,
+        param_attr=is_static)
+    return paddle.layer.batch_norm(input=tmp, act=active_type, param_attr=is_static)
     
 def shortcut(ipt, n_in, n_out, stride):
     if n_in != n_out:
@@ -87,7 +89,7 @@ def basicblock(ipt, ch_out, stride):
     tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
     tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
     short = shortcut(ipt, ch_in, ch_out, stride)
-    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
+    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu(), param_attr=is_static)
 
 def layer_warp(block_func, ipt, features, count, stride):
     tmp = block_func(ipt, features, stride)
