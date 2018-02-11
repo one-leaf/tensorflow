@@ -76,7 +76,7 @@ def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddl
         act=paddle.activation.Linear(),
         bias_attr=False,
         param_attr=is_static)
-    return paddle.layer.batch_norm(input=tmp, act=active_type, param_attr=is_static)
+    return paddle.layer.batch_norm(input=tmp, act=active_type)
     
 def shortcut(ipt, n_in, n_out, stride):
     if n_in != n_out:
