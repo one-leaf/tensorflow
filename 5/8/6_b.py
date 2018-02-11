@@ -132,16 +132,16 @@ def network(drop=True):
     net_class_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
     net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
 
-    box_net = paddle.layer.concat([res4,res5,net])
+    # box_net = paddle.layer.concat([res4,res5,net])
     if drop:
-        box_net = paddle.layer.dropout(input=box_net, dropout_rate=0.5)
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)
 
     # BOX位置是否是背景和还是有效区域分类
-    net_box_class_gru = paddle.networks.simple_gru(input=box_net, size=8, act=paddle.activation.Tanh())
+    net_box_class_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
     net_box_class_fc = paddle.layer.fc(input=net_box_class_gru, size=class_dim, act=paddle.activation.Softmax())
 
     # BOX的偏移量回归预测
-    net_box_gru = paddle.networks.simple_gru(input=box_net, size=8, act=paddle.activation.Tanh())
+    net_box_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
     net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
 
     # 不知道咋搞，训练 cost_class 时，需要将 cost_class 放前面，反之需要放到后面，晕
