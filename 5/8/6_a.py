@@ -379,7 +379,7 @@ if __name__ == '__main__':
     is_trin_box = False
     trainer = paddle.trainer.SGD(cost=costs[0], parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
 
     # is_trin_box = True
