@@ -43,7 +43,7 @@ if not os.path.exists(out_dir): os.mkdir(out_dir)
 np.set_printoptions(threshold=np.inf)
 is_trin_box=False
 
-is_static = paddle.attr.Param(is_static=True)
+static_bias_attr = paddle.attr.ParamAttr(is_static=True)
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -74,8 +74,8 @@ def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddl
         stride=stride,
         padding=padding,
         act=paddle.activation.Linear(),
-        bias_attr=False,
-        param_attr=is_static)
+        bias_attr=static_bias_attr,
+        )
     return paddle.layer.batch_norm(input=tmp, act=active_type)
     
 def shortcut(ipt, n_in, n_out, stride):
