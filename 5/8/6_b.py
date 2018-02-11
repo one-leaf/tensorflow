@@ -150,9 +150,9 @@ def network(drop=True):
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     costs=[]
-    costs.append(cost_class)
+    # costs.append(cost_class)
     costs.append(cost_box_class)
-    costs.append(cost_box)
+    # costs.append(cost_box)
     
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
@@ -364,7 +364,7 @@ if __name__ == '__main__':
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
         print("init box parameters %s ..."%box_param_file)
-        box_parameters = paddle.parameters.create(costs[1:])
+        box_parameters = paddle.parameters.create(costs)
     
     if os.path.exists(cls_param_file):
         print("init cls parameters %s ..."% cls_param_file)
@@ -388,7 +388,7 @@ if __name__ == '__main__':
     # print("paid:", time.time() - status["starttime"])
 
     is_trin_box = True
-    trainer = paddle.trainer.SGD(cost=costs[1:], parameters=box_parameters, update_equation=adam_optimizer)
+    trainer = paddle.trainer.SGD(cost=costs, parameters=box_parameters, update_equation=adam_optimizer)
     print("start train box ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_box, num_passes=1)
     print("paid:", time.time() - status["starttime"])    
