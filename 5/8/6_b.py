@@ -89,7 +89,7 @@ def basicblock(ipt, ch_out, stride):
     tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
     tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
     short = shortcut(ipt, ch_in, ch_out, stride)
-    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu(), param_attr=is_static)
+    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
 
 def layer_warp(block_func, ipt, features, count, stride):
     tmp = block_func(ipt, features, stride)
