@@ -363,11 +363,10 @@ if __name__ == '__main__':
         print("loading box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.Parameters.from_tar(open(box_param_file,"rb"))
     else:
-        print("init box parameters %s ..."%box_param_file)
         box_parameters = paddle.parameters.create(costs)
     
     if os.path.exists(cls_param_file):
-        print("init cls parameters %s ..."% cls_param_file)
+        print("loading cls parameters %s ..."% cls_param_file)
         box_parameters.init_from_tar(open(cls_param_file,"rb"))
 
     # print "cls_parameters"
