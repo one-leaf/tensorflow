@@ -108,7 +108,7 @@ def resnet(ipt, depth=32):
     res4 = layer_warp(basicblock, res3, 64, n, 2)
     res5 = layer_warp(basicblock, res4, 64, n, 2)
     res6 = layer_warp(basicblock, res5, 64, n, 2)
-    return res6
+    return res1,res2,res3,res4,res5,res6
 
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
@@ -126,7 +126,7 @@ def network(drop=True):
     # box 边缘修正
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
-    net = resnet(x, 20)
+    res1,res2,res3,res4,res5,net = resnet(x, 20)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)
 
@@ -135,11 +135,11 @@ def network(drop=True):
     net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
 
     # BOX位置是否是背景和还是有效区域分类
-    net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
+    net_box_class_gru = paddle.networks.simple_gru(input=[res5,net], size=8, act=paddle.activation.Tanh())
     net_box_class_fc = paddle.layer.fc(input=net_box_class_gru, size=class_dim, act=paddle.activation.Softmax())
 
     # BOX的偏移量回归预测
-    net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=8, act=paddle.activation.Tanh())
+    net_box_gru = paddle.networks.simple_gru(input=[res5,net], size=8, act=paddle.activation.Tanh())
     net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
 
     # 不知道咋搞，训练 cost_class 时，需要将 cost_class 放前面，反之需要放到后面，晕
