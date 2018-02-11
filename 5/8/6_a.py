@@ -34,7 +34,7 @@ home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
 cls_param_file = os.path.join(model_path,"param_cls.tar")
-box_param_file = os.path.join(model_path,"param_box.tarr")
+box_param_file = os.path.join(model_path,"param_box.tar")
 
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
@@ -379,7 +379,7 @@ if __name__ == '__main__':
     is_trin_box = False
     trainer = paddle.trainer.SGD(cost=costs[0], parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=100)
     print("paid:", time.time() - status["starttime"])
 
     # is_trin_box = True
