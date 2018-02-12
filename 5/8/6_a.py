@@ -247,24 +247,24 @@ def infer():
         else:
             pdata = validation_data
             ppath = "validation"
-    for data in pdata:
-        filename = "%s.pkl"%data["id"]
-        save_file = os.path.join(out_dir,filename)
-        if os.path.exists(save_file): continue            
-        v_data = np.load(os.path.join(data_path, ppath, filename))
-        w = v_data.shape[0]
-        values = np.zeros(w,dtype=np.float)
-        for i in range(w):
-            if i>=block_size:
-                _data = np.stack([v_data[j] for j in range(i-block_size,i)])
-            else:
-                _null_data = [np.zeros((2048)) for j in range(block_size-i-1)]
-                _not_null_data = [v_data[j] for j in range(0,i+1)]
-                _data = np.stack(_null_data+_not_null_data)
-            probs = inferer.infer(input=[([_data,],)])
-            print probs
-            values[i] = probs[0][1]
-        np.save(open(save_file,"wb"), values)
+        for data in pdata:
+            filename = "%s.pkl"%data["id"]
+            save_file = os.path.join(out_dir,filename)
+            if os.path.exists(save_file): continue            
+            v_data = np.load(os.path.join(data_path, ppath, filename))
+            w = v_data.shape[0]
+            values = np.zeros(w,dtype=np.float)
+            for i in range(w):
+                if i>=block_size:
+                    _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+                else:
+                    _null_data = [np.zeros((2048)) for j in range(block_size-i-1)]
+                    _not_null_data = [v_data[j] for j in range(0,i+1)]
+                    _data = np.stack(_null_data+_not_null_data)
+                probs = inferer.infer(input=[([_data,],)])
+                values[i] = probs[0][1]
+            print("infered %s"%filename)
+            np.save(open(save_file,"wb"), values)
 
 
 if __name__ == '__main__':
