@@ -146,7 +146,7 @@ def network(drop=True):
     # if drop:
     #     net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
     net = cnn(net,  3, 64, 64, 2, 1)
-    net = cnn(net,  3, 64, 64, 2, 1)
+ #   net = cnn(net,  3, 64, 64, 2, 1)
 
 
     # 当前图片精彩或非精彩分类
