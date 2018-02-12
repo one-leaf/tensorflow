@@ -131,7 +131,7 @@ def network(drop=True):
    
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
-    return cost_class, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
+    return cost_class, adam_optimizer, net_class_fc
 
 # 读取精彩和非精彩, 离散数据
 def read_data_cls(v_data, label): 
@@ -216,7 +216,7 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    cost, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc = network()
+    cost, adam_optimizer, net_class_fc = network()
 
     if os.path.exists(cls_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
@@ -232,6 +232,27 @@ if __name__ == '__main__':
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=100)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
 
+
+    inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
+
+    for data in training_data:
+        filename = "%s.pkl"%data["id"]
+        save_file = os.path.join(out_dir,filename)
+        if os.path.exists(save_file): continue            
+        v_data = np.load(os.path.join(data_path,"training", filename))
+        w = v_data.shape[0]
+        infer_data=[]
+        for i in range(w)
+            if i>=block_size:
+                _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+            else:
+                _null_data = [np.zeros((2048)) for j in range(block_size-i-1)]
+                _not_null_data = [v_data[j] for j in range(0,i+1)]
+                _data = np.stack(_null_data+_not_null_data)
+            infer_data.append(_data)
+        probs = inferer.infer(input=[(infer_data,)])
+        # 取一半的数据保存即可
+        np.save(open(save_file,"wb"), probs[:,1])
