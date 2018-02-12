@@ -238,11 +238,18 @@ if __name__ == '__main__':
     cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))    
     inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
 
-    for data in training_data:
+    for t in range(2):
+        if t == 0:
+            pdata = training_data
+            ppath = "training"
+        else:
+            pdata = validation_data
+            ppath = "validation"
+    for data in pdata:
         filename = "%s.pkl"%data["id"]
         save_file = os.path.join(out_dir,filename)
         if os.path.exists(save_file): continue            
-        v_data = np.load(os.path.join(data_path,"training", filename))
+        v_data = np.load(os.path.join(data_path, ppath, filename))
         w = v_data.shape[0]
         infer_data=[]
         for i in range(w):
@@ -256,3 +263,4 @@ if __name__ == '__main__':
         probs = inferer.infer(input=[(infer_data,)])
         # 取一半的数据保存即可
         np.save(open(save_file,"wb"), probs[:,1])
+
