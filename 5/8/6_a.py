@@ -39,6 +39,10 @@ if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
 np.set_printoptions(threshold=np.inf)
 
+training_path = os.path.join(data_path,"training","image_resnet50_feature")
+validation_path = os.path.join(data_path,"validation","image_resnet50_feature")
+testing_path = os.path.join(data_path,"testing","image_resnet50_feature")
+
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
     training_data = []
@@ -149,7 +153,7 @@ def readDatatoPool():
     size = len(training_data)+len(validation_data)
     c = 0
     for i in range(size):
-        if i%2==0:
+        if random.random()>1.0*len(validation_data)/size:
             data = random.choice(training_data)
             v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
         else:
@@ -210,10 +214,7 @@ def event_handler(event):
             status["steptime"]=time.time()
             cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
-if __name__ == '__main__':
-    print("paddle init ...")
-    # paddle.init(use_gpu=False, trainer_count=2) 
-    paddle.init(use_gpu=True, trainer_count=1)
+def train():
     print("get network ...")
     cost, adam_optimizer, net_class_fc = network(True)
 
@@ -234,6 +235,7 @@ if __name__ == '__main__':
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
 
+def infer():
     cost, adam_optimizer, net_class_fc = network(False) 
     cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))    
     inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
@@ -264,3 +266,10 @@ if __name__ == '__main__':
         # 取一半的数据保存即可
         np.save(open(save_file,"wb"), probs[:,1])
 
+
+if __name__ == '__main__':
+    print("paddle init ...")
+    # paddle.init(use_gpu=False, trainer_count=2) 
+    paddle.init(use_gpu=True, trainer_count=1)
+
+    infer()
