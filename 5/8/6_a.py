@@ -253,7 +253,7 @@ def infer():
         if os.path.exists(save_file): continue            
         v_data = np.load(os.path.join(data_path, ppath, filename))
         w = v_data.shape[0]
-        infer_data=[]
+        values = np.zeros(w,dtype=np.float)
         for i in range(w):
             if i>=block_size:
                 _data = np.stack([v_data[j] for j in range(i-block_size,i)])
@@ -261,10 +261,9 @@ def infer():
                 _null_data = [np.zeros((2048)) for j in range(block_size-i-1)]
                 _not_null_data = [v_data[j] for j in range(0,i+1)]
                 _data = np.stack(_null_data+_not_null_data)
-            infer_data.append(_data)
-        probs = inferer.infer(input=[(infer_data,)])
-        # 取一半的数据保存即可
-        np.save(open(save_file,"wb"), probs[:,1])
+            probs = inferer.infer(input=[([_data,],)])
+            values[i] = probs[1]
+        np.save(open(save_file,"wb"), values)
 
 
 if __name__ == '__main__':
