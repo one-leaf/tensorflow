@@ -124,7 +124,7 @@ def network(drop=True):
     net = resnet(x, 20, drop)
 
     # 当前图片精彩或非精彩分类
-    net_class_gru = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu())
+    net_class_gru = paddle.networks.simple_gru(input=net, size=block_size, act=paddle.activation.Relu())
     net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
@@ -231,7 +231,7 @@ if __name__ == '__main__':
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
 
 
