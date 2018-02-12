@@ -215,7 +215,7 @@ if __name__ == '__main__':
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    cost, adam_optimizer, net_class_fc = network()
+    cost, adam_optimizer, net_class_fc = network(True)
 
     if os.path.exists(cls_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
@@ -234,7 +234,8 @@ if __name__ == '__main__':
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
 
-
+    cost, adam_optimizer, net_class_fc = network(False) 
+    cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))    
     inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
 
     for data in training_data:
