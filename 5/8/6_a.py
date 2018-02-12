@@ -125,8 +125,7 @@ def network(drop=True):
 
     # 当前图片精彩或非精彩分类
     net_class_gru = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu())
-    net_class_gru_r = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu(), reverse=True)
-    net_class_fc = paddle.layer.fc(input=[net_class_gru,net_class_gru_r], size=class_dim, act=paddle.activation.Softmax())
+    net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
