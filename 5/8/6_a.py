@@ -213,19 +213,19 @@ def event_handler(event):
                 time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics,
                 len(data_pool_0), len(data_pool_1)) )
             status["steptime"]=time.time()
-            cls_parameters.to_tar(open(cls_param_file, 'wb'))
+            # cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 def train():
     print("get network ...")
     cost, adam_optimizer, net_class_fc = network(True)
 
-    if os.path.exists(cls_param_file):
-        (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
-        print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-        print("loading cls parameters %s ..."%cls_param_file)
-        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
-    else:
-        cls_parameters = paddle.parameters.create(cost)
+    # if os.path.exists(cls_param_file):
+    #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
+    #     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
+    #     print("loading cls parameters %s ..."%cls_param_file)
+    #     cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
+    # else:
+    cls_parameters = paddle.parameters.create(cost)
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
@@ -233,8 +233,9 @@ def train():
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
     print("paid:", time.time() - status["starttime"])
+    cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 def infer():
     cost, adam_optimizer, net_class_fc = network(False) 
@@ -272,5 +273,5 @@ if __name__ == '__main__':
     print("paddle init ...")
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
-
-    infer()
+    train()
+    # infer()
