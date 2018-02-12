@@ -118,6 +118,12 @@ def resnet(ipt, depth=32, drop=False):
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
 
+
+def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
+    return paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels, 
+        num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
+
+
 def network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
@@ -125,7 +131,24 @@ def network(drop=True):
     # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
 
-    net = resnet(x, 32, drop)
+#    net = resnet(x, 32, drop)
+
+    net = cnn(x,    8, 2048*block_size//64//64, 64, 2, 3)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)
+    net = cnn(net,  6, 64, 64, 2, 2)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
+    net = cnn(net,  4, 64, 64, 2, 1)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)            
+    net = cnn(net,  3, 64, 64, 2, 1)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
+    net = cnn(net,  3, 64, 64, 2, 1)
+    net = cnn(net,  3, 64, 64, 2, 1)
+    net = cnn(net,  3, 64, 64, 2, 1)
+
 
     # 当前图片精彩或非精彩分类
     net_class_gru = paddle.networks.simple_gru(input=net, size=block_size, act=paddle.activation.Relu())
