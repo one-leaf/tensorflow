@@ -161,10 +161,11 @@ def readDatatoPool():
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
 
         # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
-        label = [0 for _ in range(v_data.shape[0])]
+        w = v_data.shape[0]
+        label = [0 for _ in range(w)]
         for annotations in data["data"]:
             segment = annotations['segment']
-            for i in range(int(segment[0]),int(segment[1]+1)):
+            for i in range(int(segment[0]),min(w,int(segment[1]+1))):
                 label[i] = 1
         for i, _data, _label in read_data_cls(v_data, label):
             if _label==0:
