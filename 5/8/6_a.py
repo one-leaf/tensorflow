@@ -125,7 +125,7 @@ def network(drop=True):
     # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
 
-    net = resnet(x, 20, drop)
+    net = resnet(x, 32, drop)
 
     # 当前图片精彩或非精彩分类
     net_class_gru = paddle.networks.simple_gru(input=net, size=block_size, act=paddle.activation.Relu())
