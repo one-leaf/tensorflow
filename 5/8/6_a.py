@@ -262,7 +262,8 @@ def infer():
                 _not_null_data = [v_data[j] for j in range(0,i+1)]
                 _data = np.stack(_null_data+_not_null_data)
             probs = inferer.infer(input=[([_data,],)])
-            values[i] = probs[1]
+            print probs
+            values[i] = probs[0][1]
         np.save(open(save_file,"wb"), values)
 
 
