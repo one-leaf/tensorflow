@@ -245,7 +245,7 @@ if __name__ == '__main__':
         v_data = np.load(os.path.join(data_path,"training", filename))
         w = v_data.shape[0]
         infer_data=[]
-        for i in range(w)
+        for i in range(w):
             if i>=block_size:
                 _data = np.stack([v_data[j] for j in range(i-block_size,i)])
             else:
