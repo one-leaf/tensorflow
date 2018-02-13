@@ -125,7 +125,7 @@ def readDatatoPool():
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(out_dir, "%s.pkl"%data["id"]))               
 
-        # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
+        print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
         for i, _data in read_data_box(v_data):
             fix_segments =[]
             for annotations in data["data"]:
