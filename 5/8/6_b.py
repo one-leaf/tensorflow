@@ -65,62 +65,13 @@ def load_data(filter=None):
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
 
-def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
-    tmp = paddle.layer.img_conv(
-        input=input,
-        filter_size=filter_size,
-        num_channels=ch_in,
-        num_filters=ch_out,
-        stride=stride,
-        padding=padding,
-        act=paddle.activation.Linear(),
-        bias_attr=static_bias_attr,
-        )
-    return paddle.layer.batch_norm(input=tmp, act=active_type, bias_attr=static_bias_attr, )
-    
-def shortcut(ipt, n_in, n_out, stride):
-    if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
-    else:
-        return ipt
-
-def basicblock(ipt, ch_out, stride):
-    ch_in = ch_out * 2
-    tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
-    short = shortcut(ipt, ch_in, ch_out, stride)
-    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
-
-def layer_warp(block_func, ipt, features, count, stride):
-    tmp = block_func(ipt, features, stride)
-    for i in range(1, count):
-        tmp = block_func(tmp, features, 1)
-    return tmp
-
-def resnet(ipt, depth=32):
-    # depth should be one of 20, 32, 44, 56, 110, 1202
-    assert (depth - 2) % 6 == 0
-    n = (depth - 2) / 6
-    conv1 = conv_bn_layer(ipt, ch_in=2048*block_size//64//64, ch_out=64, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 64, n, 2)
-    res2 = layer_warp(basicblock, res1, 64, n, 2)
-    res3 = layer_warp(basicblock, res2, 64, n, 2)
-    res4 = layer_warp(basicblock, res3, 64, n, 2)
-    res5 = layer_warp(basicblock, res4, 64, n, 2)
-    res6 = layer_warp(basicblock, res5, 64, n, 2)
-    return res1,res2,res3,res4,res5,res6
-
 def printLayer(layer):
     print("depth:",layer.depth,"height:",layer.height,"width:",layer.width,"num_filters:",layer.num_filters,"size:",layer.size,"outputs:",layer.outputs)
 
 def network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
-    # x = paddle.layer.data(name='x', height=1, width=2048, type=paddle.data_type.dense_vector(train_size*2048))  
-    #x = paddle.layer.data(name='x', height=train_size, width=2048//channels_num, type=paddle.data_type.dense_vector(train_size*2048))
-    x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
+    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector_sequence(1))   
 
-    # 是否精彩分类
-    a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
     # box 分类器
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
     # box 边缘修正
@@ -128,45 +79,26 @@ def network(drop=True):
 
     res1,res2,res3,res4,res5,net = resnet(x, 20)
 
-    # 当前图片精彩或非精彩分类
-    net_class_gru = paddle.networks.simple_gru(input=net, size=8, act=paddle.activation.Tanh())
-    net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
-
-    # box_net = paddle.layer.concat([res4,res5,net])
-    # if drop:
-    #     net = paddle.layer.dropout(input=net, dropout_rate=0.1)
-
     # BOX位置是否是背景和还是有效区域分类
-    net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=train_size, act=paddle.activation.Tanh())
-    net_box_class_fc = paddle.layer.fc(input=net_box_class_gru, size=class_dim, act=paddle.activation.Softmax())
+    net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=128, act=paddle.activation.Relu())
+    net_box_class_gru_r = paddle.networks.simple_gru(input=net_class_fc, size=128, act=paddle.activation.Relu(), reverse=True)
+    net_box_class_fc = paddle.layer.fc(input=[net_box_class_gru,net_box_class_gru_r] size=class_dim, act=paddle.activation.Softmax())
 
     # BOX的偏移量回归预测
     net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=train_size, act=paddle.activation.Tanh())
-    net_box_fc = paddle.layer.fc(input=net_box_gru, size=box_dim, act=paddle.activation.Tanh())
+    net_box_gru_r = paddle.networks.simple_gru(input=net_class_fc, size=train_size, act=paddle.activation.Tanh(), reverse=True)
+    net_box_fc = paddle.layer.fc(input=[net_box_gru,net_box_gru_r], size=box_dim, act=paddle.activation.Tanh())
 
-    # 不知道咋搞，训练 cost_class 时，需要将 cost_class 放前面，反之需要放到后面，晕
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
     cost_box = paddle.layer.square_error_cost(input=net_box_fc, label=b)
-    cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
     costs=[]
-    # costs.append(cost_class)
     costs.append(cost_box_class)
-    # costs.append(cost_box)
+    costs.append(cost_box)
     
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return costs, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
-
-# 读取精彩和非精彩, 离散数据
-def read_data_cls(v_data, label): 
-    w = v_data.shape[0]
-    for i in range(block_size, w):
-        _avg = 1.*sum(label[i-block_size:i])/block_size
-        # 只要全部是精彩或全部是非精彩的片段
-        if (_avg == 1 or _avg == 0) and random.random()>1./2:
-            _data = np.stack([v_data[j] for j in range(i-block_size,i)])
-            yield i, _data, int(_avg)
 
 # 读取BOX数据，连续数据
 def read_data_box(v_data):
@@ -190,36 +122,24 @@ def readDatatoPool():
     for i in range(size):
         if i%2==0:
             data = random.choice(training_data)
-            v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
+            v_data = np.load(os.path.join(out_dir, "%s.pkl"%data["id"]))               
         else:
             data = random.choice(validation_data)
             v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
 
         # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
-        if is_trin_box:
-            for i, _data in read_data_box(v_data):
-                fix_segments =[]
-                for annotations in data["data"]:
-                    segment = annotations['segment']
-                    if segment[0]>=i or segment[1]<=i-train_size:
-                        continue
-                    fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
-                    out_c, out_b = calc_value(fix_segments)
-                    if random.random() > 0.5:                   
-                        data_pool_0.append((_data, out_c, out_b))
-                    else:
-                        data_pool_1.append((_data, out_c, out_b))
-        else:
-            label = [0 for _ in range(v_data.shape[0])]
+        for i, _data in read_data_box(v_data):
+            fix_segments =[]
             for annotations in data["data"]:
                 segment = annotations['segment']
-                for i in range(int(segment[0]),int(segment[1]+1)):
-                    label[i] = 1
-            for i, _data, _label in read_data_cls(v_data, label):
-                if _label==0:
-                    data_pool_0.append((_data, _label))
+                if segment[0]>=i or segment[1]<=i-train_size:
+                    continue
+                fix_segments.append([max(0, segment[0]-(i-train_size)),min(train_size-1,segment[1]-(i-train_size))])
+                out_c, out_b = calc_value(fix_segments)
+                if random.random() > 0.5:                   
+                    data_pool_0.append((_data, out_c, out_b))
                 else:
-                    data_pool_1.append((_data, _label))
+                    data_pool_1.append((_data, out_c, out_b))
 
         while len(data_pool_1)>buf_size:
             # print("r", len(data_pool_0), len(data_pool_1))
