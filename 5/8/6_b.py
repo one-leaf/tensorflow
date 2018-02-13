@@ -94,7 +94,7 @@ def network(drop=True):
     costs.append(cost_box_class)
     costs.append(cost_box)
     
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3,
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-4,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return costs, adam_optimizer, net_box_class_fc, net_box_fc
 
