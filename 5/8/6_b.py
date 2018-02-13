@@ -82,7 +82,7 @@ def network(drop=True):
     # BOX位置是否是背景和还是有效区域分类
     net_box_class_gru = paddle.networks.simple_gru(input=x, size=128, act=paddle.activation.Relu())
     net_box_class_gru_r = paddle.networks.simple_gru(input=x, size=128, act=paddle.activation.Relu(), reverse=True)
-    net_box_class_fc = paddle.layer.fc(input=[net_box_class_gru,net_box_class_gru_r] size=class_dim, act=paddle.activation.Softmax())
+    net_box_class_fc = paddle.layer.fc(input=[net_box_class_gru,net_box_class_gru_r], size=class_dim, act=paddle.activation.Softmax())
 
     # BOX的偏移量回归预测
     net_box_gru = paddle.networks.simple_gru(input=x, size=train_size, act=paddle.activation.Tanh())
