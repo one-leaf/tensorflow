@@ -295,5 +295,5 @@ if __name__ == '__main__':
     print("paddle init ...")
     # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
-    # train()
-    infer()
+    train()
+    # infer()
