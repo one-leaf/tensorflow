@@ -80,13 +80,13 @@ def network(drop=True):
     res1,res2,res3,res4,res5,net = resnet(x, 20)
 
     # BOX位置是否是背景和还是有效区域分类
-    net_box_class_gru = paddle.networks.simple_gru(input=net_class_fc, size=128, act=paddle.activation.Relu())
-    net_box_class_gru_r = paddle.networks.simple_gru(input=net_class_fc, size=128, act=paddle.activation.Relu(), reverse=True)
+    net_box_class_gru = paddle.networks.simple_gru(input=x, size=128, act=paddle.activation.Relu())
+    net_box_class_gru_r = paddle.networks.simple_gru(input=x, size=128, act=paddle.activation.Relu(), reverse=True)
     net_box_class_fc = paddle.layer.fc(input=[net_box_class_gru,net_box_class_gru_r] size=class_dim, act=paddle.activation.Softmax())
 
     # BOX的偏移量回归预测
-    net_box_gru = paddle.networks.simple_gru(input=net_class_fc, size=train_size, act=paddle.activation.Tanh())
-    net_box_gru_r = paddle.networks.simple_gru(input=net_class_fc, size=train_size, act=paddle.activation.Tanh(), reverse=True)
+    net_box_gru = paddle.networks.simple_gru(input=x, size=train_size, act=paddle.activation.Tanh())
+    net_box_gru_r = paddle.networks.simple_gru(input=x, size=train_size, act=paddle.activation.Tanh(), reverse=True)
     net_box_fc = paddle.layer.fc(input=[net_box_gru,net_box_gru_r], size=box_dim, act=paddle.activation.Tanh())
 
     cost_box_class = paddle.layer.classification_cost(input=net_box_class_fc, label=c)
@@ -98,7 +98,7 @@ def network(drop=True):
     
     adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
-    return costs, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc
+    return costs, adam_optimizer, net_box_class_fc, net_box_fc
 
 # 读取BOX数据，连续数据
 def read_data_box(v_data):
@@ -264,18 +264,10 @@ def event_handler(event):
 
 if __name__ == '__main__':
     print("paddle init ...")
-    # paddle.init(use_gpu=False, trainer_count=2) 
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
-    costs, adam_optimizer, net_class_fc, net_box_class_fc, net_box_fc = network()
+    costs, adam_optimizer, net_box_class_fc, net_box_fc = network()
 
-    # if os.path.exists(cls_param_file):
-    #     (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
-    #     print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-    #     print("loading cls parameters %s ..."%cls_param_file)
-    #     cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
-    # else:
-    #     cls_parameters = paddle.parameters.create(costs[0])
 
     if os.path.exists(box_param_file):
         (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(box_param_file)
@@ -285,26 +277,10 @@ if __name__ == '__main__':
     else:
         box_parameters = paddle.parameters.create(costs)
     
-    if os.path.exists(cls_param_file):
-        print("loading cls parameters %s ..."% cls_param_file)
-        box_parameters.init_from_tar(open(cls_param_file,"rb"))
-
-    # print "cls_parameters"
-    # print cls_parameters.keys()
-        
-    # print "box_parameters"
-    # print box_parameters.keys()
 
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
-    feeding_class={'x':0, 'a':1} 
     feeding_box={'x':0, 'c':1, 'b':2}
-
-    # is_trin_box = False
-    # trainer = paddle.trainer.SGD(cost=costs[0], parameters=cls_parameters, update_equation=adam_optimizer)
-    # print("start train class ...")
-    # trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
-    # print("paid:", time.time() - status["starttime"])
 
     is_trin_box = True
     trainer = paddle.trainer.SGD(cost=costs, parameters=box_parameters, update_equation=adam_optimizer)
