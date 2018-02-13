@@ -77,8 +77,6 @@ def network(drop=True):
     # box 边缘修正
     b = paddle.layer.data(name='b', type=paddle.data_type.dense_vector_sequence(box_dim))
 
-    res1,res2,res3,res4,res5,net = resnet(x, 20)
-
     # BOX位置是否是背景和还是有效区域分类
     net_box_class_gru = paddle.networks.simple_gru(input=x, size=128, act=paddle.activation.Relu())
     net_box_class_gru_r = paddle.networks.simple_gru(input=x, size=128, act=paddle.activation.Relu(), reverse=True)
