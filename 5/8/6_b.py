@@ -70,7 +70,7 @@ def printLayer(layer):
 
 def network(drop=True):
     # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
-    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector_sequence(1))   
+    x = paddle.layer.data(name='x', type=paddle.data_type.dense_vector_sequence(block_size))   
 
     # box 分类器
     c = paddle.layer.data(name='c', type=paddle.data_type.integer_value_sequence(class_dim))
@@ -100,7 +100,7 @@ def network(drop=True):
 
 # 读取BOX数据，连续数据
 def read_data_box(v_data):
-    batch_data = [np.zeros(2048*block_size) for _ in range(train_size)]   
+    batch_data = [np.zeros(block_size) for _ in range(train_size)]   
     w = v_data.shape[0]
     for i in range(block_size, w):
         _data = np.stack([v_data[j] for j in range(i-block_size,i)])
