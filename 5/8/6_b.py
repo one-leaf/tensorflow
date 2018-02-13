@@ -125,7 +125,7 @@ def readDatatoPool():
             v_data = np.load(os.path.join(out_dir, "%s.pkl"%data["id"]))               
         else:
             data = random.choice(validation_data)
-            v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
+            v_data = np.load(os.path.join(out_dir, "%s.pkl"%data["id"]))               
 
         # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
         for i, _data in read_data_box(v_data):
