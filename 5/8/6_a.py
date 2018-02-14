@@ -13,7 +13,7 @@ import logging
 import gc
 import commands, re  
 import threading
-
+from paddle.trainer.PyDataProvider2 import provider
 # home = "/home/kesci/work/"
 # data_path = "/mnt/BROAD-datasets/video/"
 # param_file = "/home/kesci/work/param2.data"
@@ -215,7 +215,7 @@ def reader_get_image_and_label():
     return reader
 
 def reader_get_image_and_label_no_thread():
-    @paddle.trainer.PyDataProvider2.provider(pool_size =buf_size)
+    @provider(pool_size =buf_size)
     def reader():
         count=0
         while count < all_batch_size:
