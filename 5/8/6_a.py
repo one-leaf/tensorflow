@@ -227,7 +227,7 @@ def train():
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=10)
     print("paid:", time.time() - status["starttime"])
     cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
