@@ -19,7 +19,7 @@ training_path = os.path.join(data_path,"training","image_resnet50_feature")
 validation_path = os.path.join(data_path,"validation","image_resnet50_feature")
 testing_path = os.path.join(data_path,"testing","image_resnet50_feature")
 
-block_size = 8
+block_size = 16
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -71,7 +71,7 @@ def pre_data():
                 else:
                     prev_value += 1
                 # if i % int(round(prev_value)) != 0: continue
-                if prev_value > 10 and i%block_size != 0: continue
+                if prev_value > block_size and i%4 != 0: continue
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
                     continue
@@ -82,7 +82,7 @@ def pre_data():
                 else:
                     prev_value += 1
                 # if i % int(round(prev_value)) != 0: continue
-                if prev_value > 10 and i%block_size != 0: continue
+                if prev_value > block_size and i%4 != 0: continue
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
                     continue

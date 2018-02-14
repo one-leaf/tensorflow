@@ -21,7 +21,7 @@ import threading
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 train_size = 64 # 学习的关键帧长度
-block_size = 8
+block_size = 16
 
 buf_size = 409600
 batch_size = 2048//(train_size*block_size)
