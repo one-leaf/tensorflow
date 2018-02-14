@@ -142,13 +142,13 @@ def network(drop=True):
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)
     net = cnn(net,  6, 64, 64, 2, 2)
     if drop:
-        net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
+        net = paddle.layer.dropout(input=net, dropout_rate=0.4)    
     net = cnn(net,  4, 64, 64, 2, 1)
     if drop:
-        net = paddle.layer.dropout(input=net, dropout_rate=0.5)            
+        net = paddle.layer.dropout(input=net, dropout_rate=0.3)            
     net = cnn(net,  3, 64, 64, 2, 1)
     if drop:
-        net = paddle.layer.dropout(input=net, dropout_rate=0.5)  
+        net = paddle.layer.dropout(input=net, dropout_rate=0.2)  
     net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
     # net = cnn(net,  3, 64, 64, 2, 1)
     # net = cnn(net,  3, 64, 64, 2, 1)
