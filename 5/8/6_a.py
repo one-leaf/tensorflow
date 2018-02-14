@@ -188,7 +188,7 @@ def pre_data():
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
                 pre_data_filenames_1.append(_file)
                 if os.path.exists(_file): continue
-            elif block_size == 0:
+            elif label_sum == 0:
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 pre_data_filenames_0.append(_file)
                 if os.path.exists(_file): continue
