@@ -165,45 +165,15 @@ def network(drop=True):
 
 data_pools = []
 
-pre_data_filenames_0 = []
-pre_data_filenames_1 = []
-def pre_data():
-    if not os.path.exists(pre_data_path_0): os.mkdir(pre_data_path_0)
-    if not os.path.exists(pre_data_path_1): os.mkdir(pre_data_path_1)
-    for data in training_data:
-        print("reading %s.pkl"%data["id"])
-        v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))  
+training_data, validation_data, _ = load_data()
+data_pools = []
+pre_data_filenames_0 = os.listdir(pre_data_path_0)
+pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
-        #生成精彩和非精彩分类
-        w = v_data.shape[0]
-        label = [0 for _ in range(w)]
-        for annotations in data["data"]:
-            segment = annotations['segment']
-            for i in range(int(segment[0]),min(w,int(segment[1]+1))):
-                label[i] = 1
-
-        for i in range(block_size,w):
-            label_sum = sum(label[i-block_size:i])
-            if label_sum == block_size:
-                _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
-                if os.path.exists(_file): 
-                    pre_data_filenames_1.append(_file)
-                    continue
-                _filenames = pre_data_filenames_1
-            elif label_sum == 0:
-                _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
-                if os.path.exists(_file): 
-                    pre_data_filenames_0.append(_file)
-                    continue
-                _filenames = pre_data_filenames_0
-            else: continue
-            _data = np.stack([v_data[j] for j in range(i-block_size,i)])
-            np.save(open(_file,"wb"), _data)
-            _filenames.append(_file)
-
+pool_size = 5
 def read_data_form_files():
     count=0
-    while t1.isAlive() or count<(len(pre_data_filenames_0)+len(pre_data_filenames_1))//2:
+    while count<(len(pre_data_filenames_0)+len(pre_data_filenames_1))//pool_size:
         while len(pre_data_filenames_0)==0 or len(pre_data_filenames_1)==0:
             print("waite files count:", len(pre_data_filenames_0), len(pre_data_filenames_0))
             time.sleep(1)        
@@ -211,10 +181,12 @@ def read_data_form_files():
         labels=[]
         while (len(datas)<train_size):
             if random.random()>0.5:
-                datas.append(np.load(random.choice(pre_data_filenames_0)))
+                _file = os.path.join(pre_data_path_0, random.choice(pre_data_filenames_0))
+                datas.append(np.load(_file))
                 labels.append(0)
             else:
-                datas.append(np.load(random.choice(pre_data_filenames_1)))
+                _file = os.path.join(pre_data_path_1, random.choice(pre_data_filenames_1))
+                datas.append(np.load(_file))
                 labels.append(1)
         data_pools.append((datas, labels))
         while len(data_pools)>buf_size:
@@ -222,19 +194,14 @@ def read_data_form_files():
 
 t1 = threading.Thread(target=pre_data, args=())
 t1.start()
-t2 = threading.Thread(target=read_data_form_files, args=())
-t2.start()
-t3 = threading.Thread(target=read_data_form_files, args=())
-t3.start()
-def reader_get_image_and_label():
-    def reader():
-        while t2.isAlive():            
-            while len(data_pools)==0:
-                print("wait", len(data_pools))
-                time.sleep(1)
-            datas, labels = data_pools.pop()
-            yield datas, labels
-    return reader
+
+threads_pool=[]
+for i in range(pool_size):
+    threads_pool.append(threading.Thread(target=read_data_form_files, args=()))
+
+for _thread in threads_pool:
+    _thread.start()
+    
 
 status ={}
 status["starttime"]=time.time()
