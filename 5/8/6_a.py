@@ -159,7 +159,7 @@ def network(drop=True):
     net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-4,
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return cost_class, adam_optimizer, net_class_fc
 
