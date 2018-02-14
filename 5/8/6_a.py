@@ -192,9 +192,6 @@ def read_data_form_files():
         while len(data_pools)>buf_size:
             time.sleep(0.1)
 
-t1 = threading.Thread(target=pre_data, args=())
-t1.start()
-
 threads_pool=[]
 for i in range(pool_size):
     threads_pool.append(threading.Thread(target=read_data_form_files, args=()))
