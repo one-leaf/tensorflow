@@ -171,6 +171,7 @@ def pre_data():
     if not os.path.exists(pre_data_path_0): os.mkdir(pre_data_path_0)
     if not os.path.exists(pre_data_path_1): os.mkdir(pre_data_path_1)
     for data in training_data:
+        print("reading %s.pkl"%data["id"])
         v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))  
 
         #生成精彩和非精彩分类
@@ -213,7 +214,7 @@ def read_data_form_files():
         data_pools.append((datas, labels))
         while len(data_pools)>buf_size:
             time.sleep(0.1)
-            
+
 t1 = threading.Thread(target=pre_data, args=())
 t1.start()
 t2 = threading.Thread(target=read_data_form_files, args=())
