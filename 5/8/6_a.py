@@ -145,8 +145,8 @@ def network(drop=True):
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
     net = cnn(net,  4, 64, 64, 2, 1)
-    if drop:
-        net = paddle.layer.dropout(input=net, dropout_rate=0.5)            
+    # if drop:
+    #     net = paddle.layer.dropout(input=net, dropout_rate=0.5)            
     net = cnn(net,  3, 64, 64, 2, 1)
     # if drop:
     #     net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
