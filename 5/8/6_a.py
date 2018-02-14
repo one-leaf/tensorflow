@@ -225,7 +225,7 @@ def event_handler(event):
         if event.batch_id>0 and event.batch_id % 10 == 0:
             print "Paid %.2f,Time %.2f, Pass %d, Batch %d/%d, Cost %f, %s (%s)" % (
                 time.time() - status["starttime"], time.time() - status["steptime"], event.pass_id, 
-                event.batch_id, all_batch_size , event.cost, event.metrics, len(data_pools)) 
+                event.batch_id, all_batch_size//batch_size , event.cost, event.metrics, len(data_pools)) 
             status["steptime"]=time.time()
             # cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
