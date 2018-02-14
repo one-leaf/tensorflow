@@ -175,9 +175,6 @@ all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // train_
 def read_data_form_files():
     count = 0
     while count < all_batch_size//pool_size:
-        while len(pre_data_filenames_0)==0 or len(pre_data_filenames_1)==0:
-            print("waite files count:", len(pre_data_filenames_0), len(pre_data_filenames_0))
-            time.sleep(1)        
         datas=[]
         labels=[]
         while (len(datas)<train_size):
@@ -217,6 +214,25 @@ def reader_get_image_and_label():
             yield datas, labels
     return reader
 
+def reader_get_image_and_label_no_thread():
+    def reader():
+        for count < all_batch_size:
+            datas=[]
+            labels=[]
+            while (len(datas)<train_size):
+                if random.random()>0.5:
+                    _file = os.path.join(pre_data_path_0, random.choice(pre_data_filenames_0))
+                    datas.append(np.load(_file))
+                    labels.append(0)
+                else:
+                    _file = os.path.join(pre_data_path_1, random.choice(pre_data_filenames_1))
+                    datas.append(np.load(_file))
+                    labels.append(1)            
+            yield datas, labels
+            count += 1
+
+    return reader
+
 status ={}
 status["starttime"]=time.time()
 status["steptime"]=time.time()
@@ -242,7 +258,7 @@ def train():
     cls_parameters = paddle.parameters.create(cost)
 
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    train_reader = paddle.batch(reader_get_image_and_label_no_thread(), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
