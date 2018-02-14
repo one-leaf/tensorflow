@@ -127,16 +127,7 @@ def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
     return paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels, 
         num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
 
-
-def network(drop=True):
-    # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
-    x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
-
-    # 是否精彩分类
-    a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
-
-#    net = resnet(x, 32, drop)
-
+def normal_network(x):
     net = cnn(x,    8, 2048*block_size//64//64, 64, 2, 3)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)
@@ -150,12 +141,48 @@ def network(drop=True):
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.2)  
     net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
+    return net
+
+def normal_network2(x):
+    net = cnn(x,    8, 2048*block_size//64//64, 64, 1, 3)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+    
+    net = cnn(net,  6, 64, 64, 1, 2)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.4)    
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+
+    net = cnn(net,  4, 64, 64, 1, 1)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.3)            
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+
+    net = cnn(net,  3, 64, 64, 1, 1)
+    if drop:
+        net = paddle.layer.dropout(input=net, dropout_rate=0.2)  
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+
+    net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
+    return net
+
+
+def network(drop=True):
+    # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
+    x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
+
+    # 是否精彩分类
+    a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
+
+#    net = resnet(x, 32, drop)
+
     # net = cnn(net,  3, 64, 64, 2, 1)
     # net = cnn(net,  3, 64, 64, 2, 1)
 
-
+    net = normal_network2(x)
     # 当前图片精彩或非精彩分类
-    net_class_gru = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Tanh())
+    # net_class_gru = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Tanh())
     net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
