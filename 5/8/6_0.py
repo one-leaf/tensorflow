@@ -78,7 +78,7 @@ def pre_data():
                     prev_value = 0.5
                     prev_status = 0
                 else:
-                    prev_value += 0.2
+                    prev_value += 0.3
                 if i % int(round(prev_value)) != 0: continue
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
