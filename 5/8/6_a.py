@@ -147,22 +147,22 @@ def normal_network2(x,drop):
     net = cnn(x,    8, 2048*block_size//64//64, 64, 1, 3)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)
-    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=2, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
     
     net = cnn(net,  6, 64, 64, 1, 2)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
-    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=2, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
 
     net = cnn(net,  4, 64, 64, 1, 1)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)            
-    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=2, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
 
     net = cnn(net,  3, 64, 64, 1, 1)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)  
-    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
+    net = paddle.layer.img_pool(input=net, pool_size=2, pool_size_y=2, stride=2, padding=0, padding_y=0, pool_type=paddle.pooling.Max())  
 
     net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
     return net
