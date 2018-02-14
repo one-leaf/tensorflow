@@ -186,15 +186,20 @@ def pre_data():
             label_sum = sum(label[i-block_size:i])
             if label_sum == block_size:
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
-                pre_data_filenames_1.append(_file)
-                if os.path.exists(_file): continue
+                if os.path.exists(_file): 
+                    pre_data_filenames_1.append(_file)
+                    continue
+                _filenames = pre_data_filenames_1
             elif label_sum == 0:
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
-                pre_data_filenames_0.append(_file)
-                if os.path.exists(_file): continue
+                if os.path.exists(_file): 
+                    pre_data_filenames_0.append(_file)
+                    continue
+                _filenames = pre_data_filenames_0
             else: continue
             _data = np.stack([v_data[j] for j in range(i-block_size,i)])
             np.save(open(_file,"wb"), _data)
+            _filenames.append(_file)
 
 def read_data_form_files():
     count=0
