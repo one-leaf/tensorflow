@@ -127,7 +127,7 @@ def cnn(input,filter_size,num_channels,num_filters=64, stride=2, padding=1):
     return paddle.layer.img_conv(input=input, filter_size=filter_size, num_channels=num_channels, 
         num_filters=num_filters, stride=stride, padding=padding, act=paddle.activation.Relu())
 
-def normal_network(x):
+def normal_network(x,drop):
     net = cnn(x,    8, 2048*block_size//64//64, 64, 2, 3)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)
@@ -143,7 +143,7 @@ def normal_network(x):
     net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
     return net
 
-def normal_network2(x):
+def normal_network2(x,drop):
     net = cnn(x,    8, 2048*block_size//64//64, 64, 1, 3)
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)
@@ -180,7 +180,7 @@ def network(drop=True):
     # net = cnn(net,  3, 64, 64, 2, 1)
     # net = cnn(net,  3, 64, 64, 2, 1)
 
-    net = normal_network2(x)
+    net = normal_network2(x,drop)
     # 当前图片精彩或非精彩分类
     # net_class_gru = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Tanh())
     net_class_fc = paddle.layer.fc(input=net_class_gru, size=class_dim, act=paddle.activation.Softmax())
