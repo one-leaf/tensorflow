@@ -171,10 +171,10 @@ pre_data_filenames_0 = os.listdir(pre_data_path_0)
 pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
 pool_size = 2
-all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // (train_size * batch_size)
+all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // train_size 
 def read_data_form_files():
     count = 0
-    while count<all_batch_size//pool_size:
+    while count < all_batch_size//pool_size:
         while len(pre_data_filenames_0)==0 or len(pre_data_filenames_1)==0:
             print("waite files count:", len(pre_data_filenames_0), len(pre_data_filenames_0))
             time.sleep(1)        
@@ -209,7 +209,7 @@ def check_threads_pool_isAlive():
 
 def reader_get_image_and_label():
     def reader():
-        while check_threads_pool_isAlive():            
+        while check_threads_pool_isAlive() or len(data_pools)>0:            
             while len(data_pools)==0:
                 print("wait", len(data_pools))
                 time.sleep(1)
@@ -225,7 +225,7 @@ def event_handler(event):
         if event.batch_id>0 and event.batch_id % 10 == 0:
             print "Paid %.2f,Time %.2f, Pass %d, Batch %d/%d, Cost %f, %s (%s)" % (
                 time.time() - status["starttime"], time.time() - status["steptime"], event.pass_id, 
-                event.batch_id, all_batch_size, event.cost, event.metrics, len(data_pools)) 
+                event.batch_id, all_batch_size , event.cost, event.metrics, len(data_pools)) 
             status["steptime"]=time.time()
             # cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
