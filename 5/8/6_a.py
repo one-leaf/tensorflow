@@ -13,7 +13,6 @@ import logging
 import gc
 import commands, re  
 import threading
-from paddle.trainer.PyDataProvider2 import *
 # home = "/home/kesci/work/"
 # data_path = "/mnt/BROAD-datasets/video/"
 # param_file = "/home/kesci/work/param2.data"
@@ -170,8 +169,9 @@ pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
 all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // train_size 
 
+cache = {}
+
 def reader_get_image_and_label_no_thread():
-    @provider(pool_size =buf_size, input_types=[dense_vector_sequence(2048*block_size), integer_value_sequence(class_dim)])
     def reader():
         count=0
         while count < all_batch_size:
@@ -180,12 +180,18 @@ def reader_get_image_and_label_no_thread():
             while (len(datas)<train_size):
                 if random.random()>0.5:
                     _file = os.path.join(pre_data_path_0, random.choice(pre_data_filenames_0))
-                    datas.append(np.load(_file))
                     labels.append(0)
                 else:
                     _file = os.path.join(pre_data_path_1, random.choice(pre_data_filenames_1))
-                    datas.append(np.load(_file))
                     labels.append(1)            
+
+                if _file in cache:
+                    datas.append(cache[_file])
+                else:
+                    _data =np.load(_file)
+                    if len(cache)<buf_size:
+                        cache[_file]=_data    
+                    datas.append(_data)
             yield datas, labels
             count += 1
     return reader
