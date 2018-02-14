@@ -216,7 +216,7 @@ def reader_get_image_and_label():
 
 def reader_get_image_and_label_no_thread():
     def reader():
-        for count < all_batch_size:
+        while count < all_batch_size:
             datas=[]
             labels=[]
             while (len(datas)<train_size):
