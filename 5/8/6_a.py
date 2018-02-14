@@ -195,11 +195,6 @@ def read_data_form_files():
             time.sleep(0.1)
 
 threads_pool=[]
-for i in range(pool_size):
-    threads_pool.append(threading.Thread(target=read_data_form_files, args=()))
-
-for _thread in threads_pool:
-    _thread.start()
     
 def check_threads_pool_isAlive():
     for _thread in threads_pool:
@@ -209,6 +204,13 @@ def check_threads_pool_isAlive():
 
 def reader_get_image_and_label():
     def reader():
+
+        for i in range(pool_size):
+            threads_pool.append(threading.Thread(target=read_data_form_files, args=()))
+
+        for _thread in threads_pool:
+            _thread.start()
+        
         while check_threads_pool_isAlive() or len(data_pools)>0:            
             while len(data_pools)==0:
                 print("wait", len(data_pools))
@@ -247,7 +249,7 @@ def train():
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
     cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
