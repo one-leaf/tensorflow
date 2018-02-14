@@ -13,7 +13,7 @@ import logging
 import gc
 import commands, re  
 import threading
-from paddle.trainer.PyDataProvider2 import provider
+from paddle.trainer.PyDataProvider2 import *
 # home = "/home/kesci/work/"
 # data_path = "/mnt/BROAD-datasets/video/"
 # param_file = "/home/kesci/work/param2.data"
@@ -163,59 +163,15 @@ def network(drop=True):
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return cost_class, adam_optimizer, net_class_fc
 
-data_pools = []
-
 training_data, validation_data, _ = load_data()
-data_pools = []
+
 pre_data_filenames_0 = os.listdir(pre_data_path_0)
 pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
-pool_size = 5
 all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // train_size 
-def read_data_form_files():
-    count = 0
-    while count < all_batch_size//pool_size:
-        datas=[]
-        labels=[]
-        while (len(datas)<train_size):
-            if random.random()>0.5:
-                _file = os.path.join(pre_data_path_0, random.choice(pre_data_filenames_0))
-                datas.append(np.load(_file))
-                labels.append(0)
-            else:
-                _file = os.path.join(pre_data_path_1, random.choice(pre_data_filenames_1))
-                datas.append(np.load(_file))
-                labels.append(1)
-        data_pools.append((datas, labels))
-        count += 1
-        while len(data_pools)>buf_size:
-            time.sleep(0.1)
-  
-def check_threads_pool_isAlive(threads_pool):
-    for _thread in threads_pool:
-        if _thread.isAlive():
-            return True
-    return False
-
-def reader_get_image_and_label():
-    def reader():
-        threads_pool=[]
-        for i in range(pool_size):
-            threads_pool.append(threading.Thread(target=read_data_form_files, args=()))
-
-        for _thread in threads_pool:
-            _thread.start()
-        
-        while check_threads_pool_isAlive(threads_pool) or len(data_pools)>0:            
-            while len(data_pools)==0:
-                print("wait", len(data_pools))
-                time.sleep(1)
-            datas, labels = data_pools.pop()
-            yield datas, labels
-    return reader
 
 def reader_get_image_and_label_no_thread():
-    @provider(pool_size =buf_size)
+    @provider(pool_size =buf_size, input_types=[dense_vector_sequence(2048*block_size), integer_value_sequence(class_dim)])
     def reader():
         count=0
         while count < all_batch_size:
