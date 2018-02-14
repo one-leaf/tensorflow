@@ -170,7 +170,7 @@ data_pools = []
 pre_data_filenames_0 = os.listdir(pre_data_path_0)
 pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
-pool_size = 2
+pool_size = 1
 all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // train_size 
 def read_data_form_files():
     count = 0
