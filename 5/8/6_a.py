@@ -159,7 +159,7 @@ def network(drop=True):
     net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3,
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3,
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return cost_class, adam_optimizer, net_class_fc
 
@@ -171,7 +171,7 @@ pre_data_filenames_0 = os.listdir(pre_data_path_0)
 pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
 pool_size = 2
-all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // train_size
+all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // (train_size * batch_size)
 def read_data_form_files():
     count = 0
     while count<all_batch_size//pool_size:
