@@ -215,6 +215,7 @@ def reader_get_image_and_label():
     return reader
 
 def reader_get_image_and_label_no_thread():
+    @paddle.trainer.PyDataProvider2.provider(pool_size =buf_size)
     def reader():
         count=0
         while count < all_batch_size:
@@ -231,7 +232,6 @@ def reader_get_image_and_label_no_thread():
                     labels.append(1)            
             yield datas, labels
             count += 1
-
     return reader
 
 status ={}
