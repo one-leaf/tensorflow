@@ -64,7 +64,7 @@ def pre_data():
         for i in range(block_size,w):
             label_sum = sum(label[i-block_size:i])
             if label_sum == block_size:
-                if last_status != 1:
+                if prev_status != 1:
                     prev_value = 0.5
                 else:
                     prev_value +=0.2
@@ -73,7 +73,7 @@ def pre_data():
                 if os.path.exists(_file): 
                     continue
             elif label_sum == 0:
-                if last_status != 0:
+                if prev_status != 0:
                     prev_value = 0.5
                 else:
                     prev_value +=0.2
