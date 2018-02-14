@@ -24,7 +24,7 @@ class_dim = 2 # 分类 0，背景， 1，精彩
 train_size = 64 # 学习的关键帧长度
 block_size = 8
 
-buf_size = 10920
+buf_size = 2048
 batch_size = 2048//(train_size*block_size)
 
 home = os.path.dirname(__file__)
@@ -170,7 +170,7 @@ data_pools = []
 pre_data_filenames_0 = os.listdir(pre_data_path_0)
 pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
-pool_size = 5
+pool_size = 2
 def read_data_form_files():
     count = 0
     while count<(len(pre_data_filenames_0)+len(pre_data_filenames_1))//pool_size:
