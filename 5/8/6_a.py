@@ -222,9 +222,9 @@ status["steptime"]=time.time()
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 10 == 0:
-            print("Time %.2f, Pass %d, Batch %d, Cost %f, %s (%s)" % (
-                time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics,
-                len(data_pools)) )
+            print "Paid %.2f,Time %.2f, Pass %d, Batch %d, Cost %f, %s (%s)" % (
+                time.time() - status["starttime"], time.time() - status["steptime"], event.pass_id, 
+                event.batch_id, event.cost, event.metrics, len(data_pools)) 
             status["steptime"]=time.time()
             # cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
