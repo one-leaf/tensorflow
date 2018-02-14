@@ -204,7 +204,7 @@ def check_threads_pool_isAlive():
 
 def reader_get_image_and_label():
     def reader():
-
+        threads_pool.clear()
         for i in range(pool_size):
             threads_pool.append(threading.Thread(target=read_data_form_files, args=()))
 
