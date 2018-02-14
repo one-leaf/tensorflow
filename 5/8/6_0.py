@@ -59,13 +59,14 @@ def pre_data():
                 label[i] = 1
         
         #上一步的值
-        prev_status=0
+        prev_status=-1
         prev_value =1.
         for i in range(block_size,w):
             label_sum = sum(label[i-block_size:i])
             if label_sum == block_size:
                 if prev_status != 1:
                     prev_value = 0.5
+                    prev_status = 1
                 else:
                     prev_value +=0.2
                 if i % int(round(prev_value)) != 0: continue
@@ -75,6 +76,7 @@ def pre_data():
             elif label_sum == 0:
                 if prev_status != 0:
                     prev_value = 0.5
+                    prev_status = 0
                 else:
                     prev_value +=0.2
                 if i % int(round(prev_value)) != 0: continue
