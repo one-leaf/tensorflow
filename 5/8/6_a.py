@@ -182,7 +182,7 @@ def pre_data():
                 label[i] = 1
 
         for i in range(block_size,w):
-            label_sum = sum(label[i-block_size,i])
+            label_sum = sum(label[i-block_size:i])
             if label_sum == block_size:
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
                 pre_data_filenames_1.append(_file)
