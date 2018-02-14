@@ -209,7 +209,7 @@ def reader_get_image_and_label():
         for _thread in threads_pool:
             _thread.start()
         
-        while check_threads_pool_isAlive() or len(data_pools)>0:            
+        while check_threads_pool_isAlive(threads_pool) or len(data_pools)>0:            
             while len(data_pools)==0:
                 print("wait", len(data_pools))
                 time.sleep(1)
