@@ -61,7 +61,7 @@ def pre_data():
         #上一步的值
         prev_status=-1
         prev_value =1.
-        for i in range(block_size,w):
+        for i in range(block_size, w):
             label_sum = sum(label[i-block_size:i])
             if label_sum == block_size:
                 if prev_status != 1:
@@ -86,7 +86,33 @@ def pre_data():
             else: continue
             _data = np.stack([v_data[j] for j in range(i-block_size,i)])
             np.save(open(_file,"wb"), _data)
-            
+
+        for i in range(w, block_size, -1):
+            label_sum = sum(label[i-block_size:i])
+            if label_sum == block_size:
+                if prev_status != 1:
+                    prev_value = 0.5
+                    prev_status = 1
+                else:
+                    prev_value +=0.2
+                if i % int(round(prev_value)) != 0: continue
+                _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
+                if os.path.exists(_file): 
+                    continue
+            elif label_sum == 0:
+                if prev_status != 0:
+                    prev_value = 0.5
+                    prev_status = 0
+                else:
+                    prev_value +=0.2
+                if i % int(round(prev_value)) != 0: continue
+                _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
+                if os.path.exists(_file): 
+                    continue
+            else: continue
+            _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+            np.save(open(_file,"wb"), _data)
+
 if __name__ == '__main__':
     status={}
     status["starttime"] = time.time()
