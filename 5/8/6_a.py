@@ -198,7 +198,7 @@ def pre_data():
 
 def read_data_form_files():
     count=0
-    while t1.isAlive() or count<len(pre_data_filenames_0)+len(pre_data_filenames_1):
+    while t1.isAlive() or count<(len(pre_data_filenames_0)+len(pre_data_filenames_1))//2:
         while len(pre_data_filenames_0)==0 or len(pre_data_filenames_1)==0:
             print("waite files count:", len(pre_data_filenames_0), len(pre_data_filenames_0))
             time.sleep(1)        
@@ -219,7 +219,8 @@ t1 = threading.Thread(target=pre_data, args=())
 t1.start()
 t2 = threading.Thread(target=read_data_form_files, args=())
 t2.start()
-
+t3 = threading.Thread(target=read_data_form_files, args=())
+t3.start()
 def reader_get_image_and_label():
     def reader():
         while t2.isAlive():            
