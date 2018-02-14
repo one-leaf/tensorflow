@@ -22,9 +22,9 @@ import threading
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 train_size = 64 # 学习的关键帧长度
-block_size = 16
+block_size = 8
 
-buf_size = 4096
+buf_size = 10920
 batch_size = 2048//(train_size*block_size)
 
 home = os.path.dirname(__file__)
@@ -32,6 +32,9 @@ data_path = os.path.join(home,"data")
 model_path = os.path.join(home,"model")
 cls_param_file = os.path.join(model_path,"param_cls.tar")
 box_param_file = os.path.join(model_path,"param_box.tar")
+
+pre_data_path_0 = os.path.join(home,"data_0")
+pre_data_path_1 = os.path.join(home,"data_1")
 
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
@@ -62,6 +65,8 @@ def load_data(filter=None):
                 testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
+
+training_data, validation_data, _ = load_data()
 
 def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
     tmp = paddle.layer.img_conv(
@@ -158,71 +163,68 @@ def network(drop=True):
         learning_rate_schedule="pass_manual", learning_rate_args="1:1.0,2:0.9,3:0.8,4:0.7,5:0.6,6:0.5",)
     return cost_class, adam_optimizer, net_class_fc
 
-# 读取精彩和非精彩, 离散数据
-def read_data_cls(v_data, label): 
-    w = v_data.shape[0]
-    for i in range(block_size, w):
-        _avg = 1.*sum(label[i-block_size:i])/block_size
-        # 只要全部是精彩或全部是非精彩的片段
-        if (_avg == 1 or _avg == 0) and random.random()>1./2:
-            _data = np.stack([v_data[j] for j in range(i-block_size,i)])
-            yield i, _data, int(_avg)
+data_pools = []
 
-data_pool_0 = []    #负样本
-data_pool_1 = []    #正样本
-training_data, validation_data, _ = load_data()
-def readDatatoPool():
-    size = len(training_data)+len(validation_data)
-    c = 0
-    for i in range(size):
-        if random.random()>1.0*len(validation_data)/size:
-            data = random.choice(training_data)
-            v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
-        else:
-            data = random.choice(validation_data)
-            v_data = np.load(os.path.join(data_path,"validation", "%s.pkl"%data["id"]))               
+pre_data_filenames_0 = []
+pre_data_filenames_1 = []
+def pre_data():
+    if not os.path.exists(pre_data_path_0): os.mkdir(pre_data_path_0)
+    if not os.path.exists(pre_data_path_1): os.mkdir(pre_data_path_1)
+    for data in training_data:
+        v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))  
 
-        # print "reading", data["id"], v_data.shape , len(data_pool_0), len(data_pool_1)
+        #生成精彩和非精彩分类
         w = v_data.shape[0]
         label = [0 for _ in range(w)]
         for annotations in data["data"]:
             segment = annotations['segment']
             for i in range(int(segment[0]),min(w,int(segment[1]+1))):
                 label[i] = 1
-        for i, _data, _label in read_data_cls(v_data, label):
-            if _label==0:
-                data_pool_0.append((_data, _label))
-            else:
-                data_pool_1.append((_data, _label))
 
-        while len(data_pool_1)>buf_size:
-            # print("r", len(data_pool_0), len(data_pool_1))
-            time.sleep(1) 
-              
+        for i in range(block_size,w):
+            label_sum = sum(label[i-block_size,i])
+            if label_sum == block_size:
+                _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
+                pre_data_filenames_1.append(_file)
+                if os.path.exists(_file): continue
+            elif block_size == 0:
+                _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
+                pre_data_filenames_0.append(_file)
+                if os.path.exists(_file): continue
+            _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+            np.save(_file, _data)
+
+def read_data_form_files():
+    t1 = threading.Thread(target=pre_data, args=())
+    t1.start()
+    count=0
+    while t1.isAlive() or count<len(pre_data_filenames_0)+len(pre_data_filenames_1):
+        while len(pre_data_filenames_0)==0 or len(pre_data_filenames_1)==0:
+            print("waite files count:", len(pre_data_filenames_0), len(pre_data_filenames_0))
+            time.sleep(1)        
+        datas=[]
+        labels=[]
+        while (len(datas)<train_size):
+            if random.random()>0.5:
+                datas.append(np.load(random.choice(pre_data_filenames_0)))
+                labels.append(0)
+            else:
+                datas.append(np.load(random.choice(pre_data_filenames_1)))
+                labels.append(1)
+        data_pools.append((datas, labels))
+        while len(data_pools)>buf_size:
+            time.sleep(0.1)
+
 def reader_get_image_and_label():
     def reader():
-        t1 = threading.Thread(target=readDatatoPool, args=())
-        t1.start()
-        while t1.isAlive():            
-            datas=[]
-            labels=[]
-            while (len(datas)<train_size):
-                while len(data_pool_1)==0 or len(data_pool_0)==0:
-                    print("w", len(data_pool_0), len(data_pool_1))
-                    time.sleep(1)
-                if random.random()>0.5 and len(data_pool_0)>0:
-                    data_pool = data_pool_0
-                    v = 1.0*len(data_pool_0)/len(data_pool_1)
-                else:
-                    data_pool = data_pool_1
-                    v = 1.0*len(data_pool_1)/len(data_pool_0)
-                if random.random()>v:
-                    d, a = random.choice(data_pool)
-                else:    
-                    d, a = data_pool.pop(random.randrange(len(data_pool)))
-                datas.append(d)
-                labels.append(a)
-            yield datas, labels   
+        t2 = threading.Thread(target=read_data_form_files, args=())
+        t2.start()
+        while t2.isAlive():            
+            while len(data_pool)==0:
+                print("wait", len(data_pool))
+                time.sleep(1)
+            datas, labels = data_pool.pop()
+            yield datas, labels
     return reader
 
 status ={}
