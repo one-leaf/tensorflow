@@ -191,6 +191,7 @@ def pre_data():
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 pre_data_filenames_0.append(_file)
                 if os.path.exists(_file): continue
+            else: continue
             _data = np.stack([v_data[j] for j in range(i-block_size,i)])
             np.save(open(_file,"wb"), _data)
 
