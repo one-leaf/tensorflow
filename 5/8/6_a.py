@@ -172,7 +172,7 @@ pre_data_filenames_1 = os.listdir(pre_data_path_1)
 
 pool_size = 5
 def read_data_form_files():
-    count=0
+    count = 0
     while count<(len(pre_data_filenames_0)+len(pre_data_filenames_1))//pool_size:
         while len(pre_data_filenames_0)==0 or len(pre_data_filenames_1)==0:
             print("waite files count:", len(pre_data_filenames_0), len(pre_data_filenames_0))
@@ -189,6 +189,7 @@ def read_data_form_files():
                 datas.append(np.load(_file))
                 labels.append(1)
         data_pools.append((datas, labels))
+        count += 1
         while len(data_pools)>buf_size:
             time.sleep(0.1)
 
@@ -214,7 +215,7 @@ def reader_get_image_and_label():
             datas, labels = data_pools.pop()
             yield datas, labels
     return reader
-    
+
 status ={}
 status["starttime"]=time.time()
 status["steptime"]=time.time()
