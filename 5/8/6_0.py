@@ -7,6 +7,7 @@ import numpy as np
 import os
 import json
 import time
+import random
 
 home = os.path.dirname(__file__)
 data_path = os.path.join(home,"data")
@@ -65,21 +66,23 @@ def pre_data():
             label_sum = sum(label[i-block_size:i])
             if label_sum == block_size:
                 if prev_status != 1:
-                    prev_value = 0.5
+                    prev_value = 0
                     prev_status = 1
                 else:
-                    prev_value += 0.2
-                if i % int(round(prev_value)) != 0: continue
+                    prev_value += 1
+                # if i % int(round(prev_value)) != 0: continue
+                if prev_value > 10 and i%4 != 0: continue
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
                     continue
             elif label_sum == 0:
                 if prev_status != 0:
-                    prev_value = 0.5
+                    prev_value = 0
                     prev_status = 0
                 else:
-                    prev_value += 0.3
-                if i % int(round(prev_value)) != 0: continue
+                    prev_value += 1
+                # if i % int(round(prev_value)) != 0: continue
+                if prev_value > 10 and i%4 != 0: continue
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
                     continue
