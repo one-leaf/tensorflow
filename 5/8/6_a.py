@@ -112,8 +112,8 @@ def resnet(ipt, depth=32, drop=False):
     if drop:
         res2 = paddle.layer.dropout(input=res2, dropout_rate=0.5)
     res3 = layer_warp(basicblock, res2, 64, n, 2)
-    if drop:    
-        res3 = paddle.layer.dropout(input=res3, dropout_rate=0.5)
+    # if drop:    
+    #     res3 = paddle.layer.dropout(input=res3, dropout_rate=0.5)
     res4 = layer_warp(basicblock, res3, 64, n, 2)
     res5 = layer_warp(basicblock, res4, 64, n, 2)
     res6 = layer_warp(basicblock, res5, 64, n, 2)
@@ -148,13 +148,14 @@ def network(drop=True):
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)            
     net = cnn(net,  3, 64, 64, 2, 1)
     if drop:
-        net = paddle.layer.dropout(input=net, dropout_rate=0.5)    
-    net = cnn(net,  3, 64, 64, 2, 1)
-    net = cnn(net,  3, 64, 64, 2, 1)
+        net = paddle.layer.dropout(input=net, dropout_rate=0.5)  
+    net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=41, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
+    # net = cnn(net,  3, 64, 64, 2, 1)
+    # net = cnn(net,  3, 64, 64, 2, 1)
 
 
     # 当前图片精彩或非精彩分类
-   # net_class_gru = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Tanh())
+    # net_class_gru = paddle.networks.simple_gru(input=net, size=128, act=paddle.activation.Tanh())
     net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
