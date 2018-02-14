@@ -192,7 +192,7 @@ def pre_data():
                 pre_data_filenames_0.append(_file)
                 if os.path.exists(_file): continue
             _data = np.stack([v_data[j] for j in range(i-block_size,i)])
-            np.save(_file, _data)
+            np.save(open(_file,"wb"), _data)
 
 def read_data_form_files():
     t1 = threading.Thread(target=pre_data, args=())
