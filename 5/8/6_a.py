@@ -221,10 +221,10 @@ def reader_get_image_and_label():
         t2 = threading.Thread(target=read_data_form_files, args=())
         t2.start()
         while t2.isAlive():            
-            while len(data_pool)==0:
-                print("wait", len(data_pool))
+            while len(data_pools)==0:
+                print("wait", len(data_pools))
                 time.sleep(1)
-            datas, labels = data_pool.pop()
+            datas, labels = data_pools.pop()
             yield datas, labels
     return reader
 
@@ -234,9 +234,9 @@ status["steptime"]=time.time()
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 10 == 0:
-            print("Time %.2f, Pass %d, Batch %d, Cost %f, %s (%s/%s)" % (
+            print("Time %.2f, Pass %d, Batch %d, Cost %f, %s (%s)" % (
                 time.time() - status["steptime"], event.pass_id, event.batch_id, event.cost, event.metrics,
-                len(data_pool_0), len(data_pool_1)) )
+                len(data_pools)) )
             status["steptime"]=time.time()
             # cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
