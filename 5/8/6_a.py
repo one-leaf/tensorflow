@@ -193,10 +193,8 @@ def read_data_form_files():
         count += 1
         while len(data_pools)>buf_size:
             time.sleep(0.1)
-
-threads_pool=[]
-    
-def check_threads_pool_isAlive():
+  
+def check_threads_pool_isAlive(threads_pool):
     for _thread in threads_pool:
         if _thread.isAlive():
             return True
@@ -204,7 +202,7 @@ def check_threads_pool_isAlive():
 
 def reader_get_image_and_label():
     def reader():
-        threads_pool.clear()
+        threads_pool=[]
         for i in range(pool_size):
             threads_pool.append(threading.Thread(target=read_data_form_files, args=()))
 
