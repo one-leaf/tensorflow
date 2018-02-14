@@ -196,8 +196,6 @@ def pre_data():
             np.save(open(_file,"wb"), _data)
 
 def read_data_form_files():
-    t1 = threading.Thread(target=pre_data, args=())
-    t1.start()
     count=0
     while t1.isAlive() or count<len(pre_data_filenames_0)+len(pre_data_filenames_1):
         while len(pre_data_filenames_0)==0 or len(pre_data_filenames_1)==0:
@@ -215,11 +213,14 @@ def read_data_form_files():
         data_pools.append((datas, labels))
         while len(data_pools)>buf_size:
             time.sleep(0.1)
+            
+t1 = threading.Thread(target=pre_data, args=())
+t1.start()
+t2 = threading.Thread(target=read_data_form_files, args=())
+t2.start()
 
 def reader_get_image_and_label():
     def reader():
-        t2 = threading.Thread(target=read_data_form_files, args=())
-        t2.start()
         while t2.isAlive():            
             while len(data_pools)==0:
                 print("wait", len(data_pools))
