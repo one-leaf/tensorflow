@@ -199,7 +199,22 @@ for i in range(pool_size):
 for _thread in threads_pool:
     _thread.start()
     
+def check_threads_pool_isAlive():
+    for _thread in threads_pool:
+        if _thread.isAlive():
+            return True
+    return False
 
+def reader_get_image_and_label():
+    def reader():
+        while check_threads_pool_isAlive():            
+            while len(data_pools)==0:
+                print("wait", len(data_pools))
+                time.sleep(1)
+            datas, labels = data_pools.pop()
+            yield datas, labels
+    return reader
+    
 status ={}
 status["starttime"]=time.time()
 status["steptime"]=time.time()
