@@ -68,7 +68,7 @@ def pre_data():
                     prev_value = 0.5
                     prev_status = 1
                 else:
-                    prev_value +=0.2
+                    prev_value += 0.2
                 if i % int(round(prev_value)) != 0: continue
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
@@ -78,7 +78,7 @@ def pre_data():
                     prev_value = 0.5
                     prev_status = 0
                 else:
-                    prev_value +=0.2
+                    prev_value += 0.2
                 if i % int(round(prev_value)) != 0: continue
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
@@ -87,6 +87,8 @@ def pre_data():
             _data = np.stack([v_data[j] for j in range(i-block_size,i)])
             np.save(open(_file,"wb"), _data)
 
+        prev_status=-1
+        prev_value =1.
         for i in range(w, block_size, -1):
             label_sum = sum(label[i-block_size:i])
             if label_sum == block_size:
@@ -94,7 +96,7 @@ def pre_data():
                     prev_value = 0.5
                     prev_status = 1
                 else:
-                    prev_value +=0.2
+                    prev_value += 0.2
                 if i % int(round(prev_value)) != 0: continue
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
@@ -104,7 +106,7 @@ def pre_data():
                     prev_value = 0.5
                     prev_status = 0
                 else:
-                    prev_value +=0.2
+                    prev_value += 0.2
                 if i % int(round(prev_value)) != 0: continue
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
