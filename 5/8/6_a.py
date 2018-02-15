@@ -163,36 +163,107 @@ def network(drop=True):
 
 training_data, validation_data, _ = load_data()
 
-pre_data_filenames_0 = os.listdir(pre_data_path_0)
-pre_data_filenames_1 = os.listdir(pre_data_path_1)
-
-all_batch_size = (len(pre_data_filenames_0)+len(pre_data_filenames_1)) // train_size 
-
 cache = {}
+def addto_cache(key, _data):
+    if len(cache)<buf_size:
+        cache[key]=_data    
 
-def reader_get_image_and_label_no_thread():
+def get_image_and_label(v_data,data):
+    w = v_data.shape[0]
+    label = [0 for _ in range(w)]
+    for annotations in data["data"]:
+        segment = annotations['segment']
+        for i in range(int(segment[0]),min(w,int(segment[1]+1))):
+            label[i] = 1
+
+    prev_status=-1
+    prev_value =1.
+    for i in range(block_size, w):
+        label_sum = sum(label[i-block_size:i])
+        if label_sum == block_size:
+            if prev_status != 1:
+                prev_value = 0
+                prev_status = 1
+            else:
+                prev_value += 1
+            # if i % int(round(prev_value)) != 0: continue
+            if prev_value >= 8 : continue
+            _key = "%s_%d"%(data["id"],i)) 
+            if _key in cache: 
+                yield cache[_key], 1
+            else:
+                _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+                addto_cache(_key, _data)
+                yield _data, 1                
+        elif label_sum == 0:
+            if prev_status != 0:
+                prev_value = 0
+                prev_status = 0
+            else:
+                prev_value += 1
+            # if i % int(round(prev_value)) != 0: continue
+            if prev_value >= 8 : continue
+            _key = "%s_%d"%(data["id"],i)) 
+            if _key in cache: 
+                yield cache[_key], 0
+            else:
+                _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+                addto_cache(_key, _data)
+                yield _data, 0                
+        else: continue
+
+    prev_status=-1
+    prev_value =1.
+    for i in range(w, block_size, -1):
+        label_sum = sum(label[i-block_size:i])
+        if label_sum == block_size:
+            if prev_status != 1:
+                prev_value = 0
+                prev_status = 1
+            else:
+                prev_value += 1
+            # if i % int(round(prev_value)) != 0: continue
+            if prev_value >= 8 : continue
+            _key = "%s_%d"%(data["id"],i)) 
+            if _key in cache: 
+                yield cache[_key], 1
+            else:
+                _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+                addto_cache(_key, _data)
+                yield _data, 1                
+        elif label_sum == 0:
+            if prev_status != 0:
+                prev_value = 0
+                prev_status = 0
+            else:
+                prev_value += 1
+            # if i % int(round(prev_value)) != 0: continue
+            if prev_value >= 8 : continue
+            _key = "%s_%d"%(data["id"],i)) 
+            if _key in cache: 
+                yield cache[_key], 0
+            else:
+                _data = np.stack([v_data[j] for j in range(i-block_size,i)])
+                addto_cache(_key, _data)
+                yield _data, 0                
+        else: continue
+
+
+def reader_get_image_and_label():
     def reader():
-        count=0
-        while count < all_batch_size:
-            datas=[]
-            labels=[]
-            while (len(datas)<train_size):
-                if random.random()>0.5:
-                    _file = os.path.join(pre_data_path_0, random.choice(pre_data_filenames_0))
-                    labels.append(0)
-                else:
-                    _file = os.path.join(pre_data_path_1, random.choice(pre_data_filenames_1))
-                    labels.append(1)            
-
-                if _file in cache:
-                    datas.append(cache[_file])
-                else:
-                    _data =np.load(_file)
-                    if len(cache)<buf_size:
-                        cache[_file]=_data    
-                    datas.append(_data)
-            yield datas, labels
-            count += 1
+        size = len(training_data)
+        datas=[]
+        labels=[]
+        for i, data in enumerate(training_data):
+            print("reading %s/%s %s.pkl"%(i,size,data["id"]))
+            v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
+            for _data,_label in get_image_and_label(v_data, data):
+                if len(datas)==train_size：
+                    yield datas, labels
+                    datas=[]
+                    labels=[]
+                datas.append(_data)
+                labels.append(_label)
     return reader
 
 status ={}
@@ -220,7 +291,7 @@ def train():
     cls_parameters = paddle.parameters.create(cost)
 
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label_no_thread(), batch_size=batch_size)
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
