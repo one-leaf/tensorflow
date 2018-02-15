@@ -54,13 +54,13 @@ def load_data(filter=None):
         if filter!=None and data['database'][data_id]['subset']!=filter:
             continue
         if data['database'][data_id]['subset'] == 'training':
-            if os.path.exists(os.path.join(data_path,"training", "%s.pkl"%data_id)):
+            if os.path.exists(os.path.join(training_path, "%s.pkl"%data_id)):
                 training_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
         elif data['database'][data_id]['subset'] == 'validation':
-            if os.path.exists(os.path.join(data_path,"validation", "%s.pkl"%data_id)):
+            if os.path.exists(os.path.join(validation_path, "%s.pkl"%data_id)):
                 validation_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
         elif data['database'][data_id]['subset'] == 'testing':
-            if os.path.exists(os.path.join(data_path,"testing", "%s.pkl"%data_id)):
+            if os.path.exists(os.path.join(testing_path, "%s.pkl"%data_id)):
                 testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
