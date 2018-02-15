@@ -253,7 +253,7 @@ def reader_get_image_and_label():
         datas=[]
         labels=[]
         for i, data in enumerate(training_data):
-            print("reading %s/%s %s.pkl"%(i,size,data["id"]))
+            # print("reading %s/%s %s.pkl"%(i,size,data["id"]))
             v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
             for _data,_label in get_image_and_label(v_data, data):
                 if len(datas)==train_size:
