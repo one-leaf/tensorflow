@@ -161,8 +161,6 @@ def network(drop=True):
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
     return cost_class, adam_optimizer, net_class_fc
 
-print("training_data: %s , validation_data: %s" % (len(training_data),len(validation_data)))
-
 cache = {}
 def addto_cache(key, _data):
     if len(cache)<buf_size:
@@ -272,9 +270,9 @@ status["steptime"]=time.time()
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 10 == 0:
-            print "Paid %.2f,Time %.2f, Pass %d, Batch %d/%d, Cost %f, %s" % (
+            print "Paid %.2f,Time %.2f, Pass %d, Batch %d, Cost %f, %s" % (
                 time.time() - status["starttime"], time.time() - status["steptime"], event.pass_id, 
-                event.batch_id, all_batch_size//batch_size , event.cost, event.metrics) 
+                event.batch_id, event.cost, event.metrics) 
             status["steptime"]=time.time()
             # cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
