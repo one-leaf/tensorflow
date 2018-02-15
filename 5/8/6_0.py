@@ -71,7 +71,7 @@ def pre_data():
                 else:
                     prev_value += 1
                 # if i % int(round(prev_value)) != 0: continue
-                # if prev_value >= 8 and i%8 != 0: continue
+                if prev_value >= 8 : continue
                 _file = os.path.join(pre_data_path_1,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
                     continue
@@ -82,7 +82,7 @@ def pre_data():
                 else:
                     prev_value += 1
                 # if i % int(round(prev_value)) != 0: continue
-                # if prev_value >= 8 and i%8 != 0: continue
+                if prev_value >= 8 : continue
                 _file = os.path.join(pre_data_path_0,"%s_%d.pkl"%(data["id"],i)) 
                 if os.path.exists(_file): 
                     continue
