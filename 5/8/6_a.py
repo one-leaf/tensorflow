@@ -258,7 +258,7 @@ def reader_get_image_and_label():
             print("reading %s/%s %s.pkl"%(i,size,data["id"]))
             v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
             for _data,_label in get_image_and_label(v_data, data):
-                if len(datas)==train_size：
+                if len(datas)==train_size:
                     yield datas, labels
                     datas=[]
                     labels=[]
