@@ -161,7 +161,6 @@ def network(drop=True):
     adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
     return cost_class, adam_optimizer, net_class_fc
 
-training_data, validation_data, _ = load_data()
 print("training_data: %s , validation_data: %s" % (len(training_data),len(validation_data)))
 
 cache = {}
