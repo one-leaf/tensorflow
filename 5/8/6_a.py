@@ -162,6 +162,7 @@ def network(drop=True):
     return cost_class, adam_optimizer, net_class_fc
 
 training_data, validation_data, _ = load_data()
+print("training_data: %s , validation_data: %s" % (len(training_data),len(validation_data)))
 
 cache = {}
 def addto_cache(key, _data):
