@@ -46,12 +46,12 @@ training_data, validation_data, _ = load_data()
 def pre_data():
     if not os.path.exists(pre_data_path_0): os.mkdir(pre_data_path_0)
     if not os.path.exists(pre_data_path_1): os.mkdir(pre_data_path_1)
-    print("clear files ...")
+    print("delete files ...")
     for _file in os.listdir(pre_data_path_0):
         os.remove(os.path.join(pre_data_path_0,_file))
     for _file in os.listdir(pre_data_path_1):
         os.remove(os.path.join(pre_data_path_1,_file))
-    print("cleared")
+    print("deleted")
     size = len(training_data)
     for i, data in enumerate(training_data):
         print("reading %s/%s %s.pkl"%(i,size,data["id"]))
