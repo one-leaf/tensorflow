@@ -188,7 +188,7 @@ def get_image_and_label(v_data,data):
                 prev_value += 1
             # if i % int(round(prev_value)) != 0: continue
             if prev_value >= 8 : continue
-            _key = "%s_%d"%(data["id"],i)) 
+            _key = "%s_%d"%(data["id"],i) 
             if _key in cache: 
                 yield cache[_key], 1
             else:
