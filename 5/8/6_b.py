@@ -168,12 +168,14 @@ def get_image_and_label(v_data,data):
     label = [0 for _ in range(w)]
     for annotations in data["data"]:
         segment = annotations['segment']
-        for i in range(max(0,segment[0]-2*block_size), min(w,segment[0]+2*block_size+1)):
+        _s = int(round(segment[0]))
+        _e = int(round(segment[1]))
+        for i in range(max(0,_s-2*block_size), min(_e,w,_s+2*block_size+1)):
             if segment[0] -i > block_size/4 and segment[0] -i < block_size*3/4 :
                 yield v_data[i:i+block_size], 1
             else:
                 yield v_data[i:i+block_size], 0
-        for i in range(max(0,segment[1]-2*block_size), min(w,segment[1]+2*block_size+1)):
+        for i in range(max(0,_s+1,_e-2*block_size), min(w,_e+2*block_size+1)):
             if segment[0] -i > block_size/4 and segment[0] -i < block_size*3/4 :
                 yield v_data[i:i+block_size], 2
             else:
