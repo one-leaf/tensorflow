@@ -32,9 +32,6 @@ model_path = os.path.join(home,"model")
 cls_param_file = os.path.join(model_path,"param_cls.tar")
 box_param_file = os.path.join(model_path,"param_box.tar")
 
-pre_data_path_0 = os.path.join(home,"data_0")
-pre_data_path_1 = os.path.join(home,"data_1")
-
 result_json_file = os.path.join(model_path,"ai2.json")
 out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)
