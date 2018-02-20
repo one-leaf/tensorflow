@@ -223,10 +223,10 @@ def train():
         if len(_data) == train_size*2:
             probs = inferer.infer(input=[(_data,)])
             v = probs[:,1]
-            print(v)
-            print(v[v<0.1])
-            sort = np.argsort(v[<0.1])
-            print(sort)
+            for i,v in enumerate(v):
+                if v<0.1:
+                    del _data[_keys[i]]
+                    print("del",i,v)
             _data=[]
             _keys=[]
 
