@@ -155,7 +155,7 @@ def pre_data():
             data_0[j%10].append(_data)
             j += 1
 
-        status["progress"]=1.0 * c / size
+        status["progress"]="%s/%s"%(c,size)
 
 
 
@@ -191,11 +191,11 @@ def reader_get_image_and_label():
 status ={}
 status["starttime"]=time.time()
 status["steptime"]=time.time()
-status["progress"]=0
+status["progress"]=""
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % 100 == 0:
-            print "Paid %.2f,Time %.2f, Progress %.2f, Pass %d, Batch %d, Cost %f, %s" % (
+            print "Paid %.2f,Time %.2f, Progress %s, Pass %d, Batch %d, Cost %f, %s" % (
                 time.time() - status["starttime"], time.time() - status["steptime"], status["progress"], event.pass_id, 
                 event.batch_id, event.cost, event.metrics) 
             status["steptime"]=time.time()
