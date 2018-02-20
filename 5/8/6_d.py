@@ -172,12 +172,14 @@ def reader_get_image_and_label(addone):
                 if len(data_1)> one_buf_size:
                     one_last_remove_index, _data = data_1.popitem()
                 else:
-                    try:
-                        _data = data_1[one_curr_index]
-                    except:
-                        one_curr_index = one_last_remove_index+1
-                        _data = data_1[one_curr_index]
-                    one_curr_index += 1
+                    _data = None
+                    while _data == None:
+                        try:
+                            _data = data_1[one_curr_index]                            
+                        except:
+                            one_curr_index = one_last_remove_index+1
+                            _data = data_1[one_curr_index]
+                        one_curr_index += 1
             else:
                 labels.append(0)
                 if len(data_0)> zero_buf_size or not t1.isAlive():
@@ -224,9 +226,9 @@ def train():
             probs = inferer.infer(input=[(_data,)])
             v = probs[:,1]
             for i,v in enumerate(v):
-                print(i,v)
+                print(i,v,_keys[i])
                 if v<0.1:
-                    del _data[_keys[i]]
+                    _data[_keys[i]] = None
                     print("del",i,v)
             _data=[]
             _keys=[]
