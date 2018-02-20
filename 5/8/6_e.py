@@ -167,8 +167,8 @@ def reader_get_image_and_label():
         t1 = threading.Thread(target=pre_data, args=())
         t1.start()
         time.sleep(10)
-        while (len(data_1[0])>1000 and len(data_0[0])>1000) or t1.isAlive(): 
-            if t1.isAlive() and (len(data_1[0])<1000 or len(data_0[0])<1000):
+        while len(data_0[0])>1000 or t1.isAlive(): 
+            if t1.isAlive() and len(data_0[0])<1000:
                 time.sleep(0.1)
             must_pop = False
             if random.random() < 0.3:
