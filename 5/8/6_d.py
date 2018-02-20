@@ -116,7 +116,7 @@ def add_one_data_to_list(segment, label, v_data):
     w = v_data.shape[0]
     def filter(i):
         if i>=0 and i+block_size<=w: 
-            if min(label[i:i+block_size]) == 1:
+            if sum(label[i:i+block_size]) >= block_size*0.8:
                 return 1, v_data[i:i+block_size]
         return None
     start = int(round(segment[0]))
