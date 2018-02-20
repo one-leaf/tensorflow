@@ -180,7 +180,8 @@ def reader_get_image_and_label():
                 if not t1.isAlive(): must_pop = True
 
             _i = random.randint(0,9)
-            if len(_data[_i])>buf_size or must_pop:
+            _size = len(_data[_i]) 
+            if _size >500 and （_size > buf_size or must_pop):
                 datas.append(_data[_i].pop(0))
             else:
                 datas.append(random.choice(_data[_i]))
