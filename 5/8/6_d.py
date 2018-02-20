@@ -221,6 +221,7 @@ def clearData():
     _keys=[]
     del_num=0
     for x in data_1:
+        if len(data_1[x])==0: continue
         _data.append(data_1[x])
         _keys.append(x)
         if len(_data) == train_size*2:
