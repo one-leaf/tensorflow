@@ -151,7 +151,7 @@ def pre_data():
                 data_1[k%10].append(_data)
                 k += 1
 
-        for _l, _data in add_zero_data_to_list(segment, label, v_data):
+        for _l, _data in add_zero_data_to_list(label, v_data):
             data_0[j%10].append(_data)
             j += 1
 
