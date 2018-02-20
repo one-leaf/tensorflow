@@ -224,7 +224,7 @@ def train():
             probs = inferer.infer(input=[(_data,)])
             v = probs[:,1]
             print(v)
-            print(v[<0.1])
+            print(v[v<0.1])
             sort = np.argsort(v[<0.1])
             print(sort)
             _data=[]
