@@ -76,7 +76,7 @@ def test():
 
                     # 预测当前方块是否是精华或非精华                    
                     sort = np.argsort(-probs)
-                    value_probs = sort[:,0]
+                    value_probs = sort[:,1]
                     print  "判断分类",value_probs
                     _data=[]
                     if raw_input("==========================================================================="): pass
