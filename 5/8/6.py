@@ -22,7 +22,7 @@ data_path = os.path.join(home,"data")
 # param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
-class_dim = 2 # 分类 0，背景， 1，精彩
+class_dim = 3 # 分类 0，背景， 1，精彩， 2无效区
 train_size = 64 # 学习的关键帧长度
 block_size = 16
 
@@ -102,20 +102,28 @@ def network(drop=True):
     adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost_class, adam_optimizer, net_class_fc
 
+data_2 = {i:[] for i in range(10)}
 data_1 = {i:[] for i in range(10)}
 data_0 = {i:[] for i in range(10)}
     
 def add_zero_data_to_list(label, v_data):
     w = v_data.shape[0]
     for i in range(0, w-block_size, 2):
-        if max(label[i:i+block_size]) == 0:
+        if sum(label[i:i+block_size]) < block_size*0.2:
+            yield 0, v_data[i:i+block_size]
+
+def add_two_data_to_list(label, v_data):
+    w = v_data.shape[0]
+    for i in range(0, w-block_size, 2):
+        _sum = sum(label[i:i+block_size])
+        if _sum >= block_size*0.2 and _sum <= block_size*0.8:
             yield 0, v_data[i:i+block_size]
 
 def add_one_data_to_list(segment, label, v_data):
     w = v_data.shape[0]
     def filter(i):
         if i>=0 and i+block_size<=w: 
-            if sum(label[i:i+block_size]) > block_size*0.9:
+            if sum(label[i:i+block_size]) > block_size*0.8:
                 return 1, v_data[i:i+block_size]
         return None
     start = int(round(segment[0]))
@@ -135,6 +143,7 @@ def pre_data():
     labels=[]
     k=0
     j=0
+    l=0
     for c, data in enumerate(training_data):
         v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
 
@@ -154,6 +163,11 @@ def pre_data():
         for _l, _data in add_zero_data_to_list(label, v_data):
             data_0[j%10].append(_data)
             j += 1
+
+        for _l, _data in add_two_data_to_list(label, v_data):
+            data_2[l%10].append(_data)
+            l += 1
+
         status["progress"]="%s/%s"%(c,size)
 
 #         print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_0)))
@@ -169,9 +183,12 @@ def reader_get_image_and_label():
             if t1.isAlive() and (len(data_1[0])<1000 or len(data_0[0])<1000):
                 time.sleep(0.1)
             must_pop = False
-            if random.random() > 0.5:
+            if random.random() < 0.3:
                 labels.append(1)
                 _data = data_1 
+            elif random.random() > 0.6:
+                labels.append(2)
+                _data = data_2 
             else:
                 labels.append(0)
                 _data = data_0
