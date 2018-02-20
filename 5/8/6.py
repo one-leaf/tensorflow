@@ -109,21 +109,21 @@ data_0 = {i:[] for i in range(10)}
 def add_zero_data_to_list(label, v_data):
     w = v_data.shape[0]
     for i in range(0, w-block_size, 2):
-        if sum(label[i:i+block_size]) < block_size*0.2:
+        if sum(label[i:i+block_size]) < block_size*0.1:
             yield 0, v_data[i:i+block_size]
 
 def add_two_data_to_list(label, v_data):
     w = v_data.shape[0]
     for i in range(0, w-block_size, 2):
         _sum = sum(label[i:i+block_size])
-        if _sum >= block_size*0.2 and _sum <= block_size*0.8:
+        if _sum >= block_size*0.3 and _sum <= block_size*0.7:
             yield 0, v_data[i:i+block_size]
 
 def add_one_data_to_list(segment, label, v_data):
     w = v_data.shape[0]
     def filter(i):
         if i>=0 and i+block_size<=w: 
-            if sum(label[i:i+block_size]) > block_size*0.8:
+            if sum(label[i:i+block_size]) > block_size*0.9:
                 return 1, v_data[i:i+block_size]
         return None
     start = int(round(segment[0]))
