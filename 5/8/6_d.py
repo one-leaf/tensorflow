@@ -22,7 +22,7 @@ data_path = os.path.join(home,"data")
 
 class_dim = 2 # 分类 0，背景， 1，精彩
 train_size = 64 # 学习的关键帧长度
-block_size = 16
+block_size = 8
 
 buf_size = 5000
 batch_size = 2048//(train_size*block_size)
@@ -122,10 +122,10 @@ def add_one_data_to_list(segment, label, v_data):
     start = int(round(segment[0]))
     end = int(round(segment[1]))
     
-    for i in range(start-1, start+block_size//2):
+    for i in range(start-1, start+8):
         _data = filter(i)
         if _data != None: yield _data
-    for i in range(end-3*block_size//2, end-block_size+1):
+    for i in range(end-block_size-8, end-block_size+1):
         _data = filter(i)
         if _data != None: yield _data
             
