@@ -128,7 +128,7 @@ def pre_data(addone):
     size = len(training_data)
     datas=[]
     labels=[]
-    i=0
+    one_num=0
     for c, data in enumerate(training_data):
         v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
 
@@ -143,8 +143,8 @@ def pre_data(addone):
             for annotations in data["data"]:
                 segment = annotations['segment']
                 for _l, _data in add_one_data_to_list(segment, label, v_data):
-                    data_1[i]= _data
-                    i += 1
+                    data_1[one_num]= _data
+                    one_num += 1
 
         for _l, _data in add_zero_data_to_list(label, v_data):
             data_0.append(_data)
