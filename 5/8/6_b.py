@@ -165,11 +165,29 @@ def addto_cache(key, _data):
 
 def get_image_and_label(v_data,data):
     w = v_data.shape[0]
+
     label = [0 for _ in range(w)]
+    for annotations in data["data"]:
+        segment = annotations['segment']
+        for i in range(int(segment[0]),min(w,int(segment[1]+1))):
+            label[i] = 1
+
+    zerolist=[]
+    for i in range(w-block_size):
+        if sum(label[i,i+block_size]) in (block_size,0) and i%2==0:
+            zerolist.append(v_data[i:i+batch_size])
+
     for annotations in data["data"]:
         segment = annotations['segment']
         _s = int(round(segment[0]))
         _e = int(round(segment[1]))
+        onelist=[]
+        twolist=[]
+        for i in range(block_size//2):
+            yield random.choice(zerolist), 0
+            yield v_data[max(0,_s-block_size)], 1
+
+
         for i in range(max(0,_s-2*block_size), min(_e-block_size,w-block_size,_s+2*block_size+1)):
             if _s -i > block_size/4 and _s -i < block_size*3/4 :
                 yield v_data[i:i+block_size], 1
