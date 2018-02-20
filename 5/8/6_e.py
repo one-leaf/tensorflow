@@ -114,18 +114,18 @@ def add_one_data_to_list(segment, label, v_data):
     w = v_data.shape[0]
     def filter(i):
         if i>=0 and i+block_size<=w: 
-            return v_data[i:i+block_size]
-        return None
+            return [v_data[i:i+block_size],]
+        return []
 
     start = int(round(segment[0]))
     end = int(round(segment[1]))
     
     for i in range(start-3*block_size//4, start+block_size//4):
         _data = filter(i)
-        if _data != None: yield 1, _data
+        if len(_data) >0 : yield 1, _data[0]
     for i in range(end-3*block_size//4, end+block_size//4):
         _data = filter(i)
-        if _data != None: yield 2, _data
+        if len(_data) >0 : yield 2, _data[0]
             
 def pre_data():
     size = len(training_data)
