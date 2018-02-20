@@ -170,8 +170,8 @@ def reader_get_image_and_label(addone):
                 if len(data_1)> one_buf_size:
                     one_last_remove_index, _data = data_1.popitem()
                 else:
-                    _data = None
-                    while _data == None:
+                    _data = []
+                    while len(_data) == 0:
                         try:
                             _data = data_1[one_curr_index]                            
                         except:
@@ -219,6 +219,7 @@ def clearData():
     inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
     _data=[]
     _keys=[]
+    del_num=0
     for x in data_1:
         _data.append(data_1[x])
         _keys.append(x)
@@ -227,8 +228,8 @@ def clearData():
             v = probs[:,1]
             for i,v in enumerate(v):
                 if v<0.1:
-                    data_1[_keys[i]] = None
-                    print("del", _keys[i])
+                    data_1[_keys[i]] = []
+                    del_num+=1
             _data=[]
             _keys=[]
     if len(_data)>0:
@@ -236,9 +237,9 @@ def clearData():
         v = probs[:,1]
         for i,v in enumerate(v):
             if v<0.1:
-                data_1[_keys[i]] = None
-                print("del", _keys[i])
-
+                data_1[_keys[i]] = []
+                del_num+=1
+    print("size:",len(data_1),"del:",del_num)
 
 if __name__ == '__main__':
     print("paddle init ...")
