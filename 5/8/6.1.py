@@ -69,7 +69,7 @@ def test():
             _data=[]
             for i in range(w-model.block_size):
                 _data.append(v_data[i:i+model.block_size])
-                if i%model.train_size==0:            
+                if i>0 and i%model.train_size==0:            
                     print "正确目标：",label[i:i+model.train_size]
                     probs = inferer.infer(input=[(_data,)])
                     print probs
