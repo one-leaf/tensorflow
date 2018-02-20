@@ -172,8 +172,8 @@ def reader_get_image_and_label(addone):
                 if len(data_1)> one_buf_size:
                     one_last_remove_index, _data = data_1.popitem()
                 else:
-                    _data = None
-                    while _data == None:
+                    _data = []
+                    while len(_data) == 0:
                         try:
                             _data = data_1[one_curr_index]                            
                         except:
