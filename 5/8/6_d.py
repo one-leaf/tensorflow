@@ -224,6 +224,7 @@ def train():
             probs = inferer.infer(input=[(_data,)])
             v = probs[:,1]
             for i,v in enumerate(v):
+                print(i,v)
                 if v<0.1:
                     del _data[_keys[i]]
                     print("del",i,v)
