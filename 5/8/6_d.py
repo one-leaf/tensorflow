@@ -122,10 +122,10 @@ def add_one_data_to_list(segment, label, v_data):
     start = int(round(segment[0]))
     end = int(round(segment[1]))
     
-    for i in range(start, start+block_size//2):
+    for i in range(start-1, start+block_size//2):
         _data = filter(i)
         if _data != None: yield _data
-    for i in range(end-3*block_size//2, end-block_size):
+    for i in range(end-3*block_size//2, end-block_size+1):
         _data = filter(i)
         if _data != None: yield _data
             
