@@ -158,7 +158,7 @@ def reader_get_image_and_label(addone):
     def reader():
         datas=[]
         labels=[]    
-        t1 = threading.Thread(target=pre_data, args=(addone))
+        t1 = threading.Thread(target=pre_data, args=(addone,))
         t1.start()
         time.sleep(10)
         one_curr_index=0
