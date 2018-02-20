@@ -215,7 +215,7 @@ def train(addone):
     cls_parameters.to_tar(open(cls_param_file, 'wb'))     
     print("paid:", time.time() - status["starttime"])
 
-def clearData():
+def clearData(minvalue):
     inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
     _data=[]
     _keys=[]
@@ -228,7 +228,7 @@ def clearData():
             probs = inferer.infer(input=[(_data,)])
             v = probs[:,1]
             for i,v in enumerate(v):
-                if v<0.1:
+                if v<minvalue:
                     data_1[_keys[i]] = []
                     del_num+=1
             _data=[]
@@ -251,10 +251,10 @@ if __name__ == '__main__':
     if os.path.exists(cls_param_file):
         cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
     train(True)
-    clearData()
+    clearData(0.1)
     train(False)
-    clearData()
+    clearData(0.2)
     train(False)
-    clearData()
+    clearData(0.3)
     train(False)
     train(False)            
