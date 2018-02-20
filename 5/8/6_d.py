@@ -163,7 +163,7 @@ def reader_get_image_and_label():
         labels=[]    
         t1 = threading.Thread(target=pre_data, args=())
         t1.start()
-        time.sleep(5)
+        time.sleep(10)
         while (len(data_1[0])>1000 and len(data_0[0])>1000) or t1.isAlive(): 
             if t1.isAlive() and (len(data_1[0])<1000 or len(data_0[0])<1000):
                 time.sleep(0.1)
@@ -175,7 +175,7 @@ def reader_get_image_and_label():
                 _data = data_0                
 
             _i = random.randint(0,9)
-            if len(_data[_i])>buf_size:
+            if len(_data[_i])>buf_size or not t1.isAlive() :
                 datas.append(_data[_i].pop(0))
             else:
                 datas.append(random.choice(_data[_i]))
