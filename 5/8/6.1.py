@@ -14,11 +14,11 @@ import gc
 import commands, re  
 import zipfile
 
-model = __import__('6')
+model = __import__('6_d')
 home = os.path.dirname(__file__)
 data_path = model.data_path
 model_path = model.model_path
-param_file = model.param_file
+cls_param_file = model.cls_param_file
 result_json_file = os.path.join(model_path,"ai.json.zip")
 out_dir = os.path.join(model_path, "out")
 
@@ -36,23 +36,23 @@ print("paddle init ...")
 # paddle.init(use_gpu=False, trainer_count=2) 
 paddle.init(use_gpu=True, trainer_count=1)
 print("get network ...")
-cost, paddle_parameters, adam_optimizer, net_class_fc, net_class_box_fc, net_box_fc = model.network(drop=False)
+cost, adam_optimizer, net_class_fc  = model.network(drop=False)
 
 # 预测时需要读取模型
-(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(param_file)
+(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
 print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
 print("loading parameters ...")
-paddle_parameters = paddle.parameters.Parameters.from_tar(open(param_file,"rb"))
+paddle_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
     
 def test():
     items = []
-    inferer = paddle.inference.Inference(output_layer=[net_class_fc,net_class_box_fc,net_box_fc], parameters=paddle_parameters)
+    inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=paddle_parameters)
 
-    # for i, data_info in enumerate(model.training_data):    
-    for i, data_info in enumerate(model.validation_data):    
+    for i, data_info in enumerate(model.training_data):    
+    # for i, data_info in enumerate(model.validation_data):    
         data_id = data_info["id"]
-        # v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%data_id))
-        v_data = np.load(os.path.join(data_path, "validation", "%s.pkl"%data_id))
+        v_data = np.load(os.path.join(data_path, "training", "%s.pkl"%data_id))
+        # v_data = np.load(os.path.join(data_path, "validation", "%s.pkl"%data_id))
 
         # 得到直观分布图
         w = v_data.shape[0]
@@ -62,6 +62,7 @@ def test():
             segment = annotations['segment']
             for i in range(int(segment[0]),int(segment[1]+1)):
                 label[i] += 1
+
         # print label
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):

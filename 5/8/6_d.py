@@ -82,8 +82,6 @@ def normal_network(x,drop):
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.5)            
     net = cnn(net,  3, 64, 64, 2, 1)
-    if drop:
-        net = paddle.layer.dropout(input=net, dropout_rate=0.5)  
     net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
     return net
 
@@ -184,7 +182,8 @@ def event_handler(event):
                 time.time() - status["starttime"], time.time() - status["steptime"], event.pass_id, 
                 event.batch_id, event.cost, event.metrics) 
             status["steptime"]=time.time()
-            cls_parameters.to_tar(open(cls_param_file, 'wb'))
+            if event.cost<10:
+                cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 def train():
     print('set reader ...')
