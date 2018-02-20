@@ -56,7 +56,7 @@ def test():
 
         # 得到直观分布图
         w = v_data.shape[0]
-        print "读取数据:", v_data.shape
+        print "读取数据:", data_id, v_data.shape
         label = np.zeros([w], dtype=np.int)
         for annotations in data_info["data"]:
             segment = annotations['segment']
@@ -72,11 +72,11 @@ def test():
                 if len(_data) == model.train_size:
                     print "正确目标：",label[i:i+model.train_size]                    
                     probs = inferer.infer(input=[(_data,)])
-                    print probs[:,0]
+                    print probs[:,1]
 
                     # 预测当前方块是否是精华或非精华                    
                     sort = np.argsort(-probs)
-                    value_probs = sort[:,1]
+                    value_probs = sort[:,0]
                     print  "判断分类",value_probs
                     _data=[]
                     if raw_input("==========================================================================="): pass
