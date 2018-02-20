@@ -218,8 +218,7 @@ def event_handler(event):
                 time.time() - status["starttime"], time.time() - status["steptime"], status["progress"],
                 event.pass_id, event.batch_id, event.cost, event.metrics) 
             status["steptime"]=time.time()
-            if event.cost<10:
-                cls_parameters.to_tar(open(cls_param_file, 'wb'))
+            cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 def train():
     print('set reader ...')
