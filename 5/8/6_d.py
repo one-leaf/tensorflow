@@ -103,6 +103,36 @@ def network(drop=True):
 data_1 = {i:[] for i in range(10)}
 data_0 = {i:[] for i in range(10)}
 
+data_1 = {i:[] for i in range(10)}
+data_0 = {i:[] for i in range(10)}
+    
+def add_data_to_list(segment, label, v_data):
+    w = v_data.shape[0]
+    def filter(i):
+        if i>=0 and i+block_size<=w: 
+            _sum = sum(label[i:i+block_size])                
+            if _sum == block_size:
+                return 1, v_data[i:i+block_size]
+            elif _sum == 0:
+                return 0, v_data[i:i+block_size]
+        return None
+    start = int(round(segment[0]))
+    end = int(round(segment[1]))
+    
+    for i in range(0, start-block_size, 2):
+        _data = filter(i)
+        if _data != None: yield _data
+    for i in range(start, start+block_size//2+1, 2):
+        _data = filter(i)
+        if _data != None: yield _data
+    for i in range(end-3*block_size//2-1, end-block_size, 2):
+        _data = filter(i)
+        if _data != None: yield _data
+    for i in range(end, w, 2):
+        _data = filter(i)
+        if _data != None: yield _data
+
+            
 def pre_data():
     size = len(training_data)
     datas=[]
@@ -121,27 +151,14 @@ def pre_data():
 
         for annotations in data["data"]:
             segment = annotations['segment']
-            _start = int(round(segment[0]))
-            _end = int(round(segment[1]))
-            for i in range(max(0,_start-2*block_size),min(w,_start+block_size//2+1),2):
-                if i+block_size > w: continue
-                _sum = sum(label[i:i+block_size])                
-                if _sum == block_size:
-                    data_1[k%10].append(v_data[i:i+block_size])
+            for _l, _data in add_data_to_list(segment, label, v_data):
+                if _l == 1:                   
+                    data_1[k%10].append(_data)
                     k += 1
-                elif _sum == 0:
-                    data_0[j%10].append(v_data[i:i+block_size])
+                else:
+                    data_0[j%10].append(_data)
                     j += 1
-            for i in range(max(0,_end-block_size//2*3),min(w,_end+block_size+1),2):
-                if i+block_size > w: continue
-                _sum = sum(label[i:i+block_size])
-                if _sum == block_size:
-                    data_1[k%10].append(v_data[i:i+block_size])
-                    k += 1
-                elif _sum == 0:
-                    data_0[j%10].append(v_data[i:i+block_size])
-                    j += 1
-#         print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_0)))
+
 
 def reader_get_image_and_label():
     def reader():
