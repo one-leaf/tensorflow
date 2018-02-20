@@ -155,7 +155,7 @@ def pre_data(addone):
 
 
 def reader_get_image_and_label(addone):
-    def reader(addone):
+    def reader():
         datas=[]
         labels=[]    
         t1 = threading.Thread(target=pre_data, args=(addone))
