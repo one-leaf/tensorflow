@@ -202,4 +202,6 @@ if __name__ == '__main__':
     print("get network ...")
     cost, adam_optimizer, net_class_fc = network(True)
     cls_parameters = paddle.parameters.create(cost)
+    if os.path.exists(cls_param_file):
+        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
     train()
