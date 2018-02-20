@@ -22,7 +22,7 @@ data_path = os.path.join(home,"data")
 
 class_dim = 3 # 分类 0，背景，1，开始 2，结束
 train_size = 64 # 学习的关键帧长度
-block_size = 32
+block_size = 16
 
 buf_size = 5000
 batch_size = 2048//(train_size*block_size)
