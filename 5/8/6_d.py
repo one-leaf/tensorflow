@@ -222,8 +222,10 @@ def train():
         _keys.append(x)
         if len(_data) == train_size*2:
             probs = inferer.infer(input=[(_data,)])
-            sort = np.argsort(probs[:,1])
-            print(probs[:,1])
+            v = probs[:,1]
+            print(v)
+            print(v[<0.1])
+            sort = np.argsort(v[<0.1])
             print(sort)
             _data=[]
             _keys=[]
