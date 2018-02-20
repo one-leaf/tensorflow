@@ -14,7 +14,7 @@ import gc
 import commands, re  
 import zipfile
 
-model = __import__('6_d')
+model = __import__('6')
 home = os.path.dirname(__file__)
 data_path = model.data_path
 model_path = model.model_path
