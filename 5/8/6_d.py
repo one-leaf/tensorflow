@@ -170,15 +170,17 @@ def reader_get_image_and_label():
         while (len(data_1[0])>1000 and len(data_0[0])>1000) or t1.isAlive(): 
             if t1.isAlive() and (len(data_1[0])<1000 or len(data_0[0])<1000):
                 time.sleep(0.1)
+            must_pop = False
             if random.random() > 0.5:
                 labels.append(1)
                 _data = data_1 
             else:
                 labels.append(0)
-                _data = data_0                
+                _data = data_0
+                if not t1.isAlive(): must_pop = True
 
             _i = random.randint(0,9)
-            if len(_data[_i])>buf_size or not t1.isAlive() :
+            if len(_data[_i])>buf_size or must_pop:
                 datas.append(_data[_i].pop(0))
             else:
                 datas.append(random.choice(_data[_i]))
@@ -188,6 +190,7 @@ def reader_get_image_and_label():
                 datas=[]
                 labels=[]
     return reader
+
 
 status ={}
 status["starttime"]=time.time()
