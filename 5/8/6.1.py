@@ -41,7 +41,7 @@ cost, adam_optimizer, net_class_fc  = model.network(drop=False)
 # 预测时需要读取模型
 (mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(cls_param_file)
 print("find param file, modify time: %s file size: %s" % (time.ctime(mtime), size))
-print("loading parameters ...")
+print("loading parameters ...", cls_param_file)
 paddle_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
     
 def test():
@@ -80,7 +80,7 @@ def test():
                     value_probs = sort[:,0]
                     print  "判断分类",value_probs
                     _data=[]
-                if raw_input("==========================================================================="): pass
+                    if raw_input("==========================================================================="): pass
             #     all_values.append(probs)
             #     sys.stdout.write(".")
             #     sys.stdout.flush()           
