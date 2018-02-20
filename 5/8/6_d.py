@@ -105,33 +105,29 @@ data_0 = {i:[] for i in range(10)}
 
 data_1 = {i:[] for i in range(10)}
 data_0 = {i:[] for i in range(10)}
-    
-def add_data_to_list(segment, label, v_data):
+
+def add_zero_data_to_list(label, v_data):
+    w = v_data.shape[0]
+    for i in range(0, w-block_size, 2):
+        if max(label[i:i+block_size]) == 0:
+            yield 0, v_data[i:i+block_size]
+
+def add_one_data_to_list(segment, label, v_data):
     w = v_data.shape[0]
     def filter(i):
         if i>=0 and i+block_size<=w: 
-            _sum = sum(label[i:i+block_size])                
-            if _sum == block_size:
+            if min(label[i:i+block_size]) == 1:
                 return 1, v_data[i:i+block_size]
-            elif _sum == 0:
-                return 0, v_data[i:i+block_size]
         return None
     start = int(round(segment[0]))
     end = int(round(segment[1]))
     
-    for i in range(0, start-block_size, 2):
+    for i in range(start, start+block_size//2, 2):
         _data = filter(i)
         if _data != None: yield _data
-    for i in range(start, start+block_size//2+1, 2):
+    for i in range(end-3*block_size//2, end-block_size, 2):
         _data = filter(i)
         if _data != None: yield _data
-    for i in range(end-3*block_size//2-1, end-block_size, 2):
-        _data = filter(i)
-        if _data != None: yield _data
-    for i in range(end, w, 2):
-        _data = filter(i)
-        if _data != None: yield _data
-
             
 def pre_data():
     size = len(training_data)
@@ -151,13 +147,14 @@ def pre_data():
 
         for annotations in data["data"]:
             segment = annotations['segment']
-            for _l, _data in add_data_to_list(segment, label, v_data):
-                if _l == 1:                   
-                    data_1[k%10].append(_data)
-                    k += 1
-                else:
-                    data_0[j%10].append(_data)
-                    j += 1
+            for _l, _data in add_one_data_to_list(segment, label, v_data):
+                data_1[k%10].append(_data)
+                k += 1
+
+        for _l, _data in add_zero_data_to_list(segment, label, v_data):
+            data_0[j%10].append(_data)
+            j += 1
+
 
 
 def reader_get_image_and_label():
