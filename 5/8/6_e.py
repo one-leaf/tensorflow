@@ -156,7 +156,7 @@ def pre_data():
             j += 1
 
         status["progress"]="%s/%s"%(c,size)
-        print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_2),len(data_0[0])))
+        print("readed %s/%s %s.pkl, size: %s/%s/%s"%(c,size,data["id"],len(data_2),len(data_1),len(data_0[0])))
 
 
 
