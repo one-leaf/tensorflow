@@ -66,43 +66,18 @@ def test():
         # print label
         save_file = os.path.join(out_dir,data_id)
         if not os.path.exists(save_file):
-            for i, _data in model.read_data(v_data):
-                print "正确目标：",label[i-model.train_size:i]
+            _data=[]
+            for i in range(w-model.block_size):
+                _data.append(v_data[i:i+model.block_size])
+                if i%model.train_size==0:            
+                    print "正确目标：",label[i:i+model.train_size]
+                    probs = inferer.infer(input=[(_data,)])
 
-                probs = inferer.infer(input=[(_data,)])
-
-                # 预测当前方块是否是精华或非精华
-                probs_class = probs[0: model.train_size]
-                sort = np.argsort(-probs_class)
-                value_probs = sort[:,0]
-                print  "判断分类",value_probs
-
-                # print(probs_class)
-                probs_box_class = probs[model.train_size: model.train_size*2]
-                has_class = probs_box_class[:,1]
-                sort = np.argsort(-has_class)
-                print "前五最高：",sort[0:5]
-                print "概率如下：",has_class[sort[0:5]]
-                probs_net = probs[model.train_size*2:]
-                print i-model.train_size, i
-                for s in sort[0:1]:
-                    if has_class[s]<0.5: break
-                    src = model.get_box_point(s)
-                    print s, has_class[s], probs_net[s]
-                    print "分类坐标：", src
-                    print "偏移量：", probs_net[s]*model.train_size
-                    fix_src= [max(src[0]+probs_net[s][0]*model.train_size,0),min(src[1]+probs_net[s][1]*model.train_size,model.train_size-1)]
-                    print "预测坐标：", fix_src
-                    label2 = np.zeros([model.train_size], dtype=np.int)        
-                    for x in range(int(fix_src[0]),int(fix_src[1]+1)):
-                        label2[x] = 1
-                    label2[int(s)]=8
-                    if src[0]>=0:
-                        label2[int(src[0])]=7
-                    if src[1]<model.train_size:
-                        label2[int(src[1])]=9
-                    print "预测目标：", label2[0:model.train_size] 
-
+                    # 预测当前方块是否是精华或非精华
+                    sort = np.argsort(-probs)
+                    value_probs = sort[:,0]
+                    print  "判断分类",value_probs
+                    _data=[]
                 if raw_input("==========================================================================="): pass
             #     all_values.append(probs)
             #     sys.stdout.write(".")
