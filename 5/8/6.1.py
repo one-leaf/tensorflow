@@ -72,9 +72,11 @@ def test():
                 if i%model.train_size==0:            
                     print "正确目标：",label[i:i+model.train_size]
                     probs = inferer.infer(input=[(_data,)])
+                    print probs
 
-                    # 预测当前方块是否是精华或非精华
+                    # 预测当前方块是否是精华或非精华                    
                     sort = np.argsort(-probs)
+                    print sort
                     value_probs = sort[:,0]
                     print  "判断分类",value_probs
                     _data=[]
