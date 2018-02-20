@@ -24,7 +24,9 @@ class_dim = 2 # 分类 0，背景， 1，精彩
 train_size = 64 # 学习的关键帧长度
 block_size = 8
 
-buf_size = 5000
+zero_buf_size = 5000
+one_buf_size = 400000
+
 batch_size = 2048//(train_size*block_size)
 
 model_path = os.path.join(home,"model")
@@ -100,41 +102,33 @@ def network(drop=True):
     adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost_class, adam_optimizer, net_class_fc
 
-data_1 = {i:[] for i in range(10)}
-data_0 = {i:[] for i in range(10)}
-
-data_1 = {i:[] for i in range(10)}
-data_0 = {i:[] for i in range(10)}
+data_1 = {}
+data_0 = []
 
 def add_zero_data_to_list(label, v_data):
     w = v_data.shape[0]
     for i in range(0, w-block_size, 2):
         if max(label[i:i+block_size]) == 0:
-            yield 0, v_data[i:i+block_size]
+            yield i, v_data[i:i+block_size]
 
 def add_one_data_to_list(segment, label, v_data):
     w = v_data.shape[0]
     def filter(i):
         if i>=0 and i+block_size<=w: 
             if sum(label[i:i+block_size]) >= block_size*0.8:
-                return 1, v_data[i:i+block_size]
+                return i, v_data[i:i+block_size]
         return None
     start = int(round(segment[0]))
-    end = int(round(segment[1]))
-    
-    for i in range(start-1, start+8):
-        _data = filter(i)
-        if _data != None: yield _data
-    for i in range(end-block_size-8, end-block_size+1):
+    end = int(round(segment[1]))    
+    for i in range(start-1, end-block_size+1):
         _data = filter(i)
         if _data != None: yield _data
             
-def pre_data():
+def pre_data(addone):
     size = len(training_data)
     datas=[]
     labels=[]
-    k=0
-    j=0
+    i=0
     for c, data in enumerate(training_data):
         v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
 
@@ -145,53 +139,57 @@ def pre_data():
             for i in range(int(segment[0]),min(w,int(segment[1]+1))):
                 label[i] = 1
 
-        for annotations in data["data"]:
-            segment = annotations['segment']
-            for _l, _data in add_one_data_to_list(segment, label, v_data):
-                data_1[k%10].append(_data)
-                k += 1
+        if addone:
+            for annotations in data["data"]:
+                segment = annotations['segment']
+                for _l, _data in add_one_data_to_list(segment, label, v_data):
+                    data_1[i]= _data
+                    i += 1
 
         for _l, _data in add_zero_data_to_list(label, v_data):
-            data_0[j%10].append(_data)
-            j += 1
+            data_0.append(_data)
 
         status["progress"]="%s/%s"%(c,size)
         # print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1[0]),len(data_0[0])))
 
 
 
-def reader_get_image_and_label():
-    def reader():
+def reader_get_image_and_label(addone):
+    def reader(addone):
         datas=[]
         labels=[]    
-        t1 = threading.Thread(target=pre_data, args=())
+        t1 = threading.Thread(target=pre_data, args=(addone))
         t1.start()
         time.sleep(10)
-        while (len(data_1[0])>1000 and len(data_0[0])>1000) or t1.isAlive(): 
+        one_curr_index=0
+        one_last_remove_index=0
+        while (len(data_0)>1000) or t1.isAlive(): 
             if t1.isAlive() and (len(data_1[0])<1000 or len(data_0[0])<1000):
                 time.sleep(0.1)
             must_pop = False
-            if random.random() > 0.5:
+            if random.random() > 0.5:                
                 labels.append(1)
-                _data = data_1 
+                if len(data_1)> one_buf_size:
+                    one_last_remove_index, _data = data_1.popitem()
+                else:
+                    try:
+                        _data = data_1[one_curr_index]
+                    except:
+                        one_curr_index = one_last_remove_index+1
+                        _data = data_1[one_curr_index]
+                    one_curr_index += 1
             else:
                 labels.append(0)
-                _data = data_0
-                if not t1.isAlive(): must_pop = True
-
-            _i = random.randint(0,9)
-            _size = len(_data[_i]) 
-            if _size >500 and (_size > buf_size or must_pop):
-                datas.append(_data[_i].pop(0))
-            else:
-                datas.append(random.choice(_data[_i]))
-                
+                if len(data_0)> zero_buf_size or not t1.isAlive():
+                    _data = data_0.pop()
+                else:
+                    _data = random.choice(data_0)
+            datas.append(_data)                
             if len(datas) == train_size:
                 yield datas, labels
                 datas=[]
                 labels=[]
     return reader
-
 
 status ={}
 status["starttime"]=time.time()
@@ -209,13 +207,28 @@ def event_handler(event):
 
 def train():
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=50)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
+    cls_parameters.to_tar(open(cls_param_file, 'wb'))
+
+    inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
+    _data=[]
+    _keys=[]
+    for x in data_1:
+        _data.append(data_1[x])
+        _keys.append(x)
+        if len(_data) == train_size*2:
+            probs = inferer.infer(input=[(_data,)])
+            sort = np.argsort(probs[:,1])
+            print(sort)
+            _data=[]
+            _keys=[]
+
+
     print("paid:", time.time() - status["starttime"])
-#     cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
 
 if __name__ == '__main__':
