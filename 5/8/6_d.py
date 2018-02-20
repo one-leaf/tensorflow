@@ -107,7 +107,7 @@ data_0 = []
 
 def add_zero_data_to_list(label, v_data):
     w = v_data.shape[0]
-    for i in range(0, w-block_size, 2):
+    for i in range(0, w-block_size, 4):
         if max(label[i:i+block_size]) == 0:
             yield i, v_data[i:i+block_size]
 
