@@ -152,8 +152,6 @@ def pre_data(addone):
         status["progress"]="%s/%s"%(c,size)
         # print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1[0]),len(data_0[0])))
 
-
-
 def reader_get_image_and_label(addone):
     def reader():
         datas=[]
@@ -207,15 +205,17 @@ def event_handler(event):
             if event.cost<10:
                 cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
-def train():
+def train(addone):
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=batch_size)
+    train_reader = paddle.batch(reader_get_image_and_label(addone), batch_size=batch_size)
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
     trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=1)
-    cls_parameters.to_tar(open(cls_param_file, 'wb'))
+    cls_parameters.to_tar(open(cls_param_file, 'wb'))     
+    print("paid:", time.time() - status["starttime"])
 
+def clearData():
     inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
     _data=[]
     _keys=[]
@@ -226,15 +226,18 @@ def train():
             probs = inferer.infer(input=[(_data,)])
             v = probs[:,1]
             for i,v in enumerate(v):
-                print(i,v,_keys[i])
                 if v<0.1:
-                    _data[_keys[i]] = None
-                    print("del",i,v)
+                    data_1[_keys[i]] = None
+                    print("del", _keys[i])
             _data=[]
             _keys=[]
-
-
-    print("paid:", time.time() - status["starttime"])
+    if len(_data)>0:
+        probs = inferer.infer(input=[(_data,)])
+        v = probs[:,1]
+        for i,v in enumerate(v):
+            if v<0.1:
+                data_1[_keys[i]] = None
+                print("del", _keys[i])
 
 
 if __name__ == '__main__':
@@ -245,4 +248,10 @@ if __name__ == '__main__':
     cls_parameters = paddle.parameters.create(cost)
     if os.path.exists(cls_param_file):
         cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
-    train()
+    train(True)
+    clearData()
+    train(False)
+    train(False)
+    train(False)
+    train(False)            
+    train(False)    
