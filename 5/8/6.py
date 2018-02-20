@@ -22,9 +22,9 @@ data_path = os.path.join(home,"data")
 # param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
-class_dim = 3 # 分类 0，背景， 1，精彩， 2无效区
+class_dim = 2 # 分类 0，背景， 1，精彩， 2无效区
 train_size = 64 # 学习的关键帧长度
-block_size = 16
+block_size = 4
 
 buf_size = 5000
 batch_size = 2048//(train_size*block_size)
@@ -164,9 +164,9 @@ def pre_data():
             data_0[j%10].append(_data)
             j += 1
 
-        for _l, _data in add_two_data_to_list(label, v_data):
-            data_2[l%10].append(_data)
-            l += 1
+        # for _l, _data in add_two_data_to_list(label, v_data):
+        #     data_2[l%10].append(_data)
+        #     l += 1
 
         status["progress"]="%s/%s"%(c,size)
 
@@ -183,12 +183,12 @@ def reader_get_image_and_label():
             if t1.isAlive() and (len(data_1[0])<1000 or len(data_0[0])<1000):
                 time.sleep(0.1)
             must_pop = False
-            if random.random() < 0.3:
+            if random.random() < 0.5:
                 labels.append(1)
                 _data = data_1 
-            elif random.random() > 0.6:
-                labels.append(2)
-                _data = data_2 
+            # elif random.random() > 0.6:
+            #     labels.append(2)
+            #     _data = data_2 
             else:
                 labels.append(0)
                 _data = data_0
