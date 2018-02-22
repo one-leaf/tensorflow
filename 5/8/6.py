@@ -254,6 +254,7 @@ def infer():
 
         infers[data["id"]]=values
         print("infered %s"%filename)
+    print(infers)
     json.dump(infers,open(save_file,"w"))
 
 if __name__ == '__main__':
