@@ -226,10 +226,35 @@ def train():
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
-    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=7)
+    trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding_class, num_passes=5)
     print("paid:", time.time() - status["starttime"])
 #     cls_parameters.to_tar(open(cls_param_file, 'wb'))
 
+def infer():
+    inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
+    save_file = os.path.join(out_dir,"infer.json")
+    infers={}
+    for data in training_data:
+        filename = "%s.pkl"%data["id"]
+        v_data = np.load(os.path.join(training_path, filename))
+        w = v_data.shape[0]
+        values = []
+        datas=[]
+        for i in range(w-block_size):
+            datas.append（v_data[i:i+block_size])
+            if len(datas)==train_size*batch_size:
+                probs = inferer.infer(input=[(datas,)])
+                for p in probs:
+                    values.append(p[1])
+                datas=[]
+        if len(datas)>0:
+            probs = inferer.infer(input=[(datas,)])
+            for p in probs:
+                values.append(p[1])
+
+        infers[data["id"]]=values
+        print("infered %s"%filename, values)
+    json.dump(open(save_file,"wb"),infers)
 
 if __name__ == '__main__':
     print("paddle init ...")
@@ -238,3 +263,4 @@ if __name__ == '__main__':
     cost, adam_optimizer, net_class_fc = network(True)
     cls_parameters = paddle.parameters.create(cost)
     train()
+    infer()
