@@ -10,7 +10,7 @@ import sys
 import time
 import shutil 
 import logging
-import gc
+import pickle
 import commands, re  
 import threading
 
@@ -85,108 +85,20 @@ def network(drop=True):
     adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost_class, adam_optimizer, net_class_fc
 
-data_x = {}
-data_a = {}
-    
-def add_zero_data_to_list(label, v_data):
-    w = v_data.shape[0]
-    for i in range(0, w-block_size, 2):
-        if sum(label[i:i+block_size]) < block_size*0.1:
-            yield 0, v_data[i:i+block_size]
-
-def add_two_data_to_list(label, v_data):
-    w = v_data.shape[0]
-    for i in range(0, w-block_size, 2):
-        _sum = sum(label[i:i+block_size])
-        if _sum >= block_size*0.3 and _sum <= block_size*0.7:
-            yield 0, v_data[i:i+block_size]
-
-def add_one_data_to_list(segment, label, v_data):
-    w = v_data.shape[0]
-    def filter(i):
-        if i>=0 and i+block_size<=w: 
-            if sum(label[i:i+block_size]) > block_size*0.9:
-                return 1, v_data[i:i+block_size]
-        return None
-    start = int(round(segment[0]))
-    end = int(round(segment[1]))
-
-    # 重点按分割点左右的数据进行学习，其余按 0.25 的概率采集    
-    for i in range(start-1, end-block_size+2):
-        if i>start+block_size//2 and i<end-3*block_size//2 and random.random>0.25:
-            continue
-        _data = filter(i)
-        if _data != None: yield _data
-
-
-def pre_data():
-    size = len(training_data)
-    datas=[]
-    labels=[]
-    k=0
-    j=0
-    l=0
-    for c, data in enumerate(training_data):
-        v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
-
-        w = v_data.shape[0]
-        label = [0 for _ in range(w)]
-        for annotations in data["data"]:
-            segment = annotations['segment']
-            for i in range(int(segment[0]),min(w,int(segment[1]+1))):
-                label[i] = 1
-
-        for annotations in data["data"]:
-            segment = annotations['segment']
-            for _l, _data in add_one_data_to_list(segment, label, v_data):
-                data_1[k%10].append(_data)
-                k += 1
-
-        for _l, _data in add_zero_data_to_list(label, v_data):
-            data_0[j%10].append(_data)
-            j += 1
-
-        # for _l, _data in add_two_data_to_list(label, v_data):
-        #     data_2[l%10].append(_data)
-        #     l += 1
-
-        status["progress"]="%s/%s"%(c,size)
-
-#         print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_0)))
-
 def reader_get_image_and_label():
     def reader():
-        datas=[]
-        labels=[]    
-        t1 = threading.Thread(target=pre_data, args=())
-        t1.start()
-        time.sleep(10)
-        while (len(data_1[0])>1000 and len(data_0[0])>1000) or t1.isAlive(): 
-            if t1.isAlive() and (len(data_1[0])<1000 or len(data_0[0])<1000):
-                time.sleep(0.1)
-            must_pop = False
-            if random.random() < 0.5:
-                labels.append(1)
-                _data = data_1 
-            # elif random.random() > 0.6:
-            #     labels.append(2)
-            #     _data = data_2 
-            else:
-                labels.append(0)
-                _data = data_0
-                if not t1.isAlive(): must_pop = True
+        save_file = os.path.join(out_dir,"infer.pkl")
+        infers = pickle.load(open(save_file,"r"))        
+        for data in training_data:               
+            _x =  infers[data["id"]]
+            w= len(_x)
+            label = [0 for _ in range(w)]
 
-            _i = random.randint(0,9)
-            _size = len(_data[_i]) 
-            if _size >500 and (_size > buf_size or must_pop):
-                datas.append(_data[_i].pop(0))
-            else:
-                datas.append(random.choice(_data[_i]))
-                
-            if len(datas) == train_size:
-                yield datas, labels
-                datas=[]
-                labels=[]
+            for annotations in data["data"]:
+                segment = annotations['segment']
+                for i in range(int(segment[0]),min(w,int(segment[1]+1))):
+                    label[i] = 1
+            yield [_x, label]
     return reader
 
 status ={}
@@ -204,7 +116,7 @@ def event_handler(event):
 
 def train():
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=1)
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
