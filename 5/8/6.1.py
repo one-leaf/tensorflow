@@ -92,6 +92,8 @@ def reader_get_image_and_label():
         for data in training_data:               
             _x =  infers[data["id"]]
             w= len(_x)
+            _x = np.array(_x)
+            _x = np.reshape(_x,(w,1))
             label = [0 for _ in range(w)]
 
             for annotations in data["data"]:
