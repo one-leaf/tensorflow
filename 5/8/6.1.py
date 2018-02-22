@@ -102,7 +102,7 @@ def reader_get_image_and_label():
                     label[i] = 1
             
             for i in range(w-block_size):
-                if random.random()>0.75: 
+                if random.random()>0.9: 
                     yield [_x[i:i+block_size], label[i:i+block_size]]
     return reader
 
@@ -121,7 +121,7 @@ def event_handler(event):
 
 def train():
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=8)
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=16)
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
