@@ -82,7 +82,7 @@ def network(drop=True):
 
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-4)
     return cost_class, adam_optimizer, net_class_fc
 
 def reader_get_image_and_label():
@@ -121,7 +121,7 @@ def event_handler(event):
 
 def train():
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=16)
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=32)
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
