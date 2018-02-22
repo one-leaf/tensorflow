@@ -24,7 +24,7 @@ data_path = os.path.join(home,"data")
 
 class_dim = 2 # 分类 0，背景， 1，精彩， 2无效区
 train_size = 64 # 学习的关键帧长度
-block_size = 4
+block_size = 1024
 
 buf_size = 5000
 batch_size = 2048//(train_size*block_size)
@@ -100,7 +100,10 @@ def reader_get_image_and_label():
                 segment = annotations['segment']
                 for i in range(int(segment[0]),min(w,int(segment[1]+1))):
                     label[i] = 1
-            yield [_x, label]
+            
+            for i in range(w-block_size):
+                if random.random()>0.75: 
+                    yield [_x[i:i+block_size], label[i:i+block_size]]
     return reader
 
 status ={}
@@ -118,7 +121,7 @@ def event_handler(event):
 
 def train():
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=1)
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=8)
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
