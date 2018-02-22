@@ -253,8 +253,8 @@ def infer():
                 values.append(p[1])
 
         infers[data["id"]]=values
-        print("infered %s"%filename, values)
-    json.dump(open(save_file,"wb"),infers)
+        print("infered %s"%filename)
+    json.dump(infers,open(save_file,"wb"))
 
 if __name__ == '__main__':
     print("paddle init ...")
