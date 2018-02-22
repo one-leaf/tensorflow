@@ -82,7 +82,7 @@ def network(drop=True):
 
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-4)
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
     return cost_class, adam_optimizer, net_class_fc
 
 def reader_get_image_and_label():
