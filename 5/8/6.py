@@ -254,7 +254,7 @@ def infer():
 
         infers[data["id"]]=values
         print("infered %s"%filename)
-    json.dump(infers,open(save_file,"wb"))
+    json.dump(infers,open(save_file,"w"))
 
 if __name__ == '__main__':
     print("paddle init ...")
