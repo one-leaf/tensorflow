@@ -254,7 +254,7 @@ def infer():
 
         infers[data["id"]]=values
         print("infered %s"%filename)
-    print(infers)
+    # print(infers)
     pickle.dump(infers,open(save_file,"w"))
 
 if __name__ == '__main__':
