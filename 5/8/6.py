@@ -241,7 +241,7 @@ def infer():
         values = []
         datas=[]
         for i in range(w-block_size):
-            datas.append（v_data[i:i+block_size])
+            datas.append(v_data[i:i+block_size])
             if len(datas)==train_size*batch_size:
                 probs = inferer.infer(input=[(datas,)])
                 for p in probs:
