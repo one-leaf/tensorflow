@@ -10,7 +10,7 @@ import sys
 import time
 import shutil 
 import logging
-import gc
+import pickle
 import commands, re  
 import threading
 
@@ -232,7 +232,7 @@ def train():
 
 def infer():
     inferer = paddle.inference.Inference(output_layer=net_class_fc, parameters=cls_parameters)
-    save_file = os.path.join(out_dir,"infer.json")
+    save_file = os.path.join(out_dir,"infer.pkl")
     infers={}
     for data in training_data:
         filename = "%s.pkl"%data["id"]
@@ -255,7 +255,7 @@ def infer():
         infers[data["id"]]=values
         print("infered %s"%filename)
     print(infers)
-    json.dump(infers,open(save_file,"w"))
+    pickle.dump(infers,open(save_file,"w"))
 
 if __name__ == '__main__':
     print("paddle init ...")
