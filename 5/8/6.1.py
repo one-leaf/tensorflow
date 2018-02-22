@@ -102,7 +102,7 @@ def reader_get_image_and_label():
                     label[i] = 1
             
             for i in range(w-block_size):
-                if random.random()>0.9: 
+                if random.random()>0.99: 
                     yield [_x[i:i+block_size], label[i:i+block_size]]
     return reader
 
