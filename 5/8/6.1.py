@@ -88,8 +88,9 @@ def network(drop=True):
 def reader_get_image_and_label():
     def reader():
         save_file = os.path.join(out_dir,"infer.pkl")
-        infers = pickle.load(open(save_file,"r"))        
-        for data in training_data:               
+        infers = pickle.load(open(save_file,"r"))
+        size = len(training_data)        
+        for p, data in enumerate(training_data):               
             _x =  infers[data["id"]]
             w= len(_x)
             _x = np.array(_x)
@@ -104,6 +105,7 @@ def reader_get_image_and_label():
             for i in range(w-block_size):
                 if random.random()>0.99: 
                     yield [_x[i:i+block_size], label[i:i+block_size]]
+            status["progress"]="%s/%s"%(p,size)
     return reader
 
 status ={}
