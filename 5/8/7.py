@@ -113,7 +113,7 @@ def add_data_to_list(label, v_data):
     for i in range(w-block_size):
         _data.append(v_data[i:i+block_size])
         if len(_data)==train_size:
-            yield _data, label[i+1-train_size,i+1]
+            yield _data, label[i+1-train_size:i+1]
             _data = []
 
 def pre_data():
