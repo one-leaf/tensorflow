@@ -132,7 +132,7 @@ def pre_data():
             start = int(round(segment[0]))
             end = int(round(segment[1]))
             for i in range(start-block_size, end+block_size):
-                if i <0 or i>w: continue
+                if i <0 or i>=w: continue
                 if i+block_size>start and i<=start: 
                     label[i] = 1
                 elif i+block_size>end and i<=end:
