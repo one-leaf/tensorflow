@@ -26,7 +26,7 @@ class_dim = 3 # 分类 0，空白  1 开始， 2，过程， 3，结束
 train_size = 128 # 学习的关键帧长度
 block_size = 4
 
-buf_size = 5000
+buf_size = 1000
 batch_size = 2048//(train_size*block_size)
 
 model_path = os.path.join(home,"model")
