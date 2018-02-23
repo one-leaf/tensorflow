@@ -139,7 +139,7 @@ def pre_data():
                     label[i] = 1
                 elif i+block_size>end and i<=end:
                     label[i] = 3
-                else:
+                elif label[i] == 0:
                     label[i] = 2
                     
         for _data, _label in add_data_to_list(label, v_data):
