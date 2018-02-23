@@ -123,11 +123,11 @@ def pre_data():
     k=0
     j=0
     l=0
-    for c, data in enumerate(training_data):
-        v_data = np.load(os.path.join(training_path, "%s.pkl"%data["id"]))  
+    for c, t_data in enumerate(training_data):
+        v_data = np.load(os.path.join(training_path, "%s.pkl"%t_data["id"]))  
         w = v_data.shape[0]
         label = [0 for _ in range(w)]
-        for annotations in data["data"]:
+        for annotations in t_data["data"]:
             segment = annotations['segment']
             start = int(round(segment[0]))
             end = int(round(segment[1]))
@@ -140,8 +140,8 @@ def pre_data():
                 else:
                     label[i] = 2
                     
-        for _data, label in add_data_to_list(label, v_data):
-            data[j%10].append((_data,label))
+        for _data, _label in add_data_to_list(label, v_data):
+            data[j%10].append((_data,_label))
             j += 1
 
         status["progress"]="%s/%s"%(c,size)
