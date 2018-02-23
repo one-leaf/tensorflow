@@ -135,7 +135,7 @@ def pre_data():
                 if i <0 or i>w: continue
                 if i+block_size>start and i<=start: 
                     label[i] = 1
-                else i+block_size>end and i<=end:
+                elif i+block_size>end and i<=end:
                     label[i] = 3
                 else:
                     label[i] = 2
