@@ -23,11 +23,11 @@ data_path = os.path.join(home,"data")
 # result_json_file = "/home/kesci/work/ai2.json"
 
 class_dim = 3 # 分类 0，空白  1 开始， 2，过程， 3，结束
-train_size = 128 # 学习的关键帧长度
+train_size = 256 # 学习的关键帧长度
 block_size = 4
 
 buf_size = 5000
-batch_size = 2048//(train_size*block_size)
+batch_size = 2048*8//(train_size*block_size)
 
 model_path = os.path.join(home,"model")
 cls_param_file = os.path.join(model_path,"param_cls.tar")
