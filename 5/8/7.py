@@ -23,15 +23,15 @@ data_path = os.path.join(home,"data")
 # result_json_file = "/home/kesci/work/ai2.json"
 
 class_dim = 4 # 分类 0，空白  1 开始， 2，过程， 3，结束
-train_size = 64 # 学习的关键帧长度
+train_size = 128 # 学习的关键帧长度
 block_size = 4
 
-buf_size = 1000
-batch_size = 2048//(train_size*block_size)
+buf_size = 5000
+batch_size = 2048*2//(train_size*block_size)
 
 model_path = os.path.join(home,"model")
-cls_param_file = os.path.join(model_path,"param_cls.tar")
-box_param_file = os.path.join(model_path,"param_box.tar")
+cls_param_file = os.path.join(model_path,"param_cls_%s.tar"%class_dim)
+status_file = os.path.join(model_path,"status_%s.json"%class_dim)
 
 result_json_file = os.path.join(model_path,"ai.json")
 out_dir = os.path.join(model_path, "out")
@@ -88,10 +88,8 @@ def normal_network(x,drop):
     return net
 
 def network(drop=True):
-    # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
 
-    # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
 
     net = normal_network(x, drop)
@@ -105,18 +103,17 @@ def network(drop=True):
     adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost_class, adam_optimizer, net_class_fc
 
-data = {i:[] for i in range(10)}
+data_0 = {i:[] for i in range(10)}
+data_1 = {i:[] for i in range(10)}
     
 def add_data_to_list(label, v_data):
     w = v_data.shape[0]
-    for j in range(w-block_size*train_size):
-        _data = []
-        for i in range(j, w-block_size):
-            _data.append(v_data[i:i+block_size])
-            if len(_data)==train_size:
-                yield _data, label[i+1-train_size:i+1]
-                _data = []
-
+    _data = []
+    for i in range(random.randint(block_size), w-block_size):
+        _data.append(v_data[i:i+block_size])
+        if len(_data)==train_size:
+            yield _data, label[i+1-train_size:i+1]
+            _data = []
 
 def pre_data():
     size = len(training_data)
@@ -126,6 +123,8 @@ def pre_data():
     j=0
     l=0
     for c, t_data in enumerate(training_data):
+        # 由于网页训练中途会莫名中断，只能随机选择
+        t_data = random.choice(training_data)
         v_data = np.load(os.path.join(training_path, "%s.pkl"%t_data["id"]))  
         w = v_data.shape[0]
         label = [0 for _ in range(w)]
@@ -143,8 +142,12 @@ def pre_data():
                     label[i] = 2
                     
         for _data, _label in add_data_to_list(label, v_data):
-            data[j%10].append((_data,_label))
-            j += 1
+            if max(_label)==0:
+                data_0[j%10].append((_data,_label))
+                j += 1
+            else:
+                data_1[k%10].append((_data,_label))
+                k += 1
 
         status["progress"]="%s/%s"%(c,size)
 
@@ -156,10 +159,15 @@ def reader_get_image_and_label():
         t1.start()
         time.sleep(10)
         while t1.isAlive(): 
-            if t1.isAlive() and len(data[0])<1000:
+            if t1.isAlive() and (len(data_0[0])<1000 or len(data_1[0])<1000):
                 time.sleep(0.1)
 
             _i = random.randint(0,9)
+            
+            if random.random()>0.5:
+                data = data_0
+            else:
+                data = data_1
             _size = len(data[_i]) 
             if _size > buf_size:
                 yield data[_i].pop(0)
@@ -174,12 +182,20 @@ status["progress"]=""
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % batch_size == 0:
-            print "Paid %.2f,Time %.2f, Progress %s, Pass %d, Batch %d, Cost %f, %s" % (
+            print "Paid %.2f,Time %.2f, %s, Pass %d, Batch %d, Cost %.2f, %s" % (
                 time.time() - status["starttime"], time.time() - status["steptime"], status["progress"],
                 event.pass_id, event.batch_id, event.cost, event.metrics) 
             status["steptime"]=time.time()
-            cls_parameters.to_tar(open(cls_param_file, 'wb'))
-
+            if event.cost<5:
+                cls_parameters.to_tar(open(cls_param_file, 'wb'))
+                json.dump(status, open(status_file,'w'))
+                
+            # 莫名其妙数据丢失，每3000后重新跑
+#             if event.batch_id==3000: exit()
+            # 为了公平，只学习3小时
+            if time.time() - status["starttime"] > 3600*3:
+                exit()
+                
 def train():
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
@@ -222,6 +238,11 @@ if __name__ == '__main__':
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
     cost, adam_optimizer, net_class_fc = network(True)
-    cls_parameters = paddle.parameters.create(cost)
+    if os.path.exists(cls_param_file):
+        print("load %s, continue train ..."%cls_param_file)
+        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
+        status = json.load(open(status_file,'r'))
+    else:
+        cls_parameters = paddle.parameters.create(cost)
     train()
-    # infer()
+    #infer()
