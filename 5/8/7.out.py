@@ -64,7 +64,7 @@ def test():
             start = int(round(segment[0]))
             end = int(round(segment[1]))
             print(start, end)
-            for i in range(start-model.block_size, end+1):
+            for i in range(start-model.block_size+1, end+1):
                 if i<0 or i>=w: continue
                 if i+model.block_size>start and i<=start: 
                     label[i] = 1
@@ -80,7 +80,7 @@ def test():
             for i in range(w-model.block_size):
                 _data.append(v_data[i:i+model.block_size])
                 if len(_data) == model.train_size:
-                    print "正确目标：",i-model.train_size,"-",i+1
+                    print "正确目标：",i-model.train_size+1,"-",i+1
                     print label[i-model.train_size+1:i+1]                    
                     probs = inferer.infer(input=[(_data,)])
                     print probs[:,1]
