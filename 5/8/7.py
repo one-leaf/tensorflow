@@ -204,7 +204,7 @@ def event_handler(event):
                 
 def train():
     print('set reader ...')
-    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
+    train_reader = paddle.batch(reader_get_image_and_label(), batch_size=1)
     feeding_class={'x':0, 'a':1} 
     trainer = paddle.trainer.SGD(cost=cost, parameters=cls_parameters, update_equation=adam_optimizer)
     print("start train class ...")
