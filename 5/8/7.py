@@ -134,12 +134,17 @@ data_1 = {i:[] for i in range(10)}
     
 def add_data_to_list(label, v_data):
     w = v_data.shape[0]
-    _data = []
-    for i in range(random.randint(0, block_size), w-block_size):
-        _data.append(v_data[i:i+block_size])
-        if len(_data)==train_size:
-            yield _data, label[i+1-train_size:i+1]
-            _data = []
+    for j in range(0, w-block_size):
+        if random.random()>1.0/64 : continue
+        _data = []
+        _lable = []
+        for i in range(j, w-block_size):
+            _data.append(v_data[i:i+block_size])
+            _label.append(label[i])
+            if len(_data)==train_size:
+                yield _data, _label
+                _data = []
+                _lable = []
 
 def pre_data():
     size = len(training_data)
