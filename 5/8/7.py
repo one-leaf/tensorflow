@@ -95,8 +95,8 @@ def network(drop=True):
     net = normal_network(x, drop)
     # 当前图片精彩或非精彩分类
 
-    lstm1 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu())
-    lstm2 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), reverse=True)
+    lstm1 = paddle.layer.lstmemory(input=net, size=128, act=paddle.activation.Relu())
+    lstm2 = paddle.layer.lstmemory(input=net, size=128, act=paddle.activation.Relu(), reverse=True)
     net_class_fc = paddle.layer.fc(input=[lstm1, lstm2], size=class_dim, act=paddle.activation.Softmax())
 
 
