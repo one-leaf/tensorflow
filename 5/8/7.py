@@ -96,8 +96,8 @@ def network(drop=True):
     # 当前图片精彩或非精彩分类
 
     bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
-    lstm1 = paddle.layer.lstmemory(input=net, act=relu, bias_attr=bias_attr)
-    lstm2 = paddle.layer.lstmemory(input=net, act=relu, bias_attr=bias_attr, reverse=True)
+    lstm1 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), bias_attr=bias_attr)
+    lstm2 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), bias_attr=bias_attr, reverse=True)
     net_class_fc = paddle.layer.fc(input=[lstm1, lstm2], size=class_dim, act=paddle.activation.Softmax())
 
 
