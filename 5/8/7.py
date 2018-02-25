@@ -104,7 +104,7 @@ def network(drop=True):
     fc1 = paddle.layer.fc(input=net, size=train_size, act=linear, bias_attr=bias_attr)
     lstm1 = paddle.layer.lstmemory(input=fc1, act=relu, bias_attr=bias_attr)
     inputs = [fc1, lstm1]
-    for i in range(2, 4):
+    for i in range(2, 2):
         fc = paddle.layer.fc(input=inputs, size=train_size, act=linear, param_attr=para_attr, bias_attr=bias_attr)
         lstm = paddle.layer.lstmemory(input=fc, reverse=(i % 2) == 0, act=relu, bias_attr=bias_attr)
         inputs = [fc, lstm]
@@ -117,11 +117,11 @@ def network(drop=True):
     # net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
-    # adam_optimizer = paddle.optimizer.Adam(
-    #     learning_rate=1e-3,
-    #     regularization=paddle.optimizer.L2Regularization(rate=8e-4),
-    #     model_average=paddle.optimizer.ModelAverage(average_window=0.5))
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
+    adam_optimizer = paddle.optimizer.Adam(
+        learning_rate=1e-3,
+        regularization=paddle.optimizer.L2Regularization(rate=8e-4),
+        model_average=paddle.optimizer.ModelAverage(average_window=0.5))
+    # adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost_class, adam_optimizer, net_class_fc
 
 data_0 = {i:[] for i in range(10)}
