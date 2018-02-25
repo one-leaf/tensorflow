@@ -99,26 +99,25 @@ def network(drop=True):
     # lstm2 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), reverse=True)
     # net_class_fc = paddle.layer.fc(input=[lstm1, lstm2], size=class_dim, act=paddle.activation.Softmax())
 
+    # fc_para_attr = paddle.attr.Param(learning_rate=1e-3)
+    # lstm_para_attr = paddle.attr.Param(initial_std=0., learning_rate=1e-3)
+    # para_attr = [fc_para_attr, lstm_para_attr]
+    # bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
+    # tanh = paddle.activation.Tanh()
+    # linear = paddle.activation.Linear()
+    # fc1 = paddle.layer.fc(input=net, size=64, act=linear, bias_attr=bias_attr)
+    # lstm1 = paddle.layer.lstmemory(input=fc1, act=tanh, bias_attr=bias_attr)
+    # inputs = [fc1, lstm1]
+    # for i in range(2, 4):
+    #     fc = paddle.layer.fc(input=inputs, size=64, act=linear, param_attr=para_attr, bias_attr=bias_attr)
+    #     lstm = paddle.layer.lstmemory(input=fc, reverse=(i % 2) == 0, act=tanh, bias_attr=bias_attr)
+    #     inputs = [fc, lstm]
+    # net_class_fc = paddle.layer.fc(input=inputs, size=class_dim, act=paddle.activation.Softmax(), bias_attr=bias_attr, param_attr=para_attr)
 
-
-    fc_para_attr = paddle.attr.Param(learning_rate=1e-3)
-    lstm_para_attr = paddle.attr.Param(initial_std=0., learning_rate=1e-3)
-    para_attr = [fc_para_attr, lstm_para_attr]
-    bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
-    tanh = paddle.activation.Tanh()
-    linear = paddle.activation.Linear()
-    fc1 = paddle.layer.fc(input=net, size=64, act=linear, bias_attr=bias_attr)
-    lstm1 = paddle.layer.lstmemory(input=fc1, act=tanh, bias_attr=bias_attr)
-    inputs = [fc1, lstm1]
-    for i in range(2, 4):
-        fc = paddle.layer.fc(input=inputs, size=64, act=linear, param_attr=para_attr, bias_attr=bias_attr)
-        lstm = paddle.layer.lstmemory(input=fc, reverse=(i % 2) == 0, act=tanh, bias_attr=bias_attr)
-        inputs = [fc, lstm]
-    net_class_fc = paddle.layer.fc(input=inputs, size=class_dim, act=paddle.activation.Softmax(), bias_attr=bias_attr, param_attr=para_attr)
-
-    # gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu())
-    # gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu(), reverse=True)
-    # net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu(), reverse=True)
+    net = paddle.layer.concat(input=[gru_forward, gru_backward])
+    net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
 
     # net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
