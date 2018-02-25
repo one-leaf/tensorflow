@@ -103,7 +103,7 @@ def network(drop=True):
 
 
     fc_para_attr = paddle.attr.Param(learning_rate=1e-3)
-    lstm_para_attr = paddle.attr.Param(initial_std=0., learning_rate=1.)
+    lstm_para_attr = paddle.attr.Param(initial_std=0., learning_rate=1e-3)
     para_attr = [fc_para_attr, lstm_para_attr]
     bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
     tanh = paddle.activation.Tanh()
