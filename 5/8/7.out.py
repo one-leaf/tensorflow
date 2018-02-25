@@ -58,10 +58,19 @@ def test():
         w = v_data.shape[0]
         print "读取数据:", data_id, v_data.shape
         label = np.zeros([w], dtype=np.int)
+        
         for annotations in data_info["data"]:
             segment = annotations['segment']
-            for i in range(int(segment[0]),int(segment[1]+1)):
-                label[i] += 1
+            start = int(round(segment[0]))
+            end = int(round(segment[1]))
+            for i in range(start-block_size, end+1):
+                if i<0 or i>=w: continue
+                if i+block_size>start and i<=start: 
+                    label[i] = 1
+                elif i+block_size>end and i<=end:
+                    label[i] = 3
+                elif label[i] == 0:
+                    label[i] = 2
 
         # print label
         save_file = os.path.join(out_dir,data_id)
