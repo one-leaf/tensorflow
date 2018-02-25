@@ -95,10 +95,10 @@ def network(drop=True):
     net = normal_network(x, drop)
     # 当前图片精彩或非精彩分类
 
-    bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
-    lstm1 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), bias_attr=bias_attr)
-    lstm2 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), bias_attr=bias_attr, reverse=True)
-    net_class_fc = paddle.layer.fc(input=[lstm1, lstm2], size=class_dim, act=paddle.activation.Softmax())
+    # bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
+    # lstm1 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), bias_attr=bias_attr)
+    # lstm2 = paddle.layer.lstmemory(input=net, act=paddle.activation.Relu(), bias_attr=bias_attr, reverse=True)
+    # net_class_fc = paddle.layer.fc(input=[lstm1, lstm2], size=class_dim, act=paddle.activation.Softmax())
 
 
 
@@ -117,10 +117,10 @@ def network(drop=True):
     #     inputs = [fc, lstm]
     # net_class_fc = paddle.layer.fc(input=inputs, size=class_dim, act=paddle.activation.Softmax(), bias_attr=bias_attr, param_attr=para_attr)
 
-    # gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh())
-    # gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh(), reverse=True)
+    gru_forward = paddle.networks.simple_gru(input=net, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=net, act=paddle.activation.Relu(), reverse=True)
+    net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
 
-    # net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
     # net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
