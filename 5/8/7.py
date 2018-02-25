@@ -94,6 +94,7 @@ def network(drop=True):
 
     net = normal_network(x, drop)
     # 当前图片精彩或非精彩分类
+    net = paddle.layer.embedding(input=net, size=64)
     gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh())
     gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh(), reverse=True)
 
