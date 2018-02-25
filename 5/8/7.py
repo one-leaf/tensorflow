@@ -241,11 +241,11 @@ if __name__ == '__main__':
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
     cost, adam_optimizer, net_class_fc = network(True)
-    if os.path.exists(cls_param_file):
-        print("load %s, continue train ..."%cls_param_file)
-        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
-        status = json.load(open(status_file,'r'))
-    else:
-        cls_parameters = paddle.parameters.create(cost)
+    # if os.path.exists(cls_param_file):
+    #     print("load %s, continue train ..."%cls_param_file)
+    #     cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
+    #     status = json.load(open(status_file,'r'))
+    # else:
+    cls_parameters = paddle.parameters.create(cost)
     train()
     #infer()
