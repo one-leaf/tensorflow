@@ -199,6 +199,7 @@ def event_handler(event):
 #             if event.batch_id==3000: exit()
             # 为了公平，只学习3小时
             if time.time() - status["starttime"] > 3600*3:
+                print("Exit...")
                 exit()
                 
 def train():
