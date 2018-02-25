@@ -114,9 +114,9 @@ def network(drop=True):
             bias_attr=bias_attr)
         inputs = [fc, lstm]
 
-    fc_last = paddle.layer.pooling(input=inputs[0], pooling_type=paddle.pooling.Max())
-    lstm_last = paddle.layer.pooling(input=inputs[1], pooling_type=paddle.pooling.Max())
-    net_class_fc = paddle.layer.fc(input=[fc_last, lstm_last],
+    # fc_last = paddle.layer.pooling(input=inputs[0], pooling_type=paddle.pooling.Max())
+    # lstm_last = paddle.layer.pooling(input=inputs[1], pooling_type=paddle.pooling.Max())
+    net_class_fc = paddle.layer.fc(input=inputs,
                              size=class_dim,
                              act=paddle.activation.Softmax(),
                              bias_attr=bias_attr,
@@ -184,7 +184,7 @@ def pre_data():
 
         status["progress"]="%s/%s"%(c,size)
 
-        print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,t_data["id"],len(data_1[0]),len(data_0[0])))
+        # print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,t_data["id"],len(data_1[0]),len(data_0[0])))
 
 def reader_get_image_and_label():
     def reader():
