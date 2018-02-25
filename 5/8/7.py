@@ -119,7 +119,7 @@ def network(drop=True):
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
     adam_optimizer = paddle.optimizer.Adam(
-        learning_rate=2e-3,
+        learning_rate=1e-3,
         regularization=paddle.optimizer.L2Regularization(rate=8e-4),
         model_average=paddle.optimizer.ModelAverage(average_window=0.5))
     # adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
