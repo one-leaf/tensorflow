@@ -94,11 +94,38 @@ def network(drop=True):
 
     net = normal_network(x, drop)
     # 当前图片精彩或非精彩分类
-    net = paddle.layer.embedding(input=net, size=64)
-    gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh())
-    gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh(), reverse=True)
 
-    net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    fc_para_attr = paddle.attr.Param(learning_rate=1e-3)
+    lstm_para_attr = paddle.attr.Param(initial_std=0., learning_rate=1.)
+    para_attr = [fc_para_attr, lstm_para_attr]
+    bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
+    relu = paddle.activation.Relu()
+    linear = paddle.activation.Linear()
+
+    fc1 = paddle.layer.fc(input=net, size=64, act=linear, bias_attr=bias_attr)
+    lstm1 = paddle.layer.lstmemory(input=fc1, act=relu, bias_attr=bias_attr)
+    inputs = [fc1, lstm1]
+    for i in range(2, stacked_num + 1):
+        fc = paddle.layer.fc(input=inputs, size=64, act=linear, param_attr=para_attr, bias_attr=bias_attr)
+        lstm = paddle.layer.lstmemory(
+            input=fc,
+            reverse=(i % 2) == 0,
+            act=relu,
+            bias_attr=bias_attr)
+        inputs = [fc, lstm]
+
+    fc_last = paddle.layer.pooling(input=inputs[0], pooling_type=paddle.pooling.Max())
+    lstm_last = paddle.layer.pooling(input=inputs[1], pooling_type=paddle.pooling.Max())
+    net_class_fc = paddle.layer.fc(input=[fc_last, lstm_last],
+                             size=class_dim,
+                             act=paddle.activation.Softmax(),
+                             bias_attr=bias_attr,
+                             param_attr=para_attr)
+
+    # gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh())
+    # gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh(), reverse=True)
+
+    # net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
     # net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
