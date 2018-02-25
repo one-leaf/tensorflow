@@ -191,7 +191,7 @@ def reader_get_image_and_label():
 
             _i = random.randint(0,9)
             
-            if random.random()>0.5:
+            if random.random()>0.8:
                 data = data_0
             else:
                 data = data_1
@@ -200,8 +200,8 @@ def reader_get_image_and_label():
                 _data, _label =  data[_i].pop(0)
             else:
                 _data, _label = random.choice(data[_i])
-            if random.random()>0.99:
-                print _label
+            # if random.random()>0.99:
+            #     print _label
             yield _data, _label
     return reader
 
