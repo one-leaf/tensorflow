@@ -102,8 +102,8 @@ def test():
             #     sys.stdout.write('.')
             #     sys.stdout.flush() 
         
-            _all_values = np.row_stack(all_values)
-            np.save(open(save_file,"wb"), _all_values)
+            # _all_values = np.row_stack(all_values)
+            # np.save(open(save_file,"wb"), _all_values)
         else:
             _all_values = np.load(open(save_file,"rb"))
 
