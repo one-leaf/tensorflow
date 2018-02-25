@@ -128,7 +128,7 @@ def pre_data():
     l=0
     for c, t_data in enumerate(training_data):
         # 由于网页训练中途会莫名中断，只能随机选择
-        t_data = random.choice(training_data)
+        # t_data = random.choice(training_data)
         v_data = np.load(os.path.join(training_path, "%s.pkl"%t_data["id"]))  
         w = v_data.shape[0]
         label = [0 for _ in range(w)]
@@ -155,7 +155,7 @@ def pre_data():
 
         status["progress"]="%s/%s"%(c,size)
 
-#         print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_0)))
+        print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_0)))
 
 def reader_get_image_and_label():
     def reader():
