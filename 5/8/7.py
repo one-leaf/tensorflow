@@ -159,7 +159,7 @@ def pre_data():
             segment = annotations['segment']
             start = int(round(segment[0]))
             end = int(round(segment[1]))
-            for i in range(start-block_size, end+1):
+            for i in range(start-block_size+1, end+1):
                 if i<0 or i>=w: continue
                 if i+block_size>start and i<=start: 
                     label[i] = 1
