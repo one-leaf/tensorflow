@@ -117,8 +117,8 @@ def network(drop=True):
     #     inputs = [fc, lstm]
     # net_class_fc = paddle.layer.fc(input=inputs, size=class_dim, act=paddle.activation.Softmax(), bias_attr=bias_attr, param_attr=para_attr)
 
-    gru_forward = paddle.networks.simple_gru(input=net, act=paddle.activation.Relu())
-    gru_backward = paddle.networks.simple_gru(input=net, act=paddle.activation.Relu(), reverse=True)
+    gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu())
+    gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu(), reverse=True)
     net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
 
     # net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
