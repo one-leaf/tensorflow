@@ -137,14 +137,14 @@ def add_data_to_list(label, v_data):
     for j in range(0, w-block_size):
         if random.random()>1.0/64 : continue
         _data = []
-        _lable = []
+        _label = []
         for i in range(j, w-block_size):
             _data.append(v_data[i:i+block_size])
             _label.append(label[i])
             if len(_data)==train_size:
                 yield _data, _label
                 _data = []
-                _lable = []
+                _label = []
 
 def pre_data():
     size = len(training_data)
