@@ -101,11 +101,10 @@ def network(drop=True):
     bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
     relu = paddle.activation.Relu()
     linear = paddle.activation.Linear()
-
     fc1 = paddle.layer.fc(input=net, size=64, act=linear, bias_attr=bias_attr)
     lstm1 = paddle.layer.lstmemory(input=fc1, act=relu, bias_attr=bias_attr)
     inputs = [fc1, lstm1]
-    for i in range(2, 2):
+    for i in range(2, 4):
         fc = paddle.layer.fc(input=inputs, size=64, act=linear, param_attr=para_attr, bias_attr=bias_attr)
         lstm = paddle.layer.lstmemory(
             input=fc,
@@ -113,14 +112,7 @@ def network(drop=True):
             act=relu,
             bias_attr=bias_attr)
         inputs = [fc, lstm]
-
-    # fc_last = paddle.layer.pooling(input=inputs[0], pooling_type=paddle.pooling.Max())
-    # lstm_last = paddle.layer.pooling(input=inputs[1], pooling_type=paddle.pooling.Max())
-    net_class_fc = paddle.layer.fc(input=inputs,
-                             size=class_dim,
-                             act=paddle.activation.Softmax(),
-                             bias_attr=bias_attr,
-                             param_attr=para_attr)
+    net_class_fc = paddle.layer.fc(input=inputs, size=class_dim, act=paddle.activation.Softmax(), bias_attr=bias_attr, param_attr=para_attr)
 
     # gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh())
     # gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Tanh(), reverse=True)
