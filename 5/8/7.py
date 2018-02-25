@@ -108,11 +108,11 @@ def network(drop=True):
     bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
     tanh = paddle.activation.Tanh()
     linear = paddle.activation.Linear()
-    fc1 = paddle.layer.fc(input=net, size=512, act=linear, bias_attr=bias_attr)
+    fc1 = paddle.layer.fc(input=net, size=64, act=linear, bias_attr=bias_attr)
     lstm1 = paddle.layer.lstmemory(input=fc1, act=tanh, bias_attr=bias_attr)
     inputs = [fc1, lstm1]
     for i in range(2, 4):
-        fc = paddle.layer.fc(input=inputs, size=512, act=linear, param_attr=para_attr, bias_attr=bias_attr)
+        fc = paddle.layer.fc(input=inputs, size=64, act=linear, param_attr=para_attr, bias_attr=bias_attr)
         lstm = paddle.layer.lstmemory(input=fc, reverse=(i % 2) == 0, act=tanh, bias_attr=bias_attr)
         inputs = [fc, lstm]
     net_class_fc = paddle.layer.fc(input=inputs, size=class_dim, act=paddle.activation.Softmax(), bias_attr=bias_attr, param_attr=para_attr)
