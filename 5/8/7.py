@@ -22,7 +22,7 @@ data_path = os.path.join(home,"data")
 # param_file_bak = "/home/kesci/work/param2.data.bak"
 # result_json_file = "/home/kesci/work/ai2.json"
 
-class_dim = 4 # 分类 0，空白  1 开始， 2，过程， 3，结束
+class_dim = 2 # 分类 0，空白  1 开始， 2，过程， 3，结束
 train_size = 128 # 学习的关键帧长度
 block_size = 4
 
@@ -141,9 +141,11 @@ def pre_data():
                 if i+block_size>start and i<=start: 
                     label[i] = 1
                 elif i+block_size>end and i<=end:
-                    label[i] = 3
+                    # label[i] = 3
+                    label[i] = 1
                 elif label[i] == 0:
-                    label[i] = 2
+                    # label[i] = 2
+                    label[i] = 1
                     
         for _data, _label in add_data_to_list(label, v_data):
             if max(_label)==0:
