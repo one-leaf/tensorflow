@@ -189,9 +189,8 @@ def event_handler(event):
                 time.time() - status["starttime"], time.time() - status["steptime"], status["progress"],
                 event.pass_id, event.batch_id, event.cost, event.metrics) 
             status["steptime"]=time.time()
-            if event.cost<5:
-                cls_parameters.to_tar(open(cls_param_file, 'wb'))
-                json.dump(status, open(status_file,'w'))
+            cls_parameters.to_tar(open(cls_param_file, 'wb'))
+            json.dump(status, open(status_file,'w'))
                 
             # 莫名其妙数据丢失，每3000后重新跑
 #             if event.batch_id==3000: exit()
