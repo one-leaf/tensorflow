@@ -131,7 +131,7 @@ data_1 = {i:[] for i in range(10)}
 def add_data_to_list(label, v_data):
     w = v_data.shape[0]
     for j in range(0, w-block_size):
-        if random.random()>1.0/64 : continue
+        if j>0 and random.random()>1.0/100 : continue
         _data = []
         _label = []
         for i in range(j, w-block_size):
