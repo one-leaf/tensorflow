@@ -80,8 +80,8 @@ def test():
             for i in range(w-model.block_size):
                 _data.append(v_data[i:i+model.block_size])
                 if len(_data) == model.train_size:
-                    print "正确目标："
-                    print label[i:i+model.train_size]                    
+                    print "正确目标：",i-model.train_size,"-",i+1
+                    print label[i-model.train_size+1:i+1]                    
                     probs = inferer.infer(input=[(_data,)])
                     print probs[:,1]
 
