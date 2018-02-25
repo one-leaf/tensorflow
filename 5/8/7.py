@@ -94,10 +94,11 @@ def network(drop=True):
 
     net = normal_network(x, drop)
     # 当前图片精彩或非精彩分类
-    gru_forward = paddle.networks.simple_gru(input=net, size=train_size, act=paddle.activation.Relu())
-    gru_backward = paddle.networks.simple_gru(input=net, size=train_size, act=paddle.activation.Relu(), reverse=True)
+    # gru_forward = paddle.networks.simple_gru(input=net, size=train_size, act=paddle.activation.Relu())
+    # gru_backward = paddle.networks.simple_gru(input=net, size=train_size, act=paddle.activation.Relu(), reverse=True)
 
-    net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    # net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
     # adam_optimizer = paddle.optimizer.Adam(
