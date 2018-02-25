@@ -23,7 +23,7 @@ data_path = os.path.join(home,"data")
 # result_json_file = "/home/kesci/work/ai2.json"
 
 class_dim = 4 # 分类 0，空白  1 开始， 2，过程， 3，结束
-train_size = 64 # 学习的关键帧长度
+train_size = 128 # 学习的关键帧长度
 block_size = 4
 
 buf_size = 5000
@@ -104,7 +104,7 @@ def network(drop=True):
     #     learning_rate=1e-3,
     #     regularization=paddle.optimizer.L2Regularization(rate=8e-4),
     #     model_average=paddle.optimizer.ModelAverage(average_window=0.5))
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=1e-3)
+    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost_class, adam_optimizer, net_class_fc
 
 data_0 = {i:[] for i in range(10)}
