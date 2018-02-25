@@ -100,7 +100,10 @@ def network(drop=True):
     net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
+    adam_optimizer = paddle.optimizer.Adam(
+        learning_rate=1e-3,
+        regularization=paddle.optimizer.L2Regularization(rate=8e-4),
+        model_average=paddle.optimizer.ModelAverage(average_window=0.5))
     return cost_class, adam_optimizer, net_class_fc
 
 data_0 = {i:[] for i in range(10)}
