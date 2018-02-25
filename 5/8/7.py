@@ -131,14 +131,13 @@ def pre_data():
         # t_data = random.choice(training_data)
         v_data = np.load(os.path.join(training_path, "%s.pkl"%t_data["id"]))  
         w = v_data.shape[0]
-        # label = [0 for _ in range(w)]
-        label = np.zeros(w)
+        label = [0 for _ in range(w)]
         for annotations in t_data["data"]:
             segment = annotations['segment']
             start = int(round(segment[0]))
             end = int(round(segment[1]))
             for i in range(start-block_size, end+1):
-                if i <0 or i>=w: continue
+                if i<0 or i>=w: continue
                 if i+block_size>start and i<=start: 
                     label[i] = 1
                 elif i+block_size>end and i<=end:
