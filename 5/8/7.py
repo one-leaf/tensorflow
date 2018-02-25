@@ -84,7 +84,7 @@ def normal_network(x,drop):
     if drop:
         net = paddle.layer.dropout(input=net, dropout_rate=0.1)            
     net = cnn(net,  3, 64, 64, 2, 1) 
-    net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
+    # net = paddle.layer.img_pool(input=net, pool_size=4, pool_size_y=4, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())  
     return net
 
 def network(drop=True):
