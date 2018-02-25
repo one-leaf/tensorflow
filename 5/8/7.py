@@ -197,9 +197,12 @@ def reader_get_image_and_label():
                 data = data_1
             _size = len(data[_i]) 
             if _size > buf_size:
-                yield data[_i].pop(0)
+                _data, _label =  data[_i].pop(0)
             else:
-                yield random.choice(data[_i])
+                _data, _label = random.choice(data[_i])
+            if random.random()>0.99:
+                print _label
+            yield _data, _label
     return reader
 
 status ={}
