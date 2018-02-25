@@ -209,9 +209,9 @@ status["progress"]=""
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % batch_size == 0:
-            print "Paid %.2f,Time %.2f, %s, Pass %d, Batch %d, Cost %.2f, %s" % (
+            print "Paid %.2f,Time %.2f, %s, Pass %d, Batch %d, Cost %.2f, %s, %s" % (
                 time.time() - status["starttime"], time.time() - status["steptime"], status["progress"],
-                event.pass_id, event.batch_id, event.cost, event.metrics) 
+                event.pass_id, event.batch_id, event.cost, event.metrics, "%s/%s"%(len(data_0[0]),len(data_1[0]))) 
             status["steptime"]=time.time()
             cls_parameters.to_tar(open(cls_param_file, 'wb'))
             json.dump(status, open(status_file,'w'))
