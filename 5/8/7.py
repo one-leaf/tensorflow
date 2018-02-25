@@ -105,7 +105,7 @@ def network(drop=True):
     fc1 = paddle.layer.fc(input=net, size=64, act=linear, bias_attr=bias_attr)
     lstm1 = paddle.layer.lstmemory(input=fc1, act=relu, bias_attr=bias_attr)
     inputs = [fc1, lstm1]
-    for i in range(2, stacked_num + 1):
+    for i in range(2, 4):
         fc = paddle.layer.fc(input=inputs, size=64, act=linear, param_attr=para_attr, bias_attr=bias_attr)
         lstm = paddle.layer.lstmemory(
             input=fc,
