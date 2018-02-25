@@ -155,7 +155,7 @@ def pre_data():
 
         status["progress"]="%s/%s"%(c,size)
 
-        print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_0)))
+        print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,t_data["id"],len(data_1),len(data_0)))
 
 def reader_get_image_and_label():
     def reader():
