@@ -30,7 +30,7 @@ def init():
     session = tf.Session()
     session.run(tf.global_variables_initializer())
 
-    model_dir = os.path.join(curr_dir, "model_ascii_srgan")
+    model_dir = os.path.join(curr_dir, "model_ascii")
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_G_dir = os.path.join(model_dir, "TG32")
     model_R_dir = os.path.join(model_dir, "RL32")
