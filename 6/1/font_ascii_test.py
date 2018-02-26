@@ -72,8 +72,8 @@ def RES(inputs, seq_len, reuse = False):
 # 输入 half_layer
 def LSTM(inputs, seq_len):
     num_hidden = 512
-    cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
-    cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
+    cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
+    cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
     return layer
