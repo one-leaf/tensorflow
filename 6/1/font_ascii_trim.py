@@ -182,7 +182,7 @@ def get_next_batch_for_gan(batch_size=128):
         image = np.asarray(image)
 
         if random.random()>0.9:
-            image[image>200] = image * random.uniform(0.5, 1)
+            image[image>200] = 255 * random.uniform(0.5, 1)
 
         if random.random()>0.5:
             image = (255. - image) / 255.
