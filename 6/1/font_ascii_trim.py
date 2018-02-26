@@ -270,13 +270,13 @@ def train():
                 errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
                 print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
-                start = time.time()                                
-                errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
-                print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
+                # start = time.time()                                
+                # errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
+                # print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
-                start = time.time()                                
-                errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
-                print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))                
+                # start = time.time()                                
+                # errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
+                # print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))                
                 # 报告
                 if steps > 0 and steps % REPORT_STEPS < 5:
                     for i in range(batch_size): 
