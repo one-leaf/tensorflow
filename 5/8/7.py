@@ -23,15 +23,15 @@ data_path = os.path.join(home,"data")
 # result_json_file = "/home/kesci/work/ai2.json"
 
 class_dim = 4 # 分类 0，空白  1 开始， 2，过程， 3，结束
-train_size = 64 # 学习的关键帧长度
+train_size = 128 # 学习的关键帧长度
 block_size = 4
 
-buf_size = 1000
-batch_size = 2048//(train_size*block_size)
+buf_size = 5000
+batch_size = 2048*2//(train_size*block_size)
 
 model_path = os.path.join(home,"model")
-cls_param_file = os.path.join(model_path,"param_cls.tar")
-box_param_file = os.path.join(model_path,"param_box.tar")
+cls_param_file = os.path.join(model_path,"param_cls_%s.tar"%class_dim)
+status_file = os.path.join(model_path,"status_%s.json"%class_dim)
 
 result_json_file = os.path.join(model_path,"ai.json")
 out_dir = os.path.join(model_path, "out")
@@ -88,35 +88,59 @@ def normal_network(x,drop):
     return net
 
 def network(drop=True):
-    # 每批32张图片，将输入转为 1 * 256 * 256 CHW 
     x = paddle.layer.data(name='x', height=64, width=64, type=paddle.data_type.dense_vector_sequence(2048*block_size))   
 
-    # 是否精彩分类
     a = paddle.layer.data(name='a', type=paddle.data_type.integer_value_sequence(class_dim))
 
     net = normal_network(x, drop)
     # 当前图片精彩或非精彩分类
-    gru_forward = paddle.networks.simple_gru(input=net, size=train_size, act=paddle.activation.Relu())
-    gru_backward = paddle.networks.simple_gru(input=net, size=train_size, act=paddle.activation.Relu(), reverse=True)
 
-    net_class_fc = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
+    fc_para_attr = paddle.attr.Param(learning_rate=1e-3)
+    lstm_para_attr = paddle.attr.Param(initial_std=0., learning_rate=1e-3)
+    para_attr = [fc_para_attr, lstm_para_attr]
+    bias_attr = paddle.attr.Param(initial_std=0., l2_rate=0.)
+    tanh = paddle.activation.Tanh()
+    linear = paddle.activation.Linear()
+    fc1 = paddle.layer.fc(input=net, size=64, act=linear, bias_attr=bias_attr)
+    lstm1 = paddle.layer.lstmemory(input=fc1, act=tanh, bias_attr=bias_attr)
+    inputs = [fc1, lstm1]
+    for i in range(2, 4):
+        fc = paddle.layer.fc(input=inputs, size=64, act=linear, param_attr=para_attr, bias_attr=bias_attr)
+        lstm = paddle.layer.lstmemory(input=fc, reverse=(i % 2) == 0, act=tanh, bias_attr=bias_attr)
+        inputs = [fc, lstm]
+    net_class_fc = paddle.layer.fc(input=inputs, size=class_dim, act=paddle.activation.Softmax(), bias_attr=bias_attr, param_attr=para_attr)
+
+    # gru_forward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu())
+    # gru_backward = paddle.networks.simple_gru(input=net, size=64, act=paddle.activation.Relu(), reverse=True)
+    # net = paddle.layer.concat(input=[gru_forward, gru_backward])
+    # net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
+
+    # net_class_fc = paddle.layer.fc(input=net, size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
    
-    adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
+    adam_optimizer = paddle.optimizer.Adam(
+        learning_rate=1e-3,
+        regularization=paddle.optimizer.L2Regularization(rate=8e-4),
+        model_average=paddle.optimizer.ModelAverage(average_window=0.5))
+    # adam_optimizer = paddle.optimizer.Adam(learning_rate=2e-3)
     return cost_class, adam_optimizer, net_class_fc
 
-data = {i:[] for i in range(10)}
+data_0 = {i:[] for i in range(10)}
+data_1 = {i:[] for i in range(10)}
     
 def add_data_to_list(label, v_data):
     w = v_data.shape[0]
-    for j in range(w-block_size*train_size):
+    for j in range(0, w-block_size):
+        if j>0 and random.random()>1.0/100 : continue
         _data = []
+        _label = []
         for i in range(j, w-block_size):
             _data.append(v_data[i:i+block_size])
+            _label.append(label[i])
             if len(_data)==train_size:
-                yield _data, label[i+1-train_size:i+1]
+                yield _data, _label
                 _data = []
-
+                _label = []
 
 def pre_data():
     size = len(training_data)
@@ -126,6 +150,8 @@ def pre_data():
     j=0
     l=0
     for c, t_data in enumerate(training_data):
+        # 由于网页训练中途会莫名中断，只能随机选择
+        # t_data = random.choice(training_data)
         v_data = np.load(os.path.join(training_path, "%s.pkl"%t_data["id"]))  
         w = v_data.shape[0]
         label = [0 for _ in range(w)]
@@ -133,8 +159,8 @@ def pre_data():
             segment = annotations['segment']
             start = int(round(segment[0]))
             end = int(round(segment[1]))
-            for i in range(start-block_size, end+1):
-                if i <0 or i>=w: continue
+            for i in range(start-block_size+1, end+1):
+                if i<0 or i>=w: continue
                 if i+block_size>start and i<=start: 
                     label[i] = 1
                 elif i+block_size>end and i<=end:
@@ -143,28 +169,40 @@ def pre_data():
                     label[i] = 2
                     
         for _data, _label in add_data_to_list(label, v_data):
-            data[j%10].append((_data,_label))
-            j += 1
+            if max(_label)==0:
+                data_0[j%10].append((_data,_label))
+                j += 1
+            else:
+                data_1[k%10].append((_data,_label))
+                k += 1
 
         status["progress"]="%s/%s"%(c,size)
 
-#         print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,data["id"],len(data_1),len(data_0)))
+        # print("readed %s/%s %s.pkl, size: %s/%s"%(c,size,t_data["id"],len(data_1[0]),len(data_0[0])))
 
 def reader_get_image_and_label():
     def reader():
         t1 = threading.Thread(target=pre_data, args=())
         t1.start()
-        time.sleep(10)
+        time.sleep(20)
         while t1.isAlive(): 
-            if t1.isAlive() and len(data[0])<1000:
+            if t1.isAlive() and (len(data_0[0])<1000 or len(data_1[0])<1000):
                 time.sleep(0.1)
 
             _i = random.randint(0,9)
+            
+            if random.random()>0.8:
+                data = data_0
+            else:
+                data = data_1
             _size = len(data[_i]) 
             if _size > buf_size:
-                yield data[_i].pop(0)
+                _data, _label =  data[_i].pop(0)
             else:
-                yield random.choice(data[_i])
+                _data, _label = random.choice(data[_i])
+            # if random.random()>0.99:
+            #     print _label
+            yield _data, _label
     return reader
 
 status ={}
@@ -174,12 +212,20 @@ status["progress"]=""
 def event_handler(event):
     if isinstance(event, paddle.event.EndIteration):
         if event.batch_id>0 and event.batch_id % batch_size == 0:
-            print "Paid %.2f,Time %.2f, Progress %s, Pass %d, Batch %d, Cost %f, %s" % (
+            print "Paid %.2f,Time %.2f, %s, Pass %d, Batch %d, Cost %.2f, %s, %s" % (
                 time.time() - status["starttime"], time.time() - status["steptime"], status["progress"],
-                event.pass_id, event.batch_id, event.cost, event.metrics) 
+                event.pass_id, event.batch_id, event.cost, event.metrics, "%s/%s"%(len(data_0[0]),len(data_1[0]))) 
             status["steptime"]=time.time()
             cls_parameters.to_tar(open(cls_param_file, 'wb'))
-
+            json.dump(status, open(status_file,'w'))
+                
+            # 莫名其妙数据丢失，每3000后重新跑
+#             if event.batch_id==3000: exit()
+            # 为了公平，只学习3小时
+            if time.time() - status["starttime"] > 3600*3:
+                print("Exit...")
+                exit()
+                
 def train():
     print('set reader ...')
     train_reader = paddle.batch(reader_get_image_and_label(), batch_size=batch_size)
@@ -222,6 +268,11 @@ if __name__ == '__main__':
     paddle.init(use_gpu=True, trainer_count=1)
     print("get network ...")
     cost, adam_optimizer, net_class_fc = network(True)
-    cls_parameters = paddle.parameters.create(cost)
+    if os.path.exists(cls_param_file):
+        print("load %s, continue train ..."%cls_param_file)
+        cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
+        status = json.load(open(status_file,'r'))
+    else:
+        cls_parameters = paddle.parameters.create(cost)
     train()
-    # infer()
+    #infer()
