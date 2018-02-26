@@ -87,7 +87,7 @@ def scan(file):
             _t_img = utils.cvTrimImage(_t_img)
             _t_img = utils.resize(_t_img, ocr.image_height)
             if _t_img.shape[0] * _t_img.shape[1] <= ocr.image_size * ocr.image_size:
-                p_net_g[i] = utils.square_img(_t_img, np.zeros([ocr.image_size, ocr.image_size]), ocr.image_height)
+                p_net_g[j] = utils.square_img(_t_img, np.zeros([ocr.image_size, ocr.image_size]), ocr.image_height)
 
         _img = np.vstack((ocr_inputs[0], debug_net_g[0], p_net_g[0])) 
         utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
