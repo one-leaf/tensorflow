@@ -178,8 +178,10 @@ def get_next_batch_for_gan(batch_size=128):
         trim_images.append(trims_image)
 
         if random.random()>0.9:
-            image = utils_font.add_noise(image)   
+            image = utils_font.add_noise(image) 
+
         image = np.asarray(image)
+        image.flags.writeable = True  
 
         if random.random()>0.9:
             image[image>200] = 255 * random.uniform(0.5, 1)
