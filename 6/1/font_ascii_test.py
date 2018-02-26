@@ -59,12 +59,13 @@ def RES(inputs, seq_len, reuse = False):
         batch_size = tf.shape(inputs)[0]
         layer = utils_nn.resNet50(inputs, True)    
 
-        res_layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 2048]) # -1,1600,2048
+        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 2048]) # -1,1600,2048
 
-        lstm_layer = LSTM(res_layer, seq_len)    # -1, 1600, 256
+        layer = slim.fully_connected(layer, 256, normalizer_fn=None, activation_fn=None)  
+        lstm_layer = LSTM(layer, seq_len)    # -1, 1600, 256
 
         layer = tf.concat([res_layer,lstm_layer], axis=2)
-        layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+        # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, 128, normalizer_fn=None, activation_fn=None)  
         return layer
 
