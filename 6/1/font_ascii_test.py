@@ -54,13 +54,14 @@ def TRIM_G(inputs, reuse=False):
         # print(half_layer.shape) ? 1,1, 512
         return layer, half_layer
 
-def RES(inputs, keep_prob, seq_len, reuse = False):
+def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
         layer = utils_nn.resNet50(inputs, True)    
 
         res_layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 2048]) # -1,1600,2048
-        lstm_layer = LSTM(inputs, keep_prob, seq_len)    # -1, 1600, 256
+
+        lstm_layer = LSTM(res_layer, seq_len)    # -1, 1600, 256
 
         layer = tf.concat([res_layer,lstm_layer], axis=2)
         layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -68,23 +69,20 @@ def RES(inputs, keep_prob, seq_len, reuse = False):
         return layer
 
 # 输入 half_layer
-def LSTM(inputs, keep_prob, seq_len):
-    # layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
-    # layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
-    batch_size = tf.shape(inputs)[0]
-    layer = slim.conv2d(inputs, 64, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.conv2d(layer, 128, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = slim.conv2d(layer, 256, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = tf.reshape(layer, (batch_size, SEQ_LENGHT, 256))
+def LSTM(inputs, seq_len):
+    fc_layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
+    layer = tf.reshape(fc_layer, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
+    # batch_size = tf.shape(inputs)[0]
+    # layer = slim.conv2d(inputs, 64, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    # layer = slim.conv2d(layer, 128, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    # layer = slim.conv2d(layer, 256, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+    # layer = tf.reshape(layer, (batch_size, SEQ_LENGHT, 256))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
-    cell_fw = tf.contrib.rnn.DropoutWrapper(cell_fw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
-    cell_bw = tf.contrib.rnn.DropoutWrapper(cell_bw, input_keep_prob=keep_prob, output_keep_prob=keep_prob)    
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
-    # layer = slim.fully_connected(layer, 1024, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
-    # layer = slim.dropout(layer, keep_prob)
+    layer = tf.concat([layer,fc_layer], axis=2)
     return layer
 
 def neural_networks():
@@ -92,7 +90,6 @@ def neural_networks():
     inputs = tf.placeholder(tf.float32, [None, image_size, image_size], name="inputs")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
-    keep_prob = tf.placeholder(tf.float32, name="keep_prob")
     global_step = tf.Variable(0, trainable=False)
 
     layer = tf.reshape(inputs, (-1, image_size, image_size, 1))
@@ -101,7 +98,7 @@ def neural_networks():
 
     net_g, half_net_g = TRIM_G(layer, reuse = False)
 
-    net_res = RES(resize_layer, keep_prob, seq_len, reuse = False)
+    net_res = RES(resize_layer, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
@@ -111,7 +108,7 @@ def neural_networks():
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
     
-    return  inputs, labels, global_step, keep_prob, \
+    return  inputs, labels, global_step, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, \
             net_g, resize_layer
 
@@ -223,7 +220,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
     return inputs, sparse_labels, seq_len, info
 
 def train():
-    inputs, labels, global_step, keep_prob,\
+    inputs, labels, global_step, \
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
         net_g, resize_layer = neural_networks()
 
@@ -281,8 +278,8 @@ def train():
                     if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                         p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
-                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len, keep_prob: 0.95} 
+                feed = {inputs: p_net_g, labels: train_labels, seq_len: train_seq_len} 
+                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]
@@ -311,11 +308,106 @@ def train():
                         if _t_img.shape[0] * _t_img.shape[1] <= image_size * image_size:
                             p_net_g[i] = utils.square_img(_t_img, np.zeros([image_size, image_size]), image_height)
 
-                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len, keep_prob: 1}) 
+                    decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: train_seq_len}) 
 
                     for i in range(batch_size): 
                         _img = np.vstack((train_inputs[i], p_net_g[i])) 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), _img * 255) 
+
+                    original_list = utils.decode_sparse_tensor(train_labels)
+                    detected_list = utils.decode_sparse_tensor(decoded_list)
+                    if len(original_list) != len(detected_list):
+                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+                            " test and detect length desn't match")
+                    print("T/F: original(length) <-------> detectcted(length)")
+                    acc = 0.
+                    for idx in range(min(len(original_list),len(detected_list))):
+                        number = original_list[idx]
+                        detect_number = detected_list[idx]  
+                        hit = (number == detect_number)          
+                        print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
+                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+                        # 计算莱文斯坦比
+                        import Levenshtein
+                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                    print("Test Accuracy:", acc / len(original_list))
+                    sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                    for f in sorted_fonts[:20]:
+                        print(f)
+            print("Save Model OCR ...")
+            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)
+            try:
+                ckpt = tf.train.get_checkpoint_state(model_G_dir)
+                if ckpt and ckpt.model_checkpoint_path:           
+                    print("Restore Model G...")
+                    g_saver.restore(session, ckpt.model_checkpoint_path)   
+            except:
+                pass
+
+def train2():
+    inputs, labels, global_step, \
+        res_loss, res_optim, seq_len, res_acc, res_decoded, \
+        net_g, resize_layer = neural_networks()
+
+    curr_dir = os.path.dirname(__file__)
+    model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
+    if not os.path.exists(model_dir): os.mkdir(model_dir)
+    model_R_dir = os.path.join(model_dir, "RL32")
+
+    if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
+ 
+    init = tf.global_variables_initializer()
+    with tf.Session() as session:
+        session.run(init)
+
+        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True)
+
+        ckpt = tf.train.get_checkpoint_state(model_R_dir)
+        if ckpt and ckpt.model_checkpoint_path:
+            print("Restore Model OCR...")
+            r_saver.restore(session, ckpt.model_checkpoint_path)    
+
+        AllLosts={}
+        while True:
+            errA = errD1 = errD2 = 1
+            batch_size = 3
+            for batch in range(BATCHES):
+                if len(AllLosts)>10 and random.random()>0.7:
+                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                    font_info = sorted_font[random.randint(0,10)]
+                    font_info = font_info[0].split(",")
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, \
+                        font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
+                else:
+                    # train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, if_to_G=False)
+                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
+                start = time.time()                
+
+                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
+
+                errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                font_info = train_info[0][0]+"/"+train_info[0][1]
+                print("%d time: %4.4fs, res_acc: %.4f, res_loss: %.4f, info: %s " % (steps, time.time() - start, acc, errR, font_info))
+                if np.isnan(errR) or np.isinf(errR) :
+                    print("Error: cost is nan or inf")
+                    return
+
+                for info in train_info:
+                    key = ",".join(info)
+                    if key in AllLosts:
+                        AllLosts[key]=AllLosts[key]*0.95+errR*0.05
+                    else:
+                        AllLosts[key]=errR
+
+                # 报告
+                if steps >0 and steps % REPORT_STEPS < 2:
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, if_to_G=False)   
+           
+                    decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
+
+                    for i in range(batch_size): 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
 
                     original_list = utils.decode_sparse_tensor(train_labels)
                     detected_list = utils.decode_sparse_tensor(decoded_list)
