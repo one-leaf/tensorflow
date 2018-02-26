@@ -53,11 +53,10 @@ def init():
 session, inputs, seq_len, res_decoded, net_g = init()
 
 def scan(file):
-    img = Image.open(file.stream)
-    image = np.array(img)
-    print(image.shape)
-    image = utils.img2gray(image)
-    utils.save(image * 255, os.path.join(curr_dir,"test","p0.png"))
+    image = Image.open(file.stream)
+    image = utils_pil.convert_to_gray(image)
+    image = np.asarray(image)
+    utils.save(image, os.path.join(curr_dir,"test","p0.png"))
    # image = utils.clearImgGray(image)    
    # utils.save(image * 255, os.path.join(curr_dir,"test","p1.png"))
     split_images = utils.splitImg(image)
