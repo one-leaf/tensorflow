@@ -70,19 +70,11 @@ def RES(inputs, seq_len, reuse = False):
 
 # 输入 half_layer
 def LSTM(inputs, seq_len):
-    # fc_layer = slim.fully_connected(inputs, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
-    # layer = tf.reshape(inputs, (-1, SEQ_LENGHT, POOL_SIZE*POOL_SIZE))
-    # batch_size = tf.shape(inputs)[0]
-    # layer = slim.conv2d(inputs, 64, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    # layer = slim.conv2d(layer, 128, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    # layer = slim.conv2d(layer, 256, [4,4], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
-    # layer = tf.reshape(layer, (batch_size, SEQ_LENGHT, 256))
     num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
     cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, axis=2)
-    # layer = tf.concat([layer,fc_layer], axis=2)
     return layer
 
 def neural_networks():
