@@ -318,6 +318,8 @@ def splitImg(img_gray):
 
     h_sum = np.sum(adaptive_binary_inv, axis=1)
     peek_ranges = extract_peek_ranges_from_array(h_sum,0,5)
+    # print(h_sum)
+    # print(peek_ranges)
     images=[]
     for i, peek_range in enumerate(peek_ranges):
         x = 0
@@ -351,6 +353,7 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
     peek_ranges = []
     zero_count = 0
     for i, val in enumerate(array_vals):
+        # print(i,val)
         if val > minimun_val and start_i is None:
             start_i = i
         elif val > minimun_val and start_i is not None:
@@ -363,7 +366,7 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
                 zero_count = 0
             else:
                 zero_count += 1
-        elif val <= minimun_val and start_i is None:
+        elif val <= minimun_val and (start_i is None or end_i is None):
             pass
         else:
             raise ValueError("cannot parse this case...")
@@ -570,15 +573,22 @@ def getImage(CHARS, font_file, image_height=16, font_length=30, font_size=12, wo
 #     # cv2.destroyAllWindows()    
 
 def main():
-    img = Image.open("D://S4_0.png")
-    img = np.array(img)
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
-    img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
-    show(img)    
+    # img = Image.open("D://S4_0.png")
+    # img = np.array(img)
+    # kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (10, 1))
+    # img = cv2.morphologyEx(img, cv2.MORPH_CLOSE, kernel)
+    # show(img)    
     # img = cv2.dilate(img, None , iterations=10) 
     # img = cv2.erode(img, None , iterations=10) 
     # show(img)
-
+    import utils_pil
+    image = Image.open("/Users/oneleaf/Desktop/test.png")
+    image = utils_pil.convert_to_gray(image)
+    image = np.asarray(image)
+    # utils.save(image, os.path.join(curr_dir,"test","p0.png"))
+   # image = utils.clearImgGray(image)    
+   # utils.save(image * 255, os.path.join(curr_dir,"test","p1.png"))
+    split_images = splitImg(image)
 
 if __name__ == '__main__':
     main()
