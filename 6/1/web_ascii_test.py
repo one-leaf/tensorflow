@@ -49,9 +49,9 @@ def init():
         print("Restore Model R...")
         r_saver.restore(session, ckpt.model_checkpoint_path)    
 
-    return session, inputs, seq_len, res_decoded, net_g
+    return session, inputs, keep_prob, seq_len, res_decoded, net_g
 
-session, inputs, seq_len, res_decoded, net_g = init()
+session, inputs, keep_prob, seq_len, res_decoded, net_g = init()
 
 def scan(file):
     image = Image.open(file.stream)
@@ -92,7 +92,7 @@ def scan(file):
         _img = np.vstack((ocr_inputs[0], debug_net_g[0], p_net_g[0])) 
         utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
 
-        decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len}) 
+        decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len, keep_prob: 1.}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))
         detected_list = utils.decode_sparse_tensor(decoded_list)            
