@@ -429,15 +429,7 @@ def train2():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
                         print(f)
-            print("Save Model OCR ...")
-            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)
-            try:
-                ckpt = tf.train.get_checkpoint_state(model_G_dir)
-                if ckpt and ckpt.model_checkpoint_path:           
-                    print("Restore Model G...")
-                    g_saver.restore(session, ckpt.model_checkpoint_path)   
-            except:
-                pass
+         
 
 if __name__ == '__main__':
-    train()
+    train2()
