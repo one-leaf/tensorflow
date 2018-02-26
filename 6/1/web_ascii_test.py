@@ -12,6 +12,7 @@ from PIL import Image
 import json
 import font_ascii_test as ocr
 import utils, cv2
+import utils_pil, utils_font, utils_nn
 
 try:
     from StringIO import StringIO
