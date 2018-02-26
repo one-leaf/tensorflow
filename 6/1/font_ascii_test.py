@@ -327,6 +327,7 @@ def train():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
                         print(f)
+
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)
             try:
@@ -422,7 +423,8 @@ def train2():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
                         print(f)
-         
+            print("Save Model OCR ...")
+            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
 
 if __name__ == '__main__':
     train2()
