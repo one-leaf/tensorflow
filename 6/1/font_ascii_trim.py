@@ -129,11 +129,11 @@ def get_next_batch_for_gan(batch_size=128):
             font_length = random.randint(3, 400)            
             # text  = utils_font.get_random_text(CHARS, eng_world_list, font_length)
             text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint, trim=False)
+            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
             if font_hint in (0,1,3,5):
-                clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0, trim=False)
+                clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 0)
             else:
-                clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4, trim=False)    
+                clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4)    
             temp_image = utils_pil.resize_by_height(image, image_height)
             if clear_trim_image.size[0] != image.size[0] or  clear_trim_image.size[1] != image.size[1]:
                 print("get size not same,",image.size,clear_trim_image.size,font_name,font_size,font_mode,font_hint)
