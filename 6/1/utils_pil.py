@@ -87,11 +87,18 @@ def show(img, cmap='gray'):
 def trim(img):
     bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
     diff = ImageChops.difference(img, bg)
-    diff = ImageChops.add(diff, diff, 2.0, -100)
+    # diff = ImageChops.add(diff, diff, 2.0, -100)
     bbox = diff.getbbox()
     if bbox:
         return img.crop(bbox)
 
+# 获取空白Box
+def get_trim_box(img):
+    bg = Image.new(img.mode, img.size, img.getpixel((0,0)))
+    diff = ImageChops.difference(img, bg)
+    bbox = diff.getbbox()
+    return bbox
+        
 # 图片缩放
 def resize_by_size(img, size):
     return img.resize(size,Image.ANTIALIAS) 
