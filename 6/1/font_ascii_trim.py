@@ -136,8 +136,8 @@ def get_next_batch_for_gan(batch_size=128):
                 clear_trim_image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, 4, trim=False)   
 
             bbox = utils_pil.get_trim_box(clear_trim_image)
-            image = image.crop(box)
-            clear_trim_image = clear_trim_image.crop(box)
+            image = image.crop(bbox)
+            clear_trim_image = clear_trim_image.crop(bbox)
 
             temp_image = utils_pil.resize_by_height(image, image_height)
             if clear_trim_image.size[0] != image.size[0] or  clear_trim_image.size[1] != image.size[1]:
