@@ -46,7 +46,7 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii"
-SEQ_LENGHT = resize_image_size * resize_image_size // (POOL_SIZE * POOL_SIZE)
+SEQ_LENGHT = resize_image_size * resize_image_size // (POOL_SIZE * POOL_SIZE) #1024
 
 def TRIM_G(inputs, reuse=False):    
     with tf.variable_scope("TRIM_G", reuse=reuse):      
@@ -59,9 +59,12 @@ def RES(inputs, seq_len, reuse = False):
         batch_size = tf.shape(inputs)[0]
         layer = utils_nn.resNet50(inputs, True)    
 
-        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 2048]) # -1,1600,2048
 
-        res_layer = slim.fully_connected(layer, 512, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)  
+        layer = slim.conv2d(layer, SEQ_LENGHT, [3,3], normalizer_fn=slim.batch_norm, activation_fn=None) 
+
+        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, SEQ_LENGHT]) # -1,1024,1024
+
+        res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)  
         lstm_layer = LSTM(res_layer, seq_len)    # -1, 1600, 256
 
         layer = tf.concat([res_layer, lstm_layer], axis=2)
@@ -71,7 +74,7 @@ def RES(inputs, seq_len, reuse = False):
 
 # 输入 half_layer
 def LSTM(inputs, seq_len):
-    num_hidden = 512
+    num_hidden = 256
     cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
     cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
     outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
