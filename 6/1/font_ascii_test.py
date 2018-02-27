@@ -60,7 +60,8 @@ def RES(inputs, seq_len, reuse = False):
         layer = utils_nn.resNet50(inputs, True)    
 
         layer = slim.conv2d(layer, SEQ_LENGHT, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, SEQ_LENGHT]) # -1,1024,1024
+        layer = slim.avg_pool2d(layer,[resize_image_size//POOL_SIZE, resize_image_size//POOL_SIZE])
+        layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, 1]) # -1,1024,1024
 
         res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
         lstm_layer = LSTM(res_layer, seq_len)    # -1, 1600, 256
