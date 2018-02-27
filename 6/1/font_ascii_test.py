@@ -418,9 +418,10 @@ def train2():
                     for idx in range(min(len(original_list),len(detected_list))):
                         number = original_list[idx]
                         detect_number = detected_list[idx]  
-                        hit = (number == detect_number)          
-                        print("%6s" % hit, list_to_chars(number), "(", len(number), ")")
-                        print("%6s" % "",  list_to_chars(detect_number), "(", len(detect_number), ")")
+                        hit = (number == detect_number)
+                        print("----------",hit,"------------")          
+                        print(list_to_chars(number), "(", len(number), ")")
+                        print(list_to_chars(detect_number), "(", len(detect_number), ")")
                         # 计算莱文斯坦比
                         import Levenshtein
                         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
