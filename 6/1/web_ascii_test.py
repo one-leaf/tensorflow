@@ -74,6 +74,8 @@ def scan(file):
         ocr_inputs = np.zeros([1, ocr.image_size, ocr.image_size])
         ocr_inputs[0,:] = utils.square_img(image, np.zeros([ocr.image_size, ocr.image_size]))
         
+        utils.save(ocr_inputs[0] * 255, os.path.join(curr_dir,"test","ocr_%s.png"%i))
+        
         ocr_seq_len = np.ones(1) * ocr.SEQ_LENGHT 
 
         start = time.time()
