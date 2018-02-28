@@ -24,7 +24,7 @@ curr_dir = os.path.dirname(__file__)
 def init():
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'    
 
-    inputs, labels, global_step, keep_prob,\
+    inputs, labels, global_step, \
         res_loss, res_optim, seq_len, res_acc, res_decoded, \
         net_g, resize_layer = ocr.neural_networks()
 
@@ -77,22 +77,22 @@ def scan(file):
         ocr_seq_len = np.ones(1) * ocr.SEQ_LENGHT 
 
         start = time.time()
-        p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
-        p_net_g = np.squeeze(p_net_g, axis=3)
+        # p_net_g = session.run(net_g, {inputs: ocr_inputs}) 
+        # p_net_g = np.squeeze(p_net_g, axis=3)
 
-        debug_net_g = np.copy(p_net_g)
-        for j in range(1):
-            _t_img = utils.unsquare_img(p_net_g[j], ocr.image_height)                          
-            _t_img[_t_img<0] = 0
-            _t_img = utils.cvTrimImage(_t_img)
-            _t_img = utils.resize(_t_img, ocr.image_height)
-            if _t_img.shape[0] * _t_img.shape[1] <= ocr.image_size * ocr.image_size:
-                p_net_g[j] = utils.square_img(_t_img, np.zeros([ocr.image_size, ocr.image_size]), ocr.image_height)
+        # debug_net_g = np.copy(p_net_g)
+        # for j in range(1):
+        #     _t_img = utils.unsquare_img(p_net_g[j], ocr.image_height)                          
+        #     _t_img[_t_img<0] = 0
+        #     _t_img = utils.cvTrimImage(_t_img)
+        #     _t_img = utils.resize(_t_img, ocr.image_height)
+        #     if _t_img.shape[0] * _t_img.shape[1] <= ocr.image_size * ocr.image_size:
+        #         p_net_g[j] = utils.square_img(_t_img, np.zeros([ocr.image_size, ocr.image_size]), ocr.image_height)
 
-        _img = np.vstack((ocr_inputs[0], debug_net_g[0], p_net_g[0])) 
-        utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
+        # _img = np.vstack((ocr_inputs[0], debug_net_g[0], p_net_g[0])) 
+        # utils.save(_img * 255, os.path.join(curr_dir,"test","%s.png"%i))
 
-        decoded_list = session.run(res_decoded[0], {inputs: p_net_g, seq_len: ocr_seq_len, keep_prob: 1.}) 
+        decoded_list = session.run(res_decoded[0], {inputs: ocr_inputs, seq_len: ocr_seq_len}) 
         seconds = round(time.time() - start,2)
         print("filished ocr %s , paid %s seconds" % (i,seconds))
         detected_list = utils.decode_sparse_tensor(decoded_list)            
