@@ -154,12 +154,17 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             if random.random()> 0.5:
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             else:
-                text = []
-                chars = random.sample(CHARS, random.randint(15,20))+[" "," "]            
-                for i in range(random.randint(10,20)):
-                    text += chars  #
-                random.shuffle(text)
-                text = "".join(text).strip()
+                text=""
+                if os.path.exists(os.path.join(curr_dir,"train.txt")):
+                    text = random.choice(open(os.path.join(curr_dir,"train.txt")).readlines())
+                    text = text.strip()
+                if len(text)==0:    
+                    text = []
+                    chars = random.sample(CHARS, random.randint(15,20))+[" "," "]            
+                    for i in range(random.randint(10,20)):
+                        text += chars  #
+                    random.shuffle(text)
+                    text = "".join(text).strip()
 
             # text = CHARS + CHARS + random.sample(CHARS, random.randint(0,len(CHARS)))
             # random.shuffle(text)
