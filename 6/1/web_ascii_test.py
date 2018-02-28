@@ -97,7 +97,7 @@ def scan(file):
         print("filished ocr %s , paid %s seconds" % (i,seconds))
         detected_list = utils.decode_sparse_tensor(decoded_list)            
         for detect_number in detected_list:
-            ocr_texts.append(ocr.list_to_chars(detect_number))
+                .append(ocr.list_to_chars(detect_number))
 
     return ocr_texts
 
@@ -126,7 +126,16 @@ def single_digit():
     if file :
         code = scan(file)
         print(code)
-        return json.dumps(code, ensure_ascii=False)
+        codestr = "\n".join(code)
+        return '''
+        <!DOCTYPE html>
+        <html lang="zh-CN">
+        <body>
+            <pre>%s</pre>
+        </body>
+        </html>
+        '''%codestr
+        # return json.dumps(code, ensure_ascii=False)
     else:
         return 'No file upload'
 
