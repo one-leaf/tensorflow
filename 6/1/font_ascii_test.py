@@ -195,7 +195,8 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         if if_to_G and random.random()>0.5:
             image, _ = utils_pil.random_space2(image, image,  image_height)
         
-        if if_to_G and random.random()>0.5:
+        # if if_to_G and random.random()>0.5:
+        if random.random()>0.5:
             image = utils_font.add_noise(image)   
     
         image = np.asarray(image) 
