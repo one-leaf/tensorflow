@@ -359,7 +359,7 @@ def extract_peek_ranges_from_array(array_vals, minimun_val=0, minimun_range=5):
         elif val > minimun_val and start_i is not None:
             end_i = i
         elif val <= minimun_val and start_i is not None and end_i is not None:
-            if end_i - start_i >= minimun_range and zero_count >= 1:
+            if end_i - start_i >= minimun_range and zero_count >= 2:
                 peek_ranges.append((start_i, end_i))
                 start_i = None
                 end_i = None
@@ -589,6 +589,8 @@ def main():
    # image = utils.clearImgGray(image)    
    # utils.save(image * 255, os.path.join(curr_dir,"test","p1.png"))
     split_images = splitImg(image)
+    for img in split_images:
+        show(img)
 
 if __name__ == '__main__':
     main()
