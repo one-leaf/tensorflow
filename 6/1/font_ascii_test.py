@@ -156,12 +156,12 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
 
         while True:
             font_length = random.randint(5, 400)
-            if random.random()> 0.5:
+            if random.random() > 0.5:
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             else:
                 text=""
 
-                if len(train_text_lines)>0:
+                if len(train_text_lines)>0 and random.random() < 0.01:
                     text = random.choice(train_text_lines)
                     text = text.strip()
 
