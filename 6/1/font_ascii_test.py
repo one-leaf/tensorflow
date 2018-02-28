@@ -159,7 +159,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             if random.random() > 0.1:
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             else:
-                # text=""
+                text=""
 
                 if len(train_text_lines)>0 and random.random() < 0.01:
                     text = random.choice(train_text_lines)
