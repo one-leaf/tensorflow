@@ -97,7 +97,7 @@ def scan(file):
         print("filished ocr %s , paid %s seconds" % (i,seconds))
         detected_list = utils.decode_sparse_tensor(decoded_list)            
         for detect_number in detected_list:
-                .append(ocr.list_to_chars(detect_number))
+            ocr_texts.append(ocr.list_to_chars(detect_number))
 
     return ocr_texts
 
