@@ -126,7 +126,11 @@ def list_to_chars(list):
     except Exception as err:
         return "Error: %s" % err        
 
-train_text_lines = None
+if os.path.exists(os.path.join(curr_dir,"train.txt")):
+    train_text_lines = open(os.path.join(curr_dir,"train.txt")).readlines()
+else:
+    train_text_lines = []
+
 def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
     inputs_images = []   
     codes = []
@@ -156,10 +160,8 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             else:
                 text=""
-                if train_text_lines==None and os.path.exists(os.path.join(curr_dir,"train.txt")):
-                    train_text_lines = open(os.path.join(curr_dir,"train.txt")).readlines()
 
-                if train_text_lines!=None:
+                if len(train_text_lines)>0:
                     text = random.choice(train_text_lines)
                     text = text.strip()
 
