@@ -33,7 +33,7 @@ def cvTrimImage(img):
 
     # 找到最大的矩形框
     x,y,w,h = getMaxContours(_b_t_img)
-    if w==0 or h==0: return img
+    if w<10 or h<10: return img
     # 有时候左边缺一个像素，
     return b_t_img[y:y+h,x-1:x+w]
 
