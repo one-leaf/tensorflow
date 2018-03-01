@@ -42,7 +42,7 @@ def cvTrimImage(img):
 def resize(img,height=28):
     if height == img.shape[1]: return img
     width = round(height*img.shape[1]/img.shape[0])
-    # print(img.shape[0],img.shape[1],width,height)
+    print(img.shape[0],img.shape[1],width,height)
     return cv2.resize(img,(width,height),interpolation=cv2.INTER_NEAREST)
 
 # 文本转向量
