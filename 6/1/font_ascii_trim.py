@@ -265,27 +265,24 @@ def train():
                 errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
                 print("T %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
                 
-                if errD1/errD2 < 0.9:
-                    start = time.time()                
-                    errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
-                    print("T %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
+                if errD1/errD2 > 0.99:
+                    for _ in range(3):
+                        start = time.time()                
+                        errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
+                        print("T %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
                     
-                    start = time.time()                
-                    errD, errD1, errD2, _, steps = session.run([t_d_loss, t_d_loss_real, t_d_loss_fake, t_d_optim, t_global_step], feed)
-                    print("T %d time: %4.4fs, d_loss: %.8f (d_loss_real: %.6f  d_loss_fake: %.6f)" % (steps, time.time() - start, errD, errD1, errD2))
 
                 start = time.time()                                
                 errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
                 print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
-                if errD1/errD2 > 0.99:
-                    start = time.time()                                
-                    errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
-                    print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
+                if errD1/errD2 < 0.9:
+                    for _ in range(int(round(2/(errD1/errD2)))):
+                        start = time.time()                                
+                        errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
+                        print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
 
-                    start = time.time()                                
-                    errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
-                    print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))
+
                 # start = time.time()                                
                 # errG, errM, errA, errH, _, steps, t_net_g = session.run([t_g_loss, t_g_mse_loss, t_g_loss_fake, t_g_half_loss, t_g_optim, t_global_step, t_fake_B], feed)
                 # print("T %d time: %4.4fs, g_loss: %.8f (mse: %.6f half: %.6f adv: %.6f)" % (steps, time.time() - start, errG, errM, errH, errA))                
