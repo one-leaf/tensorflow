@@ -161,7 +161,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             else:
                 text=""
 
-                if len(train_text_lines)>0 and random.random() < 0.01:
+                if len(train_text_lines)>0:
                     text = random.choice(train_text_lines)
                     text = text.strip()
 
