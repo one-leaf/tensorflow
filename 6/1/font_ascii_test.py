@@ -155,7 +155,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             font_hint = random.choice([0,4]) 
 
         while True:
-            font_length = random.randint(5, 300)
+            font_length = random.randint(5, 50)
             if random.random() > 0.1:
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
             else:
