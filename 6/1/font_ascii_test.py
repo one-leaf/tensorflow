@@ -380,6 +380,7 @@ def train2():
         if ckpt and ckpt.model_checkpoint_path:
             print("Restore Model OCR...")
             r_saver.restore(session, ckpt.model_checkpoint_path)    
+            print("Restored.")
 
         AllLosts={}
         while True:
@@ -444,6 +445,7 @@ def train2():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
                         print(f)
+                        
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
 
