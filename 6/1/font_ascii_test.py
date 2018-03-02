@@ -181,7 +181,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
             temp_image = utils_pil.resize_by_height(image, image_height)
             w, h = temp_image.size            
             if w * h < image_size * image_size: break
-
+            print("text too long:",text)
         image = utils_pil.convert_to_gray(image) 
         w, h = image.size
         if h > image_height:
@@ -445,7 +445,7 @@ def train2():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     for f in sorted_fonts[:20]:
                         print(f)
-                        
+
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
 
