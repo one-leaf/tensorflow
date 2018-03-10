@@ -260,7 +260,7 @@ def reader_get_image_and_label():
         while True:
             full=True
             for buffer_name in buffers:
-                if len(buffers[buffer_name])<buffers[buffer_name].maxlen*0.5:
+                if len(buffers[buffer_name])<100:
                     print("cacheing", len(buffers["0"]), len(buffers["1"]), len(buffers["2"]))
                     time.sleep(5)
                     full=False
