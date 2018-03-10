@@ -270,9 +270,9 @@ def reader_get_image_and_label():
         status["steptime"]=time.time()    
         while t1.isAlive(): 
             k=random.random()
-            if k<0.3:
+            if k<0.2:
                 data = buffers["0"]
-            elif k>0.2:
+            elif k>0.7:
                 data = buffers["1"]
             else:
                 data = buffers["2"]      
