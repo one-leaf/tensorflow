@@ -17,8 +17,11 @@ import commands, re
 import threading
 from collections import deque
 
-home = "/home/kesci/work/"
-data_path = "/mnt/BROAD-datasets/video/"
+# home = "/home/kesci/work/"
+# data_path = "/mnt/BROAD-datasets/video/"
+home = os.path.dirname(__file__)
+data_path = os.path.join(home,"data")
+
 model_path = os.path.join(home,"model")
 cls_param_file = os.path.join(model_path,"param_cls.tar")
 status_file = os.path.join(model_path,"status.json")
@@ -66,9 +69,9 @@ def setBuffer():
             buffers[buff].clear()
     buffer_size = get_buffer_size()
     print("buffer size:",buffer_size)
-    buffers["0"] = deque(maxlen=int(buffer_size*0.1))
-    buffers["1"] = deque(maxlen=int(buffer_size*0.1))
-    buffers["2"] = deque(maxlen=int(buffer_size*0.8))
+    buffers["0"] = deque(maxlen=int(buffer_size))
+    buffers["1"] = deque(maxlen=int(buffer_size))
+    buffers["2"] = deque(maxlen=int(buffer_size))
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -210,27 +213,25 @@ def pre_data():
                     label[i] = 1
         
         for _data, _label in add_data_to_list(label, v_data):
-            #刚开始只学干净的数据
-            if status["epoch_count"]==0:
-                _temp_str="".join(map(str,_label))                
-                if _temp_str.find("12")>0: continue
-                if _temp_str.find("23")>0: continue
-                if _temp_str.find("31")>0: continue
-                if _temp_str.find("32")>0: continue
-                if re.match(r'10{1,5}1',_temp_str): continue
-                if re.match(r'20{1,5}3',_temp_str): continue
-                if re.match(r'30{1,5}2',_temp_str): continue
+            # #刚开始只学干净的数据
+            # if status["epoch_count"]==0:
+            #     _temp_str="".join(map(str,_label))                
+            #     if _temp_str.find("12")>0: continue
+            #     if _temp_str.find("23")>0: continue
+            #     if _temp_str.find("31")>0: continue
+            #     if _temp_str.find("32")>0: continue
+            #     if re.match(r'10{1,5}1',_temp_str): continue
+            #     if re.match(r'20{1,5}3',_temp_str): continue
+            #     if re.match(r'30{1,5}2',_temp_str): continue
             
             _rate = 1.0*sum(_label)/len(_label)
-            if 2 in _label or 3 in _label:
-                data = buffers["2"]
-            elif _rate<=0.2:
+            if 2 in _label and 3 in _label:
                 data = buffers["0"]
-            elif _rate>=0.8:
+            elif _rate<=0.2 or _rate>=0.8:
                 data = buffers["1"]
-            else:
+            elif:
                 data = buffers["2"]
- 
+            
             if len(buffers["2"]) < buffer_size//2:
                 data = buffers["2"]
             data.append((t_data["id"], _data, _label))
@@ -269,9 +270,9 @@ def reader_get_image_and_label():
         status["steptime"]=time.time()    
         while t1.isAlive(): 
             k=random.random()
-            if k<0.1:
+            if k<0.3:
                 data = buffers["0"]
-            elif k>0.8:
+            elif k>0.2:
                 data = buffers["1"]
             else:
                 data = buffers["2"]      

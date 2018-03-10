@@ -132,7 +132,13 @@ def network():
     net = paddle.layer.block_expand(input=net, num_channels=5, stride_x=1, stride_y=1, block_x=1, block_y=1)
 
     net = normal_network(net)
-        
+    avg_pool = paddle.layer.pooling(input=net, pooling_type=paddle.pooling.Avg(),
+                                agg_level=paddle.layer.AggregateLevel.TO_NO_SEQUENCE)
+    
+    net_class_fc = paddle.layer.mixed(size=class_dim,
+                          input=[paddle.layer.full_matrix_projection(input=avg_pool)],
+                          act=paddle.activation.Softmax())
+    
     net_class_fc = paddle.layer.fc(input=[net,box], size=class_dim, act=paddle.activation.Softmax())
     cost_class = paddle.layer.classification_cost(input=net_class_fc, label=a)
 
