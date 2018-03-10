@@ -1,5 +1,3 @@
-## DEBUG 用 ##
-
 # coding=utf-8
 #!/sbin/python
 
