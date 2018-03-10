@@ -229,7 +229,7 @@ def pre_data():
                 data = buffers["0"]
             elif _rate<=0.2 or _rate>=0.8:
                 data = buffers["1"]
-            elif:
+            else:
                 data = buffers["2"]
             
             if len(buffers["2"]) < buffer_size//2:
