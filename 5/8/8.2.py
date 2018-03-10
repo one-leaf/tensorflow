@@ -15,8 +15,10 @@ import gc
 import commands, re  
 import pickle
 
-home = "/home/kesci/work/"
-model_path = os.path.join(home,"model")
+# home = "/home/kesci/work/"
+# model_path = os.path.join(home,"model")
+home = os.path.dirname(__file__)
+data_path = os.path.join(home,"data")
 result_json_file = os.path.join(model_path,"ai.json")
 out_dir = os.path.join(model_path, "out")
 if not os.path.exists(model_path): os.mkdir(model_path)

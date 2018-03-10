@@ -393,8 +393,8 @@ if __name__ == '__main__':
         cls_parameters = paddle.parameters.Parameters.from_tar(open(cls_param_file,"rb"))
         print("has train %s"% status["usedtime"])
         if status["usedtime"] > max_train_time:
-#             infer_validation()
-            infer()
+            infer_validation()
+            # infer()
         else:
             train()
     else:
