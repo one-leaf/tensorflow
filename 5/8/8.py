@@ -41,7 +41,7 @@ max_train_time = 3600*3
 # 每一轮最长训练时间
 max_epoch_time = 3600
 class_dim=4       # 分类 0，空白  1 过程，2，开始, 3，结束， 
-block_size=2      # 坐标在右边，需要为偶数
+block_size=1      # 坐标在右边，需要为偶数
 mark_length=6     # 标记开始和结束长度
 learning_rate = 1e-4 # 学习速率
 batch_size=16     # 每次最大学习多少批
