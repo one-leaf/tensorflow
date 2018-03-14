@@ -126,11 +126,12 @@ def resNet50v2(layer, isPoolSize=True, stride=2):
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
         for i in range(6):
             layer = resNetBlockV2(layer, 256)
-        layer = slim.max_pool2d(layer, [1, 2])
+        layer = slim.max_pool2d(layer, [2, 2])
 
         layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
             layer = resNetBlockV2(layer, 512)
+        layer = slim.max_pool2d(layer, [2, 2])
 
         return layer
 
@@ -162,6 +163,7 @@ def resNet101(layer, isPoolSize=True):
         layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
             layer = resNetBlockV2(layer, 512)
+        layer = slim.max_pool2d(layer, [3, 3])
         return layer   
 
 def resNet152(layer, isPoolSize=True):
@@ -190,6 +192,8 @@ def resNet152(layer, isPoolSize=True):
         layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
             layer = resNetBlockV2(layer, 512)
+        layer = slim.max_pool2d(layer, [2, 2])
+
         return layer 
 
 # 参考 https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/slim/python/slim/nets/inception_v3.py
