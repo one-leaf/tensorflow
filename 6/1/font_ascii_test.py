@@ -72,28 +72,35 @@ def RES(inputs, seq_len, reuse = False):
         return layer
 
 # 输入 half_layer
+# def LSTM(inputs, seq_len, fc_size, lstm_size):
+#     fc = slim.fully_connected(inputs, fc_size, normalizer_fn=None, activation_fn=None)
+#     cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
+#     lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len, dtype=inputs.dtype)
+#     output = tf.concat([fc, lstm], axis=2) 
+#     for i in range(6):
+#         with tf.variable_scope(None, default_name="bidirectional-rnn"):
+#             fc = slim.fully_connected(output, fc_size, normalizer_fn=None, activation_fn=None)
+#             if i%2==0:
+#                 input = tf.reverse_sequence(fc,seq_len,1) 
+#             else:
+#                 input = fc
+#             cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
+#             lstm, _ = tf.nn.dynamic_rnn(cell, input, seq_len, dtype=inputs.dtype)
+#             if i%2==0:
+#                 lstm = tf.reverse_sequence(lstm,seq_len,1) 
+#             output = tf.concat([fc, lstm], axis=2) 
+#     return output
+
 def LSTM(inputs, seq_len, fc_size, lstm_size):
-    fc = slim.fully_connected(inputs, fc_size, normalizer_fn=None, activation_fn=None)
-    cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
-    lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len, dtype=inputs.dtype)
-    output = tf.concat([fc, lstm], axis=2) 
-    for i in range(6):
-        with tf.variable_scope(None, default_name="bidirectional-rnn"):
-            fc = slim.fully_connected(output, fc_size, normalizer_fn=None, activation_fn=None)
-            if i%2==0:
-                input = tf.reverse_sequence(fc,seq_len,1) 
-            else:
-                input = fc
-            cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
-            lstm, _ = tf.nn.dynamic_rnn(cell, input, seq_len, dtype=inputs.dtype)
-            if i%2==0:
-                lstm = tf.reverse_sequence(lstm,seq_len,1) 
-            output = tf.concat([fc, lstm], axis=2) 
-    # num_hidden = 256
-    # cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
-    # cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
-    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
-    # layer = tf.concat(outputs, axis=2)
+    layer = inputs
+    num_hidden = 256
+    for i in range(4):
+        with tf.variable_scope("rnn-%s"%i):
+            cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
+            cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
+            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
+            outputs.append(layer)
+            layer = tf.concat(outputs, axis=2)
     return output
 
 def neural_networks():
