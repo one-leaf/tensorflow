@@ -40,7 +40,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 32
-BATCH_SIZE = 1
+BATCH_SIZE = 3
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -57,39 +57,19 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
-        layer = utils_nn.resNet50(inputs, True)    
+        layer = utils_nn.resNet101(inputs, True)    
 
         layer = slim.conv2d(layer, SEQ_LENGHT, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
         layer = slim.avg_pool2d(layer,[2, 2])
         layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, SEQ_LENGHT//4]) # -1,1024,256
 
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
-        layer = LSTM(layer, seq_len, 256, 8)    # -1, 1024, 256
+        layer = LSTM(layer, seq_len, 256, 256)    # -1, 1024, 256
 
         # layer = tf.concat([layer, lstm_layer], axis=2)
         # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
         return layer
-
-# 输入 half_layer
-# def LSTM(inputs, seq_len, fc_size, lstm_size):
-#     fc = slim.fully_connected(inputs, fc_size, normalizer_fn=None, activation_fn=None)
-#     cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
-#     lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len, dtype=inputs.dtype)
-#     output = tf.concat([fc, lstm], axis=2) 
-#     for i in range(6):
-#         with tf.variable_scope(None, default_name="bidirectional-rnn"):
-#             fc = slim.fully_connected(output, fc_size, normalizer_fn=None, activation_fn=None)
-#             if i%2==0:
-#                 input = tf.reverse_sequence(fc,seq_len,1) 
-#             else:
-#                 input = fc
-#             cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
-#             lstm, _ = tf.nn.dynamic_rnn(cell, input, seq_len, dtype=inputs.dtype)
-#             if i%2==0:
-#                 lstm = tf.reverse_sequence(lstm,seq_len,1) 
-#             output = tf.concat([fc, lstm], axis=2) 
-#     return output
 
 def LSTM(inputs, seq_len, fc_size, lstm_size):
     layer = inputs
