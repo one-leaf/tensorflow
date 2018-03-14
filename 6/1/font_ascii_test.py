@@ -93,15 +93,15 @@ def RES(inputs, seq_len, reuse = False):
 
 def LSTM(inputs, seq_len, fc_size, lstm_size):
     layer = inputs
-    num_hidden = 256
     for i in range(4):
         with tf.variable_scope("rnn-%s"%i):
-            cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
-            cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
+            layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
             outputs.append(layer)
             layer = tf.concat(outputs, axis=2)
-    return output
+    return layer
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
