@@ -1,8 +1,9 @@
+## DEBUG 用 ##
+
 # coding=utf-8
 #!/sbin/python
 
 import numpy as np
-import paddle.v2 as paddle
 import json
 import os
 import random
@@ -12,26 +13,22 @@ import shutil
 import logging
 import gc
 import commands, re  
+import pickle
 
-
-home = os.path.dirname(__file__)
-data_path = os.path.join(home,"data")
+home = "/home/kesci/work/"
 model_path = os.path.join(home,"model")
-param_file = os.path.join(model_path,"param2.tar")
-result_json_file = os.path.join(model_path,"ai2.json")
+result_json_file = os.path.join(model_path,"ai.json")
 out_dir = os.path.join(model_path, "out")
-
-# home = "/home/kesci/work/"
-# data_path = "/mnt/BROAD-datasets/video/"
-# param_file = "/home/kesci/work/param2.data"
-# param_file_bak = "/home/kesci/work/param2.data.bak"
-# result_json_file = "/home/kesci/work/ai2.json"
-
 if not os.path.exists(model_path): os.mkdir(model_path)
 if not os.path.exists(out_dir): os.mkdir(out_dir)
+np.set_printoptions(threshold=np.inf)
 
-class_dim = 2 # 0 不是关键 1 是关键
-train_size = 16 # 学习的关键帧长度
+data_path = "/mnt/BROAD-datasets/video/"
+training_path = os.path.join(data_path,"training","image_resnet50_feature")
+validation_path = os.path.join(data_path,"validation","image_resnet50_feature")
+testing_path = os.path.join(data_path,"testing","image_resnet50_feature")
+
+mark_length = 6 # 标记
 
 def load_data(filter=None):
     data = json.loads(open(os.path.join(data_path,"meta.json")).read())
@@ -42,136 +39,218 @@ def load_data(filter=None):
         if filter!=None and data['database'][data_id]['subset']!=filter:
             continue
         if data['database'][data_id]['subset'] == 'training':
-            if os.path.exists(os.path.join(data_path,"training", "%s.pkl"%data_id)):
+            if os.path.exists(os.path.join(training_path, "%s.pkl"%data_id)):
                 training_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
         elif data['database'][data_id]['subset'] == 'validation':
-            if os.path.exists(os.path.join(data_path,"validation", "%s.pkl"%data_id)):
+            if os.path.exists(os.path.join(validation_path, "%s.pkl"%data_id)):
                 validation_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
         elif data['database'][data_id]['subset'] == 'testing':
-            if os.path.exists(os.path.join(data_path,"testing", "%s.pkl"%data_id)):
+            if os.path.exists(os.path.join(testing_path, "%s.pkl"%data_id)):
                 testing_data.append({'id':data_id,'data':data['database'][data_id]['annotations']})
     print('load data train %s, valid %s, test %s'%(len(training_data), len(validation_data), len(testing_data)))
     return training_data, validation_data, testing_data
 
-def conv_bn_layer(input, ch_out, filter_size, stride, padding, active_type=paddle.activation.Relu(), ch_in=None):
-    tmp = paddle.layer.img_conv(
-        input=input,
-        filter_size=(filter_size,1),
-        num_channels=ch_in,
-        num_filters=ch_out,
-        stride=stride,
-        padding=(padding,0),
-        act=paddle.activation.Linear(),
-        bias_attr=False)
-    return paddle.layer.batch_norm(input=tmp, act=active_type)
+training_data, validation_data, testing_data = load_data()
 
-def shortcut(ipt, n_in, n_out, stride):
-    if n_in != n_out:
-        return conv_bn_layer(ipt, n_out, 1, stride, 0, paddle.activation.Linear())
-    else:
-        return ipt
+def conv_to_segment(probs, minsec=32, isDebug=False):
+    sort_probs = np.argsort(-probs)
+#     print(sort_probs)
+    v = sort_probs[:,0]
+    w=len(v)
+    items = []
+    if isDebug: print(v)
+    start = None
+    end = None
+    p=0
+    while True:
+        zerocount=0
+        # 如果 剩下的区块小于最小区块，就不再扫描了
+        if (w-p)<minsec: break
+        for i in range(p, w):
+            if v[i]==0:
+                zerocount+=1
+            
+            # 先按2去找start,找到2后，统计后面50个块中是否含有30个有效，如果是，确定开始位置
+            if start==None and v[i]==2:
+                _onecount=0
+                for j in range(i+1,i+50):
+                    if j<w and (v[j]==1 or v[j]==2):
+                        _onecount+=1
+                if _onecount>30:
+                    start=i
+                else:
+                    continue
 
-def basicblock(ipt, ch_out, stride):
-    ch_in = ch_out * 2
-    tmp = conv_bn_layer(ipt, ch_out, 3, stride, 1)
-    tmp = conv_bn_layer(tmp, ch_out, 3, 1, 1, paddle.activation.Linear())
-    short = shortcut(ipt, ch_in, ch_out, stride)
-    return paddle.layer.addto(input=[tmp, short], act=paddle.activation.Relu())
+            # 继续按1去找start, 如果后面20个以内，包括了至少3个2，忽略，以后面的2为准；否则继续找30个1
+            if start==None and v[i]==1:
+                _twocount=0
+                for j in range(i+1,i+20):
+                    if j<w and v[j]==2:
+                        _twocount+=1
+                if _twocount>3:
+                    continue
+                    
+                _onecount=0                
+                for j in range(i+1,i+50):
+                    if j<w and v[j]==1:
+                        _onecount+=1
+                if _onecount>30:
+                    start=i
+                else:
+                    continue
 
-def layer_warp(block_func, ipt, features, count, stride):
-    tmp = block_func(ipt, features, stride)
-    for i in range(1, count):
-        tmp = block_func(tmp, features, 1)
-    return tmp
+            # 如果找到开始位置了，搜索后面的结尾，忽略交叉的，这一个实在太难检测
+            
+            if start!=None:
+                # 先按3搜索，如果搜索不到，再按0
+                _zcount=0
+                _tcount=0
+                for j in range(start+1,w):
+                    # 统计连续为0个个数
+                    if v[j]==0:
+                        _zcount+=1
+                    else:
+                        _zcount=0
+                    
+                    if v[j]==3 or v[j]==1:
+                        end=j
+                        
+                    # 如果碰到开始2了，但后面没有3，停止
+                    if v[j]==2:
+                        _threecount=0
+                        for k in range(j+1,j+20):
+                            if k<w and v[k]==3:
+                                 _threecount+=1
+                        if _threecount>0:
+                            continue 
+                        if end!=None and end-start>minsec:
+                            break
+                    
+                    # 如果后面10位内还包含了3，忽略，以后面的为准
+                    _threecount=0
+                    for k in range(i+1,i+10):
+                        if k<w and v[k]==3:
+                             _threecount+=1
+                    if _threecount>0:
+                        continue 
+                    else:
+                        # 如果前面10位包括了至少4个3，以这个为end
+                        _threecount=0
+                        for k in range(j-10,j+1):
+                            if k<w and k>0 and v[k]==3:
+                                 _threecount+=1
+                        if _threecount>4:
+                             break
+                            
+                    # 如果连续0超过20个，且找到了end，且长度超过最低长度，寻找结束
+                    if _zcount>20 and end!=None and end-start>minsec:
+                        break
+                            
+                    # 如果连续0超过了30个，不管有没有找到也结束，说明开始选的有错误        
+                    if _zcount>30:
+                        break
 
-def resnet(ipt, depth=32):
-    # depth should be one of 20, 32, 44, 56, 110, 1202
-    assert (depth - 2) % 6 == 0
-    n = (depth - 2) / 6
-    conv1 = conv_bn_layer(ipt, ch_in=train_size, ch_out=64, filter_size=3, stride=1, padding=1)
-    res1 = layer_warp(basicblock, conv1, 64, n, 2)
-    res2 = layer_warp(basicblock, res1, 64, n, 2)
-    res3 = layer_warp(basicblock, res2, 64, n, 2)
-    res4 = layer_warp(basicblock, res3, 64, n, 2)
-    res5 = layer_warp(basicblock, res4, 64, n, 2)
-    res6 = layer_warp(basicblock, res5, 64, n, 2)
-    res7 = layer_warp(basicblock, res6, 64, n, 2)
-    res8 = layer_warp(basicblock, res7, 64, n, 2)
-    # pool = paddle.layer.img_pool(input=res8, pool_size=8, pool_size_y=1, stride=1, padding=0, padding_y=0, pool_type=paddle.pooling.Avg())
-    return res8
-
-def network():
-    # -1 ,2048*5 
-    x = paddle.layer.data(name='x', width=2048, height=1, type=paddle.data_type.dense_vector(2048*train_size))
-    y = paddle.layer.data(name='y', type=paddle.data_type.integer_value(3))
-
-    layer = resnet(x, 8)
-    output = paddle.layer.fc(input=layer,size=class_dim,act=paddle.activation.Softmax())
-
-    # sliced_feature = paddle.layer.block_expand(input=layer, num_channels=64, stride_x=1, stride_y=1, block_x=8, block_y=1)
-    # gru_forward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu())
-    # gru_backward = paddle.networks.simple_gru(input=sliced_feature, size=64, act=paddle.activation.Relu(), reverse=True)
-    # output = paddle.layer.fc(input=[gru_forward, gru_backward], size=class_dim, act=paddle.activation.Softmax())
-    
-    cost = paddle.layer.classification_cost(input=output, label=y)
-    parameters = paddle.parameters.create(cost)
-    adam_optimizer = paddle.optimizer.Adam(
-        learning_rate=2e-3,
-        regularization=paddle.optimizer.L2Regularization(rate=8e-4),
-        model_average=paddle.optimizer.ModelAverage(average_window=0.5))
-    return cost, parameters, adam_optimizer, output
-
-def reader_get_image_and_label():
-    def reader():
-        training_data, _, _ = load_data("training") 
-        size = len(training_data)
-        for i, data in enumerate(training_data):
-            batch_data = np.zeros((2048, train_size))    
-            v_data = np.load(os.path.join(data_path,"training", "%s.pkl"%data["id"]))               
-            print("\nstart train: %s / %s %s.pkl, shape: %s"%(i, size, data["id"], v_data.shape))                
-            w = v_data.shape[0]
-            label = np.zeros([w], dtype=np.int)
-
-            for annotations in data["data"]:
-                segment = annotations['segment']
-                for i in range(int(segment[0]),int(segment[1]+1)):
-                    label[i] += 1
-
-            for i in range(w):
-                _data = np.reshape(v_data[i], (2048,1))
-                batch_data = np.append(batch_data[:, 1:], _data, axis=1)
-                if i>train_size and random.random()>0.5:
-                    s = sum(label[i-train_size+1:i+1]) / train_size
-                    if s > 0.9 or s < 0.1:
-                        if s>0.9:
-                            v=1
+                if start!=None and end!=None and end-start<minsec:
+                    end=None
+                    
+                if start!=None and end!=None:
+                    items.append((start,end))
+                    
+                    #将尾端的结束标记抹去
+                    for j in range(start,end+1):
+                        if v[j]==3:
+                            v[j]=1
+                    
+                    # 检查后1/2区间是否也包含了连续的2，如果包含3以上的连续2，则下一次定位按2开始
+                    _twocount = 0
+                    _twopoint = 0
+                    for j in range(start+(end-start)//2,end):
+                        if v[j]==2:
+                            _twocount+=1
+                            if _twopoint==0:
+                                _twopoint=j
                         else:
-                            v=0 
-                        yield np.ravel(batch_data), v
-            del v_data
-    return reader
+                            _twocount=0
+                            
+                    if _twocount>3:
+                        p=_twopoint
+                        start=None
+                        end=None
+                        break    
+                    
+                if isDebug: print(start,end+1)
+                if isDebug: print(v)
+                if end!=None:
+                    p=end+1
+                else:
+                    p=i+1
+                start=None
+                end=None
+                break
+            else:
+                p=i+1
+                
+    result=[]
+    for item in items:
+        seg_value ={}
+        seg_value["score"]=1
+        seg_value["segment"]=item
+        result.append(seg_value)          
+    return result
 
-def event_handler(event):
-    if isinstance(event, paddle.event.EndIteration):
-        if event.batch_id>0 and event.batch_id % 20 == 0:
-            print("\nPass %d, Batch %d, Cost %f, %s" % (
-                event.pass_id, event.batch_id, event.cost, event.metrics) )
-            with open(param_file, 'wb') as f:
-                paddle_parameters.to_tar(f)
-        else:
-            sys.stdout.write('.')
-            sys.stdout.flush()
+
+def main():
+    save_file = os.path.join(out_dir,"validation_3.pkl")
+    print("loading...")
+    infers = pickle.load(open(save_file,"rb"))
+    print("loaded.")
+    result={}
+    result["version"]="VERSION 1.0"
+    result["results"]={}  
+    print("start infer...")
+    for infer in infers:
+        _all_values = infers[infer]
+        _all_values = np.stack(_all_values,axis=0)
         
-print("paddle init ...")
-# paddle.init(use_gpu=False, trainer_count=2) 
-paddle.init(use_gpu=True, trainer_count=2)
-print("get network ...")
-cost, paddle_parameters, adam_optimizer, output = network()
-print('set reader ...')
-train_reader = paddle.batch(paddle.reader.shuffle(reader_get_image_and_label(), buf_size=8192), batch_size=256)
-# train_reader = paddle.batch(reader_get_image_and_label(True), batch_size=64)
-feeding={'x': 0, 'y': 1}
- 
-trainer = paddle.trainer.SGD(cost=cost, parameters=paddle_parameters, update_equation=adam_optimizer)
-print("start train ...")
-trainer.train(reader=train_reader, event_handler=event_handler, feeding=feeding, num_passes=2)
+        sort_probs = np.argsort(-_all_values)
+        v = sort_probs[:,0]
+        
+
+#         print(v)
+
+        
+#         result["results"][infer] = items
+#         return
+#         print("infered %s count:%s"%(infer,len(items)))
+#     json.dump(result, open(result_json_file,"w"))
+
+        for t_data in validation_data:
+            if t_data["id"]==infer:                
+                v_data = np.load(os.path.join(validation_path, "%s.pkl"%t_data["id"]))  
+                w = v.shape[0]
+                label = [0 for _ in range(w)]
+                for annotations in t_data["data"]:
+                    segment = annotations['segment']
+                    start = int(round(segment[0]))
+                    end = int(round(segment[1]))
+                    for i in range(start, end+1):
+                        if i<0 or i>=w: continue                  
+                        if i>=start and i<=start+mark_length: 
+                            label[i] = 2
+                        elif i>=end-mark_length and i<=end:
+                            label[i] = 2
+                        elif label[i] == 0:
+                            label[i] = 1                  
+                v_val = np.array(label)
+                if infer=="310918400":
+                    print v_val
+                    print v
+                    print t_data["data"]
+                    print conv_to_segment(_all_values)
+                accuracy = (v == v_val).mean()
+                print(infer, accuracy)
+                break
+    print("OK")  
+        
+if __name__ == '__main__':
+    main()
