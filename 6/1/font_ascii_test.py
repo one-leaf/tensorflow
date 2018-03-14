@@ -64,7 +64,7 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, SEQ_LENGHT//4]) # -1,1024,256
 
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
-        layer = LSTM(layer, seq_len, 256, 256)    # -1, 1024, 256
+        layer = LSTM(layer, seq_len, 256, 32)    # -1, 1024, 256
 
         # layer = tf.concat([layer, lstm_layer], axis=2)
         # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
