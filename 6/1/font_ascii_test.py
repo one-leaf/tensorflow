@@ -57,18 +57,23 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
+        print("inputs shape:",inputs.shape)
         layer = utils_nn.resNet101(inputs, True)    
 
+        print("resNet shape:",layer.shape)
         layer = slim.conv2d(layer, SEQ_LENGHT, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
         layer = slim.avg_pool2d(layer,[2, 2])
         layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, SEQ_LENGHT//4]) # -1,1024,256
+        print("resNet_seq shape:",layer.shape)
 
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
         layer = LSTM(layer, seq_len, 256, 32)    # -1, 1024, 256
+        print("lstm shape:",layer.shape)
 
         # layer = tf.concat([layer, lstm_layer], axis=2)
         # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
+        print("fc shape:",layer.shape)
         return layer
 
 def LSTM(inputs, seq_len, fc_size, lstm_size):
