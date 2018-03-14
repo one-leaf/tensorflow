@@ -401,7 +401,7 @@ def train2():
         AllLosts={}
         while True:
             errA = errD1 = errD2 = 1
-            batch_size = 2
+            batch_size = BATCH_SIZE
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
@@ -414,7 +414,7 @@ def train2():
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, if_to_G=False)
                 # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 start = time.time()                
-
+                print("start train")
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
