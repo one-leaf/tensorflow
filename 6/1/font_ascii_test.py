@@ -64,7 +64,7 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, SEQ_LENGHT//4]) # -1,1024,256
 
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
-        layer = LSTM(layer, seq_len, 256)    # -1, 1024, 256
+        layer = LSTM(layer, seq_len, 256, 8)    # -1, 1024, 256
 
         # layer = tf.concat([layer, lstm_layer], axis=2)
         # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -72,19 +72,19 @@ def RES(inputs, seq_len, reuse = False):
         return layer
 
 # 输入 half_layer
-def LSTM(inputs, seq_len, size):
-    fc = slim.fully_connected(inputs, size, normalizer_fn=None, activation_fn=None)
-    cell = tf.contrib.rnn.BasicLSTMCell(size)
+def LSTM(inputs, seq_len, fc_size, lstm_size):
+    fc = slim.fully_connected(inputs, fc_size, normalizer_fn=None, activation_fn=None)
+    cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
     lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len, dtype=inputs.dtype)
     output = tf.concat([fc, lstm], axis=2) 
     for i in range(6):
         with tf.variable_scope(None, default_name="bidirectional-rnn"):
-            fc = slim.fully_connected(output, size, normalizer_fn=None, activation_fn=None)
+            fc = slim.fully_connected(output, fc_size, normalizer_fn=None, activation_fn=None)
             if i%2==0:
                 input = tf.reverse_sequence(fc,seq_len,1) 
             else:
                 input = fc
-            cell = tf.contrib.rnn.BasicLSTMCell(size)
+            cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
             lstm, _ = tf.nn.dynamic_rnn(cell, input, seq_len, dtype=inputs.dtype)
             if i%2==0:
                 lstm = tf.reverse_sequence(lstm,seq_len,1) 
