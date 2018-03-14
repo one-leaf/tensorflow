@@ -83,7 +83,7 @@ def resNet50(layer, isPoolSize=True, stride=2):
         stride = 1
         padding = "SAME"
     with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
-        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, 64, [7,7], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(3):
             layer = resNetBlockV2(layer, 64)
         layer = slim.max_pool2d(layer, [2, 2])
@@ -113,7 +113,7 @@ def resNet50v2(layer, isPoolSize=True, stride=2):
         stride = 1
         padding = "SAME"
     with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
-        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, 64, [7,7], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(3):
             layer = resNetBlockV2(layer, 64)
         layer = slim.max_pool2d(layer, [2, 2])
@@ -143,7 +143,8 @@ def resNet101(layer, isPoolSize=True):
         stride = 1
         padding = "SAME"
     with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
-        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.conv2d(layer, 64, [7,7], stride=2, normalizer_fn=slim.batch_norm, activation_fn=None)
+
         for i in range(3):
             layer = resNetBlockV2(layer, 64)
         layer = slim.max_pool2d(layer, [3, 3])
