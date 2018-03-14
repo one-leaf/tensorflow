@@ -57,7 +57,7 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
-        layer = utils_nn.resNet152(inputs, True)    
+        layer = utils_nn.resNet101(inputs, True)    
 
         layer = slim.conv2d(layer, SEQ_LENGHT, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
         layer = slim.avg_pool2d(layer,[2, 2])
