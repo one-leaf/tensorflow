@@ -40,7 +40,7 @@ REPORT_STEPS = 500
 MOMENTUM = 0.9
 
 BATCHES = 32
-BATCH_SIZE = 3
+BATCH_SIZE = 1
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 3
@@ -282,7 +282,7 @@ def train():
         AllLosts={}
         while True:
             errA = errD1 = errD2 = 1
-            batch_size = 3
+            batch_size = BATCH_SIZE
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
