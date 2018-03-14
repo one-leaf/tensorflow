@@ -75,7 +75,7 @@ def RES(inputs, seq_len, reuse = False):
 def LSTM(inputs, seq_len, size):
     fc = slim.fully_connected(inputs, size, normalizer_fn=None, activation_fn=None)
     cell = tf.contrib.rnn.BasicLSTMCell(size)
-    lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len=seq_len)
+    lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len)
     output = tf.concat([fc, lstm], axis=2) 
     for i in range(6):
         with tf.variable_scope(None, default_name="bidirectional-rnn"):
@@ -85,7 +85,7 @@ def LSTM(inputs, seq_len, size):
             else:
                 input = fc
             cell = tf.contrib.rnn.BasicLSTMCell(size)
-            lstm, _ = tf.nn.dynamic_rnn(cell, input, seq_len=seq_len)
+            lstm, _ = tf.nn.dynamic_rnn(cell, input, seq_len)
             if i%2==0:
                 lstm = tf.reverse_sequence(lstm,seq_len,1) 
             output = tf.concat([fc, lstm], axis=2) 
