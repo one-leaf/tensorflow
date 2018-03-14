@@ -73,7 +73,7 @@ def RES(inputs, seq_len, reuse = False):
 
 # 输入 half_layer
 def LSTM(inputs, seq_len, size):
-    fc = slim.fully_connected(layer, size, normalizer_fn=None, activation_fn=None)
+    fc = slim.fully_connected(inputs, size, normalizer_fn=None, activation_fn=None)
     cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
     lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len=seq_len)
     output = tf.concat([fc, lstm], axis=2) 
