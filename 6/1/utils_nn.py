@@ -143,6 +143,7 @@ def resNet101(layer, isPoolSize=True):
         stride = 1
         padding = "SAME"
     with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
+        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(3):
             layer = resNetBlockV2(layer, 64)
         layer = slim.max_pool2d(layer, [3, 3])
@@ -170,6 +171,7 @@ def resNet152(layer, isPoolSize=True):
         stride = 1
         padding = "SAME"
     with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
+        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(3):
             layer = resNetBlockV2(layer, 64)
         layer = slim.max_pool2d(layer, [2, 2])
