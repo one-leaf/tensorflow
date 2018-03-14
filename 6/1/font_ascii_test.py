@@ -58,7 +58,7 @@ def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
         print("inputs shape:",inputs.shape)
-        layer = utils_nn.resNet50v2(inputs, True)    # -1 7 7 2048
+        layer = utils_nn.resNet101(inputs, True)    # -1 7 7 2048
 
         print("resNet shape:",layer.shape)
         layer = slim.conv2d(layer, SEQ_LENGHT, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
