@@ -33,7 +33,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-6
+LEARNING_RATE_INITIAL = 1e-4
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -57,28 +57,44 @@ def TRIM_G(inputs, reuse=False):
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         batch_size = tf.shape(inputs)[0]
-        layer = utils_nn.resNet50(inputs, True)    
+        layer = utils_nn.resNet152(inputs, True)    
 
         layer = slim.conv2d(layer, SEQ_LENGHT, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
         layer = slim.avg_pool2d(layer,[2, 2])
         layer = tf.reshape(layer, [batch_size, SEQ_LENGHT, SEQ_LENGHT//4]) # -1,1024,256
 
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
-        lstm_layer = LSTM(layer, seq_len)    # -1, 1024, 256
+        layer = LSTM(layer, seq_len, 256)    # -1, 1024, 256
 
-        layer = tf.concat([layer, lstm_layer], axis=2)
+        # layer = tf.concat([layer, lstm_layer], axis=2)
         # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        layer = slim.fully_connected(layer, 512, normalizer_fn=None, activation_fn=None)  
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
         return layer
 
 # 输入 half_layer
-def LSTM(inputs, seq_len):
-    num_hidden = 256
-    cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
-    cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
-    outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
-    layer = tf.concat(outputs, axis=2)
-    return layer
+def LSTM(inputs, seq_len, size):
+    fc = slim.fully_connected(layer, size, normalizer_fn=None, activation_fn=None)
+    cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
+    lstm, _ = tf.nn.dynamic_rnn(cell, fc, seq_len=seq_len)
+    output = tf.concat([fc, lstm], axis=2) 
+    for i in range(6):
+        with tf.variable_scope(None, default_name="bidirectional-rnn"):
+            fc = slim.fully_connected(output, size, normalizer_fn=None, activation_fn=None)
+            if i%2==0:
+                input = tf.reverse_sequence(fc,seq_len,1) 
+            else:
+                input = fc
+            cell = tf.contrib.rnn.BasicLSTMCell(lstm_size)
+            lstm, _ = tf.nn.dynamic_rnn(cell, input, seq_len=seq_len)
+            if i%2==0:
+                lstm = tf.reverse_sequence(lstm,seq_len,1) 
+            output = tf.concat([fc, lstm], axis=2) 
+    # num_hidden = 256
+    # cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
+    # cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2, activation=tf.nn.relu)
+    # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, inputs, seq_len, dtype=tf.float32)
+    # layer = tf.concat(outputs, axis=2)
+    return output
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
