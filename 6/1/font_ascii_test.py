@@ -241,7 +241,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * SEQ_LENGHT
-    print(seq_len)
+    # print(seq_len)
     return inputs, sparse_labels, seq_len, info
 
 def train():
