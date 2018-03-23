@@ -87,7 +87,7 @@ def LSTM(inputs, seq_len, fc_size, lstm_size):
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
             layer = tf.concat([outputs[0],outputs[1],layer], axis=2)
-            # layer = slim.batch_norm(layer)
+            layer = slim.batch_norm(layer)
     return layer
 
 def neural_networks():
