@@ -146,7 +146,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
     codes = []
     max_width_image = 0
     info = []
-    seq_len = np.ones(batch_size)
+    seq_len = np.ones(batch_size, dtype=np.int32)
     for i in range(batch_size):
         font_name = _font_name
         font_size = _font_size
@@ -233,7 +233,7 @@ def get_next_batch_for_res(batch_size=128, if_to_G=True, _font_name=None, _font_
         codes.append([CHARS.index(char) for char in text])                  
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
-        seq_len[i] = len(text)
+        # seq_len[i] = len(text)
     inputs = np.zeros([batch_size, image_size, image_size])
     for i in range(batch_size):
         inputs[i,:] = utils.square_img(inputs_images[i], np.zeros([image_size, image_size]), image_height)
