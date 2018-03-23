@@ -81,7 +81,8 @@ def LSTM(inputs, seq_len, fc_size, lstm_size):
     layer = inputs
     for i in range(4):
         with tf.variable_scope("rnn-%s"%i):
-            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
+            # layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
+            layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
