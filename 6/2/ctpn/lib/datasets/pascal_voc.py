@@ -176,9 +176,12 @@ class pascal_voc(imdb):
         filename = os.path.join(self._data_path, 'Annotations', index + '.xml')
         tree = ET.parse(filename)
         objs = tree.findall('object')
-
-        cls_objs = [obj for obj in objs if obj.find('name').text in self._classes]
-        objs = cls_objs
+        
+        # print("****************************************************")
+        # print("Len objs",len(objs))
+        # cls_objs = [obj for obj in objs if obj.find('name').text in self._classes]
+        # objs = cls_objs
+        # print("Len objs",len(objs))
 
         num_objs = len(objs)
 
