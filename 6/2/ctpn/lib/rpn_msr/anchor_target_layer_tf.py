@@ -6,7 +6,7 @@ from ..utils.bbox import bbox_overlaps, bbox_intersections
 from ..fast_rcnn.config import cfg
 from ..fast_rcnn.bbox_transform import bbox_transform
 
-DEBUG = False
+DEBUG = True
 def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_info, _feat_stride = [16,], anchor_scales = [16,]):
     """
     Assign anchors to ground-truth targets. Produces anchor classification

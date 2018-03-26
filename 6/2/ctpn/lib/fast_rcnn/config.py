@@ -250,7 +250,7 @@ __C.EXP_DIR = 'default'
 __C.LOG_DIR = 'default'
 
 # Use GPU implementation of non-maximum suppression
-__C.USE_GPU_NMS = True
+__C.USE_GPU_NMS = False
 
 # Default GPU device id
 __C.GPU_ID = 0
@@ -287,9 +287,9 @@ def _merge_a_into_b(a, b):
     if type(a) is not edict:
         return
 
-    for k, v in a.iteritems():
+    for k, v in a.items():
         # a must specify keys that are in b
-        if not b.has_key(k):
+        if k not in b:
             raise KeyError('{} is not a valid config key'.format(k))
 
         # the types must match, too
