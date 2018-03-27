@@ -1,3 +1,6 @@
+'''
+ctpn模型的训练入口
+'''
 import pprint
 import sys
 import os.path
@@ -11,14 +14,21 @@ from lib.datasets.factory import get_imdb
 from lib.networks.factory import get_network
 from lib.fast_rcnn.config import cfg
 
-
-
 if __name__ == '__main__':
     cfg_from_file('ctpn/text.yml')
     print('Using config:')
     pprint.pprint(cfg)
+    
+    # 获得voc2007的数据集
     imdb = get_imdb('voc_2007_trainval')
     print('Loaded dataset `{:s}` for training'.format(imdb.name))
+
+    # roidb 是 imdb 的一个 dict 属性，包含了 GTbox，以及真实标签和翻转标签
+    # 元素如下：
+    # boxes 
+    # gt_overlaps
+    # gt_classes
+    # flipped 
     roidb = get_training_roidb(imdb)
 
     output_dir = get_output_dir(imdb, None)
