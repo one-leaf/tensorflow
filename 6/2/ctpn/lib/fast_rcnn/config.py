@@ -31,7 +31,9 @@ cfg = __C
 
 # region proposal network (RPN) or not
 __C.IS_RPN = True
+# 只有 16
 __C.ANCHOR_SCALES = [16]
+# Box分类，文字或背景
 __C.NCLASSES = 2
 
 # multiscale training and testing
