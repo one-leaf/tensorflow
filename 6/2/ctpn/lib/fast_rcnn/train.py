@@ -140,16 +140,21 @@ class SolverWrapper(object):
 
         last_snapshot_iter = -1
         timer = Timer()
-        print (restore_iter, max_iters)
+        print ('restore:',restore_iter, max_iters)
         for iter in range(restore_iter, max_iters):
             timer.tic()
             # learning rate
             if iter != 0 and iter % cfg.TRAIN.STEPSIZE == 0:
                 sess.run(tf.assign(lr, lr.eval() * cfg.TRAIN.GAMMA))
-                print(lr)
+                print('learning rate:',lr)
 
             # get one batch
             blobs = data_layer.forward()
+
+            print('im_info:', blobs['im_info'])
+            print('gt_boxes:', blobs['gt_boxes'])
+            print('gt_ishard:', blobs['gt_ishard'])
+            print('dontcare_areas:', blobs['dontcare_areas'])
 
             feed_dict={
                 self.net.data: blobs['data'],
