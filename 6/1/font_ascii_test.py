@@ -61,7 +61,7 @@ def RES(inputs, seq_len, reuse = False):
         # -1 1 W/16 1024
         # layer = tf.transpose(layer,[0,3,1,2])
         # layer = slim.avg_pool2d(layer,[2, 2])
-        layer = tf.reshape(layer, [batch_size, height*width, SEQ_LENGHT]) # -1,1024,256
+        layer = tf.reshape(layer, [batch_size*height, width, SEQ_LENGHT]) # -1,1024,256
         print("resNet_seq shape:",layer.shape,"seq_len:",SEQ_LENGHT)
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
         layer.set_shape([None, None, SEQ_LENGHT])
