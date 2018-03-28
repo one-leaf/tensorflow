@@ -50,7 +50,8 @@ SEQ_LENGHT = 1024
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
-        batch_size, height, width, channel = tf.shape(inputs)
+        shape = tf.shape(inputs)
+        batch_size, height, width, channel = shape[0], shape[1], shape[2], shape[3]
 
         print("inputs shape:",inputs.shape)
         layer = utils_nn.resNet101(inputs, True)    # -1 2 W/16 2048
