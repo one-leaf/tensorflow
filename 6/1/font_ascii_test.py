@@ -163,7 +163,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             font_hint = random.choice([0,4]) 
 
         text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-        text = text +" "+ random.sample(CHARS, random.randint(1,5))
+        text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
         text = text.strip()
 
             # random.shuffle(text)
