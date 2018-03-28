@@ -185,10 +185,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             # text = "".join(text).strip()
 
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-            temp_image = utils_pil.resize_by_height(image, image_height)
-            w, h = temp_image.size            
-            if w * h < image_size * image_size: break
-            print("text too long:",text)
+
         image = utils_pil.convert_to_gray(image) 
         w, h = image.size
         if h > image_height:
