@@ -213,7 +213,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * SEQ_LENGHT
+    seq_len = np.ones(batch_size) * (3 * max_width_image//POOL_SIZE)
     print(seq_len)
     return inputs, sparse_labels, seq_len, info
 
