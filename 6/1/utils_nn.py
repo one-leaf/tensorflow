@@ -188,7 +188,7 @@ def resNet101V2(layer, isPoolSize=True):
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
         for i in range(23):
             layer = resNetBlockV2(layer, 256)
-        # layer = slim.max_pool2d(layer, [3, 3])
+        layer = slim.max_pool2d(layer, [3, 3])
 
         layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
