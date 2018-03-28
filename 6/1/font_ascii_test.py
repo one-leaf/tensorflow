@@ -197,7 +197,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         codes.append([CHARS.index(char) for char in text])                  
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
-        # seq_len[i] = len(text)
+        seq_len[i] = len(text)
 
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
@@ -213,7 +213,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (image_height//POOL_SIZE * max_width_image//POOL_SIZE)
+    # seq_len = np.ones(batch_size) * (image_height//POOL_SIZE * max_width_image//POOL_SIZE)
     # print(seq_len)
     return inputs, sparse_labels, seq_len, info
 
