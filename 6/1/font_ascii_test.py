@@ -43,7 +43,7 @@ BATCHES = 32
 BATCH_SIZE = 3
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = 4
+POOL_COUNT = 3
 POOL_SIZE  = round(math.pow(4,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii"
 SEQ_LENGHT = 1024
@@ -64,11 +64,11 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer, [batch_size*height, width, SEQ_LENGHT]) # -1,1024,256
         print("resNet_seq shape:",layer.shape,"seq_len:",SEQ_LENGHT)
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
-        # layer.set_shape([None, None, SEQ_LENGHT])
-        # layer = LSTM(layer, seq_len, 256, 128)    # -1, 1024, 354
-        # print("lstm shape:",layer.shape)
-        # layer = tf.reshape(layer, [batch_size, height, width, 256+128+128]) # -1,1024,256
-        # layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
+        layer.set_shape([None, None, SEQ_LENGHT])
+        layer = LSTM(layer, seq_len, 256, 128)    # -1, 1024, 354
+        print("lstm shape:",layer.shape)
+        layer = tf.reshape(layer, [batch_size, height, width, 256+128+128]) # -1,1024,256
+        layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
         layer = tf.reshape(layer, [batch_size, height*width, SEQ_LENGHT]) # -1,1024,256
 
         # layer = tf.concat([layer, lstm_layer], axis=2)
@@ -197,7 +197,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         codes.append([CHARS.index(char) for char in text])                  
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
-        seq_len[i] = len(text)
+        # seq_len[i] = len(text)
 
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
@@ -213,7 +213,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    # seq_len = np.ones(batch_size) * SEQ_LENGHT
+    seq_len = np.ones(batch_size) * SEQ_LENGHT
     print(seq_len)
     return inputs, sparse_labels, seq_len, info
 
