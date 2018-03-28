@@ -316,4 +316,4 @@ def train():
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
 
 if __name__ == '__main__':
-    train2()
+    train()
