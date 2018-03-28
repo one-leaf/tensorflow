@@ -65,9 +65,9 @@ def RES(inputs, seq_len, reuse = False):
         print("resNet_seq shape:",layer.shape,"seq_len:",SEQ_LENGHT)
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
         layer.set_shape([None, None, SEQ_LENGHT])
-        layer = LSTM(layer, seq_len, SEQ_LENGHT, 128)    # -1, 1024, 354
+        layer = LSTM(layer, seq_len, 512, 128)    # -1, 1024, 354
         print("lstm shape:",layer.shape)
-        layer = tf.reshape(layer, [batch_size, height, width, SEQ_LENGHT+128+128]) # -1,1024,256
+        layer = tf.reshape(layer, [batch_size, height, width, 512+128+128]) # -1,1024,256
         layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
         layer = tf.reshape(layer, [batch_size, height*width, SEQ_LENGHT]) # -1,1024,256
 
@@ -85,8 +85,8 @@ def LSTM(inputs, seq_len, fc_size, lstm_size):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
-            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
-            # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
+            # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
+            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
             layer = tf.concat([outputs[0],outputs[1], layer], axis=-1)
             layer = slim.batch_norm(layer)
     return layer
