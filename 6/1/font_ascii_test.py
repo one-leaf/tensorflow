@@ -43,8 +43,8 @@ BATCHES = 32
 BATCH_SIZE = 3
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
-POOL_COUNT = 3
-POOL_SIZE  = round(math.pow(2,POOL_COUNT))
+POOL_COUNT = 4
+POOL_SIZE  = round(math.pow(4,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii"
 SEQ_LENGHT = 1024
 
@@ -214,9 +214,16 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
         # seq_len[i] = len(text)
-    inputs = np.zeros([batch_size, image_size, image_size, 1])
+
+        if max_width_image < image.shape[1]:
+            max_width_image = image.shape[1]
+
+    # 凑成16的整数倍
+    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+
+    inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        inputs[i,:] = inputs_images[i]
+        inputs[i,:] = img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
 
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
