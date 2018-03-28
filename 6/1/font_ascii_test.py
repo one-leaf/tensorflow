@@ -143,6 +143,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     max_width_image = 0
     info = []
     seq_len = np.ones(batch_size, dtype=np.int32)
+    font_length = random.randint(5, 150)
     for i in range(batch_size):
         font_name = _font_name
         font_size = _font_size
@@ -161,24 +162,22 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             # font_hint = random.choice([0,1,2,3,4,5])    
             font_hint = random.choice([0,4]) 
 
-        while True:
-            font_length = random.randint(5, 50)
-            if random.random() > 0:
-                text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-            else:
-                text=""
+        if random.random() > 0:
+            text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
+        else:
+            text=""
 
-                if len(train_text_lines)>0:
-                    text = random.choice(train_text_lines)
-                    text = text.strip()
+            if len(train_text_lines)>0:
+                text = random.choice(train_text_lines)
+                text = text.strip()
 
-                if len(text)==0:    
-                    text = []
-                    chars = random.sample(CHARS, random.randint(15,20))+[" "," "]            
-                    for i in range(random.randint(10,20)):
-                        text += chars  #
-                    random.shuffle(text)
-                    text = "".join(text).strip()
+            if len(text)==0:    
+                text = []
+                chars = random.sample(CHARS, random.randint(15,20))+[" "," "]            
+                for i in range(random.randint(10,20)):
+                    text += chars  #
+                random.shuffle(text)
+                text = "".join(text).strip()
 
             # text = CHARS + CHARS + random.sample(CHARS, random.randint(0,len(CHARS)))
             # random.shuffle(text)
@@ -224,7 +223,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
         inputs[i,:] = img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
-        
+
     print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
