@@ -518,8 +518,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__utils__cython_nms
-#define __PYX_HAVE_API__utils__cython_nms
+#define __PYX_HAVE__lib__utils__cython_nms
+#define __PYX_HAVE_API__lib__utils__cython_nms
 #include <string.h>
 #include <stdio.h>
 #include "numpy/arrayobject.h"
@@ -1562,16 +1562,16 @@ static PyTypeObject *__pyx_ptype_5numpy_ndarray = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
 
-/* Module declarations from 'utils.cython_nms' */
-static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_max(__pyx_t_5numpy_float32_t, __pyx_t_5numpy_float32_t); /*proto*/
-static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_min(__pyx_t_5numpy_float32_t, __pyx_t_5numpy_float32_t); /*proto*/
+/* Module declarations from 'lib.utils.cython_nms' */
+static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_3lib_5utils_10cython_nms_max(__pyx_t_5numpy_float32_t, __pyx_t_5numpy_float32_t); /*proto*/
+static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_3lib_5utils_10cython_nms_min(__pyx_t_5numpy_float32_t, __pyx_t_5numpy_float32_t); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_float32_t = { "float32_t", NULL, sizeof(__pyx_t_5numpy_float32_t), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int_t = { "int_t", NULL, sizeof(__pyx_t_5numpy_int_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_int_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_int_t), 0 };
-#define __Pyx_MODULE_NAME "utils.cython_nms"
-extern int __pyx_module_is_main_utils__cython_nms;
-int __pyx_module_is_main_utils__cython_nms = 0;
+#define __Pyx_MODULE_NAME "lib.utils.cython_nms"
+extern int __pyx_module_is_main_lib__utils__cython_nms;
+int __pyx_module_is_main_lib__utils__cython_nms = 0;
 
-/* Implementation of 'utils.cython_nms' */
+/* Implementation of 'lib.utils.cython_nms' */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -1623,8 +1623,8 @@ static const char __pyx_k_suppressed[] = "suppressed";
 static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
 static const char __pyx_k_cython_nms_pyx[] = "cython_nms.pyx";
-static const char __pyx_k_utils_cython_nms[] = "utils.cython_nms";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
+static const char __pyx_k_lib_utils_cython_nms[] = "lib.utils.cython_nms";
 static const char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
 static const char __pyx_k_unknown_dtype_code_in_numpy_pxd[] = "unknown dtype code in numpy.pxd (%d)";
@@ -1659,6 +1659,7 @@ static PyObject *__pyx_n_s_iy2;
 static PyObject *__pyx_n_s_j;
 static PyObject *__pyx_n_s_j_2;
 static PyObject *__pyx_n_s_keep;
+static PyObject *__pyx_n_s_lib_utils_cython_nms;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_kp_u_ndarray_is_not_C_contiguous;
 static PyObject *__pyx_kp_u_ndarray_is_not_Fortran_contiguou;
@@ -1679,7 +1680,6 @@ static PyObject *__pyx_n_s_suppressed;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_thresh;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
-static PyObject *__pyx_n_s_utils_cython_nms;
 static PyObject *__pyx_n_s_w;
 static PyObject *__pyx_n_s_x1;
 static PyObject *__pyx_n_s_x2;
@@ -1690,8 +1690,8 @@ static PyObject *__pyx_n_s_y2;
 static PyObject *__pyx_n_s_yy1;
 static PyObject *__pyx_n_s_yy2;
 static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh); /* proto */
-static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh); /* proto */
+static PyObject *__pyx_pf_3lib_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh); /* proto */
+static PyObject *__pyx_pf_3lib_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static PyObject *__pyx_float_0_95;
@@ -1737,7 +1737,7 @@ static PyObject *__pyx_tuple__34;
 static PyObject *__pyx_codeobj__33;
 static PyObject *__pyx_codeobj__35;
 
-/* "utils/cython_nms.pyx":11
+/* "lib/utils/cython_nms.pyx":11
  * cimport numpy as np
  * 
  * cdef inline np.float32_t max(np.float32_t a, np.float32_t b):             # <<<<<<<<<<<<<<
@@ -1745,13 +1745,13 @@ static PyObject *__pyx_codeobj__35;
  * 
  */
 
-static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_max(__pyx_t_5numpy_float32_t __pyx_v_a, __pyx_t_5numpy_float32_t __pyx_v_b) {
+static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_3lib_5utils_10cython_nms_max(__pyx_t_5numpy_float32_t __pyx_v_a, __pyx_t_5numpy_float32_t __pyx_v_b) {
   __pyx_t_5numpy_float32_t __pyx_r;
   __Pyx_RefNannyDeclarations
   __pyx_t_5numpy_float32_t __pyx_t_1;
   __Pyx_RefNannySetupContext("max", 0);
 
-  /* "utils/cython_nms.pyx":12
+  /* "lib/utils/cython_nms.pyx":12
  * 
  * cdef inline np.float32_t max(np.float32_t a, np.float32_t b):
  *     return a if a >= b else b             # <<<<<<<<<<<<<<
@@ -1766,7 +1766,7 @@ static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_max(__
   __pyx_r = __pyx_t_1;
   goto __pyx_L0;
 
-  /* "utils/cython_nms.pyx":11
+  /* "lib/utils/cython_nms.pyx":11
  * cimport numpy as np
  * 
  * cdef inline np.float32_t max(np.float32_t a, np.float32_t b):             # <<<<<<<<<<<<<<
@@ -1780,7 +1780,7 @@ static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_max(__
   return __pyx_r;
 }
 
-/* "utils/cython_nms.pyx":14
+/* "lib/utils/cython_nms.pyx":14
  *     return a if a >= b else b
  * 
  * cdef inline np.float32_t min(np.float32_t a, np.float32_t b):             # <<<<<<<<<<<<<<
@@ -1788,13 +1788,13 @@ static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_max(__
  * 
  */
 
-static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_min(__pyx_t_5numpy_float32_t __pyx_v_a, __pyx_t_5numpy_float32_t __pyx_v_b) {
+static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_3lib_5utils_10cython_nms_min(__pyx_t_5numpy_float32_t __pyx_v_a, __pyx_t_5numpy_float32_t __pyx_v_b) {
   __pyx_t_5numpy_float32_t __pyx_r;
   __Pyx_RefNannyDeclarations
   __pyx_t_5numpy_float32_t __pyx_t_1;
   __Pyx_RefNannySetupContext("min", 0);
 
-  /* "utils/cython_nms.pyx":15
+  /* "lib/utils/cython_nms.pyx":15
  * 
  * cdef inline np.float32_t min(np.float32_t a, np.float32_t b):
  *     return a if a <= b else b             # <<<<<<<<<<<<<<
@@ -1809,7 +1809,7 @@ static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_min(__
   __pyx_r = __pyx_t_1;
   goto __pyx_L0;
 
-  /* "utils/cython_nms.pyx":14
+  /* "lib/utils/cython_nms.pyx":14
  *     return a if a >= b else b
  * 
  * cdef inline np.float32_t min(np.float32_t a, np.float32_t b):             # <<<<<<<<<<<<<<
@@ -1823,7 +1823,7 @@ static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_min(__
   return __pyx_r;
 }
 
-/* "utils/cython_nms.pyx":17
+/* "lib/utils/cython_nms.pyx":17
  *     return a if a <= b else b
  * 
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
@@ -1832,9 +1832,9 @@ static CYTHON_INLINE __pyx_t_5numpy_float32_t __pyx_f_5utils_10cython_nms_min(__
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5utils_10cython_nms_1nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5utils_10cython_nms_1nms = {"nms", (PyCFunction)__pyx_pw_5utils_10cython_nms_1nms, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5utils_10cython_nms_1nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_3lib_5utils_10cython_nms_1nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_3lib_5utils_10cython_nms_1nms = {"nms", (PyCFunction)__pyx_pw_3lib_5utils_10cython_nms_1nms, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3lib_5utils_10cython_nms_1nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_dets = 0;
   PyObject *__pyx_v_thresh = 0;
   PyObject *__pyx_r = 0;
@@ -1882,13 +1882,13 @@ static PyObject *__pyx_pw_5utils_10cython_nms_1nms(PyObject *__pyx_self, PyObjec
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("nms", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 17, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("utils.cython_nms.nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("lib.utils.cython_nms.nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dets), __pyx_ptype_5numpy_ndarray, 1, "dets", 0))) __PYX_ERR(0, 17, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_thresh), (&PyFloat_Type), 1, "thresh", 1))) __PYX_ERR(0, 17, __pyx_L1_error)
-  __pyx_r = __pyx_pf_5utils_10cython_nms_nms(__pyx_self, __pyx_v_dets, __pyx_v_thresh);
+  __pyx_r = __pyx_pf_3lib_5utils_10cython_nms_nms(__pyx_self, __pyx_v_dets, __pyx_v_thresh);
 
   /* function exit code */
   goto __pyx_L0;
@@ -1899,7 +1899,7 @@ static PyObject *__pyx_pw_5utils_10cython_nms_1nms(PyObject *__pyx_self, PyObjec
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh) {
+static PyObject *__pyx_pf_3lib_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh) {
   PyArrayObject *__pyx_v_x1 = 0;
   PyArrayObject *__pyx_v_y1 = 0;
   PyArrayObject *__pyx_v_x2 = 0;
@@ -2026,7 +2026,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   }
   __pyx_pybuffernd_dets.diminfo[0].strides = __pyx_pybuffernd_dets.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_dets.diminfo[0].shape = __pyx_pybuffernd_dets.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_dets.diminfo[1].strides = __pyx_pybuffernd_dets.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_dets.diminfo[1].shape = __pyx_pybuffernd_dets.rcbuffer->pybuffer.shape[1];
 
-  /* "utils/cython_nms.pyx":18
+  /* "lib/utils/cython_nms.pyx":18
  * 
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]             # <<<<<<<<<<<<<<
@@ -2049,7 +2049,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_x1 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":19
+  /* "lib/utils/cython_nms.pyx":19
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]             # <<<<<<<<<<<<<<
@@ -2072,7 +2072,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_y1 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":20
+  /* "lib/utils/cython_nms.pyx":20
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]             # <<<<<<<<<<<<<<
@@ -2095,7 +2095,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_x2 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":21
+  /* "lib/utils/cython_nms.pyx":21
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]             # <<<<<<<<<<<<<<
@@ -2118,7 +2118,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_y2 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":22
+  /* "lib/utils/cython_nms.pyx":22
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]
  *     cdef np.ndarray[np.float32_t, ndim=1] scores = dets[:, 4]             # <<<<<<<<<<<<<<
@@ -2141,7 +2141,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_scores = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":24
+  /* "lib/utils/cython_nms.pyx":24
  *     cdef np.ndarray[np.float32_t, ndim=1] scores = dets[:, 4]
  * 
  *     cdef np.ndarray[np.float32_t, ndim=1] areas = (x2 - x1 + 1) * (y2 - y1 + 1)             # <<<<<<<<<<<<<<
@@ -2176,7 +2176,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_areas = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":25
+  /* "lib/utils/cython_nms.pyx":25
  * 
  *     cdef np.ndarray[np.float32_t, ndim=1] areas = (x2 - x1 + 1) * (y2 - y1 + 1)
  *     cdef np.ndarray[np.int_t, ndim=1] order = scores.argsort()[::-1]             # <<<<<<<<<<<<<<
@@ -2220,7 +2220,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_order = ((PyArrayObject *)__pyx_t_8);
   __pyx_t_8 = 0;
 
-  /* "utils/cython_nms.pyx":27
+  /* "lib/utils/cython_nms.pyx":27
  *     cdef np.ndarray[np.int_t, ndim=1] order = scores.argsort()[::-1]
  * 
  *     cdef int ndets = dets.shape[0]             # <<<<<<<<<<<<<<
@@ -2229,7 +2229,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
  */
   __pyx_v_ndets = (__pyx_v_dets->dimensions[0]);
 
-  /* "utils/cython_nms.pyx":29
+  /* "lib/utils/cython_nms.pyx":29
  *     cdef int ndets = dets.shape[0]
  *     cdef np.ndarray[np.int_t, ndim=1] suppressed = \
  *             np.zeros((ndets), dtype=np.int)             # <<<<<<<<<<<<<<
@@ -2276,7 +2276,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_suppressed = ((PyArrayObject *)__pyx_t_12);
   __pyx_t_12 = 0;
 
-  /* "utils/cython_nms.pyx":42
+  /* "lib/utils/cython_nms.pyx":42
  *     cdef np.float32_t inter, ovr
  * 
  *     keep = []             # <<<<<<<<<<<<<<
@@ -2288,7 +2288,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_keep = ((PyObject*)__pyx_t_12);
   __pyx_t_12 = 0;
 
-  /* "utils/cython_nms.pyx":43
+  /* "lib/utils/cython_nms.pyx":43
  * 
  *     keep = []
  *     for _i in range(ndets):             # <<<<<<<<<<<<<<
@@ -2299,7 +2299,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
     __pyx_v__i = __pyx_t_15;
 
-    /* "utils/cython_nms.pyx":44
+    /* "lib/utils/cython_nms.pyx":44
  *     keep = []
  *     for _i in range(ndets):
  *         i = order[_i]             # <<<<<<<<<<<<<<
@@ -2318,7 +2318,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     }
     __pyx_v_i = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_order.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_order.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":45
+    /* "lib/utils/cython_nms.pyx":45
  *     for _i in range(ndets):
  *         i = order[_i]
  *         if suppressed[i] == 1:             # <<<<<<<<<<<<<<
@@ -2338,7 +2338,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     __pyx_t_19 = (((*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_suppressed.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_suppressed.diminfo[0].strides)) == 1) != 0);
     if (__pyx_t_19) {
 
-      /* "utils/cython_nms.pyx":46
+      /* "lib/utils/cython_nms.pyx":46
  *         i = order[_i]
  *         if suppressed[i] == 1:
  *             continue             # <<<<<<<<<<<<<<
@@ -2347,7 +2347,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
  */
       goto __pyx_L3_continue;
 
-      /* "utils/cython_nms.pyx":45
+      /* "lib/utils/cython_nms.pyx":45
  *     for _i in range(ndets):
  *         i = order[_i]
  *         if suppressed[i] == 1:             # <<<<<<<<<<<<<<
@@ -2356,7 +2356,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
  */
     }
 
-    /* "utils/cython_nms.pyx":47
+    /* "lib/utils/cython_nms.pyx":47
  *         if suppressed[i] == 1:
  *             continue
  *         keep.append(i)             # <<<<<<<<<<<<<<
@@ -2368,7 +2368,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     __pyx_t_20 = __Pyx_PyList_Append(__pyx_v_keep, __pyx_t_12); if (unlikely(__pyx_t_20 == ((int)-1))) __PYX_ERR(0, 47, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "utils/cython_nms.pyx":48
+    /* "lib/utils/cython_nms.pyx":48
  *             continue
  *         keep.append(i)
  *         ix1 = x1[i]             # <<<<<<<<<<<<<<
@@ -2387,7 +2387,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     }
     __pyx_v_ix1 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x1.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_x1.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":49
+    /* "lib/utils/cython_nms.pyx":49
  *         keep.append(i)
  *         ix1 = x1[i]
  *         iy1 = y1[i]             # <<<<<<<<<<<<<<
@@ -2406,7 +2406,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     }
     __pyx_v_iy1 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y1.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_y1.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":50
+    /* "lib/utils/cython_nms.pyx":50
  *         ix1 = x1[i]
  *         iy1 = y1[i]
  *         ix2 = x2[i]             # <<<<<<<<<<<<<<
@@ -2425,7 +2425,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     }
     __pyx_v_ix2 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x2.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_x2.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":51
+    /* "lib/utils/cython_nms.pyx":51
  *         iy1 = y1[i]
  *         ix2 = x2[i]
  *         iy2 = y2[i]             # <<<<<<<<<<<<<<
@@ -2444,7 +2444,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     }
     __pyx_v_iy2 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y2.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_y2.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":52
+    /* "lib/utils/cython_nms.pyx":52
  *         ix2 = x2[i]
  *         iy2 = y2[i]
  *         iarea = areas[i]             # <<<<<<<<<<<<<<
@@ -2463,7 +2463,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     }
     __pyx_v_iarea = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_areas.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_areas.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":53
+    /* "lib/utils/cython_nms.pyx":53
  *         iy2 = y2[i]
  *         iarea = areas[i]
  *         for _j in range(_i + 1, ndets):             # <<<<<<<<<<<<<<
@@ -2474,7 +2474,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     for (__pyx_t_26 = (__pyx_v__i + 1); __pyx_t_26 < __pyx_t_17; __pyx_t_26+=1) {
       __pyx_v__j = __pyx_t_26;
 
-      /* "utils/cython_nms.pyx":54
+      /* "lib/utils/cython_nms.pyx":54
  *         iarea = areas[i]
  *         for _j in range(_i + 1, ndets):
  *             j = order[_j]             # <<<<<<<<<<<<<<
@@ -2493,7 +2493,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
       }
       __pyx_v_j = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_order.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_order.diminfo[0].strides));
 
-      /* "utils/cython_nms.pyx":55
+      /* "lib/utils/cython_nms.pyx":55
  *         for _j in range(_i + 1, ndets):
  *             j = order[_j]
  *             if suppressed[j] == 1:             # <<<<<<<<<<<<<<
@@ -2513,7 +2513,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
       __pyx_t_19 = (((*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_suppressed.rcbuffer->pybuffer.buf, __pyx_t_29, __pyx_pybuffernd_suppressed.diminfo[0].strides)) == 1) != 0);
       if (__pyx_t_19) {
 
-        /* "utils/cython_nms.pyx":56
+        /* "lib/utils/cython_nms.pyx":56
  *             j = order[_j]
  *             if suppressed[j] == 1:
  *                 continue             # <<<<<<<<<<<<<<
@@ -2522,7 +2522,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
  */
         goto __pyx_L6_continue;
 
-        /* "utils/cython_nms.pyx":55
+        /* "lib/utils/cython_nms.pyx":55
  *         for _j in range(_i + 1, ndets):
  *             j = order[_j]
  *             if suppressed[j] == 1:             # <<<<<<<<<<<<<<
@@ -2531,7 +2531,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
  */
       }
 
-      /* "utils/cython_nms.pyx":57
+      /* "lib/utils/cython_nms.pyx":57
  *             if suppressed[j] == 1:
  *                 continue
  *             xx1 = max(ix1, x1[j])             # <<<<<<<<<<<<<<
@@ -2548,9 +2548,9 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 57, __pyx_L1_error)
       }
-      __pyx_v_xx1 = __pyx_f_5utils_10cython_nms_max(__pyx_v_ix1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x1.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_x1.diminfo[0].strides)));
+      __pyx_v_xx1 = __pyx_f_3lib_5utils_10cython_nms_max(__pyx_v_ix1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x1.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_x1.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":58
+      /* "lib/utils/cython_nms.pyx":58
  *                 continue
  *             xx1 = max(ix1, x1[j])
  *             yy1 = max(iy1, y1[j])             # <<<<<<<<<<<<<<
@@ -2567,9 +2567,9 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 58, __pyx_L1_error)
       }
-      __pyx_v_yy1 = __pyx_f_5utils_10cython_nms_max(__pyx_v_iy1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y1.rcbuffer->pybuffer.buf, __pyx_t_31, __pyx_pybuffernd_y1.diminfo[0].strides)));
+      __pyx_v_yy1 = __pyx_f_3lib_5utils_10cython_nms_max(__pyx_v_iy1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y1.rcbuffer->pybuffer.buf, __pyx_t_31, __pyx_pybuffernd_y1.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":59
+      /* "lib/utils/cython_nms.pyx":59
  *             xx1 = max(ix1, x1[j])
  *             yy1 = max(iy1, y1[j])
  *             xx2 = min(ix2, x2[j])             # <<<<<<<<<<<<<<
@@ -2586,9 +2586,9 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 59, __pyx_L1_error)
       }
-      __pyx_v_xx2 = __pyx_f_5utils_10cython_nms_min(__pyx_v_ix2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x2.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_x2.diminfo[0].strides)));
+      __pyx_v_xx2 = __pyx_f_3lib_5utils_10cython_nms_min(__pyx_v_ix2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x2.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_x2.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":60
+      /* "lib/utils/cython_nms.pyx":60
  *             yy1 = max(iy1, y1[j])
  *             xx2 = min(ix2, x2[j])
  *             yy2 = min(iy2, y2[j])             # <<<<<<<<<<<<<<
@@ -2605,27 +2605,27 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 60, __pyx_L1_error)
       }
-      __pyx_v_yy2 = __pyx_f_5utils_10cython_nms_min(__pyx_v_iy2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y2.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_y2.diminfo[0].strides)));
+      __pyx_v_yy2 = __pyx_f_3lib_5utils_10cython_nms_min(__pyx_v_iy2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y2.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_y2.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":61
+      /* "lib/utils/cython_nms.pyx":61
  *             xx2 = min(ix2, x2[j])
  *             yy2 = min(iy2, y2[j])
  *             w = max(0.0, xx2 - xx1 + 1)             # <<<<<<<<<<<<<<
  *             h = max(0.0, yy2 - yy1 + 1)
  *             inter = w * h
  */
-      __pyx_v_w = __pyx_f_5utils_10cython_nms_max(0.0, ((__pyx_v_xx2 - __pyx_v_xx1) + 1.0));
+      __pyx_v_w = __pyx_f_3lib_5utils_10cython_nms_max(0.0, ((__pyx_v_xx2 - __pyx_v_xx1) + 1.0));
 
-      /* "utils/cython_nms.pyx":62
+      /* "lib/utils/cython_nms.pyx":62
  *             yy2 = min(iy2, y2[j])
  *             w = max(0.0, xx2 - xx1 + 1)
  *             h = max(0.0, yy2 - yy1 + 1)             # <<<<<<<<<<<<<<
  *             inter = w * h
  *             ovr = inter / (iarea + areas[j] - inter)
  */
-      __pyx_v_h = __pyx_f_5utils_10cython_nms_max(0.0, ((__pyx_v_yy2 - __pyx_v_yy1) + 1.0));
+      __pyx_v_h = __pyx_f_3lib_5utils_10cython_nms_max(0.0, ((__pyx_v_yy2 - __pyx_v_yy1) + 1.0));
 
-      /* "utils/cython_nms.pyx":63
+      /* "lib/utils/cython_nms.pyx":63
  *             w = max(0.0, xx2 - xx1 + 1)
  *             h = max(0.0, yy2 - yy1 + 1)
  *             inter = w * h             # <<<<<<<<<<<<<<
@@ -2634,7 +2634,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
  */
       __pyx_v_inter = (__pyx_v_w * __pyx_v_h);
 
-      /* "utils/cython_nms.pyx":64
+      /* "lib/utils/cython_nms.pyx":64
  *             h = max(0.0, yy2 - yy1 + 1)
  *             inter = w * h
  *             ovr = inter / (iarea + areas[j] - inter)             # <<<<<<<<<<<<<<
@@ -2658,7 +2658,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
       }
       __pyx_v_ovr = (__pyx_v_inter / __pyx_t_35);
 
-      /* "utils/cython_nms.pyx":65
+      /* "lib/utils/cython_nms.pyx":65
  *             inter = w * h
  *             ovr = inter / (iarea + areas[j] - inter)
  *             if ovr >= thresh:             # <<<<<<<<<<<<<<
@@ -2673,7 +2673,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
       if (__pyx_t_19) {
 
-        /* "utils/cython_nms.pyx":66
+        /* "lib/utils/cython_nms.pyx":66
  *             ovr = inter / (iarea + areas[j] - inter)
  *             if ovr >= thresh:
  *                 suppressed[j] = 1             # <<<<<<<<<<<<<<
@@ -2692,7 +2692,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
         }
         *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_suppressed.rcbuffer->pybuffer.buf, __pyx_t_36, __pyx_pybuffernd_suppressed.diminfo[0].strides) = 1;
 
-        /* "utils/cython_nms.pyx":65
+        /* "lib/utils/cython_nms.pyx":65
  *             inter = w * h
  *             ovr = inter / (iarea + areas[j] - inter)
  *             if ovr >= thresh:             # <<<<<<<<<<<<<<
@@ -2705,7 +2705,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     __pyx_L3_continue:;
   }
 
-  /* "utils/cython_nms.pyx":68
+  /* "lib/utils/cython_nms.pyx":68
  *                 suppressed[j] = 1
  * 
  *     return keep             # <<<<<<<<<<<<<<
@@ -2717,7 +2717,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_r = __pyx_v_keep;
   goto __pyx_L0;
 
-  /* "utils/cython_nms.pyx":17
+  /* "lib/utils/cython_nms.pyx":17
  *     return a if a <= b else b
  * 
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
@@ -2746,7 +2746,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_y1.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_y2.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("utils.cython_nms.nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("lib.utils.cython_nms.nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -2774,7 +2774,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
   return __pyx_r;
 }
 
-/* "utils/cython_nms.pyx":70
+/* "lib/utils/cython_nms.pyx":70
  *     return keep
  * 
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
@@ -2783,9 +2783,9 @@ static PyObject *__pyx_pf_5utils_10cython_nms_nms(CYTHON_UNUSED PyObject *__pyx_
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5utils_10cython_nms_3nms_new(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5utils_10cython_nms_3nms_new = {"nms_new", (PyCFunction)__pyx_pw_5utils_10cython_nms_3nms_new, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5utils_10cython_nms_3nms_new(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_3lib_5utils_10cython_nms_3nms_new(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_3lib_5utils_10cython_nms_3nms_new = {"nms_new", (PyCFunction)__pyx_pw_3lib_5utils_10cython_nms_3nms_new, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3lib_5utils_10cython_nms_3nms_new(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_dets = 0;
   PyObject *__pyx_v_thresh = 0;
   PyObject *__pyx_r = 0;
@@ -2833,13 +2833,13 @@ static PyObject *__pyx_pw_5utils_10cython_nms_3nms_new(PyObject *__pyx_self, PyO
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("nms_new", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 70, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("utils.cython_nms.nms_new", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("lib.utils.cython_nms.nms_new", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dets), __pyx_ptype_5numpy_ndarray, 1, "dets", 0))) __PYX_ERR(0, 70, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_thresh), (&PyFloat_Type), 1, "thresh", 1))) __PYX_ERR(0, 70, __pyx_L1_error)
-  __pyx_r = __pyx_pf_5utils_10cython_nms_2nms_new(__pyx_self, __pyx_v_dets, __pyx_v_thresh);
+  __pyx_r = __pyx_pf_3lib_5utils_10cython_nms_2nms_new(__pyx_self, __pyx_v_dets, __pyx_v_thresh);
 
   /* function exit code */
   goto __pyx_L0;
@@ -2850,7 +2850,7 @@ static PyObject *__pyx_pw_5utils_10cython_nms_3nms_new(PyObject *__pyx_self, PyO
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh) {
+static PyObject *__pyx_pf_3lib_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh) {
   PyArrayObject *__pyx_v_x1 = 0;
   PyArrayObject *__pyx_v_y1 = 0;
   PyArrayObject *__pyx_v_x2 = 0;
@@ -2981,7 +2981,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   }
   __pyx_pybuffernd_dets.diminfo[0].strides = __pyx_pybuffernd_dets.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_dets.diminfo[0].shape = __pyx_pybuffernd_dets.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_dets.diminfo[1].strides = __pyx_pybuffernd_dets.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_dets.diminfo[1].shape = __pyx_pybuffernd_dets.rcbuffer->pybuffer.shape[1];
 
-  /* "utils/cython_nms.pyx":71
+  /* "lib/utils/cython_nms.pyx":71
  * 
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]             # <<<<<<<<<<<<<<
@@ -3004,7 +3004,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_x1 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":72
+  /* "lib/utils/cython_nms.pyx":72
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]             # <<<<<<<<<<<<<<
@@ -3027,7 +3027,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_y1 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":73
+  /* "lib/utils/cython_nms.pyx":73
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]             # <<<<<<<<<<<<<<
@@ -3050,7 +3050,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_x2 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":74
+  /* "lib/utils/cython_nms.pyx":74
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]             # <<<<<<<<<<<<<<
@@ -3073,7 +3073,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_y2 = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":75
+  /* "lib/utils/cython_nms.pyx":75
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]
  *     cdef np.ndarray[np.float32_t, ndim=1] scores = dets[:, 4]             # <<<<<<<<<<<<<<
@@ -3096,7 +3096,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_scores = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":77
+  /* "lib/utils/cython_nms.pyx":77
  *     cdef np.ndarray[np.float32_t, ndim=1] scores = dets[:, 4]
  * 
  *     cdef np.ndarray[np.float32_t, ndim=1] areas = (x2 - x1 + 1) * (y2 - y1 + 1)             # <<<<<<<<<<<<<<
@@ -3131,7 +3131,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_areas = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":78
+  /* "lib/utils/cython_nms.pyx":78
  * 
  *     cdef np.ndarray[np.float32_t, ndim=1] areas = (x2 - x1 + 1) * (y2 - y1 + 1)
  *     cdef np.ndarray[np.int_t, ndim=1] order = scores.argsort()[::-1]             # <<<<<<<<<<<<<<
@@ -3175,7 +3175,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_order = ((PyArrayObject *)__pyx_t_8);
   __pyx_t_8 = 0;
 
-  /* "utils/cython_nms.pyx":80
+  /* "lib/utils/cython_nms.pyx":80
  *     cdef np.ndarray[np.int_t, ndim=1] order = scores.argsort()[::-1]
  * 
  *     cdef int ndets = dets.shape[0]             # <<<<<<<<<<<<<<
@@ -3184,7 +3184,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
  */
   __pyx_v_ndets = (__pyx_v_dets->dimensions[0]);
 
-  /* "utils/cython_nms.pyx":82
+  /* "lib/utils/cython_nms.pyx":82
  *     cdef int ndets = dets.shape[0]
  *     cdef np.ndarray[np.int_t, ndim=1] suppressed = \
  *             np.zeros((ndets), dtype=np.int)             # <<<<<<<<<<<<<<
@@ -3231,7 +3231,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_suppressed = ((PyArrayObject *)__pyx_t_12);
   __pyx_t_12 = 0;
 
-  /* "utils/cython_nms.pyx":95
+  /* "lib/utils/cython_nms.pyx":95
  *     cdef np.float32_t inter, ovr
  * 
  *     keep = []             # <<<<<<<<<<<<<<
@@ -3243,7 +3243,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_v_keep = ((PyObject*)__pyx_t_12);
   __pyx_t_12 = 0;
 
-  /* "utils/cython_nms.pyx":96
+  /* "lib/utils/cython_nms.pyx":96
  * 
  *     keep = []
  *     for _i in range(ndets):             # <<<<<<<<<<<<<<
@@ -3254,7 +3254,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   for (__pyx_t_15 = 0; __pyx_t_15 < __pyx_t_14; __pyx_t_15+=1) {
     __pyx_v__i = __pyx_t_15;
 
-    /* "utils/cython_nms.pyx":97
+    /* "lib/utils/cython_nms.pyx":97
  *     keep = []
  *     for _i in range(ndets):
  *         i = order[_i]             # <<<<<<<<<<<<<<
@@ -3273,7 +3273,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     }
     __pyx_v_i = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_order.rcbuffer->pybuffer.buf, __pyx_t_16, __pyx_pybuffernd_order.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":98
+    /* "lib/utils/cython_nms.pyx":98
  *     for _i in range(ndets):
  *         i = order[_i]
  *         if suppressed[i] == 1:             # <<<<<<<<<<<<<<
@@ -3293,7 +3293,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     __pyx_t_19 = (((*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_suppressed.rcbuffer->pybuffer.buf, __pyx_t_18, __pyx_pybuffernd_suppressed.diminfo[0].strides)) == 1) != 0);
     if (__pyx_t_19) {
 
-      /* "utils/cython_nms.pyx":99
+      /* "lib/utils/cython_nms.pyx":99
  *         i = order[_i]
  *         if suppressed[i] == 1:
  *             continue             # <<<<<<<<<<<<<<
@@ -3302,7 +3302,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
  */
       goto __pyx_L3_continue;
 
-      /* "utils/cython_nms.pyx":98
+      /* "lib/utils/cython_nms.pyx":98
  *     for _i in range(ndets):
  *         i = order[_i]
  *         if suppressed[i] == 1:             # <<<<<<<<<<<<<<
@@ -3311,7 +3311,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
  */
     }
 
-    /* "utils/cython_nms.pyx":100
+    /* "lib/utils/cython_nms.pyx":100
  *         if suppressed[i] == 1:
  *             continue
  *         keep.append(i)             # <<<<<<<<<<<<<<
@@ -3323,7 +3323,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     __pyx_t_20 = __Pyx_PyList_Append(__pyx_v_keep, __pyx_t_12); if (unlikely(__pyx_t_20 == ((int)-1))) __PYX_ERR(0, 100, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_12); __pyx_t_12 = 0;
 
-    /* "utils/cython_nms.pyx":101
+    /* "lib/utils/cython_nms.pyx":101
  *             continue
  *         keep.append(i)
  *         ix1 = x1[i]             # <<<<<<<<<<<<<<
@@ -3342,7 +3342,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     }
     __pyx_v_ix1 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x1.rcbuffer->pybuffer.buf, __pyx_t_21, __pyx_pybuffernd_x1.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":102
+    /* "lib/utils/cython_nms.pyx":102
  *         keep.append(i)
  *         ix1 = x1[i]
  *         iy1 = y1[i]             # <<<<<<<<<<<<<<
@@ -3361,7 +3361,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     }
     __pyx_v_iy1 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y1.rcbuffer->pybuffer.buf, __pyx_t_22, __pyx_pybuffernd_y1.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":103
+    /* "lib/utils/cython_nms.pyx":103
  *         ix1 = x1[i]
  *         iy1 = y1[i]
  *         ix2 = x2[i]             # <<<<<<<<<<<<<<
@@ -3380,7 +3380,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     }
     __pyx_v_ix2 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x2.rcbuffer->pybuffer.buf, __pyx_t_23, __pyx_pybuffernd_x2.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":104
+    /* "lib/utils/cython_nms.pyx":104
  *         iy1 = y1[i]
  *         ix2 = x2[i]
  *         iy2 = y2[i]             # <<<<<<<<<<<<<<
@@ -3399,7 +3399,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     }
     __pyx_v_iy2 = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y2.rcbuffer->pybuffer.buf, __pyx_t_24, __pyx_pybuffernd_y2.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":105
+    /* "lib/utils/cython_nms.pyx":105
  *         ix2 = x2[i]
  *         iy2 = y2[i]
  *         iarea = areas[i]             # <<<<<<<<<<<<<<
@@ -3418,7 +3418,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     }
     __pyx_v_iarea = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_areas.rcbuffer->pybuffer.buf, __pyx_t_25, __pyx_pybuffernd_areas.diminfo[0].strides));
 
-    /* "utils/cython_nms.pyx":106
+    /* "lib/utils/cython_nms.pyx":106
  *         iy2 = y2[i]
  *         iarea = areas[i]
  *         for _j in range(_i + 1, ndets):             # <<<<<<<<<<<<<<
@@ -3429,7 +3429,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     for (__pyx_t_26 = (__pyx_v__i + 1); __pyx_t_26 < __pyx_t_17; __pyx_t_26+=1) {
       __pyx_v__j = __pyx_t_26;
 
-      /* "utils/cython_nms.pyx":107
+      /* "lib/utils/cython_nms.pyx":107
  *         iarea = areas[i]
  *         for _j in range(_i + 1, ndets):
  *             j = order[_j]             # <<<<<<<<<<<<<<
@@ -3448,7 +3448,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
       }
       __pyx_v_j = (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_order.rcbuffer->pybuffer.buf, __pyx_t_27, __pyx_pybuffernd_order.diminfo[0].strides));
 
-      /* "utils/cython_nms.pyx":108
+      /* "lib/utils/cython_nms.pyx":108
  *         for _j in range(_i + 1, ndets):
  *             j = order[_j]
  *             if suppressed[j] == 1:             # <<<<<<<<<<<<<<
@@ -3468,7 +3468,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
       __pyx_t_19 = (((*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_suppressed.rcbuffer->pybuffer.buf, __pyx_t_29, __pyx_pybuffernd_suppressed.diminfo[0].strides)) == 1) != 0);
       if (__pyx_t_19) {
 
-        /* "utils/cython_nms.pyx":109
+        /* "lib/utils/cython_nms.pyx":109
  *             j = order[_j]
  *             if suppressed[j] == 1:
  *                 continue             # <<<<<<<<<<<<<<
@@ -3477,7 +3477,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
  */
         goto __pyx_L6_continue;
 
-        /* "utils/cython_nms.pyx":108
+        /* "lib/utils/cython_nms.pyx":108
  *         for _j in range(_i + 1, ndets):
  *             j = order[_j]
  *             if suppressed[j] == 1:             # <<<<<<<<<<<<<<
@@ -3486,7 +3486,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
  */
       }
 
-      /* "utils/cython_nms.pyx":110
+      /* "lib/utils/cython_nms.pyx":110
  *             if suppressed[j] == 1:
  *                 continue
  *             xx1 = max(ix1, x1[j])             # <<<<<<<<<<<<<<
@@ -3503,9 +3503,9 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 110, __pyx_L1_error)
       }
-      __pyx_v_xx1 = __pyx_f_5utils_10cython_nms_max(__pyx_v_ix1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x1.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_x1.diminfo[0].strides)));
+      __pyx_v_xx1 = __pyx_f_3lib_5utils_10cython_nms_max(__pyx_v_ix1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x1.rcbuffer->pybuffer.buf, __pyx_t_30, __pyx_pybuffernd_x1.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":111
+      /* "lib/utils/cython_nms.pyx":111
  *                 continue
  *             xx1 = max(ix1, x1[j])
  *             yy1 = max(iy1, y1[j])             # <<<<<<<<<<<<<<
@@ -3522,9 +3522,9 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 111, __pyx_L1_error)
       }
-      __pyx_v_yy1 = __pyx_f_5utils_10cython_nms_max(__pyx_v_iy1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y1.rcbuffer->pybuffer.buf, __pyx_t_31, __pyx_pybuffernd_y1.diminfo[0].strides)));
+      __pyx_v_yy1 = __pyx_f_3lib_5utils_10cython_nms_max(__pyx_v_iy1, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y1.rcbuffer->pybuffer.buf, __pyx_t_31, __pyx_pybuffernd_y1.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":112
+      /* "lib/utils/cython_nms.pyx":112
  *             xx1 = max(ix1, x1[j])
  *             yy1 = max(iy1, y1[j])
  *             xx2 = min(ix2, x2[j])             # <<<<<<<<<<<<<<
@@ -3541,9 +3541,9 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 112, __pyx_L1_error)
       }
-      __pyx_v_xx2 = __pyx_f_5utils_10cython_nms_min(__pyx_v_ix2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x2.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_x2.diminfo[0].strides)));
+      __pyx_v_xx2 = __pyx_f_3lib_5utils_10cython_nms_min(__pyx_v_ix2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_x2.rcbuffer->pybuffer.buf, __pyx_t_32, __pyx_pybuffernd_x2.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":113
+      /* "lib/utils/cython_nms.pyx":113
  *             yy1 = max(iy1, y1[j])
  *             xx2 = min(ix2, x2[j])
  *             yy2 = min(iy2, y2[j])             # <<<<<<<<<<<<<<
@@ -3560,27 +3560,27 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
         __Pyx_RaiseBufferIndexError(__pyx_t_28);
         __PYX_ERR(0, 113, __pyx_L1_error)
       }
-      __pyx_v_yy2 = __pyx_f_5utils_10cython_nms_min(__pyx_v_iy2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y2.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_y2.diminfo[0].strides)));
+      __pyx_v_yy2 = __pyx_f_3lib_5utils_10cython_nms_min(__pyx_v_iy2, (*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_y2.rcbuffer->pybuffer.buf, __pyx_t_33, __pyx_pybuffernd_y2.diminfo[0].strides)));
 
-      /* "utils/cython_nms.pyx":114
+      /* "lib/utils/cython_nms.pyx":114
  *             xx2 = min(ix2, x2[j])
  *             yy2 = min(iy2, y2[j])
  *             w = max(0.0, xx2 - xx1 + 1)             # <<<<<<<<<<<<<<
  *             h = max(0.0, yy2 - yy1 + 1)
  *             inter = w * h
  */
-      __pyx_v_w = __pyx_f_5utils_10cython_nms_max(0.0, ((__pyx_v_xx2 - __pyx_v_xx1) + 1.0));
+      __pyx_v_w = __pyx_f_3lib_5utils_10cython_nms_max(0.0, ((__pyx_v_xx2 - __pyx_v_xx1) + 1.0));
 
-      /* "utils/cython_nms.pyx":115
+      /* "lib/utils/cython_nms.pyx":115
  *             yy2 = min(iy2, y2[j])
  *             w = max(0.0, xx2 - xx1 + 1)
  *             h = max(0.0, yy2 - yy1 + 1)             # <<<<<<<<<<<<<<
  *             inter = w * h
  *             ovr = inter / (iarea + areas[j] - inter)
  */
-      __pyx_v_h = __pyx_f_5utils_10cython_nms_max(0.0, ((__pyx_v_yy2 - __pyx_v_yy1) + 1.0));
+      __pyx_v_h = __pyx_f_3lib_5utils_10cython_nms_max(0.0, ((__pyx_v_yy2 - __pyx_v_yy1) + 1.0));
 
-      /* "utils/cython_nms.pyx":116
+      /* "lib/utils/cython_nms.pyx":116
  *             w = max(0.0, xx2 - xx1 + 1)
  *             h = max(0.0, yy2 - yy1 + 1)
  *             inter = w * h             # <<<<<<<<<<<<<<
@@ -3589,7 +3589,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
  */
       __pyx_v_inter = (__pyx_v_w * __pyx_v_h);
 
-      /* "utils/cython_nms.pyx":117
+      /* "lib/utils/cython_nms.pyx":117
  *             h = max(0.0, yy2 - yy1 + 1)
  *             inter = w * h
  *             ovr = inter / (iarea + areas[j] - inter)             # <<<<<<<<<<<<<<
@@ -3613,7 +3613,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
       }
       __pyx_v_ovr = (__pyx_v_inter / __pyx_t_35);
 
-      /* "utils/cython_nms.pyx":118
+      /* "lib/utils/cython_nms.pyx":118
  *             inter = w * h
  *             ovr = inter / (iarea + areas[j] - inter)
  *             ovr1 = inter / iarea             # <<<<<<<<<<<<<<
@@ -3629,7 +3629,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
       __Pyx_XDECREF_SET(__pyx_v_ovr1, __pyx_t_12);
       __pyx_t_12 = 0;
 
-      /* "utils/cython_nms.pyx":119
+      /* "lib/utils/cython_nms.pyx":119
  *             ovr = inter / (iarea + areas[j] - inter)
  *             ovr1 = inter / iarea
  *             ovr2 = inter / areas[j]             # <<<<<<<<<<<<<<
@@ -3656,7 +3656,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
       __Pyx_XDECREF_SET(__pyx_v_ovr2, __pyx_t_12);
       __pyx_t_12 = 0;
 
-      /* "utils/cython_nms.pyx":120
+      /* "lib/utils/cython_nms.pyx":120
  *             ovr1 = inter / iarea
  *             ovr2 = inter / areas[j]
  *             if ovr >= thresh or ovr1 > 0.95 or ovr2 > 0.95:             # <<<<<<<<<<<<<<
@@ -3689,7 +3689,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
       __pyx_L10_bool_binop_done:;
       if (__pyx_t_19) {
 
-        /* "utils/cython_nms.pyx":121
+        /* "lib/utils/cython_nms.pyx":121
  *             ovr2 = inter / areas[j]
  *             if ovr >= thresh or ovr1 > 0.95 or ovr2 > 0.95:
  *                 suppressed[j] = 1             # <<<<<<<<<<<<<<
@@ -3708,7 +3708,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
         }
         *__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int_t *, __pyx_pybuffernd_suppressed.rcbuffer->pybuffer.buf, __pyx_t_38, __pyx_pybuffernd_suppressed.diminfo[0].strides) = 1;
 
-        /* "utils/cython_nms.pyx":120
+        /* "lib/utils/cython_nms.pyx":120
  *             ovr1 = inter / iarea
  *             ovr2 = inter / areas[j]
  *             if ovr >= thresh or ovr1 > 0.95 or ovr2 > 0.95:             # <<<<<<<<<<<<<<
@@ -3721,7 +3721,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     __pyx_L3_continue:;
   }
 
-  /* "utils/cython_nms.pyx":123
+  /* "lib/utils/cython_nms.pyx":123
  *                 suppressed[j] = 1
  * 
  *     return keep             # <<<<<<<<<<<<<<
@@ -3731,7 +3731,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
   __pyx_r = __pyx_v_keep;
   goto __pyx_L0;
 
-  /* "utils/cython_nms.pyx":70
+  /* "lib/utils/cython_nms.pyx":70
  *     return keep
  * 
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
@@ -3760,7 +3760,7 @@ static PyObject *__pyx_pf_5utils_10cython_nms_2nms_new(CYTHON_UNUSED PyObject *_
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_y1.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_y2.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("utils.cython_nms.nms_new", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("lib.utils.cython_nms.nms_new", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -6435,6 +6435,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_j, __pyx_k_j, sizeof(__pyx_k_j), 0, 0, 1, 1},
   {&__pyx_n_s_j_2, __pyx_k_j_2, sizeof(__pyx_k_j_2), 0, 0, 1, 1},
   {&__pyx_n_s_keep, __pyx_k_keep, sizeof(__pyx_k_keep), 0, 0, 1, 1},
+  {&__pyx_n_s_lib_utils_cython_nms, __pyx_k_lib_utils_cython_nms, sizeof(__pyx_k_lib_utils_cython_nms), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_kp_u_ndarray_is_not_C_contiguous, __pyx_k_ndarray_is_not_C_contiguous, sizeof(__pyx_k_ndarray_is_not_C_contiguous), 0, 1, 0, 0},
   {&__pyx_kp_u_ndarray_is_not_Fortran_contiguou, __pyx_k_ndarray_is_not_Fortran_contiguou, sizeof(__pyx_k_ndarray_is_not_Fortran_contiguou), 0, 1, 0, 0},
@@ -6455,7 +6456,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_thresh, __pyx_k_thresh, sizeof(__pyx_k_thresh), 0, 0, 1, 1},
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
-  {&__pyx_n_s_utils_cython_nms, __pyx_k_utils_cython_nms, sizeof(__pyx_k_utils_cython_nms), 0, 0, 1, 1},
   {&__pyx_n_s_w, __pyx_k_w, sizeof(__pyx_k_w), 0, 0, 1, 1},
   {&__pyx_n_s_x1, __pyx_k_x1, sizeof(__pyx_k_x1), 0, 0, 1, 1},
   {&__pyx_n_s_x2, __pyx_k_x2, sizeof(__pyx_k_x2), 0, 0, 1, 1},
@@ -6482,7 +6482,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "utils/cython_nms.pyx":18
+  /* "lib/utils/cython_nms.pyx":18
  * 
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]             # <<<<<<<<<<<<<<
@@ -6496,7 +6496,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "utils/cython_nms.pyx":19
+  /* "lib/utils/cython_nms.pyx":19
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]             # <<<<<<<<<<<<<<
@@ -6510,7 +6510,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
-  /* "utils/cython_nms.pyx":20
+  /* "lib/utils/cython_nms.pyx":20
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]             # <<<<<<<<<<<<<<
@@ -6524,7 +6524,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
-  /* "utils/cython_nms.pyx":21
+  /* "lib/utils/cython_nms.pyx":21
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]             # <<<<<<<<<<<<<<
@@ -6538,7 +6538,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
-  /* "utils/cython_nms.pyx":22
+  /* "lib/utils/cython_nms.pyx":22
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]
  *     cdef np.ndarray[np.float32_t, ndim=1] scores = dets[:, 4]             # <<<<<<<<<<<<<<
@@ -6552,7 +6552,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
-  /* "utils/cython_nms.pyx":25
+  /* "lib/utils/cython_nms.pyx":25
  * 
  *     cdef np.ndarray[np.float32_t, ndim=1] areas = (x2 - x1 + 1) * (y2 - y1 + 1)
  *     cdef np.ndarray[np.int_t, ndim=1] order = scores.argsort()[::-1]             # <<<<<<<<<<<<<<
@@ -6563,7 +6563,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice__11);
   __Pyx_GIVEREF(__pyx_slice__11);
 
-  /* "utils/cython_nms.pyx":71
+  /* "lib/utils/cython_nms.pyx":71
  * 
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]             # <<<<<<<<<<<<<<
@@ -6577,7 +6577,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
 
-  /* "utils/cython_nms.pyx":72
+  /* "lib/utils/cython_nms.pyx":72
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]             # <<<<<<<<<<<<<<
@@ -6591,7 +6591,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__15);
   __Pyx_GIVEREF(__pyx_tuple__15);
 
-  /* "utils/cython_nms.pyx":73
+  /* "lib/utils/cython_nms.pyx":73
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]             # <<<<<<<<<<<<<<
@@ -6605,7 +6605,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__17);
   __Pyx_GIVEREF(__pyx_tuple__17);
 
-  /* "utils/cython_nms.pyx":74
+  /* "lib/utils/cython_nms.pyx":74
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]             # <<<<<<<<<<<<<<
@@ -6619,7 +6619,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__19);
   __Pyx_GIVEREF(__pyx_tuple__19);
 
-  /* "utils/cython_nms.pyx":75
+  /* "lib/utils/cython_nms.pyx":75
  *     cdef np.ndarray[np.float32_t, ndim=1] x2 = dets[:, 2]
  *     cdef np.ndarray[np.float32_t, ndim=1] y2 = dets[:, 3]
  *     cdef np.ndarray[np.float32_t, ndim=1] scores = dets[:, 4]             # <<<<<<<<<<<<<<
@@ -6633,7 +6633,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__21);
   __Pyx_GIVEREF(__pyx_tuple__21);
 
-  /* "utils/cython_nms.pyx":78
+  /* "lib/utils/cython_nms.pyx":78
  * 
  *     cdef np.ndarray[np.float32_t, ndim=1] areas = (x2 - x1 + 1) * (y2 - y1 + 1)
  *     cdef np.ndarray[np.int_t, ndim=1] order = scores.argsort()[::-1]             # <<<<<<<<<<<<<<
@@ -6741,7 +6741,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__31);
   __Pyx_GIVEREF(__pyx_tuple__31);
 
-  /* "utils/cython_nms.pyx":17
+  /* "lib/utils/cython_nms.pyx":17
  *     return a if a <= b else b
  * 
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
@@ -6753,7 +6753,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__32);
   __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(2, 0, 29, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_cython_nms_pyx, __pyx_n_s_nms, 17, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 17, __pyx_L1_error)
 
-  /* "utils/cython_nms.pyx":70
+  /* "lib/utils/cython_nms.pyx":70
  *     return keep
  * 
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
@@ -6903,14 +6903,14 @@ static int __pyx_pymod_exec_cython_nms(PyObject *__pyx_pyinit_module)
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_utils__cython_nms) {
+  if (__pyx_module_is_main_lib__utils__cython_nms) {
     if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "utils.cython_nms")) {
-      if (unlikely(PyDict_SetItemString(modules, "utils.cython_nms", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "lib.utils.cython_nms")) {
+      if (unlikely(PyDict_SetItemString(modules, "lib.utils.cython_nms", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -6942,7 +6942,7 @@ static int __pyx_pymod_exec_cython_nms(PyObject *__pyx_pyinit_module)
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "utils/cython_nms.pyx":8
+  /* "lib/utils/cython_nms.pyx":8
  * # --------------------------------------------------------
  * 
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -6954,31 +6954,31 @@ static int __pyx_pymod_exec_cython_nms(PyObject *__pyx_pyinit_module)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":17
+  /* "lib/utils/cython_nms.pyx":17
  *     return a if a <= b else b
  * 
  * def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5utils_10cython_nms_1nms, NULL, __pyx_n_s_utils_cython_nms); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_3lib_5utils_10cython_nms_1nms, NULL, __pyx_n_s_lib_utils_cython_nms); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_nms, __pyx_t_1) < 0) __PYX_ERR(0, 17, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":70
+  /* "lib/utils/cython_nms.pyx":70
  *     return keep
  * 
  * def nms_new(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):             # <<<<<<<<<<<<<<
  *     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
  *     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5utils_10cython_nms_3nms_new, NULL, __pyx_n_s_utils_cython_nms); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_3lib_5utils_10cython_nms_3nms_new, NULL, __pyx_n_s_lib_utils_cython_nms); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_nms_new, __pyx_t_1) < 0) __PYX_ERR(0, 70, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "utils/cython_nms.pyx":1
+  /* "lib/utils/cython_nms.pyx":1
  * # --------------------------------------------------------             # <<<<<<<<<<<<<<
  * # Fast R-CNN
  * # Copyright (c) 2015 Microsoft
@@ -7003,11 +7003,11 @@ static int __pyx_pymod_exec_cython_nms(PyObject *__pyx_pyinit_module)
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init utils.cython_nms", 0, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init lib.utils.cython_nms", 0, __pyx_lineno, __pyx_filename);
     }
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init utils.cython_nms");
+    PyErr_SetString(PyExc_ImportError, "init lib.utils.cython_nms");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

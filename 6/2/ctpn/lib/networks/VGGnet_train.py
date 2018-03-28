@@ -19,15 +19,13 @@ class VGGnet_train(Network):
         self.setup()
 
     def setup(self):
+
         # n_classes = 21
-        # 这里修改为 2 ，文字或背景
         n_classes = cfg.NCLASSES
         # anchor_scales = [8, 16, 32]
-        # 这里修改为 [16]
         anchor_scales = cfg.ANCHOR_SCALES
         _feat_stride = [16, ]
 
-        # VGG16的网络结构
         (self.feed('data')
              .conv(3, 3, 64, 1, 1, name='conv1_1')
              .conv(3, 3, 64, 1, 1, name='conv1_2')
@@ -46,22 +44,12 @@ class VGGnet_train(Network):
              .conv(3, 3, 512, 1, 1, name='conv5_1')
              .conv(3, 3, 512, 1, 1, name='conv5_2')
              .conv(3, 3, 512, 1, 1, name='conv5_3'))
-        # 输出 shape， 这个是按原图说的 [N, H/16, W/16, 512]
-        # 后续按 [N, H, W, 512] 备注
-
         #========= RPN ============
-        # 3x3的窗口锚点
         (self.feed('conv5_3')
              .conv(3,3,512,1,1,name='rpn_conv/3x3'))
 
-        # 引入了 bilstm 模型
-        # 按 [N * H, W, C] ==> bilstm (128单元) ==> [N * H * W, 2 * 128] ==> FC(512) ==> [N, H, W, 512]
         (self.feed('rpn_conv/3x3').Bilstm(512,128,512,name='lstm_o'))
-        # bbox 位置偏移
-        # [N, H, W, 512] ==> FC(40) ==> [N, H, W, 10 * 4] 每个坐标取10个框
         (self.feed('lstm_o').lstm_fc(512,len(anchor_scales) * 10 * 4, name='rpn_bbox_pred'))
-        # 分类
-        # [N, H, W, 512] ==> FC(20) ==> [N, H, W, 10 * 2] 每个坐标取10个框
         (self.feed('lstm_o').lstm_fc(512,len(anchor_scales) * 10 * 2,name='rpn_cls_score'))
 
         # generating training labels on the fly

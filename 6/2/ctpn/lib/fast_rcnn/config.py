@@ -1,19 +1,3 @@
-# --------------------------------------------------------
-# Fast R-CNN
-# Copyright (c) 2015 Microsoft
-# Licensed under The MIT License [see LICENSE for details]
-# Written by Ross Girshick
-# --------------------------------------------------------
-
-"""Fast R-CNN config system.
-This file specifies default config options for Fast R-CNN. You should not
-change values in this file. Instead, you should write a config file (in yaml)
-and use cfg_from_file(yaml_file) to load it and override the default options.
-Most tools in $ROOT/tools take a --cfg option to specify an override file.
-    - See tools/{train,test}_net.py for example code that uses cfg_from_file()
-    - See experiments/cfgs/*.yml for example YAML config override files
-"""
-
 import os
 import os.path as osp
 import numpy as np
@@ -21,21 +5,16 @@ from time import strftime, localtime
 from easydict import EasyDict as edict
 
 __C = edict()
-# Consumers can get config by:
-#   from fast_rcnn_config import cfg
 cfg = __C
 
-#
+# Default GPU device id
+__C.GPU_ID = 0
+
 # Training options
-#
-
-# region proposal network (RPN) or not
 __C.IS_RPN = True
-# 只有 16
 __C.ANCHOR_SCALES = [16]
-# Box分类，文字或背景
 __C.NCLASSES = 2
-
+__C.USE_GPU_NMS = True
 # multiscale training and testing
 __C.IS_MULTISCALE = False
 __C.IS_EXTRAPOLATING = True
@@ -47,6 +26,8 @@ __C.SUBCLS_NAME = 'voxel_exemplars'
 
 __C.TRAIN = edict()
 # Adam, Momentum, RMS
+__C.TRAIN.restore = 0
+__C.TRAIN.max_steps = 100000
 __C.TRAIN.SOLVER = 'Momentum'
 # learning rate
 __C.TRAIN.WEIGHT_DECAY = 0.0005
@@ -61,19 +42,8 @@ __C.TRAIN.RANDOM_DOWNSAMPLE = False
 
 # Scales to compute real features
 __C.TRAIN.SCALES_BASE = (0.25, 0.5, 1.0, 2.0, 3.0)
-# __C.TRAIN.SCALES_BASE = (1.0,)
-
-# parameters for ROI generating
-#__C.TRAIN.SPATIAL_SCALE = 0.0625
 __C.TRAIN.KERNEL_SIZE = 5
-
-# Aspect ratio to use during training
-# __C.TRAIN.ASPECTS = (1, 0.75, 0.5, 0.25)
 __C.TRAIN.ASPECTS= (1,)
-
-
-# Scales to use during training (can list multiple scales)
-# Each scale is the pixel size of an image's shortest side
 __C.TRAIN.SCALES = (600,)
 
 # Max pixel size of the longest side of a scaled input image
@@ -175,13 +145,14 @@ __C.TRAIN.RPN_POSITIVE_WEIGHT = -1.0
 #
 
 __C.TEST = edict()
-
+__C.TEST.checkpoints_path = "checkpoints/"
+__C.TEST.DETECT_MODE = "H"#H/O for horizontal/oriented mode
 # Scales to use during testing (can list multiple scales)
 # Each scale is the pixel size of an image's shortest side
-__C.TEST.SCALES = (900,)
+__C.TEST.SCALES = (600,)
 
 # Max pixel size of the longest side of a scaled input image
-__C.TEST.MAX_SIZE = 1500
+__C.TEST.MAX_SIZE = 1000
 
 # Overlap threshold used for non-maximum suppression (suppress boxes with
 # IoU >= this threshold)
@@ -254,12 +225,12 @@ __C.LOG_DIR = 'default'
 # Use GPU implementation of non-maximum suppression
 __C.USE_GPU_NMS = False
 
-# Default GPU device id
-__C.GPU_ID = 0
+
 
 def get_output_dir(imdb, weights_filename):
     """Return the directory where experimental artifacts are placed.
     If the directory does not exist, it is created.
+
     A canonical path is built using the name from an imdb and a network
     (if not None).
     """
@@ -309,7 +280,7 @@ def _merge_a_into_b(a, b):
             try:
                 _merge_a_into_b(a[k], b[k])
             except:
-                print('Error under config key: {}'.format(k))
+                print(('Error under config key: {}'.format(k)))
                 raise
         else:
             b[k] = v
@@ -330,10 +301,10 @@ def cfg_from_list(cfg_list):
         key_list = k.split('.')
         d = __C
         for subkey in key_list[:-1]:
-            assert d.has_key(subkey)
+            assert subkey in d
             d = d[subkey]
         subkey = key_list[-1]
-        assert d.has_key(subkey)
+        assert subkey in d
         try:
             value = literal_eval(v)
         except:

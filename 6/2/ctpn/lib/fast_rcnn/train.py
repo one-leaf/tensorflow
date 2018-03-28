@@ -125,36 +125,28 @@ class SolverWrapper(object):
 
         # resuming a trainer
         if restore:
-            #try:
-                print (self.output_dir)
-                ckpt = tf.train.get_checkpoint_state(self.output_dir+'/checkpoints')
+            try:
+                ckpt = tf.train.get_checkpoint_state(self.output_dir)
                 print('Restoring from {}...'.format(ckpt.model_checkpoint_path), end=' ')
                 self.saver.restore(sess, ckpt.model_checkpoint_path)
                 stem = os.path.splitext(os.path.basename(ckpt.model_checkpoint_path))[0]
                 restore_iter = int(stem.split('_')[-1])
                 sess.run(global_step.assign(restore_iter))
                 print('done')
-            #except:
-                
-               # raise 'Check your pretrained {:s}'.format(ckpt.model_checkpoint_path)
+            except:
+                raise 'Check your pretrained {:s}'.format(ckpt.model_checkpoint_path)
 
         last_snapshot_iter = -1
         timer = Timer()
-        print ('restore:',restore_iter, max_iters)
         for iter in range(restore_iter, max_iters):
             timer.tic()
             # learning rate
             if iter != 0 and iter % cfg.TRAIN.STEPSIZE == 0:
                 sess.run(tf.assign(lr, lr.eval() * cfg.TRAIN.GAMMA))
-                print('learning rate:',lr)
+                print(lr)
 
             # get one batch
             blobs = data_layer.forward()
-
-            print('im_info:', blobs['im_info'])
-            print('gt_boxes:', blobs['gt_boxes'])
-            print('gt_ishard:', blobs['gt_ishard'])
-            print('dontcare_areas:', blobs['dontcare_areas'])
 
             feed_dict={
                 self.net.data: blobs['data'],

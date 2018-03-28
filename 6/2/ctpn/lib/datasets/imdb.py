@@ -156,3 +156,4 @@ class imdb(object):
             a[i]['seg_areas'] = np.hstack((a[i]['seg_areas'],
                                            b[i]['seg_areas']))
         return a
+

@@ -5,6 +5,7 @@ from ..fast_rcnn.config import cfg
 
 def im_list_to_blob(ims):
     """Convert a list of images into a network input.
+
     Assumes images are already prepared (means subtracted, BGR order, ...).
     """
     max_shape = np.array([im.shape for im in ims]).max(axis=0)

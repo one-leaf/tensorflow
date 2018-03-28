@@ -6,6 +6,7 @@
 # --------------------------------------------------------
 
 """The data layer used during training to train a Fast R-CNN network.
+
 RoIDataLayer implements a Caffe Python layer.
 """
 
@@ -59,6 +60,7 @@ class RoIDataLayer(object):
 
     def _get_next_minibatch(self):
         """Return the blobs to be used for the next minibatch.
+
         If cfg.TRAIN.USE_PREFETCH is True, then blobs will be computed in a
         separate process and made available through self._blob_queue.
         """

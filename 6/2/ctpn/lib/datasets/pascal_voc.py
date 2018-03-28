@@ -86,6 +86,7 @@ class pascal_voc(imdb):
     def gt_roidb(self):
         """
         Return the database of ground-truth regions of interest.
+
         This function loads/saves from/to a cache file to speed up future calls.
         """
         cache_file = os.path.join(self.cache_path, self.name + '_gt_roidb.pkl')
@@ -107,6 +108,7 @@ class pascal_voc(imdb):
         """
         Return the database of selective search regions of interest.
         Ground-truth ROIs are also included.
+
         This function loads/saves from/to a cache file to speed up future calls.
         """
         cache_file = os.path.join(self.cache_path,
@@ -176,13 +178,6 @@ class pascal_voc(imdb):
         filename = os.path.join(self._data_path, 'Annotations', index + '.xml')
         tree = ET.parse(filename)
         objs = tree.findall('object')
-        
-        # print("****************************************************")
-        # print("Len objs",len(objs))
-        # cls_objs = [obj for obj in objs if obj.find('name').text in self._classes]
-        # objs = cls_objs
-        # print("Len objs",len(objs))
-
         num_objs = len(objs)
 
         boxes = np.zeros((num_objs, 4), dtype=np.uint16)

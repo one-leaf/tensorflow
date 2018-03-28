@@ -518,8 +518,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__utils__gpu_nms
-#define __PYX_HAVE_API__utils__gpu_nms
+#define __PYX_HAVE__lib__utils__gpu_nms
+#define __PYX_HAVE_API__lib__utils__gpu_nms
 #include <string.h>
 #include <stdio.h>
 #include "numpy/arrayobject.h"
@@ -1545,15 +1545,15 @@ static PyTypeObject *__pyx_ptype_5numpy_ndarray = 0;
 static PyTypeObject *__pyx_ptype_5numpy_ufunc = 0;
 static CYTHON_INLINE char *__pyx_f_5numpy__util_dtypestring(PyArray_Descr *, char *, char *, int *); /*proto*/
 
-/* Module declarations from 'utils.gpu_nms' */
+/* Module declarations from 'lib.utils.gpu_nms' */
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_float32_t = { "float32_t", NULL, sizeof(__pyx_t_5numpy_float32_t), { 0 }, 0, 'R', 0, 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int32_t = { "int32_t", NULL, sizeof(__pyx_t_5numpy_int32_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_int32_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_int32_t), 0 };
 static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_5numpy_int_t = { "int_t", NULL, sizeof(__pyx_t_5numpy_int_t), { 0 }, 0, IS_UNSIGNED(__pyx_t_5numpy_int_t) ? 'U' : 'I', IS_UNSIGNED(__pyx_t_5numpy_int_t), 0 };
-#define __Pyx_MODULE_NAME "utils.gpu_nms"
-extern int __pyx_module_is_main_utils__gpu_nms;
-int __pyx_module_is_main_utils__gpu_nms = 0;
+#define __Pyx_MODULE_NAME "lib.utils.gpu_nms"
+extern int __pyx_module_is_main_lib__utils__gpu_nms;
+int __pyx_module_is_main_lib__utils__gpu_nms = 0;
 
-/* Implementation of 'utils.gpu_nms' */
+/* Implementation of 'lib.utils.gpu_nms' */
 static PyObject *__pyx_builtin_ValueError;
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_RuntimeError;
@@ -1583,7 +1583,7 @@ static const char __pyx_k_ImportError[] = "ImportError";
 static const char __pyx_k_gpu_nms_pyx[] = "gpu_nms.pyx";
 static const char __pyx_k_sorted_dets[] = "sorted_dets";
 static const char __pyx_k_RuntimeError[] = "RuntimeError";
-static const char __pyx_k_utils_gpu_nms[] = "utils.gpu_nms";
+static const char __pyx_k_lib_utils_gpu_nms[] = "lib.utils.gpu_nms";
 static const char __pyx_k_cline_in_traceback[] = "cline_in_traceback";
 static const char __pyx_k_ndarray_is_not_C_contiguous[] = "ndarray is not C contiguous";
 static const char __pyx_k_numpy_core_multiarray_failed_to[] = "numpy.core.multiarray failed to import";
@@ -1611,6 +1611,7 @@ static PyObject *__pyx_kp_s_gpu_nms_pyx;
 static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_int32;
 static PyObject *__pyx_n_s_keep;
+static PyObject *__pyx_n_s_lib_utils_gpu_nms;
 static PyObject *__pyx_n_s_main;
 static PyObject *__pyx_kp_u_ndarray_is_not_C_contiguous;
 static PyObject *__pyx_kp_u_ndarray_is_not_Fortran_contiguou;
@@ -1626,9 +1627,8 @@ static PyObject *__pyx_n_s_sorted_dets;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_thresh;
 static PyObject *__pyx_kp_u_unknown_dtype_code_in_numpy_pxd;
-static PyObject *__pyx_n_s_utils_gpu_nms;
 static PyObject *__pyx_n_s_zeros;
-static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh, __pyx_t_5numpy_int32_t __pyx_v_device_id); /* proto */
+static PyObject *__pyx_pf_3lib_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh, __pyx_t_5numpy_int32_t __pyx_v_device_id); /* proto */
 static int __pyx_pf_5numpy_7ndarray___getbuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_pf_5numpy_7ndarray_2__releasebuffer__(PyArrayObject *__pyx_v_self, Py_buffer *__pyx_v_info); /* proto */
 static PyObject *__pyx_int_4;
@@ -1649,7 +1649,7 @@ static PyObject *__pyx_tuple__13;
 static PyObject *__pyx_tuple__14;
 static PyObject *__pyx_codeobj__15;
 
-/* "utils/gpu_nms.pyx":16
+/* "lib/utils/gpu_nms.pyx":16
  *     void _nms(np.int32_t*, int*, np.float32_t*, int, int, float, int)
  * 
  * def gpu_nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh,             # <<<<<<<<<<<<<<
@@ -1658,9 +1658,9 @@ static PyObject *__pyx_codeobj__15;
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_5utils_7gpu_nms_1gpu_nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_5utils_7gpu_nms_1gpu_nms = {"gpu_nms", (PyCFunction)__pyx_pw_5utils_7gpu_nms_1gpu_nms, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_5utils_7gpu_nms_1gpu_nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_3lib_5utils_7gpu_nms_1gpu_nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_3lib_5utils_7gpu_nms_1gpu_nms = {"gpu_nms", (PyCFunction)__pyx_pw_3lib_5utils_7gpu_nms_1gpu_nms, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_3lib_5utils_7gpu_nms_1gpu_nms(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_dets = 0;
   PyObject *__pyx_v_thresh = 0;
   __pyx_t_5numpy_int32_t __pyx_v_device_id;
@@ -1726,13 +1726,13 @@ static PyObject *__pyx_pw_5utils_7gpu_nms_1gpu_nms(PyObject *__pyx_self, PyObjec
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("gpu_nms", 0, 2, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 16, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("utils.gpu_nms.gpu_nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("lib.utils.gpu_nms.gpu_nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_dets), __pyx_ptype_5numpy_ndarray, 1, "dets", 0))) __PYX_ERR(0, 16, __pyx_L1_error)
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_thresh), (&PyFloat_Type), 1, "thresh", 1))) __PYX_ERR(0, 16, __pyx_L1_error)
-  __pyx_r = __pyx_pf_5utils_7gpu_nms_gpu_nms(__pyx_self, __pyx_v_dets, __pyx_v_thresh, __pyx_v_device_id);
+  __pyx_r = __pyx_pf_3lib_5utils_7gpu_nms_gpu_nms(__pyx_self, __pyx_v_dets, __pyx_v_thresh, __pyx_v_device_id);
 
   /* function exit code */
   goto __pyx_L0;
@@ -1743,7 +1743,7 @@ static PyObject *__pyx_pw_5utils_7gpu_nms_1gpu_nms(PyObject *__pyx_self, PyObjec
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh, __pyx_t_5numpy_int32_t __pyx_v_device_id) {
+static PyObject *__pyx_pf_3lib_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_dets, PyObject *__pyx_v_thresh, __pyx_t_5numpy_int32_t __pyx_v_device_id) {
   int __pyx_v_boxes_num;
   int __pyx_v_boxes_dim;
   int __pyx_v_num_out;
@@ -1807,7 +1807,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   }
   __pyx_pybuffernd_dets.diminfo[0].strides = __pyx_pybuffernd_dets.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_dets.diminfo[0].shape = __pyx_pybuffernd_dets.rcbuffer->pybuffer.shape[0]; __pyx_pybuffernd_dets.diminfo[1].strides = __pyx_pybuffernd_dets.rcbuffer->pybuffer.strides[1]; __pyx_pybuffernd_dets.diminfo[1].shape = __pyx_pybuffernd_dets.rcbuffer->pybuffer.shape[1];
 
-  /* "utils/gpu_nms.pyx":18
+  /* "lib/utils/gpu_nms.pyx":18
  * def gpu_nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh,
  *             np.int32_t device_id=0):
  *     cdef int boxes_num = dets.shape[0]             # <<<<<<<<<<<<<<
@@ -1816,7 +1816,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
  */
   __pyx_v_boxes_num = (__pyx_v_dets->dimensions[0]);
 
-  /* "utils/gpu_nms.pyx":19
+  /* "lib/utils/gpu_nms.pyx":19
  *             np.int32_t device_id=0):
  *     cdef int boxes_num = dets.shape[0]
  *     cdef int boxes_dim = dets.shape[1]             # <<<<<<<<<<<<<<
@@ -1825,7 +1825,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
  */
   __pyx_v_boxes_dim = (__pyx_v_dets->dimensions[1]);
 
-  /* "utils/gpu_nms.pyx":22
+  /* "lib/utils/gpu_nms.pyx":22
  *     cdef int num_out
  *     cdef np.ndarray[np.int32_t, ndim=1] \
  *         keep = np.zeros(boxes_num, dtype=np.int32)             # <<<<<<<<<<<<<<
@@ -1872,7 +1872,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_keep = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "utils/gpu_nms.pyx":24
+  /* "lib/utils/gpu_nms.pyx":24
  *         keep = np.zeros(boxes_num, dtype=np.int32)
  *     cdef np.ndarray[np.float32_t, ndim=1] \
  *         scores = dets[:, 4]             # <<<<<<<<<<<<<<
@@ -1895,7 +1895,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_scores = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "utils/gpu_nms.pyx":26
+  /* "lib/utils/gpu_nms.pyx":26
  *         scores = dets[:, 4]
  *     cdef np.ndarray[np.int_t, ndim=1] \
  *         order = scores.argsort()[::-1]             # <<<<<<<<<<<<<<
@@ -1939,7 +1939,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_order = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "utils/gpu_nms.pyx":28
+  /* "lib/utils/gpu_nms.pyx":28
  *         order = scores.argsort()[::-1]
  *     cdef np.ndarray[np.float32_t, ndim=2] \
  *         sorted_dets = dets[order, :]             # <<<<<<<<<<<<<<
@@ -1971,7 +1971,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_v_sorted_dets = ((PyArrayObject *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "utils/gpu_nms.pyx":29
+  /* "lib/utils/gpu_nms.pyx":29
  *     cdef np.ndarray[np.float32_t, ndim=2] \
  *         sorted_dets = dets[order, :]
  *     _nms(&keep[0], &num_out, &sorted_dets[0, 0], boxes_num, boxes_dim, thresh, device_id)             # <<<<<<<<<<<<<<
@@ -2006,7 +2006,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_t_14 = __pyx_PyFloat_AsFloat(__pyx_v_thresh); if (unlikely((__pyx_t_14 == (float)-1) && PyErr_Occurred())) __PYX_ERR(0, 29, __pyx_L1_error)
   _nms((&(*__Pyx_BufPtrStrided1d(__pyx_t_5numpy_int32_t *, __pyx_pybuffernd_keep.rcbuffer->pybuffer.buf, __pyx_t_10, __pyx_pybuffernd_keep.diminfo[0].strides))), (&__pyx_v_num_out), (&(*__Pyx_BufPtrStrided2d(__pyx_t_5numpy_float32_t *, __pyx_pybuffernd_sorted_dets.rcbuffer->pybuffer.buf, __pyx_t_12, __pyx_pybuffernd_sorted_dets.diminfo[0].strides, __pyx_t_13, __pyx_pybuffernd_sorted_dets.diminfo[1].strides))), __pyx_v_boxes_num, __pyx_v_boxes_dim, __pyx_t_14, __pyx_v_device_id);
 
-  /* "utils/gpu_nms.pyx":30
+  /* "lib/utils/gpu_nms.pyx":30
  *         sorted_dets = dets[order, :]
  *     _nms(&keep[0], &num_out, &sorted_dets[0, 0], boxes_num, boxes_dim, thresh, device_id)
  *     keep = keep[:num_out]             # <<<<<<<<<<<<<<
@@ -2043,7 +2043,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   __Pyx_DECREF_SET(__pyx_v_keep, ((PyArrayObject *)__pyx_t_5));
   __pyx_t_5 = 0;
 
-  /* "utils/gpu_nms.pyx":31
+  /* "lib/utils/gpu_nms.pyx":31
  *     _nms(&keep[0], &num_out, &sorted_dets[0, 0], boxes_num, boxes_dim, thresh, device_id)
  *     keep = keep[:num_out]
  *     return list(order[keep])             # <<<<<<<<<<<<<<
@@ -2058,7 +2058,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "utils/gpu_nms.pyx":16
+  /* "lib/utils/gpu_nms.pyx":16
  *     void _nms(np.int32_t*, int*, np.float32_t*, int, int, float, int)
  * 
  * def gpu_nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh,             # <<<<<<<<<<<<<<
@@ -2083,7 +2083,7 @@ static PyObject *__pyx_pf_5utils_7gpu_nms_gpu_nms(CYTHON_UNUSED PyObject *__pyx_
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_scores.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_sorted_dets.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("utils.gpu_nms.gpu_nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("lib.utils.gpu_nms.gpu_nms", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -4739,6 +4739,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_import, __pyx_k_import, sizeof(__pyx_k_import), 0, 0, 1, 1},
   {&__pyx_n_s_int32, __pyx_k_int32, sizeof(__pyx_k_int32), 0, 0, 1, 1},
   {&__pyx_n_s_keep, __pyx_k_keep, sizeof(__pyx_k_keep), 0, 0, 1, 1},
+  {&__pyx_n_s_lib_utils_gpu_nms, __pyx_k_lib_utils_gpu_nms, sizeof(__pyx_k_lib_utils_gpu_nms), 0, 0, 1, 1},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
   {&__pyx_kp_u_ndarray_is_not_C_contiguous, __pyx_k_ndarray_is_not_C_contiguous, sizeof(__pyx_k_ndarray_is_not_C_contiguous), 0, 1, 0, 0},
   {&__pyx_kp_u_ndarray_is_not_Fortran_contiguou, __pyx_k_ndarray_is_not_Fortran_contiguou, sizeof(__pyx_k_ndarray_is_not_Fortran_contiguou), 0, 1, 0, 0},
@@ -4754,7 +4755,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_thresh, __pyx_k_thresh, sizeof(__pyx_k_thresh), 0, 0, 1, 1},
   {&__pyx_kp_u_unknown_dtype_code_in_numpy_pxd, __pyx_k_unknown_dtype_code_in_numpy_pxd, sizeof(__pyx_k_unknown_dtype_code_in_numpy_pxd), 0, 1, 0, 0},
-  {&__pyx_n_s_utils_gpu_nms, __pyx_k_utils_gpu_nms, sizeof(__pyx_k_utils_gpu_nms), 0, 0, 1, 1},
   {&__pyx_n_s_zeros, __pyx_k_zeros, sizeof(__pyx_k_zeros), 0, 0, 1, 1},
   {0, 0, 0, 0, 0, 0, 0}
 };
@@ -4772,7 +4772,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("__Pyx_InitCachedConstants", 0);
 
-  /* "utils/gpu_nms.pyx":24
+  /* "lib/utils/gpu_nms.pyx":24
  *         keep = np.zeros(boxes_num, dtype=np.int32)
  *     cdef np.ndarray[np.float32_t, ndim=1] \
  *         scores = dets[:, 4]             # <<<<<<<<<<<<<<
@@ -4786,7 +4786,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
-  /* "utils/gpu_nms.pyx":26
+  /* "lib/utils/gpu_nms.pyx":26
  *         scores = dets[:, 4]
  *     cdef np.ndarray[np.int_t, ndim=1] \
  *         order = scores.argsort()[::-1]             # <<<<<<<<<<<<<<
@@ -4797,7 +4797,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_slice__3);
   __Pyx_GIVEREF(__pyx_slice__3);
 
-  /* "utils/gpu_nms.pyx":28
+  /* "lib/utils/gpu_nms.pyx":28
  *         order = scores.argsort()[::-1]
  *     cdef np.ndarray[np.float32_t, ndim=2] \
  *         sorted_dets = dets[order, :]             # <<<<<<<<<<<<<<
@@ -4905,7 +4905,7 @@ static int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__13);
   __Pyx_GIVEREF(__pyx_tuple__13);
 
-  /* "utils/gpu_nms.pyx":16
+  /* "lib/utils/gpu_nms.pyx":16
  *     void _nms(np.int32_t*, int*, np.float32_t*, int, int, float, int)
  * 
  * def gpu_nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh,             # <<<<<<<<<<<<<<
@@ -5050,14 +5050,14 @@ static int __pyx_pymod_exec_gpu_nms(PyObject *__pyx_pyinit_module)
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_utils__gpu_nms) {
+  if (__pyx_module_is_main_lib__utils__gpu_nms) {
     if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "utils.gpu_nms")) {
-      if (unlikely(PyDict_SetItemString(modules, "utils.gpu_nms", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "lib.utils.gpu_nms")) {
+      if (unlikely(PyDict_SetItemString(modules, "lib.utils.gpu_nms", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -5089,7 +5089,7 @@ static int __pyx_pymod_exec_gpu_nms(PyObject *__pyx_pyinit_module)
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "utils/gpu_nms.pyx":8
+  /* "lib/utils/gpu_nms.pyx":8
  * # --------------------------------------------------------
  * 
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -5101,7 +5101,7 @@ static int __pyx_pymod_exec_gpu_nms(PyObject *__pyx_pyinit_module)
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "utils/gpu_nms.pyx":11
+  /* "lib/utils/gpu_nms.pyx":11
  * cimport numpy as np
  * 
  * assert sizeof(int) == sizeof(np.int32_t)             # <<<<<<<<<<<<<<
@@ -5117,19 +5117,19 @@ static int __pyx_pymod_exec_gpu_nms(PyObject *__pyx_pyinit_module)
   }
   #endif
 
-  /* "utils/gpu_nms.pyx":16
+  /* "lib/utils/gpu_nms.pyx":16
  *     void _nms(np.int32_t*, int*, np.float32_t*, int, int, float, int)
  * 
  * def gpu_nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh,             # <<<<<<<<<<<<<<
  *             np.int32_t device_id=0):
  *     cdef int boxes_num = dets.shape[0]
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5utils_7gpu_nms_1gpu_nms, NULL, __pyx_n_s_utils_gpu_nms); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_3lib_5utils_7gpu_nms_1gpu_nms, NULL, __pyx_n_s_lib_utils_gpu_nms); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_gpu_nms, __pyx_t_1) < 0) __PYX_ERR(0, 16, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "utils/gpu_nms.pyx":1
+  /* "lib/utils/gpu_nms.pyx":1
  * # --------------------------------------------------------             # <<<<<<<<<<<<<<
  * # Faster R-CNN
  * # Copyright (c) 2015 Microsoft
@@ -5154,11 +5154,11 @@ static int __pyx_pymod_exec_gpu_nms(PyObject *__pyx_pyinit_module)
   __Pyx_XDECREF(__pyx_t_1);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init utils.gpu_nms", 0, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init lib.utils.gpu_nms", 0, __pyx_lineno, __pyx_filename);
     }
     Py_DECREF(__pyx_m); __pyx_m = 0;
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init utils.gpu_nms");
+    PyErr_SetString(PyExc_ImportError, "init lib.utils.gpu_nms");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();
