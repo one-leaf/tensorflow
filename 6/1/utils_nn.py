@@ -169,7 +169,7 @@ def resNet101(layer, isPoolSize=True):
 def resNet101V2(layer, isPoolSize=True):
     if isPoolSize:
         stride = 2
-        padding = "VALID"
+        padding = "SAME"
     else:
         stride = 1
         padding = "SAME"
