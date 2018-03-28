@@ -207,7 +207,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        inputs[i,:] = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
 
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
