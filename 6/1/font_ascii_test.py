@@ -210,12 +210,12 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
 
-    print(inputs.shape)
+    # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * (image_height*max_width_image)//(POOL_SIZE*POOL_SIZE)
     # seq_len = np.ones(batch_size) * SEQ_LENGHT
-    print(seq_len)
+    # print(seq_len)
     return inputs, sparse_labels, seq_len, info
 
 def train():
