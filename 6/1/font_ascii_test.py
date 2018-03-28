@@ -162,24 +162,10 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             # font_hint = random.choice([0,1,2,3,4,5])    
             font_hint = random.choice([0,4]) 
 
-        if random.random() > 0:
-            text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-        else:
-            text=""
+        text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
+        text = text +" "+ random.sample(CHARS, random.randint(1,5))
+        text = text.strip()
 
-            if len(train_text_lines)>0:
-                text = random.choice(train_text_lines)
-                text = text.strip()
-
-            if len(text)==0:    
-                text = []
-                chars = random.sample(CHARS, random.randint(15,20))+[" "," "]            
-                for i in range(random.randint(10,20)):
-                    text += chars  #
-                random.shuffle(text)
-                text = "".join(text).strip()
-
-            # text = CHARS + CHARS + random.sample(CHARS, random.randint(0,len(CHARS)))
             # random.shuffle(text)
             # text = "".join(text).strip()
 
