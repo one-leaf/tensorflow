@@ -183,8 +183,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             # random.shuffle(text)
             # text = "".join(text).strip()
 
-            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-
+        image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
         image = utils_pil.convert_to_gray(image) 
         w, h = image.size
         if h > image_height:
