@@ -214,7 +214,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * (image_height * max_width_image//POOL_SIZE)
-    print(seq_len)
+    # print(seq_len)
     return inputs, sparse_labels, seq_len, info
 
 def train():
@@ -249,7 +249,7 @@ def train():
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
                     font_info = sorted_font[random.randint(0,10)]
                     font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, \
+                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
                         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
                 else:
                     # train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
