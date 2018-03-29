@@ -186,7 +186,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
 
-        image = image[:, : , np.newaxis]
+        #image = image[:, : , np.newaxis]
+        image = np.reshape(image,(image.shape[0],image.shape[1],1))
         print(image.shape)
         image = tf.image.random_hue(image, max_delta=0.05)
         image = image.eval()
