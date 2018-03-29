@@ -21,9 +21,12 @@ for file in files:
     print(img_path)
     img = cv.imread(img_path)
     img_size = img.shape
+
     im_size_min = np.min(img_size[0:2])
     im_size_max = np.max(img_size[0:2])
 
+    # 将图片缩放到 600 ~ 1200 的范围
+    # 如果最小的边不为600，则检查最大的边缩放后是否大于1200，也就是图片要么是 600 * （600~1200） 要么是 1200
     im_scale = float(600) / float(im_size_min)
     if np.round(im_scale * im_size_max) > 1200:
         im_scale = float(1200) / float(im_size_max)
@@ -31,6 +34,7 @@ for file in files:
     re_size = re_im.shape
     cv.imwrite(os.path.join(out_path, stem) + '.jpg', re_im)
 
+    # 同比修改 box 文件中的 坐标
     with open(gt_file, 'r') as f:
         lines = f.readlines()
     for line in lines:

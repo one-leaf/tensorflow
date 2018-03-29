@@ -46,30 +46,29 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii"
-SEQ_LENGHT = 1024
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
-        layer = utils_nn.resNet101V2(inputs, True)    # -1 1 W/16 2048
+        layer = utils_nn.resNet101V2(inputs, True)    # N H/16 W/16 2048
         print("resNet shape:",layer.shape)
 
         shape = tf.shape(layer)
         batch_size, height, width, channel = shape[0], shape[1], shape[2], shape[3]
         
-        layer = slim.conv2d(layer, SEQ_LENGHT, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
-        # -1 1 W/16 1024
+        layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
+        # N H W 1024
         # layer = tf.transpose(layer,[0,3,1,2])
         # layer = slim.avg_pool2d(layer,[2, 2])
-        layer = tf.reshape(layer, [batch_size*height, width, SEQ_LENGHT]) # -1,1024,256
-        print("resNet_seq shape:",layer.shape,"seq_len:",SEQ_LENGHT)
+        layer = tf.reshape(layer, [batch_size*height, width, 1024]) # N*H, W, 1024
+        print("resNet_seq shape:",layer.shape)
         # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
-        layer.set_shape([None, None, SEQ_LENGHT])
-        layer = LSTM(layer, seq_len, 512, 128)    # -1, 1024, 354
+        layer.set_shape([None, None, 1024])
+        layer = LSTM(layer, 512, 128)    # N*H, W, 512+128*2
         print("lstm shape:",layer.shape)
-        layer = tf.reshape(layer, [batch_size, height, width, 512+128+128]) # -1,1024,256
-        layer = slim.fully_connected(layer, SEQ_LENGHT, normalizer_fn=None, activation_fn=None)
-        layer = tf.reshape(layer, [batch_size, height*width, SEQ_LENGHT]) # -1,1024,256
+        layer = tf.reshape(layer, [batch_size, height, width, 512+128+128]) # N,H,W,512+128*2
+        layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
+        layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
 
         # layer = tf.concat([layer, lstm_layer], axis=2)
         # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
@@ -77,7 +76,7 @@ def RES(inputs, seq_len, reuse = False):
         print("res fin shape:",layer.shape)
         return layer
 
-def LSTM(inputs, seq_len, fc_size, lstm_size):
+def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
     for i in range(4):
         with tf.variable_scope("rnn-%s"%i):
@@ -85,9 +84,8 @@ def LSTM(inputs, seq_len, fc_size, lstm_size):
             # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.relu)
-            # outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, seq_len, dtype=tf.float32)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-            layer = tf.concat([outputs[0],outputs[1], layer], axis=-1)
+            layer = tf.concat([outputs[0], outputs[1], layer], axis=-1)
             # layer = slim.batch_norm(layer)
     return layer
 
@@ -142,7 +140,6 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     codes = []
     max_width_image = 0
     info = []
-    seq_len = np.ones(batch_size, dtype=np.int32)
     font_length = random.randint(5, 50)
     for i in range(batch_size):
         font_name = _font_name
@@ -197,7 +194,6 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         codes.append([CHARS.index(char) for char in text])                  
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
-        # seq_len[i] = len(text)
 
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
@@ -214,8 +210,6 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
     seq_len = np.ones(batch_size) * (image_height*max_width_image)//(POOL_SIZE*POOL_SIZE)
-    # seq_len = np.ones(batch_size) * SEQ_LENGHT
-    # print(seq_len)
     return inputs, sparse_labels, seq_len, info
 
 def train():
