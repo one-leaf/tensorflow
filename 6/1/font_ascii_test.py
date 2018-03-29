@@ -58,11 +58,8 @@ def RES(inputs, seq_len, reuse = False):
         
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
         # N H W 1024
-        # layer = tf.transpose(layer,[0,3,1,2])
-        # layer = slim.avg_pool2d(layer,[2, 2])
         layer = tf.reshape(layer, [batch_size*height, width, 1024]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
-        # res_layer = slim.fully_connected(layer, 256, normalizer_fn=slim.batch_norm, activation_fn=None)  
         layer.set_shape([None, None, 1024])
         layer = LSTM(layer, 512, 128)    # N*H, W, 512+128*2
         print("lstm shape:",layer.shape)
@@ -70,9 +67,6 @@ def RES(inputs, seq_len, reuse = False):
         layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
         layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
 
-        # layer = tf.concat([layer, lstm_layer], axis=2)
-        # layer = slim.fully_connected(layer, 4096, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-        # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  
         print("res fin shape:",layer.shape)
         return layer
 
