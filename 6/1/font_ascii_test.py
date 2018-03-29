@@ -150,8 +150,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         if font_mode==None:
             font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
-            # font_hint = random.choice([0,1,2,3,4,5])    
-            font_hint = random.choice([0,4]) 
+            font_hint = random.choice([0,1,2,3,4,5])    
+            # font_hint = random.choice([0,4]) 
 
         text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
         text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
@@ -171,8 +171,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             image, _ = utils_pil.random_space2(image, image,  image_height)
         
         # if if_to_G and random.random()>0.5:
-        if random.random()>0.5:
-            image = utils_font.add_noise(image)   
+        # if random.random()>0.5:
+        #     image = utils_font.add_noise(image)   
     
         image = np.asarray(image) 
 
@@ -183,6 +183,12 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         else:
             image = (255. - image) / 255.
 
+        image = tf.image.random_hue(image, max_delta=0.05)
+        image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
+        image = tf.image.random_brightness(image, max_delta=0.2)
+        image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
+        image = tf.minimum(image, 1.0)
+        image = tf.maximum(image, 0.0)
 
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
