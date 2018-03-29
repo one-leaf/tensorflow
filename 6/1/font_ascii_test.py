@@ -173,7 +173,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         # if if_to_G and random.random()>0.5:
         # if random.random()>0.5:
         #     image = utils_font.add_noise(image)   
-        print(image.shape())
+        print(dir(image))
         image = np.asarray(image) 
         print(image.shape)
 
