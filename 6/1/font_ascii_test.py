@@ -161,7 +161,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             # text = "".join(text).strip()
 
         image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-        image = utils_pil.convert_to_gray(image) 
+        # image = utils_pil.convert_to_gray(image) 
         w, h = image.size
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)  
@@ -173,8 +173,9 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         # if if_to_G and random.random()>0.5:
         # if random.random()>0.5:
         #     image = utils_font.add_noise(image)   
-    
+        print(image.shape())
         image = np.asarray(image) 
+        print(image.shape
 
         image = utils.resize(image, height=image_height)
 
@@ -187,7 +188,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
             max_width_image = image.shape[1]
 
         #image = image[:, : , np.newaxis]
-        image = np.reshape(image,(image.shape[0],image.shape[1],1))
+        #image = np.reshape(image,(image.shape[0],image.shape[1],1))
         print(image.shape)
         image = tf.image.random_hue(image, max_delta=0.05)
         image = image.eval()
