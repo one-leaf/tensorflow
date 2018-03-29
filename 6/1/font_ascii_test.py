@@ -205,8 +205,9 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     for i in range(batch_size):
         # image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
         # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
-        inputs[i,:] = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
-
+        image = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
+        inputs[i,:] = image
+        
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
