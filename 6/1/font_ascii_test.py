@@ -189,6 +189,9 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         image = image[:, : , np.newaxis]
         print(image.shape)
         image = tf.image.random_hue(image, max_delta=0.05)
+        image = image.eval()
+        print(image.shape, type(image))
+
         image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
         image = tf.image.random_brightness(image, max_delta=0.2)
         image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
