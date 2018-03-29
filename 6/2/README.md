@@ -4,14 +4,24 @@
 > cd lib/utils
 > sh make.sh
 
-2. 下载 VOCdevkit2007 到 data 目录 解压缩并改名为 VOCdevkit2007
-> http://host.robots.ox.ac.uk/pascal/VOC/voc2007/VOCtrainval_06-Nov-2007.tar
+2. 下载 VOCdevkit.zip 到 data 目录 解压缩并改名为 VOCdevkit2007
+> https://pan.baidu.com/s/1kUNTl1l
 
 3. 下载 VGG_imagenet.npy (528M) 复制到 data 目录下的 pretrain 目录
+> https://pan.baidu.com/s/1kUNTl1l
 > https://drive.google.com/uc?id=0ByuDEGFYmWsbNVF5eExySUtMZmM&export=download
 > http://bingxiang.oss-cn-shanghai.aliyuncs.com/VGG_imagenet.npy
 
 4. 修改lib程序兼容 python3
-> modify lib/fast_rcnn/config.py
-> modify lib/datasets/pascal_voc.py
+> 修改 lib/fast_rcnn/config.py
+> 修改 lib/datasets/pascal_voc.py
 
+5. 修改CPU版本或者用GPU版本
+
+6. 编译 lib/utils
+> 修改 mask.sh 改为 python3
+> cd lib/utils
+> ./make.sh
+
+7. 运行train.net
+> sh ctpn/train_net.py

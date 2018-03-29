@@ -3,6 +3,7 @@ import numpy as np
 import math
 import cv2 as cv
 
+
 path = '/media/D/code/OCR/text-detection-ctpn/data/mlt_english+chinese/image'
 gt_path = '/media/D/code/OCR/text-detection-ctpn/data/mlt_english+chinese/label'
 out_path = 're_image'
