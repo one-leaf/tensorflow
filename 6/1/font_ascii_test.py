@@ -193,7 +193,6 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
         image = tf.minimum(image, 1.0)
         image = tf.maximum(image, 0.0)
-        print(image.shape)
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
@@ -204,8 +203,9 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
-        inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
+        # image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
+        inputs[i,:] = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
 
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
