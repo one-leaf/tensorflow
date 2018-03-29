@@ -268,8 +268,8 @@ def train():
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_info = train_info[0][0]+"/"+train_info[0][1]
                 avg_acc = 0.95*avg_acc + 0.05*acc
-                print("%d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
-                        (steps, time.time() - start, acc, avg_acc, errR, font_info))
+                print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
+                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
                 if np.isnan(errR) or np.isinf(errR) :
                     print("Error: cost is nan or inf")
                     return
