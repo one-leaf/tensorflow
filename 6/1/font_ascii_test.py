@@ -191,14 +191,12 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         #image = np.reshape(image,(image.shape[0],image.shape[1],1))
         # print(image.shape)
         image = tf.image.random_hue(image, max_delta=0.05)
-        # image = image.eval()
-        # print(image.shape, type(image))
         image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
         image = tf.image.random_brightness(image, max_delta=0.2)
         image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
-        image = tf.minimum(image, 1.0)
-        image = tf.maximum(image, 0.0)
         image = tf.image.rgb_to_grayscale(image)
+        # image = tf.minimum(image, 1.0)
+        # image = tf.maximum(image, 0.0)
         # print(image.shape, type(image))
         # image = image.eval()
         # print(image.shape, type(image))
@@ -216,8 +214,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
         image = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
         image = image.eval()
-        print(image.shape)
-
+        # print(image.shape)
         inputs[i,:] = image
         
     # print(inputs.shape)
