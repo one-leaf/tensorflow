@@ -205,13 +205,13 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        # image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        image = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
         # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
-        image = inputs_images[i], image_height, max_width_image)
-        image = image.eval()
-        print(image.shape)
+        # image = inputs_images[i], image_height, max_width_image)
+        # image = image.eval()
+        # print(image.shape)
 
-        inputs[i,:] = image.eval()
+        inputs[i,:] = image
         
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
