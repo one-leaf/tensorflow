@@ -175,7 +175,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         #     image = utils_font.add_noise(image)   
         print(image.shape())
         image = np.asarray(image) 
-        print(image.shape
+        print(image.shape)
 
         image = utils.resize(image, height=image_height)
 
