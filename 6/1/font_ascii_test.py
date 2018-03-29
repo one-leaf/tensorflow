@@ -173,9 +173,9 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         # if if_to_G and random.random()>0.5:
         # if random.random()>0.5:
         #     image = utils_font.add_noise(image)   
-        print(dir(image))
+        # print(dir(image))
         image = np.asarray(image) 
-        print(image.shape)
+        # print(image.shape)
 
         image = utils.resize(image, height=image_height)
 
@@ -189,19 +189,18 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
         #image = image[:, : , np.newaxis]
         #image = np.reshape(image,(image.shape[0],image.shape[1],1))
-        print(image.shape)
+        # print(image.shape)
         image = tf.image.random_hue(image, max_delta=0.05)
-        image = image.eval()
-        print(image.shape, type(image))
-
+        # image = image.eval()
+        # print(image.shape, type(image))
         image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
         image = tf.image.random_brightness(image, max_delta=0.2)
         image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
         image = tf.minimum(image, 1.0)
         image = tf.maximum(image, 0.0)
-        print(image.shape, type(image))
-        image = image.eval()
-        print(image.shape, type(image))
+        # print(image.shape, type(image))
+        # image = image.eval()
+        # print(image.shape, type(image))
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
@@ -212,11 +211,11 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        image = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        # image = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
         # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
-        # image = inputs_images[i], image_height, max_width_image)
-        # image = image.eval()
-        # print(image.shape)
+        image = inputs_images[i], image_height, max_width_image)
+        image = image.eval()
+        print(image.shape)
 
         inputs[i,:] = image
         
