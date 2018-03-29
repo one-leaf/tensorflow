@@ -183,6 +183,9 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         else:
             image = (255. - image) / 255.
 
+        if max_width_image < image.shape[1]:
+            max_width_image = image.shape[1]
+
         image = image[:, : , np.newaxis]
         image = tf.image.random_hue(image, max_delta=0.05)
         image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
@@ -195,9 +198,6 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         codes.append([CHARS.index(char) for char in text])                  
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
-
-        if max_width_image < image.shape[1]:
-            max_width_image = image.shape[1]
 
     # 凑成16的整数倍
     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
