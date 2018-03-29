@@ -198,6 +198,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
         image = tf.minimum(image, 1.0)
         image = tf.maximum(image, 0.0)
+        image = tf.image.rgb_to_grayscale(image)
         # print(image.shape, type(image))
         # image = image.eval()
         # print(image.shape, type(image))
