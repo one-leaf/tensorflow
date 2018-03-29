@@ -40,7 +40,7 @@ REPORT_STEPS = 1000
 MOMENTUM = 0.9
 
 BATCHES = 100
-BATCH_SIZE = 2
+BATCH_SIZE = 5
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
@@ -134,7 +134,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     codes = []
     max_width_image = 0
     info = []
-    font_length = random.randint(5, 50)
+    font_length = random.randint(5, 20)
     for i in range(batch_size):
         font_name = _font_name
         font_size = _font_size
