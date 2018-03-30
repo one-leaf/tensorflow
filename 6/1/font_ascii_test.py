@@ -203,7 +203,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
-        info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
+        info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
 
     # 凑成16的整数倍
     if max_width_image % POOL_SIZE > 0:
@@ -267,8 +267,10 @@ def train():
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                font_info = train_info[0][0]+"/"+train_info[0][1]
+                font_length = int(train_info[0][-1])
+                font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 avg_acc = 0.95*avg_acc + 0.05*acc
+                errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
                 if np.isnan(errR) or np.isinf(errR) :
