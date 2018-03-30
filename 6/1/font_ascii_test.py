@@ -206,7 +206,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
 
     # 凑成16的整数倍
-    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    if max_width_image % POOL_SIZE > 0:
+        max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
