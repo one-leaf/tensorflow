@@ -117,6 +117,7 @@ AllFontNames.remove("方正兰亭超细黑简体")
 AllFontNames.remove("幼圆")
 AllFontNames.remove("方正舒体")
 AllFontNames.remove("方正姚体")
+AllFontNames.remove("华文新魏")
 AllFontNames.remove("Impact")
 AllFontNames.remove("Gabriola")
 
