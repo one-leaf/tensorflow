@@ -58,16 +58,20 @@ def RES(inputs, seq_len, reuse = False):
         
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
         # N H W 1024
-        layer = tf.reshape(layer, [batch_size*height, width, 1024]) # N*H, W, 1024
+        
+        # NHWC => NWHC
+        layer = tf.transpose(layer, (0, 2, 1, 3))
+
+        layer = tf.reshape(layer, [batch_size, width*height, 1024]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 1024])
-        layer = LSTM(layer, 512, 128)    # N*H, W, 512+128*2
+        layer = LSTM(layer, 512, 256)    # N, W*H, 512+256*2
         print("lstm shape:",layer.shape)
-        layer = tf.reshape(layer, [batch_size, height, width, 512+128+128]) # N,H,W,512+128*2
-        layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
-        layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
+        # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,512+256*2
+        # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
+        # layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
 
-        print("res fin shape:",layer.shape)
+        # print("res fin shape:",layer.shape)
         return layer
 
 def LSTM(inputs, fc_size, lstm_size):
@@ -270,7 +274,7 @@ def train():
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 avg_acc = 0.95*avg_acc + 0.05*acc
-                errR = errR / font_length
+                # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
                 if np.isnan(errR) or np.isinf(errR) :
