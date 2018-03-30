@@ -291,7 +291,7 @@ def train():
 
                 if acc/avg_acc<=0.8:
                     for i in range(batch_size): 
-                        filename = "%s_%s_%s_%s_%s_%s_%s.png"%(steps, i, acc, \
+                        filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, steps, i, \
                             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
