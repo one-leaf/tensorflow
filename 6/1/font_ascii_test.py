@@ -258,7 +258,7 @@ def train():
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
-                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     font_info = sorted_font[random.randint(0,10)]
                     font_info = font_info[0].split(",")
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
