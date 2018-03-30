@@ -65,9 +65,9 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer, [batch_size, width*height, 1024]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 1024])
-        layer = LSTM(layer, 512, 256)    # N, W*H, 512+256*2
+        layer = LSTM(layer, 256, 128)    # N, W*H, 256+128*2
         print("lstm shape:",layer.shape)
-        # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,512+256*2
+        # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,256+128*2
         # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
         # layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
 
@@ -76,7 +76,7 @@ def RES(inputs, seq_len, reuse = False):
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
-    for i in range(6):
+    for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
