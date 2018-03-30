@@ -289,7 +289,7 @@ def train():
                     else:
                         AllLosts[key]=acc
 
-                if acc<=0.5:
+                if acc/avg_acc<=0.8:
                     for i in range(batch_size): 
                         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s_%s.png"%(steps,i,acc)), train_inputs[i] * 255)                    
                 # 报告
