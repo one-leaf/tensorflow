@@ -154,8 +154,10 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         if font_mode==None:
             font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
-            font_hint = random.choice([0,1,2,3,4,5])    
-            # font_hint = random.choice([0,4]) 
+            if font_size>=14:
+                font_hint = random.choice([0,1,2,3,4,5])  
+            else:
+                font_hint = random.choice([0,4]) 
 
         text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
         text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
