@@ -284,9 +284,9 @@ def train():
                 for info in train_info:
                     key = ",".join(info)
                     if key in AllLosts:
-                        AllLosts[key]=AllLosts[key]*0.95+errR*0.05
+                        AllLosts[key]=AllLosts[key]*0.95+acc*0.05
                     else:
-                        AllLosts[key]=errR
+                        AllLosts[key]=acc
 
                 # 报告
                 if steps >0 and steps % REPORT_STEPS < 2:
