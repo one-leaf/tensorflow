@@ -247,7 +247,7 @@ def train():
             stem = os.path.splitext(os.path.basename(ckpt.model_checkpoint_path))[0]
             restore_iter = int(stem.split('_')[-1])
             session.run(global_step.assign(restore_iter))
-            print("Restored.")
+            print("Restored to %s."%restore_iter)
 
         AllLosts={}
         avg_acc=1
