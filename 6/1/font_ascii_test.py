@@ -14,6 +14,7 @@ import urllib,json,io
 import utils_pil, utils_font, utils_nn
 import font_ascii_clean
 import operator
+from collections import deque
 
 curr_dir = os.path.dirname(__file__)
 
