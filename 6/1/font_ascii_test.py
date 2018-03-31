@@ -281,7 +281,7 @@ def train():
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 if avg_acc==0:  avg_acc=acc
-                avg_acc = 0.95*avg_acc + 0.05*acc
+                avg_acc = 0.999*avg_acc + 0.001*acc
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
