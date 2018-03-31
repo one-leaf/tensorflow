@@ -254,6 +254,7 @@ def train():
             print("Restore Model OCR...")
             r_saver.restore(session, ckpt.model_checkpoint_path)    
             stem = os.path.splitext(os.path.basename(ckpt.model_checkpoint_path))[0]
+            print(stem)
             restore_iter = int(stem.split('_')[-1])
             session.run(global_step.assign(restore_iter))
             print("Restored to %s."%restore_iter)
