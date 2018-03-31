@@ -39,8 +39,8 @@ LEARNING_RATE_INITIAL = 1e-4
 REPORT_STEPS = 750
 MOMENTUM = 0.9
 
-BATCHES = 50
-BATCH_SIZE = 8
+BATCHES = 20
+BATCH_SIZE = 1
 TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
@@ -58,21 +58,25 @@ def RES(inputs, seq_len, reuse = False):
         
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu) 
         # N H W 1024
-        layer = tf.reshape(layer, [batch_size*height, width, 1024]) # N*H, W, 1024
+        
+        # NHWC => NWHC
+        layer = tf.transpose(layer, (0, 2, 1, 3))
+
+        layer = tf.reshape(layer, [batch_size, width*height, 1024]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 1024])
-        layer = LSTM(layer, 512, 128)    # N*H, W, 512+128*2
+        layer = LSTM(layer, 256, 128)    # N, W*H, 256+128*2
         print("lstm shape:",layer.shape)
-        layer = tf.reshape(layer, [batch_size, height, width, 512+128+128]) # N,H,W,512+128*2
-        layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
-        layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
+        # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,256+128*2
+        # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
+        # layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
 
-        print("res fin shape:",layer.shape)
+        # print("res fin shape:",layer.shape)
         return layer
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
-    for i in range(4):
+    for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
@@ -113,6 +117,7 @@ AllFontNames.remove("方正兰亭超细黑简体")
 AllFontNames.remove("幼圆")
 AllFontNames.remove("方正舒体")
 AllFontNames.remove("方正姚体")
+AllFontNames.remove("华文新魏")
 AllFontNames.remove("Impact")
 AllFontNames.remove("Gabriola")
 
@@ -134,7 +139,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     codes = []
     max_width_image = 0
     info = []
-    font_length = random.randint(5, 20)
+    font_length = random.randint(5, 400)
     for i in range(batch_size):
         font_name = _font_name
         font_size = _font_size
@@ -150,8 +155,11 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         if font_mode==None:
             font_mode = random.choice([0,1,2,4]) 
         if font_hint==None:
-            font_hint = random.choice([0,1,2,3,4,5])    
-            # font_hint = random.choice([0,4]) 
+            # hint 2 在小字体下会断开笔画，人眼都无法识别
+            if font_size>=14:
+                font_hint = random.choice([0,1,2,3,4,5])  
+            else:
+                font_hint = random.choice([0,1,3,4,5]) 
 
         text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
         text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
@@ -203,10 +211,11 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
-        info.append([font_name, str(font_size), str(font_mode), str(font_hint)])
+        info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
 
     # 凑成16的整数倍
-    max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    if max_width_image % POOL_SIZE > 0:
+        max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
@@ -250,13 +259,13 @@ def train():
             print("Restored to %s."%restore_iter)
 
         AllLosts={}
-        avg_acc=1
+        avg_acc=0
         while True:
             errA = errD1 = errD2 = 1
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
-                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     font_info = sorted_font[random.randint(0,10)]
                     font_info = font_info[0].split(",")
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
@@ -269,8 +278,11 @@ def train():
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
                 errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
-                font_info = train_info[0][0]+"/"+train_info[0][1]
+                font_length = int(train_info[0][-1])
+                font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
+                if avg_acc==0:  avg_acc=acc
                 avg_acc = 0.95*avg_acc + 0.05*acc
+                # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
                 if np.isnan(errR) or np.isinf(errR) :
@@ -280,10 +292,15 @@ def train():
                 for info in train_info:
                     key = ",".join(info)
                     if key in AllLosts:
-                        AllLosts[key]=AllLosts[key]*0.95+errR*0.05
+                        AllLosts[key]=AllLosts[key]*0.95+acc*0.05
                     else:
-                        AllLosts[key]=errR
+                        AllLosts[key]=acc
 
+                if acc/avg_acc<=0.8:
+                    for i in range(batch_size): 
+                        filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, steps, i, \
+                            train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
+                        cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
                 if steps >0 and steps % REPORT_STEPS < 2:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
