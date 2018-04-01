@@ -250,14 +250,26 @@ def train():
 
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True)
 
-        ckpt = tf.train.get_checkpoint_state(model_R_dir)
-        if ckpt and ckpt.model_checkpoint_path:
-            print("Restore Model OCR...")
-            r_saver.restore(session, ckpt.model_checkpoint_path)    
-            stem = os.path.basename(ckpt.model_checkpoint_path)
-            restore_iter = int(stem.split('-')[-1])
-            session.run(global_step.assign(restore_iter))
-            print("Restored to %s."%restore_iter)
+        for i in range(3):
+            ckpt = tf.train.get_checkpoint_state(model_R_dir)
+            if ckpt and ckpt.model_checkpoint_path:
+                print("Restore Model OCR...")
+                stem = os.path.basename(ckpt.model_checkpoint_path)
+                restore_iter = int(stem.split('-')[-1])
+                try:
+                    r_saver.restore(session, ckpt.model_checkpoint_path)    
+                except:
+                    new_restore_iter = restore_iter - BATCHES
+                    with open(os.path.join(model_R_dir,"checkpoint"),'w') as f:
+                        f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%new_restore_iter)
+                        f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%new_restore_iter)
+                    continue
+                session.run(global_step.assign(restore_iter))
+                print("Restored to %s."%restore_iter)
+                break
+            print("restor fail, return")
+            return
+
 
         AllLosts={}
         accs = deque(maxlen=100)
