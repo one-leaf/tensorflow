@@ -223,7 +223,7 @@ __C.EXP_DIR = 'default'
 __C.LOG_DIR = 'default'
 
 # Use GPU implementation of non-maximum suppression
-__C.USE_GPU_NMS = False
+__C.USE_GPU_NMS = True
 
 
 
