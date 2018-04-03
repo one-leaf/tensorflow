@@ -49,11 +49,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
     # 是否允许 box 压住一点点实际目标边缘， 文字检测ctpn这里，不允许
     _allowed_border =  0
 
-    # 不需要从这里取图片的高宽，直接从 im_info 中抓取
-    # map of shape (1, H, W)
-    #height, width = rpn_cls_score.shape[1:3]
-
-    im_info = im_info[0] # 取第一张图像的高宽及通道数，也只有一张图片
+    im_info = im_info[0] # 取第一张原始图像的高宽及通道数，也只有一张图片
 
     # 在feature-map上定位anchor，并加上delta，得到在实际图像中anchor的真实坐标
     # Algorithm:
@@ -66,7 +62,8 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
     assert rpn_cls_score.shape[0] == 1, \
         'Only single item batches are supported'
 
-    # map of shape (..., H, W)
+    # 读取 VGG之后的特征图的高宽
+    # map of shape (1, H, W，C)
     height, width = rpn_cls_score.shape[1:3]#feature-map的高宽
 
     if DEBUG:
