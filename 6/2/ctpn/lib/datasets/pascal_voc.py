@@ -32,24 +32,41 @@ from ..fast_rcnn.config import cfg
         <height>374</height>
         <depth>3</depth>
     </size>
-    <segmented>0</segmented><!--是否有分割label-->
+    <segmented>0</segmented><!--是否按像素分割-->
     <object>
-        <name>dog</name> <!--类别-->
-        <pose>Unspecified</pose><!--物体的姿态-->
+        <name>dog</name> <!--检测到的物体类别-->
+        <pose>Unspecified</pose><!--物体的姿态，左右之类-->
         <truncated>0</truncated><!--物体是否被部分遮挡（>15%）-->
         <difficult>0</difficult><!--是否为难以辨识的物体， 主要指要结体背景才能判断出类别的物体。虽有标注， 但一般忽略这类物体-->
-        <bndbox><!--bounding box-->
+        <bndbox><!--bounding box（包括左下角和右上角的xy坐标）-->
             <xmin>69</xmin>
             <ymin>4</ymin>
             <xmax>392</xmax>
             <ymax>345</ymax>
         </bndbox>
     </object>
+    <object>
+    ... 这里可以有多个物体
+    </object>
+    
 </annotation>
 
 分割的label由两部分组成： 
 * class segmentation: 标注出每一个像素的类别 
 * object segmentation: 标注出每一个像素属于哪一个物体 
+
+
+Main文件夹下包含了2个分类(text, dontcare)的特***_train.txt、***_val.txt和***_trainval.txt。
+内容如下：
+...
+img_1001 1
+img_1001 -1
+...
+前面的表示图像的name，后面的1代表正样本，-1代表负样本。如果是0，代表较难分辨出来的样本
+_train中存放的是训练使用的数据
+_val中存放的是验证结果使用的数据
+_trainval将上面两个进行了合并
+
 '''
 class pascal_voc(imdb):
     # 初始化 pascal_voc 
