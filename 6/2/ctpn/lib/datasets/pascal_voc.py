@@ -288,7 +288,7 @@ class pascal_voc(imdb):
             else self._comp_id)
         return comp_id
 
-     def _get_voc_results_file_template(self):
+    def _get_voc_results_file_template(self):
         filename = self._get_comp_id() + '_det_' + self._image_set + '_{:s}.txt'
         filedir = os.path.join(self._devkit_path, 'results', 'VOC' + self._year, 'Main')
         if not os.path.exists(filedir):
