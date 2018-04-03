@@ -9,29 +9,27 @@ from ..fast_rcnn.bbox_transform import bbox_transform
 DEBUG = False
 def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_info, _feat_stride = [16,], anchor_scales = [16,]):
     """
-    Assign anchors to ground-truth targets. Produces anchor classification
-    labels and bounding-box regression targets.
-    Parameters
+    将锚点分配给真实的目标，产生锚点的分类标签和边界回归目标
+    输入参数：
     ----------
-    rpn_cls_score: (1, H, W, Ax2) bg/fg scores of previous conv layer
-    gt_boxes: (G, 5) vstack of [x1, y1, x2, y2, class]
-    gt_ishard: (G, 1), 1 or 0 indicates difficult or not
-    dontcare_areas: (D, 4), some areas may contains small objs but no labelling. D may be 0
-    im_info: a list of [image_height, image_width, scale_ratios]
-    _feat_stride: the downsampling ratio of feature map to the original input image
-    anchor_scales: the scales to the basic_anchor (basic anchor is [16, 16])
+    rpn_cls_score: (1, H, W, Ax2) bg/fg 之前 conv 层定义的分类
+    gt_boxes: (G, 5) vstack of [x1, y1, x2, y2, class] 输入的一堆box框和分类
+    gt_ishard: (G, 1), 1 or 0 是否很难识别，1是困难，0是容易
+    dontcare_areas: (D, 4), 不需要理会的 box，D 可能为 0
+    im_info: [image_height, image_width, scale_ratios] 列表，这里只有1张图片
+    _feat_stride: VGG缩放后的特征图和输入的原始图的比例，VGG网络为16
+    anchor_scales: 锚点框的缩放大小，ctpn 只有一个 [16,]
     ----------
-    Returns
+    返回值：
     ----------
-    rpn_labels : (HxWxA, 1), for each anchor, 0 denotes bg, 1 fg, -1 dontcare
-    rpn_bbox_targets: (HxWxA, 4), distances of the anchors to the gt_boxes(may contains some transform)
-                            that are the regression objectives
-    rpn_bbox_inside_weights: (HxWxA, 4) weights of each boxes, mainly accepts hyper param in cfg
-    rpn_bbox_outside_weights: (HxWxA, 4) used to balance the fg/bg,
-                            beacuse the numbers of bgs and fgs mays significiantly different
+    rpn_labels : (HxWxA, 1), 对于每个锚点框, 0 为 bg 背景, 1 fg 前景, -1 dontcare 抛弃
+    rpn_bbox_targets: (HxWxA, 4), 锚点框的坐标 和 gt_boxes 的偏移量, 这个就是回归目标
+    rpn_bbox_inside_weights: (HxWxA, 4) 每个框的权重，在 cfg 中定义
+    rpn_bbox_outside_weights: (HxWxA, 4) 用于平衡 fg 和 bg 的正反样本的个数， 方便训练
     """
-    _anchors = generate_anchors(scales=np.array(anchor_scales))#生成基本的anchor,一共9个
-    _num_anchors = _anchors.shape[0]#9个anchor
+    # 在ctpn中直接定义了等宽为16的10个不同高度的锚点框 shape : [10, 4]
+    _anchors = generate_anchors(scales=np.array(anchor_scales))
+    _num_anchors = _anchors.shape[0] # 10个anchor
 
     if DEBUG:
         print('anchors:')
@@ -48,14 +46,14 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
         _bg_sum = 0
         _count = 0
 
-    # allow boxes to sit over the edge by a small amount
+    # 是否允许 box 压住一点点实际目标边缘， 文字检测ctpn这里，不允许
     _allowed_border =  0
     # map of shape (..., H, W)
     #height, width = rpn_cls_score.shape[1:3]
 
-    im_info = im_info[0]#图像的高宽及通道数
+    im_info = im_info[0] # 取第一张图像的高宽及通道数，也只有一张图片
 
-    #在feature-map上定位anchor，并加上delta，得到在实际图像中anchor的真实坐标
+    # 在feature-map上定位anchor，并加上delta，得到在实际图像中anchor的真实坐标
     # Algorithm:
     # for each (H, W) location i
     #   generate 9 anchor boxes centered on cell i

@@ -230,7 +230,7 @@ class Network(object):
             input[0] = input[0][0]
 
         with tf.variable_scope(name) as scope:
-            # 'rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info'
+            #input: 'rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info'
             rpn_labels,rpn_bbox_targets,rpn_bbox_inside_weights,rpn_bbox_outside_weights = \
                 tf.py_func(anchor_target_layer_py,
                            [input[0],input[1],input[2],input[3],input[4], _feat_stride, anchor_scales],
