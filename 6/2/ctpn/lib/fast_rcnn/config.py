@@ -12,7 +12,9 @@ __C.GPU_ID = 0
 
 # Training options
 __C.IS_RPN = True
+# BOX 的 缩放类型，只有一种 16
 __C.ANCHOR_SCALES = [16]
+# 对于ctpn，分类只有2类，文字和非文字
 __C.NCLASSES = 2
 __C.USE_GPU_NMS = True
 # multiscale training and testing

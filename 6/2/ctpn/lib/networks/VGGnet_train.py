@@ -4,7 +4,17 @@ import numpy as np
 from .network import Network
 from ..fast_rcnn.config import cfg
 
+# VGG 的训练模型
 class VGGnet_train(Network):
+    '''
+    data : 输入图片
+    im_info ：图片的高宽和缩放比例， image info
+    gt_boxes : 图片中的框box，前4位是box的坐标，最后一位是box的类别， ground truth boxes 正确的标注数据
+    gt_ishard ：是否为难以辨识的物体， 主要指要结体背景才能判断出类别的物体。虽有标注， 但一般忽略这类物体
+    dontcare_areas ：don’t care areas，不关心的区域，也就是除开 前景，背景 之后的第三个分类，忽略掉 
+    keep_prob ：训练时的 dropout 一般取值： 0.5
+    trainable ： 是否可参与训练，也就是是否列入保存参数的范围
+    '''
     def __init__(self, trainable=True):
         self.inputs = []
         self.data = tf.placeholder(tf.float32, shape=[None, None, None, 3], name='data')
@@ -20,12 +30,16 @@ class VGGnet_train(Network):
 
     def setup(self):
 
-        # n_classes = 21
+        # n_classes = 2
+        # 对于ctpn，分类只有 2 类，文字和非文字
         n_classes = cfg.NCLASSES
         # anchor_scales = [8, 16, 32]
+        # 参数的box缩放类别，这里修改为 [16]， 默认一个点产生 9个框，这里只有3个框
         anchor_scales = cfg.ANCHOR_SCALES
+        # 图片的采样率，图片经过4层 pool = 2 * 2 * 2 * 2 == 16 ，所以对应的 H,W 坐标，分别*16，就可以换算为 data 上对应的坐标
         _feat_stride = [16, ]
 
+        # VGG16的网络结构
         (self.feed('data')
              .conv(3, 3, 64, 1, 1, name='conv1_1')
              .conv(3, 3, 64, 1, 1, name='conv1_2')
@@ -44,12 +58,25 @@ class VGGnet_train(Network):
              .conv(3, 3, 512, 1, 1, name='conv5_1')
              .conv(3, 3, 512, 1, 1, name='conv5_2')
              .conv(3, 3, 512, 1, 1, name='conv5_3'))
+
+        # 输出 shape， 这个是按原图说的 [N, H/16, W/16, 512]
+        # 后续按 [N, H, W, 512] 备注
+        
         #========= RPN ============
+        # 3x3的窗口锚点
         (self.feed('conv5_3')
              .conv(3,3,512,1,1,name='rpn_conv/3x3'))
 
+        # 引入了 bilstm 模型
+        # 按 [N * H, W, C] ==> bilstm (128单元) ==> [N * H * W, 2 * 128] ==> FC(512) ==> [N, H, W, 512]
         (self.feed('rpn_conv/3x3').Bilstm(512,128,512,name='lstm_o'))
+
+        # bbox 位置偏移
+        # [N, H, W, 512] ==> FC(40) ==> [N, H, W, 10 * 4] 每个坐标取10个框        
         (self.feed('lstm_o').lstm_fc(512,len(anchor_scales) * 10 * 4, name='rpn_bbox_pred'))
+
+        # 分类
+        # [N, H, W, 512] ==> FC(20) ==> [N, H, W, 10 * 2] 每个坐标取10个框        
         (self.feed('lstm_o').lstm_fc(512,len(anchor_scales) * 10 * 2,name='rpn_cls_score'))
 
         # generating training labels on the fly
