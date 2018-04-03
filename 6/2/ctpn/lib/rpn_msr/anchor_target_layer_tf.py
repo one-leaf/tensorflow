@@ -48,7 +48,9 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
 
     # 是否允许 box 压住一点点实际目标边缘， 文字检测ctpn这里，不允许
     _allowed_border =  0
-    # map of shape (..., H, W)
+
+    # 不需要从这里取图片的高宽，直接从 im_info 中抓取
+    # map of shape (1, H, W)
     #height, width = rpn_cls_score.shape[1:3]
 
     im_info = im_info[0] # 取第一张图像的高宽及通道数，也只有一张图片
