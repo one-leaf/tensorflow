@@ -6,7 +6,7 @@ ANCHOR_SCALES: [16]
 NCLASSES: 2
 USE_GPU_NMS: True
 TRAIN:
-  restore: 0
+  restore: 1
   max_steps: 5000000
   SOLVER: Adam
   OHEM: False
