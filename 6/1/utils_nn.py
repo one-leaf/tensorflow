@@ -12,8 +12,8 @@ def resNetBlockV1(inputs, size=64):
 
 # 第二种残差模型
 def resNetBlockV2(inputs, size=64):
-    layer = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
-    layer = slim.conv2d(layer,  size,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.relu)
+    layer = slim.conv2d(inputs, size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
+    layer = slim.conv2d(layer,  size,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
     layer = slim.conv2d(layer,  size*4, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     return tf.nn.relu(inputs + layer)   
 
