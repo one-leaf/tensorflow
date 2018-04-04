@@ -235,7 +235,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
     # 至此， 上好标签，开始计算rpn-box的真值
     #--------------------------------------------------------------
     # 根据anchor和gtbox计算得真值（anchor和gtbox之间的偏差）
-    # shape = (A,4) 也就是 （10, 4）,这个没有用
+    # shape = (I, 4) 这行代码没有用
     bbox_targets = np.zeros((len(inds_inside), 4), dtype=np.float32)
     # anchors shape (I, 4) gt_boxes shape [I, 5], 最大值
     bbox_targets = _compute_targets(anchors, gt_boxes[argmax_overlaps, :])
