@@ -46,19 +46,20 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
         _bg_sum = 0
         _count = 0
 
-    # 是否允许 box 压住一点点实际目标边缘， 文字检测ctpn这里，不允许
+    # 是否允许 box 压住目标边缘的距离， 对于文字检测ctpn，这里为0，即框等于实际文字的范围
     _allowed_border =  0
 
     im_info = im_info[0] # 取第一张原始图像的高宽及通道数，也只有一张图片
 
     # 在feature-map上定位anchor，并加上delta，得到在实际图像中anchor的真实坐标
-    # Algorithm:
-    # for each (H, W) location i
-    #   generate 9 anchor boxes centered on cell i
-    #   apply predicted bbox deltas at cell i to each of the 9 anchors
-    # filter out-of-image anchors
-    # measure GT overlap
+    # 算法:
+    # for each (H, W) 每个位置坐标 i
+    #   以 i 为中心 产生 10 个 锚窗
+    #   按10个锚窗预测 bbox 的 偏移量
+    # 过滤掉超出图片的锚窗
+    # 检测重叠样本
 
+    # 只支持每次训练1张图片
     assert rpn_cls_score.shape[0] == 1, \
         'Only single item batches are supported'
 
@@ -76,25 +77,43 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
         print('rpn: gt_boxes', gt_boxes)
 
     # 1. Generate proposals from bbox deltas and shifted anchors
+    # 产生锚点的原始对应坐标
     shift_x = np.arange(0, width) * _feat_stride
     shift_y = np.arange(0, height) * _feat_stride
+    # shift_x, shift_y shape = [ h, w ]
+    # shift_x = [[0,16,32,...],[0,16,32,...],...]
+    # shift_y = [[0,0,0,...],[16,16,16,...],...]
     shift_x, shift_y = np.meshgrid(shift_x, shift_y) # in W H order
-    # K is H x W
+
+    # 获得原图的采样点重复2次，每个采样点相隔16
+    # shifts = array([[  0,  16,  32, ..., 464, 480, 496],
+    #       [  0,   0,   0, ..., 272, 272, 272],
+    #       [  0,  16,  32, ..., 464, 480, 496],
+    #       [  0,   0,   0, ..., 272, 272, 272]]).transpose()
+    # shifts.shape=[H x W, 4] 
     shifts = np.vstack((shift_x.ravel(), shift_y.ravel(),
                         shift_x.ravel(), shift_y.ravel())).transpose()#生成feature-map和真实image上anchor之间的偏移量
+
+    # K is H x W 
     # add A anchors (1, A, 4) to
     # cell K shifts (K, 1, 4) to get
     # shift anchors (K, A, 4)
     # reshape to (K*A, 4) shifted anchors
-    A = _num_anchors#9个anchor
-    K = shifts.shape[0]#50*37，feature-map的宽乘高的大小
+    # A = 10个anchor
+    A = _num_anchors
+    # K = feature-map的宽乘高的大小
+    K = shifts.shape[0]
+    # 得到所有的锚框 (1, 10, 4) + (H*W, 1, 4) => (H*W, 10, 4)
     all_anchors = (_anchors.reshape((1, A, 4)) +
                    shifts.reshape((1, K, 4)).transpose((1, 0, 2)))#相当于复制宽高的维度，然后相加
+    # 所有的锚框（H*W, 10, 4）=> (H*W*10, 4)
     all_anchors = all_anchors.reshape((K * A, 4))
+    # 全部锚框的个数为 H*W*10
     total_anchors = int(K * A)
 
     # only keep anchors inside the image
-    #仅保留那些还在图像内部的anchor，超出图像的都删掉
+    # 仅保留那些还在图像内部的锚框，超出图像的都删掉
+    # inds_inside shape 符合条件的(K * A) => (I)
     inds_inside = np.where(
         (all_anchors[:, 0] >= -_allowed_border) &
         (all_anchors[:, 1] >= -_allowed_border) &
@@ -107,55 +126,73 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
         print('inds_inside', len(inds_inside))
 
     # keep only inside anchors
-    anchors = all_anchors[inds_inside, :]#保留那些在图像内的anchor
+    # 保留那些在图像内的anchor
+    # anchors shape (I, 4)
+    anchors = all_anchors[inds_inside, :]
     if DEBUG:
         print('anchors.shape', anchors.shape)
 
     #至此，anchor准备好了
     #--------------------------------------------------------------
-    # label: 1 is positive, 0 is negative, -1 is dont care
-    # (A)
+    # label: 1 是 正样本, 0 是 负样本, -1 是 忽略
+    # (I)
     labels = np.empty((len(inds_inside), ), dtype=np.float32)
-    labels.fill(-1)#初始化label，均为-1
+    labels.fill(-1) #初始化label，均为-1
 
     # overlaps between the anchors and the gt boxes
-    # overlaps (ex, gt), shape is A x G
-    #计算anchor和gt-box的overlap，用来给anchor上标签
+    # overlaps (ex, gt), shape is I x G
+    # 计算anchor和gt-box的overlap，用来给anchor上标签
+    # 假设anchors有I个，gt_boxes有G个，返回的是一个（I,G）的数组
+    # 存放每一个anchor和每一个gtbox之间的overlap
     overlaps = bbox_overlaps(
         np.ascontiguousarray(anchors, dtype=np.float),
-        np.ascontiguousarray(gt_boxes, dtype=np.float))#假设anchors有x个，gt_boxes有y个，返回的是一个（x,y）的数组
-    # 存放每一个anchor和每一个gtbox之间的overlap
-    argmax_overlaps = overlaps.argmax(axis=1) # (A)#找到和每一个gtbox，overlap最大的那个anchor
+        np.ascontiguousarray(gt_boxes, dtype=np.float))
+
+    # 找到每一个锚框的 overlap 最大值
+    # shape: (I)
+    # 这个是最大值的 index
+    argmax_overlaps = overlaps.argmax(axis=1)
+    # 这个 shape 也是 (I), 是最大值的 value
     max_overlaps = overlaps[np.arange(len(inds_inside)), argmax_overlaps]
-    gt_argmax_overlaps = overlaps.argmax(axis=0) # G#找到每个位置上9个anchor中与gtbox，overlap最大的那个
-    gt_max_overlaps = overlaps[gt_argmax_overlaps,
-                               np.arange(overlaps.shape[1])]
+
+    # 找到每一个 gt_boxes 的 overlap 最大值
+    # shape: (G)
+    # 这个是最大值的 index    
+    gt_argmax_overlaps = overlaps.argmax(axis=0) 
+    # 这个 shape 也是 (G), 是最大值的 value
+    gt_max_overlaps = overlaps[gt_argmax_overlaps, np.arange(overlaps.shape[1])]
+    # 这个貌似没有意义，值和前面的 gt_argmax_overlaps 一样，都是在 overlaps 0维度上的索引
     gt_argmax_overlaps = np.where(overlaps == gt_max_overlaps)[0]
 
+    # 如果一个锚框同时满足正样本和负样本的条件设置为负样本，这个默认关闭
     if not cfg.TRAIN.RPN_CLOBBER_POSITIVES:
-        # assign bg labels first so that positive labels can clobber them
-        labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0#先给背景上标签，小于0.3overlap的
-
-    # fg label: for each gt, anchor with highest overlap
-    labels[gt_argmax_overlaps] = 1#每个位置上的9个anchor中overlap最大的认为是前景
-    # fg label: above threshold IOU
-    labels[max_overlaps >= cfg.TRAIN.RPN_POSITIVE_OVERLAP] = 1#overlap大于0.7的认为是前景
-
-    if cfg.TRAIN.RPN_CLOBBER_POSITIVES:
-        # assign bg labels last so that negative labels can clobber positives
+        # 将 overlaps 值小于0.3的设置为负样本，也就是背景 0 
         labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
 
-    # preclude dontcare areas
-    if dontcare_areas is not None and dontcare_areas.shape[0] > 0:#这里我们暂时不考虑有doncare_area的存在
+    # 最大的overlap设置为 前景
+    labels[gt_argmax_overlaps] = 1 
+    # 大于 0.7 的也设置为 前景
+    labels[max_overlaps >= cfg.TRAIN.RPN_POSITIVE_OVERLAP] = 1
+
+    # 如果一个锚框同时满足正样本和负样本的条件设置为负样本，这个默认关闭
+    # 这个代码有问题将导致 cfg.TRAIN.RPN_CLOBBER_POSITIVES 失效，无论如何都会将小于 0.3 的都设置为负样本
+    if cfg.TRAIN.RPN_CLOBBER_POSITIVES:
+        # 将 overlaps 值小于0.3的设置为负样本，也就是背景 0 
+        labels[max_overlaps < cfg.TRAIN.RPN_NEGATIVE_OVERLAP] = 0
+
+    # 排除不关心的区域
+    # 在ctpn模型中，暂时不考虑有 doncare_area 的存在
+    if dontcare_areas is not None and dontcare_areas.shape[0] > 0:
         # intersec shape is D x A
         intersecs = bbox_intersections(
             np.ascontiguousarray(dontcare_areas, dtype=np.float), # D x 4
             np.ascontiguousarray(anchors, dtype=np.float) # A x 4
         )
         intersecs_ = intersecs.sum(axis=0) # A x 1
+        # 将计算出来的和不关心区域的值大于 >0.5 都忽略掉
         labels[intersecs_ > cfg.TRAIN.DONTCARE_AREA_INTERSECTION_HI] = -1
 
-    #这里我们暂时不考虑难样本的问题
+    # 在ctpn中 也暂时不考虑难样本的问题，不需要排除困难样本
     # preclude hard samples that are highly occlusioned, truncated or difficult to see
     if cfg.TRAIN.PRECLUDE_HARD_SAMPLES and gt_ishard is not None and gt_ishard.shape[0] > 0:
         assert gt_ishard.shape[0] == gt_boxes.shape[0]
@@ -172,9 +209,9 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
             labels[max_intersec_label_inds] = -1 #
 
     # subsample positive labels if we have too many
-    #对正样本进行采样，如果正样本的数量太多的话
+    # 对正样本进行采样，如果正样本的数量太多的话
     # 限制正样本的数量不超过128个
-    #TODO 这个后期可能还需要修改，毕竟如果使用的是字符的片段，那个正样本的数量是很多的。
+    # TODO 这个后期可能还需要修改，毕竟如果使用的是字符的片段，那个正样本的数量是很多的。
     num_fg = int(cfg.TRAIN.RPN_FG_FRACTION * cfg.TRAIN.RPN_BATCHSIZE)
     fg_inds = np.where(labels == 1)[0]
     if len(fg_inds) > num_fg:
@@ -183,7 +220,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
         labels[disable_inds] = -1#变为-1
 
     # subsample negative labels if we have too many
-    #对负样本进行采样，如果负样本的数量太多的话
+    # 对负样本进行采样，如果负样本的数量太多的话
     # 正负样本总数是256，限制正样本数目最多128，
     # 如果正样本数量小于128，差的那些就用负样本补上，凑齐256个样本
     num_bg = cfg.TRAIN.RPN_BATCHSIZE - np.sum(labels == 1)
@@ -197,8 +234,11 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
 
     # 至此， 上好标签，开始计算rpn-box的真值
     #--------------------------------------------------------------
+    # 根据anchor和gtbox计算得真值（anchor和gtbox之间的偏差）
+    # shape = (A,4) 也就是 （10, 4）,这个没有用
     bbox_targets = np.zeros((len(inds_inside), 4), dtype=np.float32)
-    bbox_targets = _compute_targets(anchors, gt_boxes[argmax_overlaps, :])#根据anchor和gtbox计算得真值（anchor和gtbox之间的偏差）
+    # anchors shape (I, 4) gt_boxes shape [I, 5], 最大值
+    bbox_targets = _compute_targets(anchors, gt_boxes[argmax_overlaps, :])
 
 
     bbox_inside_weights = np.zeros((len(inds_inside), 4), dtype=np.float32)

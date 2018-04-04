@@ -1,5 +1,6 @@
 import numpy as np
 
+# 计算两个box的偏移量
 def bbox_transform(ex_rois, gt_rois):
     """
     computes the distance from ground-truth boxes to the given boxes, normed by their size
