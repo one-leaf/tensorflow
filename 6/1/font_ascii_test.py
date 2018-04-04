@@ -305,7 +305,7 @@ def train():
                 for info in train_info:
                     key = ",".join(info)
                     if key in AllLosts:
-                        AllLosts[key]=AllLosts[key]*0.95+acc*0.05
+                        AllLosts[key]=AllLosts[key]*0.99+acc*0.01
                     else:
                         AllLosts[key]=acc
 
@@ -341,7 +341,7 @@ def train():
                         import Levenshtein
                         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
                     print("Test Accuracy:", acc / len(original_list))
-                    sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=True)
+                    sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     for f in sorted_fonts[:20]:
                         print(f)
 
