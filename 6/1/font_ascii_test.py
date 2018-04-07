@@ -248,7 +248,7 @@ def train():
     with tf.Session() as session:
         session.run(init)
 
-        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True)
+        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
 
         for i in range(3):
             ckpt = tf.train.get_checkpoint_state(model_R_dir)
