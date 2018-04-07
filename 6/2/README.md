@@ -25,3 +25,7 @@
 
 7. 运行train.net
 > sh ctpn/train_net.py
+
+文档：
+
+http://rowl1ng.com/tech/faster-rcnn.html
