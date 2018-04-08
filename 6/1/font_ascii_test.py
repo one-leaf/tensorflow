@@ -270,7 +270,7 @@ def train():
                 break
             else:
                 break
-            print("restor fail, return")
+            print("restored fail, return")
             return
 
 
