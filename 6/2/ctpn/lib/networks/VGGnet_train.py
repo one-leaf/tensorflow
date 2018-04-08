@@ -80,11 +80,11 @@ class VGGnet_train(Network):
         (self.feed('lstm_o').lstm_fc(512,len(anchor_scales) * 10 * 2,name='rpn_cls_score'))
 
         # generating training labels on the fly
-        # output: rpn_labels(HxWxA, 2)
-        #         rpn_bbox_targets(HxWxA, 4) 
-        #         rpn_bbox_inside_weights 
-        #         rpn_bbox_outside_weights
-        # 给每个 anchor 计算分类标签，并获得实际偏移量坐标（也是delta的形式），以及内部权重和外部权重
+        # 给每个 anchor 计算分类标签，并获得实际偏移量坐标
+        # output: rpn_labels (1 x H x W x A, 2)                 分类
+        #         rpn_bbox_targets (1 x H x W x A, 4)           回归
+        #         rpn_bbox_inside_weights (1 x H x W x A, 4)    正负样本权重开关
+        #         rpn_bbox_outside_weights (1 x H x W x A, 4)   正负样本权重
         (self.feed('rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info')
              .anchor_target_layer(_feat_stride, anchor_scales, name = 'rpn-data' ))
 

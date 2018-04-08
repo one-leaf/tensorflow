@@ -18,6 +18,7 @@ class SolverWrapper(object):
         self.output_dir = output_dir
         self.pretrained_model = pretrained_model
 
+        # 获得当前这一批数据的正则化参数
         print('Computing bounding-box regression targets...')
         if cfg.TRAIN.BBOX_REG:
             self.bbox_means, self.bbox_stds = rdl_roidb.add_bbox_regression_targets(roidb)
@@ -75,12 +76,18 @@ class SolverWrapper(object):
         # log_image = tf.summary.image(log_image_name, tf.expand_dims(log_image_data, 0), max_outputs=1)
         return log_image, log_image_data, log_image_name
 
-
+    # 训练的实现
     def train_model(self, sess, max_iters, restore=False):
         """Network training loop."""
+        # 封装数据，加了随机打乱的功能
+        # 这里传入 分类 num_classes 在默认使用 RPN 网络时没有什么用处的；如果不使用 RPN，则需要对每一种分类都要创建锚窗
         data_layer = get_data_layer(self.roidb, self.imdb.num_classes)
-        total_loss,model_loss, rpn_cross_entropy, rpn_loss_box=self.net.build_loss(ohem=cfg.TRAIN.OHEM)
+
+        # 定义损失函数，这里是rpn的损失函数
+        total_loss, model_loss, rpn_cross_entropy, rpn_loss_box=self.net.build_loss(ohem=cfg.TRAIN.OHEM)
+
         # scalar summary
+        # 定义 log 图表，加入每一种损失的曲线图
         tf.summary.scalar('rpn_reg_loss', rpn_loss_box)
         tf.summary.scalar('rpn_cls_loss', rpn_cross_entropy)
         tf.summary.scalar('model_loss', model_loss)
@@ -212,8 +219,7 @@ def get_data_layer(roidb, num_classes):
 
     return layer
 
-
-
+# 开始训练网络
 def train_net(network, imdb, roidb, output_dir, log_dir, pretrained_model=None, max_iters=40000, restore=False):
     """Train a Fast R-CNN network."""
 

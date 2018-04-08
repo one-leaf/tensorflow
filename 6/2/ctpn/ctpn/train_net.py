@@ -50,7 +50,7 @@ if __name__ == '__main__':
     device_name = '/gpu:0'
     print(device_name)
 
-    # 采用VGG网络
+    # 采用VGG网络，获得所有分类、回归和权重网络
     network = get_network('VGGnet_train')
 
     # 开始训练

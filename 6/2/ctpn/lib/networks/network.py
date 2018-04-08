@@ -230,12 +230,14 @@ class Network(object):
             input[0] = input[0][0]
 
         with tf.variable_scope(name) as scope:
-            #input: 'rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info'
+            # input: 'rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info'
+            # 返回 分类、回归、正负样本权重开关、正负样本权重值
             rpn_labels,rpn_bbox_targets,rpn_bbox_inside_weights,rpn_bbox_outside_weights = \
                 tf.py_func(anchor_target_layer_py,
                            [input[0],input[1],input[2],input[3],input[4], _feat_stride, anchor_scales],
                            [tf.float32,tf.float32,tf.float32,tf.float32])
 
+            # 将返回值全部转为 tf 的张量
             rpn_labels = tf.convert_to_tensor(tf.cast(rpn_labels,tf.int32), name = 'rpn_labels') # shape is (1 x H x W x A, 2)
             rpn_bbox_targets = tf.convert_to_tensor(rpn_bbox_targets, name = 'rpn_bbox_targets') # shape is (1 x H x W x A, 4)
             rpn_bbox_inside_weights = tf.convert_to_tensor(rpn_bbox_inside_weights , name = 'rpn_bbox_inside_weights') # shape is (1 x H x W x A, 4)
@@ -366,6 +368,10 @@ class Network(object):
                 return tf.multiply(l2_weight, tf.nn.l2_loss(tensor), name='value')
         return regularizer
 
+    # 当预测值与目标值相差很大时, 梯度容易爆炸
+    # 也就是 差值小就取 ^2 * 常量, 差值大，直接减去一个常量
+    # 所以 x<1/9  ==> x^2 * 0.5 * 9
+    #      x>1/9  ==> |x| - 0.5/9
     def smooth_l1_dist(self, deltas, sigma2=9.0, name='smooth_l1_dist'):
         with tf.name_scope(name=name) as scope:
             deltas_abs = tf.abs(deltas)
@@ -374,37 +380,50 @@ class Network(object):
                         (deltas_abs - 0.5 / sigma2) * tf.abs(smoothL1_sign - 1)
 
 
-
+    # 定义损失函数
     def build_loss(self, ohem=False):
         # classification loss
+        # 分类损失
+        # self.get_output('rpn-data')[0] => rpn_labels
         rpn_cls_score = tf.reshape(self.get_output('rpn_cls_score_reshape'), [-1, 2])  # shape (HxWxA, 2)
         rpn_label = tf.reshape(self.get_output('rpn-data')[0], [-1])  # shape (HxWxA)
-        # ignore_label(-1)
+
+        # ignore_label(-1) 忽略为 -1 的超界区域
+        # 正样本
         fg_keep = tf.equal(rpn_label, 1)
+        # 正负样本，忽略超过区域的框
         rpn_keep = tf.where(tf.not_equal(rpn_label, -1))
+        # 分别提取参数
         rpn_cls_score = tf.gather(rpn_cls_score, rpn_keep) # shape (N, 2)
         rpn_label = tf.gather(rpn_label, rpn_keep)
+        # 定义损失函数
         rpn_cross_entropy_n = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=rpn_label,logits=rpn_cls_score)
 
-        # box loss
+        # box loss 
+        # 回归损失
+        # self.get_output('rpn-data')[1:] => rpn_bbox_targets, rpn_bbox_inside_weights, rpn_bbox_outside_weights
         rpn_bbox_pred = self.get_output('rpn_bbox_pred') # shape (1, H, W, Ax4)
         rpn_bbox_targets = self.get_output('rpn-data')[1]
         rpn_bbox_inside_weights = self.get_output('rpn-data')[2]
         rpn_bbox_outside_weights = self.get_output('rpn-data')[3]
+        # 提取有效 box
         rpn_bbox_pred = tf.gather(tf.reshape(rpn_bbox_pred, [-1, 4]), rpn_keep) # shape (N, 4)
         rpn_bbox_targets = tf.gather(tf.reshape(rpn_bbox_targets, [-1, 4]), rpn_keep)
         rpn_bbox_inside_weights = tf.gather(tf.reshape(rpn_bbox_inside_weights, [-1, 4]), rpn_keep)
         rpn_bbox_outside_weights = tf.gather(tf.reshape(rpn_bbox_outside_weights, [-1, 4]), rpn_keep)
-
+        # rpn_bbox_inside_weights ，只计算正样本
+        # 将正样本的偏移量*权重计算 smooth l1
         rpn_loss_box_n = tf.reduce_sum(rpn_bbox_outside_weights * self.smooth_l1_dist(
             rpn_bbox_inside_weights * (rpn_bbox_pred - rpn_bbox_targets)), reduction_indices=[1])
 
+        # 取box和分类损失的平均值
         rpn_loss_box = tf.reduce_sum(rpn_loss_box_n) / (tf.reduce_sum(tf.cast(fg_keep, tf.float32)) + 1)
         rpn_cross_entropy = tf.reduce_mean(rpn_cross_entropy_n)
 
-
+        # 整个损失
         model_loss = rpn_cross_entropy +  rpn_loss_box
 
+        # 将整个损失再正则化一次
         regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         total_loss = tf.add_n(regularization_losses) + model_loss
 

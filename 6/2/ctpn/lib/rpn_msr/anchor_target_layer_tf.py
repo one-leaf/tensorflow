@@ -99,6 +99,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
     # cell K shifts (K, 1, 4) to get
     # shift anchors (K, A, 4)
     # reshape to (K*A, 4) shifted anchors
+
     # A = 10个anchor
     A = _num_anchors
     # K = feature-map的宽乘高的大小
@@ -240,10 +241,12 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
     # anchors shape (I, 4) gt_boxes shape [I, 5], 最大值
     bbox_targets = _compute_targets(anchors, gt_boxes[argmax_overlaps, :])
 
-
+    # 相当于开关, 在这里面的含义是只计算前景的回归，所以就是除了前景为（1,1,1,1），其余的都是（0，0，0，0）
     bbox_inside_weights = np.zeros((len(inds_inside), 4), dtype=np.float32)
     bbox_inside_weights[labels == 1, :] = np.array(cfg.TRAIN.RPN_BBOX_INSIDE_WEIGHTS)#内部权重，前景就给1，其他是0
 
+    # 这个是权重， ctpn 里面是 RPN_POSITIVE_WEIGHT = -1.0， 
+    # 正样本赋值为：-1.0/num 负样本赋值为 2.0/num  num为(样本中正负样本的数量)
     bbox_outside_weights = np.zeros((len(inds_inside), 4), dtype=np.float32)
     if cfg.TRAIN.RPN_POSITIVE_WEIGHT < 0:#暂时使用uniform 权重，也就是正样本是1，负样本是0
         # uniform weighting of examples (given non-uniform sampling)
@@ -259,7 +262,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
                             (np.sum(labels == 1)) + 1)
         negative_weights = ((1.0 - cfg.TRAIN.RPN_POSITIVE_WEIGHT) /
                             (np.sum(labels == 0)) + 1)
-    bbox_outside_weights[labels == 1, :] = positive_weights#外部权重，前景是1，背景是0
+    bbox_outside_weights[labels == 1, :] = positive_weights 
     bbox_outside_weights[labels == 0, :] = negative_weights
 
     if DEBUG:
@@ -274,7 +277,7 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
         print(stds)
 
     # map up to original set of anchors
-    # 一开始是将超出图像范围的anchor直接丢掉的，现在在加回来
+    # 一开始是将超出图像范围的anchor直接丢掉的，现在在加回来，默认为空
     labels = _unmap(labels, total_anchors, inds_inside, fill=-1)#这些anchor的label是-1，也即dontcare
     bbox_targets = _unmap(bbox_targets, total_anchors, inds_inside, fill=0)#这些anchor的真值是0，也即没有值
     bbox_inside_weights = _unmap(bbox_inside_weights, total_anchors, inds_inside, fill=0)#内部权重以0填充
@@ -290,22 +293,22 @@ def anchor_target_layer(rpn_cls_score, gt_boxes, gt_ishard, dontcare_areas, im_i
         print('rpn: num_positive avg', _fg_sum / _count)
         print('rpn: num_negative avg', _bg_sum / _count)
 
-    # labels
+    # labels (H*W*10)=> (1, H, W, 10)
     labels = labels.reshape((1, height, width, A))#reshap一下label
     rpn_labels = labels
 
-    # bbox_targets
+    # bbox_targets (H*W*10, 4)=> (1, H, W, 40)
     bbox_targets = bbox_targets \
         .reshape((1, height, width, A * 4))#reshape
-
     rpn_bbox_targets = bbox_targets
-    # bbox_inside_weights
+
+    # bbox_inside_weights (H*W*10, 4)=> (1, H, W, 40)
     bbox_inside_weights = bbox_inside_weights \
         .reshape((1, height, width, A * 4))
 
     rpn_bbox_inside_weights = bbox_inside_weights
 
-    # bbox_outside_weights
+    # bbox_outside_weights (H*W*10, 4)=> (1, H, W, 40)
     bbox_outside_weights = bbox_outside_weights \
         .reshape((1, height, width, A * 4))
     rpn_bbox_outside_weights = bbox_outside_weights

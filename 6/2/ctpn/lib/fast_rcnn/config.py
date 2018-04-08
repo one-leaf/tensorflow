@@ -18,6 +18,7 @@ __C.ANCHOR_SCALES = [16]
 __C.NCLASSES = 2
 __C.USE_GPU_NMS = True
 # multiscale training and testing
+# 是否多尺度缩放上都进行训练和测试，目前tf版本，不支持多尺度训练
 __C.IS_MULTISCALE = False
 __C.IS_EXTRAPOLATING = True
 
