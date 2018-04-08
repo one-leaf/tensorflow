@@ -268,6 +268,8 @@ def train():
                 session.run(global_step.assign(restore_iter))
                 print("Restored to %s."%restore_iter)
                 break
+            else:
+                break
             print("restor fail, return")
             return
 
