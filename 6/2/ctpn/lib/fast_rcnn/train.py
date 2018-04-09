@@ -18,7 +18,7 @@ class SolverWrapper(object):
         self.output_dir = output_dir
         self.pretrained_model = pretrained_model
 
-        # 获得当前这一批数据的正则化参数
+        # 获得当前这一批数据的均值和方差
         print('Computing bounding-box regression targets...')
         if cfg.TRAIN.BBOX_REG:
             self.bbox_means, self.bbox_stds = rdl_roidb.add_bbox_regression_targets(roidb)
@@ -29,11 +29,16 @@ class SolverWrapper(object):
         self.writer = tf.summary.FileWriter(logdir=logdir,
                                              graph=tf.get_default_graph(),
                                              flush_secs=5)
-
+    # 保存模型训练参数
     def snapshot(self, sess, iter):
         net = self.net
+
+        # 如果前面对每一box进行了归一化target，这里将回归的fc层参数按均值和方差进行反归一化
+        # 为什么要这样干？
         if cfg.TRAIN.BBOX_REG and 'bbox_pred' in net.layers and cfg.TRAIN.BBOX_NORMALIZE_TARGETS:
             # save original values
+            # 这个回归层里面的 LSTM 后面 FC 层的参数
+            # 重新按训练的数据进行调整下正则
             with tf.variable_scope('bbox_pred', reuse=True):
                 weights = tf.get_variable("weights")
                 biases = tf.get_variable("biases")
@@ -55,9 +60,11 @@ class SolverWrapper(object):
                     '_iter_{:d}'.format(iter+1) + '.ckpt')
         filename = os.path.join(self.output_dir, filename)
 
+        # 保存参数
         self.saver.save(sess, filename)
         print('Wrote snapshot to: {:s}'.format(filename))
 
+        # 再恢复参数
         if cfg.TRAIN.BBOX_REG and 'bbox_pred' in net.layers:
             # restore net to original state
             sess.run(weights.assign(orig_0))
@@ -84,6 +91,10 @@ class SolverWrapper(object):
         data_layer = get_data_layer(self.roidb, self.imdb.num_classes)
 
         # 定义损失函数，这里是rpn的损失函数
+        # total_loss : model_loss 正则化 
+        # model_loss : 分类加回归损失
+        # rpn_cross_entropy : 分类损失
+        # rpn_loss_box : 回归损失
         total_loss, model_loss, rpn_cross_entropy, rpn_loss_box=self.net.build_loss(ohem=cfg.TRAIN.OHEM)
 
         # scalar summary
@@ -97,7 +108,7 @@ class SolverWrapper(object):
         log_image, log_image_data, log_image_name =\
             self.build_image_summary()
 
-        # optimizer
+        # 优化程序，默认采用 Adam
         lr = tf.Variable(cfg.TRAIN.LEARNING_RATE, trainable=False)
         if cfg.TRAIN.SOLVER == 'Adam':
             opt = tf.train.AdamOptimizer(cfg.TRAIN.LEARNING_RATE)
@@ -108,6 +119,7 @@ class SolverWrapper(object):
             momentum = cfg.TRAIN.MOMENTUM
             opt = tf.train.MomentumOptimizer(lr, momentum)
 
+        # 防止梯度爆炸
         global_step = tf.Variable(0, trainable=False)
         with_clip = True
         if with_clip:
@@ -121,7 +133,7 @@ class SolverWrapper(object):
         sess.run(tf.global_variables_initializer())
         restore_iter = 0
 
-        # load vgg16
+        # 加载 vgg16 预训练模型
         if self.pretrained_model is not None and not restore:
             try:
                 print(('Loading pretrained model '
@@ -130,7 +142,7 @@ class SolverWrapper(object):
             except:
                 raise 'Check your pretrained model {:s}'.format(self.pretrained_model)
 
-        # resuming a trainer
+        # 恢复训练
         if restore:
             try:
                 ckpt = tf.train.get_checkpoint_state(self.output_dir)
@@ -143,16 +155,17 @@ class SolverWrapper(object):
             except:
                 raise 'Check your pretrained {:s}'.format(ckpt.model_checkpoint_path)
 
+        # 开始按定义的最大学习次数，进行学习
         last_snapshot_iter = -1
         timer = Timer()
         for iter in range(restore_iter, max_iters):
             timer.tic()
-            # learning rate
+            # 降低学习速率
             if iter != 0 and iter % cfg.TRAIN.STEPSIZE == 0:
                 sess.run(tf.assign(lr, lr.eval() * cfg.TRAIN.GAMMA))
                 print(lr)
 
-            # get one batch
+            # 获得一批数据，也就1张
             blobs = data_layer.forward()
 
             feed_dict={
@@ -164,10 +177,10 @@ class SolverWrapper(object):
                 self.net.dontcare_areas: blobs['dontcare_areas']
             }
             res_fetches=[]
-            fetch_list = [total_loss,model_loss, rpn_cross_entropy, rpn_loss_box,
+            fetch_list = [total_loss, model_loss, rpn_cross_entropy, rpn_loss_box,
                           summary_op,
                           train_op] + res_fetches
-
+            # 训练
             total_loss_val,model_loss_val, rpn_loss_cls_val, rpn_loss_box_val, \
                 summary_str, _ = sess.run(fetches=fetch_list, feed_dict=feed_dict)
 
@@ -181,6 +194,7 @@ class SolverWrapper(object):
                         (iter, max_iters, total_loss_val,model_loss_val,rpn_loss_cls_val,rpn_loss_box_val,lr.eval()))
                 print('speed: {:.3f}s / iter'.format(_diff_time))
 
+            # 保存训练数据
             if (iter+1) % cfg.TRAIN.SNAPSHOT_ITERS == 0:
                 last_snapshot_iter = iter
                 self.snapshot(sess, iter)
