@@ -427,4 +427,4 @@ class Network(object):
         regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
         total_loss = tf.add_n(regularization_losses) + model_loss
 
-        return total_loss,model_loss, rpn_cross_entropy, rpn_loss_box
+        return total_loss, model_loss, rpn_cross_entropy, rpn_loss_box
