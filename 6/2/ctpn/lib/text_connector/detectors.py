@@ -25,7 +25,7 @@ class TextDetector:
         sorted_indices=np.argsort(scores.ravel())[::-1]
         text_proposals, scores=text_proposals[sorted_indices], scores[sorted_indices]
 
-        # 对proposal做nms
+        # 对proposal做nms ，TEXT_PROPOSALS_NMS_THRESH : 0.2
         keep_inds=nms(np.hstack((text_proposals, scores)), TextLineCfg.TEXT_PROPOSALS_NMS_THRESH)
         text_proposals, scores=text_proposals[keep_inds], scores[keep_inds]
 

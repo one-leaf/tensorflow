@@ -14,6 +14,11 @@ cdef inline np.float32_t max(np.float32_t a, np.float32_t b):
 cdef inline np.float32_t min(np.float32_t a, np.float32_t b):
     return a if a <= b else b
 
+# 非极大抑制算法
+# 目的是消除多余的框，找到最佳的物体检测位置
+# 其实现的思想主要是将各个框的置信度进行排序，然后选择其中置信度最高的框A，将其作为标准选择其他框，
+# 同时设置一个阈值，当其他框B与A的重合程度超过阈值就将B舍弃掉，然后在剩余的框中选择置信度最大的框，重复上述操作。
+# dets[n,5],前4个是坐标，最后一个是概率，已经按概率由高向低排序； thresh 阈值
 def nms(np.ndarray[np.float32_t, ndim=2] dets, np.float thresh):
     cdef np.ndarray[np.float32_t, ndim=1] x1 = dets[:, 0]
     cdef np.ndarray[np.float32_t, ndim=1] y1 = dets[:, 1]
