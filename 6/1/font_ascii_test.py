@@ -79,8 +79,8 @@ def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
     for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
-            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
-            # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
+            # layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
+            layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
             # 注意 lstm 必需用 tanh 不能用 relu relu6 或 leaky_relu ,不然在后期会出现 lost nan 问题
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.tanh)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.tanh)
@@ -103,6 +103,12 @@ def neural_networks():
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
+
+    # 防止梯度爆炸
+    tvars = tf.trainable_variables()
+    grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 10.0)
+    res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
+
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
