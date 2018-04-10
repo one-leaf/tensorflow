@@ -8,6 +8,9 @@
 
 
 参考：  
+常用dict：
+https://github.com/tesseract-ocr/langdata/tree/master/chi_sim
+
 https://github.com/JinpengLI/deep_ocr
 https://github.com/pannous/tensorflow-ocr
 http://www.jianshu.com/p/45828b18f133

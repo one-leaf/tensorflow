@@ -14,6 +14,7 @@ class VGGnet_test(Network):
         self.setup()
 
     def setup(self):
+        # cfg.ANCHOR_SCALES : [16,]
         anchor_scales = cfg.ANCHOR_SCALES
         _feat_stride = [16, ]
 
@@ -38,6 +39,7 @@ class VGGnet_test(Network):
 
         (self.feed('conv5_3').conv(3, 3, 512, 1, 1, name='rpn_conv/3x3'))
 
+        # len(anchor_scales) = 1
         (self.feed('rpn_conv/3x3').Bilstm(512, 128, 512, name='lstm_o'))
         (self.feed('lstm_o').lstm_fc(512, len(anchor_scales) * 10 * 4, name='rpn_bbox_pred'))
         (self.feed('lstm_o').lstm_fc(512, len(anchor_scales) * 10 * 2, name='rpn_cls_score'))
@@ -46,6 +48,8 @@ class VGGnet_test(Network):
         (self.feed('rpn_cls_score')
          .spatial_reshape_layer(2, name='rpn_cls_score_reshape')
          .spatial_softmax(name='rpn_cls_prob'))
+
+        # 以上和 tain network 一样
 
         # shape is (1, H, WxA, 2) -> (1, H, W, Ax2)
         (self.feed('rpn_cls_prob')

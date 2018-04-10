@@ -79,6 +79,12 @@ class VGGnet_train(Network):
         # [1, H, W, 512] ==> FC(20) ==> [1, H, W, 10 * 2] 每个坐标取10个框        
         (self.feed('lstm_o').lstm_fc(512,len(anchor_scales) * 10 * 2,name='rpn_cls_score'))
 
+        # shape is (1, H, W, 10*2) -> (1, H, W*10, 2)
+        # 给之前得到的 score 进行 softmax ，得到 0-1 (bg / fg) 的得分
+        (self.feed('rpn_cls_score')
+             .spatial_reshape_layer(2, name = 'rpn_cls_score_reshape')
+             .spatial_softmax(name='rpn_cls_prob'))
+             
         # generating training labels on the fly
         # 给每个 anchor 计算分类标签，并获得实际偏移量坐标
         # output: rpn_labels (1 x H x W x A, 2)                 分类
@@ -88,8 +94,4 @@ class VGGnet_train(Network):
         (self.feed('rpn_cls_score', 'gt_boxes', 'gt_ishard', 'dontcare_areas', 'im_info')
              .anchor_target_layer(_feat_stride, anchor_scales, name = 'rpn-data' ))
 
-        # shape is (1, H, W, 10*2) -> (1, H, W*10, 2)
-        # 给之前得到的 score 进行 softmax ，得到 0-1 (bg / fg) 的得分
-        (self.feed('rpn_cls_score')
-             .spatial_reshape_layer(2, name = 'rpn_cls_score_reshape')
-             .spatial_softmax(name='rpn_cls_prob'))
+

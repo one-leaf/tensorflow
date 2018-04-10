@@ -62,7 +62,7 @@ def ctpn(sess, net, image_name):
            '{:d} object proposals').format(timer.total_time, boxes.shape[0]))
 
 
-
+# 演示程序
 if __name__ == '__main__':
     if os.path.exists("data/results/"):
         shutil.rmtree("data/results/")
@@ -87,6 +87,7 @@ if __name__ == '__main__':
     except:
         raise 'Check your pretrained {:s}'.format(ckpt.model_checkpoint_path)
 
+    # 2张空白图片， 图片 300， 300，3 ，数值为128
     im = 128 * np.ones((300, 300, 3), dtype=np.uint8)
     for i in range(2):
         _, _ = test_ctpn(sess, net, im)

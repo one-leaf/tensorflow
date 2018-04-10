@@ -34,6 +34,7 @@ def bbox_transform(ex_rois, gt_rois):
 
     return targets
 
+# 由box和偏移量，求另外的一个box
 def bbox_transform_inv(boxes, deltas):
 
     boxes = boxes.astype(deltas.dtype, copy=False)

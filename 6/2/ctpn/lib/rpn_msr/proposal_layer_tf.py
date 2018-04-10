@@ -44,10 +44,12 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
 
     """
     cfg_key=cfg_key.decode('ascii')
-    _anchors = generate_anchors(scales=np.array(anchor_scales))#生成基本的9个anchor
-    _num_anchors = _anchors.shape[0]#9个anchor
+    # 生成 10个框，参数 scales 没有意义，每个框的宽度是16，高度分别为 [11, 16, 23, 33, 48, 68, 97, 139, 198, 283]
+    # shape : [10, 4] 4个值分别为 xmin, xmax, ymin, ymax
+    _anchors = generate_anchors(scales=np.array(anchor_scales))
+    _num_anchors = _anchors.shape[0] # 10个anchor
 
-    im_info = im_info[0]#原始图像的高宽、缩放尺度
+    im_info = im_info[0] # 原始图像的高、宽、缩放尺度
 
     assert rpn_cls_prob_reshape.shape[0] == 1, \
         'Only single item batches are supported'
@@ -63,12 +65,13 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     # the first set of _num_anchors channels are bg probs
     # the second set are the fg probs, which we want
     # (1, H, W, A)
+    # 提取到object的分数，non-object的我们不关心
+    # 并reshape到 1 * H * W * 10
     scores = np.reshape(np.reshape(rpn_cls_prob_reshape, [1, height, width, _num_anchors, 2])[:,:,:,:,1],
                         [1, height, width, _num_anchors])
-    #提取到object的分数，non-object的我们不关心
-    #并reshape到1*H*W*9
 
-    bbox_deltas = rpn_bbox_pred#模型输出的pred是相对值，需要进一步处理成真实图像中的坐标
+    # 模型输出的pred是相对值，需要进一步处理成真实图像中的坐标
+    bbox_deltas = rpn_bbox_pred
     #im_info = bottom[2].data[0, :]
 
     if DEBUG:
@@ -80,7 +83,8 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
         print('score map size: {}'.format(scores.shape))
 
     # Enumerate all shifts
-    # 同anchor-target-layer-tf这个文件一样，生成anchor的shift，进一步得到整张图像上的所有anchor
+    # 同 anchor-target-layer-tf 这个文件一样，生成anchor的shift，进一步得到整张图像上的所有anchor
+    # 按 16 的间距得到原始图片对应的所有的框的中心坐标，其中4个参数，重复了两遍中心坐标， shifts shape:(HxW, 4)
     shift_x = np.arange(0, width) * _feat_stride
     shift_y = np.arange(0, height) * _feat_stride
     shift_x, shift_y = np.meshgrid(shift_x, shift_y)
@@ -93,6 +97,8 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     # cell K shifts (K, 1, 4) to get
     # shift anchors (K, A, 4)
     # reshape to (K*A, 4) shifted anchors
+    # 将所有的框加上前面的 _anchors 大小，就获得了所有框的的具体坐标
+    # 4个值分别为 xmin, xmax, ymin, ymax
     A = _num_anchors
     K = shifts.shape[0]
     anchors = _anchors.reshape((1, A, 4)) + \
@@ -111,7 +117,8 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     scores = scores.reshape((-1, 1))
 
     # Convert anchors into proposals via bbox transformations
-    proposals = bbox_transform_inv(anchors, bbox_deltas)#做逆变换，得到box在图像上的真实坐标
+    # 做逆变换，得到box在图像上的真实坐标
+    proposals = bbox_transform_inv(anchors, bbox_deltas)
 
     # 2. clip predicted boxes to image
     proposals = clip_boxes(proposals, im_info[:2])#将所有的proposal修建一下，超出图像范围的将会被修剪掉
