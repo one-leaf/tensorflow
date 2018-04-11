@@ -45,7 +45,7 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     """
     cfg_key=cfg_key.decode('ascii')
     # 生成 10个框，参数 scales 没有意义，每个框的宽度是16，高度分别为 [11, 16, 23, 33, 48, 68, 97, 139, 198, 283]
-    # shape : [10, 4] 4个值分别为 xmin, xmax, ymin, ymax
+    # shape : [10, 4] 4个值分别为 xmin, ymin, xmax, ymax
     _anchors = generate_anchors(scales=np.array(anchor_scales))
     _num_anchors = _anchors.shape[0] # 10个anchor
 
