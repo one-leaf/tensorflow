@@ -59,6 +59,7 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     nms_thresh    = cfg[cfg_key].RPN_NMS_THRESH#nms用参数，阈值是0.7
     min_size      = cfg[cfg_key].RPN_MIN_SIZE#候选box的最小尺寸，目前是16，高宽均要大于16
     #TODO 后期需要修改这个最小尺寸，改为8？
+    # 这里有问题，如果图片不大，这个最低16个像素会丢掉很多
 
     height, width = rpn_cls_prob_reshape.shape[1:3]#feature-map的高宽
 
@@ -79,6 +80,7 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
         print('scale: {}'.format(im_info[2]))
 
     # 1. Generate proposals from bbox deltas and shifted anchors
+    # 得到bbox的偏移量
     if DEBUG:
         print('score map size: {}'.format(scores.shape))
 
@@ -121,13 +123,19 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     proposals = bbox_transform_inv(anchors, bbox_deltas)
 
     # 2. clip predicted boxes to image
-    proposals = clip_boxes(proposals, im_info[:2])#将所有的proposal修建一下，超出图像范围的将会被修剪掉
+    # 将所有的proposal修建一下，超出图像范围的将会被修剪掉
+    proposals = clip_boxes(proposals, im_info[:2])
 
     # 3. remove predicted boxes with either height or width < threshold
     # (NOTE: convert min_size to input image scale stored in im_info[2])
-    keep = _filter_boxes(proposals, min_size * im_info[2])#移除那些proposal小于一定尺寸的proposal
-    proposals = proposals[keep, :]#保留剩下的proposal
+    # 移除那些proposal小于一定尺寸的proposal
+    # min_size 为原始图片上最大16个像素，对于屏幕截图，过大，对于自然场景，手机拍照差不多了
+    keep = _filter_boxes(proposals, min_size * im_info[2])
+    # 保留下来的实际区域
+    proposals = proposals[keep, :]
+    # 保留下来的分类
     scores = scores[keep]
+    # 保留下来的偏移量
     bbox_deltas=bbox_deltas[keep,:]
 
 
@@ -138,8 +146,10 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
 
     # 4. sort all (proposal, score) pairs by score from highest to lowest
     # 5. take top pre_nms_topN (e.g. 6000)
-    order = scores.ravel().argsort()[::-1]#score按得分的高低进行排序
-    if pre_nms_topN > 0:                #保留12000个proposal进去做nms
+    # score按得分的高低进行排序
+    # 保留12000个proposal进去做nms
+    order = scores.ravel().argsort()[::-1]
+    if pre_nms_topN > 0:                
         order = order[:pre_nms_topN]
     proposals = proposals[order, :]
     scores = scores[order]
@@ -149,7 +159,8 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     # 6. apply nms (e.g. threshold = 0.7)
     # 7. take after_nms_topN (e.g. 300)
     # 8. return the top proposals (-> RoIs top)
-    keep = nms(np.hstack((proposals, scores)), nms_thresh)#进行nms操作，保留2000个proposal
+    # 进行nms操作，保留2000个proposal
+    keep = nms(np.hstack((proposals, scores)), nms_thresh)
     if post_nms_topN > 0:
         keep = keep[:post_nms_topN]
     proposals = proposals[keep, :]
@@ -160,9 +171,10 @@ def proposal_layer(rpn_cls_prob_reshape, rpn_bbox_pred, im_info, cfg_key, _feat_
     # Output rois blob
     # Our RPN implementation only supports a single input image, so all
     # batch inds are 0
+    # 合并坐标和分类,注意，blob将分类放在第一个
     blob = np.hstack((scores.astype(np.float32, copy=False), proposals.astype(np.float32, copy=False)))
 
-    return blob,bbox_deltas
+    return blob, bbox_deltas
 
 
 def _filter_boxes(boxes, min_size):

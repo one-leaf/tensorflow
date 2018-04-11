@@ -215,10 +215,12 @@ class Network(object):
             # input[0] shape: (1, H, W, Ax2)
             # rpn_rois <- (1 x H x W x A, 5) [0, x1, y1, x2, y2]
         with tf.variable_scope(name) as scope:
-            blob,bbox_delta = tf.py_func(proposal_layer_py,[input[0],input[1],input[2], cfg_key, _feat_stride, anchor_scales],\
+            # 返回坐标和偏移量，返回的坐标是换算后的坐标，实际上返回偏移量没有啥用处
+            blob, bbox_delta = tf.py_func(proposal_layer_py,[input[0],input[1],input[2], cfg_key, _feat_stride, anchor_scales],\
                                      [tf.float32,tf.float32])
-
-            rpn_rois = tf.convert_to_tensor(tf.reshape(blob,[-1, 5]), name = 'rpn_rois') # shape is (1 x H x W x A, 2)
+            # rois 分类和坐标和
+            rpn_rois = tf.convert_to_tensor(tf.reshape(blob,[-1, 5]), name = 'rpn_rois') # shape is (1 x H x W x A, 5)
+            # 偏移量
             rpn_targets = tf.convert_to_tensor(bbox_delta, name = 'rpn_targets') # shape is (1 x H x W x A, 4)
             self.layers['rpn_rois'] = rpn_rois
             self.layers['rpn_targets'] = rpn_targets

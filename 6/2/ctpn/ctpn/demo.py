@@ -50,12 +50,18 @@ def ctpn(sess, net, image_name):
     timer = Timer()
     timer.tic()
 
+    # 读取图片
     img = cv2.imread(image_name)
+    # 缩放图片和缩放比
     img, scale = resize_im(img, scale=TextLineCfg.SCALE, max_scale=TextLineCfg.MAX_SCALE)
+    # 框的概率和框的坐标，此坐标是缩放前的坐标
     scores, boxes = test_ctpn(sess, net, img)
 
+    # 框的合并
     textdetector = TextDetector()
     boxes = textdetector.detect(boxes, scores[:, np.newaxis], img.shape[:2])
+
+    # 绘制box
     draw_boxes(img, image_name, boxes, scale)
     timer.toc()
     print(('Detection took {:.3f}s for '
@@ -88,10 +94,12 @@ if __name__ == '__main__':
         raise 'Check your pretrained {:s}'.format(ckpt.model_checkpoint_path)
 
     # 2张空白图片， 图片 300， 300，3 ，数值为128
+    # 这个纯粹是测试下模型，返回的都是应该是空
     im = 128 * np.ones((300, 300, 3), dtype=np.uint8)
     for i in range(2):
         _, _ = test_ctpn(sess, net, im)
 
+    # 按照demo目录下的文件，逐一识别加框
     im_names = glob.glob(os.path.join(cfg.DATA_DIR, 'demo', '*.png')) + \
                glob.glob(os.path.join(cfg.DATA_DIR, 'demo', '*.jpg'))
 

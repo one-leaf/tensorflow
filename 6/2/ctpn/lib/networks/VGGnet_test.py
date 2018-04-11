@@ -55,5 +55,9 @@ class VGGnet_test(Network):
         (self.feed('rpn_cls_prob')
          .spatial_reshape_layer(len(anchor_scales) * 10 * 2, name='rpn_cls_prob_reshape'))
 
+        # 定义了返回的坐标和分类，以及偏移量
+        # rois = rpn_rois, rpn_targets 
+        # rpn_rois = [1*H*W*10, 5] ==》 [cls1_value,xmin,ymin,xmax,ymax]
+        # rpn_targets = [1*H*W*10, 4]
         (self.feed('rpn_cls_prob_reshape', 'rpn_bbox_pred', 'im_info')
          .proposal_layer(_feat_stride, anchor_scales, 'TEST', name='rois'))

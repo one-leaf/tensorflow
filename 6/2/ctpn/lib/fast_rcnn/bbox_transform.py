@@ -93,6 +93,7 @@ def bbox_transform_inv(boxes, deltas):
 
     return pred_boxes
 
+# 修正框的边界不能超过图片的边界
 def clip_boxes(boxes, im_shape):
     """
     Clip boxes to image boundaries.

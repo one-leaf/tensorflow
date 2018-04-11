@@ -58,11 +58,17 @@ def test_ctpn(sess, net, im, boxes=None):
     if cfg.TEST.HAS_RPN:
         feed_dict = {net.data: blobs['data'], net.im_info: blobs['im_info'], net.keep_prob: 1.0}
 
+    # 获得坐标和分类 [[H*W*10,5]]
     rois = sess.run([net.get_output('rois')[0]],feed_dict=feed_dict)
     rois=rois[0]
 
+    # 文字分类的概率
     scores = rois[:, 0]
+
+    # 原始未缩放前的坐标
     if cfg.TEST.HAS_RPN:
         assert len(im_scales) == 1, "Only single-image batch implemented"
         boxes = rois[:, 1:5] / im_scales[0]
-    return scores,boxes
+
+    # 返回文本框的概率 和 框的原始图片坐标
+    return scores, boxes
