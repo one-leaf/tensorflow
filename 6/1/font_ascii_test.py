@@ -116,7 +116,7 @@ def neural_networks():
     # 3
     gvs = res_optim.compute_gradients(res_loss)
     capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
-    res_optim = res_optim.apply_gradients(capped_gvs)
+    res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
 
     # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
 
