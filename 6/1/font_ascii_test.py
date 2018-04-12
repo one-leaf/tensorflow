@@ -34,7 +34,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-4
+LEARNING_RATE_INITIAL = 1e-6
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 750
@@ -107,9 +107,9 @@ def neural_networks():
     # 防止梯度爆炸
     tvars = tf.trainable_variables()
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL)
-    # 1
-    grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 5.0)
-    res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
+    # # 1
+    # grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 5.0)
+    # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
 
     # 2
     # grads, tvars = zip(*res_optim.compute_gradients(res_loss))
@@ -118,10 +118,10 @@ def neural_networks():
     #     for gradient in grads]
     # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
 
-    # 3 这个完全不行，反而引发梯度爆炸
-    # gvs = res_optim.compute_gradients(res_loss)
-    # capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
-    # res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
+    # 3 
+    gvs = res_optim.compute_gradients(res_loss)
+    capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
+    res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
 
 
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
