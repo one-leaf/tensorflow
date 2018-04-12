@@ -24,8 +24,10 @@ def draw_boxes(img,image_name,boxes,scale):
     base_name = image_name.split('/')[-1]
     with open('data/results/' + 'res_{}.txt'.format(base_name.split('.')[0]), 'w') as f:
         for box in boxes:
+            # 计算范数，这里只有一个值，效果和取绝对值一样，这里有点莫名其妙 ？？？
             if np.linalg.norm(box[0] - box[1]) < 5 or np.linalg.norm(box[3] - box[0]) < 5:
                 continue
+            # 按概率不同用不同的颜色画线，>0.9 绿色， >0.8 红色
             if box[8] >= 0.9:
                 color = (0, 255, 0)
             elif box[8] >= 0.8:
@@ -42,7 +44,8 @@ def draw_boxes(img,image_name,boxes,scale):
 
             line = ','.join([str(min_x),str(min_y),str(max_x),str(max_y)])+'\r\n'
             f.write(line)
-
+    
+    # 缩放一下
     img=cv2.resize(img, None, None, fx=1.0/scale, fy=1.0/scale, interpolation=cv2.INTER_LINEAR)
     cv2.imwrite(os.path.join("data/results", base_name), img)
 
