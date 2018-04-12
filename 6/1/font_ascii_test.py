@@ -34,7 +34,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-10
+LEARNING_RATE_INITIAL = 1e-7
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 750
@@ -322,9 +322,9 @@ def train():
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
-                if np.isnan(errR) or np.isinf(errR) :
-                    print("Error: cost is nan or inf")
-                    return
+                # if np.isnan(errR) or np.isinf(errR) :
+                #     print("Error: cost is nan or inf")
+                #     return
 
                 for info in train_info:
                     key = ",".join(info)
