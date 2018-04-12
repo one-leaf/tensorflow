@@ -118,7 +118,7 @@ def neural_networks():
     #     for gradient in grads]
     # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
 
-    # 3 这个完全不行
+    # 3 这个完全不行，反而引发梯度爆炸
     # gvs = res_optim.compute_gradients(res_loss)
     # capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
     # res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
