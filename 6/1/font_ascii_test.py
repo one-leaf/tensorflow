@@ -298,7 +298,7 @@ def train():
         AllLosts={}
         accs = deque(maxlen=100)
         while True:
-            errA = errD1 = errD2 = 1
+            errR = 1
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
                 if len(AllLosts)>10 and random.random()>0.7:
@@ -322,6 +322,7 @@ def train():
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
+
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
                 #     return
@@ -368,7 +369,10 @@ def train():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     for f in sorted_fonts[:20]:
                         print(f)
-
+                        
+            # 如果当前 loss 为 nan，就先不要保存这个模型
+            if np.isnan(errR) or np.isinf(errR):
+                continue
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
 
