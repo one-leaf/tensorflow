@@ -82,6 +82,7 @@ def LSTM(inputs, fc_size, lstm_size):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
             # 注意 lstm 必需用 tanh 不能用 relu relu6 或 leaky_relu ,不然在后期会出现 lost nan 问题
+            # 用 tanh 根本学习不出来，只能放弃
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
