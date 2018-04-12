@@ -162,7 +162,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     codes = []
     max_width_image = 0
     info = []
-    font_length = random.randint(5, 350)
+    font_length = random.randint(5, 300)
     for i in range(batch_size):
         font_name = _font_name
         font_size = _font_size
