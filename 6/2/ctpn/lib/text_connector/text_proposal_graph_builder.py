@@ -53,6 +53,8 @@ class TextProposalGraphBuilder:
         return overlaps_v(index1, index2)>=TextLineCfg.MIN_V_OVERLAPS and \
                size_similarity(index1, index2)>=TextLineCfg.MIN_SIZE_SIM
 
+    # 调用入口
+    
     def build_graph(self, text_proposals, scores, im_size):
         self.text_proposals=text_proposals
         self.scores=scores

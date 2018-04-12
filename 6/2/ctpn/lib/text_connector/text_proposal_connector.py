@@ -2,6 +2,7 @@ import numpy as np
 from .other import clip_boxes
 from .text_proposal_graph_builder import TextProposalGraphBuilder
 
+# 文本框筛选
 class TextProposalConnector:
     def __init__(self):
         self.graph_builder=TextProposalGraphBuilder()
@@ -18,6 +19,10 @@ class TextProposalConnector:
         p=np.poly1d(np.polyfit(X, Y, 1))
         return p(x1), p(x2)
 
+    # 获得所有连接后的文本框
+    # text_proposals 所有有效的宽度为16的框
+    # scores 有效概率
+    # im_size 图片大小
     def get_text_lines(self, text_proposals, scores, im_size):
         # tp=text proposal
         tp_groups=self.group_text_proposals(text_proposals, scores, im_size)

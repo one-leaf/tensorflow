@@ -21,6 +21,7 @@ class TextProposalConnector:
         p=np.poly1d(np.polyfit(X, Y, 1))
         return p(x1), p(x2)
 
+    # 获得所有的合并后的文本框
     def get_text_lines(self, text_proposals, scores, im_size):
         """
         text_proposals:boxes

@@ -6,7 +6,8 @@ from .text_proposal_connector import TextProposalConnector
 from .text_proposal_connector_oriented import TextProposalConnector as TextProposalConnectorOriented
 from .text_connect_cfg import Config as TextLineCfg
 
-
+# 文本框拼接
+# 将一组不定高度，宽度为16的文本框拼接成连续的大框
 class TextDetector:
     def __init__(self):
         self.mode= cfg.TEST.DETECT_MODE
@@ -15,9 +16,12 @@ class TextDetector:
         elif self.mode == "O":
             self.text_proposal_connector=TextProposalConnectorOriented()
 
-        
+
+    # text_proposals 锚点框的坐标
+    # scores 锚点框的概率
+    # size 图片缩放后的size    
     def detect(self, text_proposals,scores,size):
-        # 删除得分较低的proposal
+        # 删除得分较低的proposal 将低于概率0.7的框都不要了
         keep_inds=np.where(scores>TextLineCfg.TEXT_PROPOSALS_MIN_SCORE)[0]
         text_proposals, scores=text_proposals[keep_inds], scores[keep_inds]
 
@@ -31,6 +35,7 @@ class TextDetector:
 
         # 获取检测结果
         text_recs=self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
+        # 最后检查框的高宽比，以及概率和最小宽度
         keep_inds=self.filter_boxes(text_recs)
         return text_recs[keep_inds]
 
