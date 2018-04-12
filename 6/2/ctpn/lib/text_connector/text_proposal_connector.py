@@ -3,10 +3,14 @@ from .other import clip_boxes
 from .text_proposal_graph_builder import TextProposalGraphBuilder
 
 # 文本框筛选
+# 不考虑文字变形
+# 得到一个平行四边形框
+
 class TextProposalConnector:
     def __init__(self):
         self.graph_builder=TextProposalGraphBuilder()
 
+    # 获得框的分组
     def group_text_proposals(self, text_proposals, scores, im_size):
         graph=self.graph_builder.build_graph(text_proposals, scores, im_size)
         return graph.sub_graphs_connected()
@@ -20,8 +24,8 @@ class TextProposalConnector:
         return p(x1), p(x2)
 
     # 获得所有连接后的文本框
-    # text_proposals 所有有效的宽度为16的框
-    # scores 有效概率
+    # text_proposals 所有有效的宽度为16的框 [k, 4]
+    # scores 有效概率  [k, 1]
     # im_size 图片大小
     def get_text_lines(self, text_proposals, scores, im_size):
         # tp=text proposal

@@ -2,6 +2,8 @@
 import numpy as np
 from .text_proposal_graph_builder import TextProposalGraphBuilder
 
+# 考虑文字变形，分别计算中心点斜率和边角斜率
+# 因此得到一个不规则四边形
 class TextProposalConnector:
     """
         Connect text proposals into text lines
@@ -9,6 +11,7 @@ class TextProposalConnector:
     def __init__(self):
         self.graph_builder=TextProposalGraphBuilder()
 
+    # 获得框的分组
     def group_text_proposals(self, text_proposals, scores, im_size):
         graph=self.graph_builder.build_graph(text_proposals, scores, im_size)
         return graph.sub_graphs_connected()
@@ -28,28 +31,39 @@ class TextProposalConnector:
         
         """
         # tp=text proposal
-        tp_groups=self.group_text_proposals(text_proposals, scores, im_size)#首先还是建图，获取到文本行由哪几个小框构成
+        # 首先还是建图，获取到文本行由哪几个小框构成
+        tp_groups=self.group_text_proposals(text_proposals, scores, im_size)
         
+        # 创建 [l, 8] ，含义为 [xmin, ymin, xmax, ymax, avg_score, k, b, avg_height+2.5]
+        # k ,b 是中心拟合框的斜率和偏置，可以用于后期的位图旋转矫正
         text_lines=np.zeros((len(tp_groups), 8), np.float32)
 
         for index, tp_indices in enumerate(tp_groups):
-            text_line_boxes=text_proposals[list(tp_indices)]#每个文本行的全部小框
-            X = (text_line_boxes[:,0] + text_line_boxes[:,2]) / 2# 求每一个小框的中心x，y坐标
+            # 每个文本行的全部小框
+            text_line_boxes=text_proposals[list(tp_indices)]
+
+            # 求每一个小框的中心x，y坐标
+            X = (text_line_boxes[:,0] + text_line_boxes[:,2]) / 2
             Y = (text_line_boxes[:,1] + text_line_boxes[:,3]) / 2
             
-            z1 = np.polyfit(X,Y,1)#多项式拟合，根据之前求的中心店拟合一条直线（最小二乘）
+            # 多项式拟合，根据之前求的中心店拟合一条直线（最小二乘）
+            z1 = np.polyfit(X,Y,1)
 
-            x0=np.min(text_line_boxes[:, 0])#文本行x坐标最小值
-            x1=np.max(text_line_boxes[:, 2])#文本行x坐标最大值
+            # 文本行x坐标最小值
+            x0=np.min(text_line_boxes[:, 0])
+            # 文本行x坐标最大值
+            x1=np.max(text_line_boxes[:, 2])
 
-            offset=(text_line_boxes[0, 2]-text_line_boxes[0, 0])*0.5#小框宽度的一半
+            # 小框宽度的一半
+            offset=(text_line_boxes[0, 2]-text_line_boxes[0, 0])*0.5
 
             # 以全部小框的左上角这个点去拟合一条直线，然后计算一下文本行x坐标的极左极右对应的y坐标
             lt_y, rt_y=self.fit_y(text_line_boxes[:, 0], text_line_boxes[:, 1], x0+offset, x1-offset)
             # 以全部小框的左下角这个点去拟合一条直线，然后计算一下文本行x坐标的极左极右对应的y坐标
             lb_y, rb_y=self.fit_y(text_line_boxes[:, 0], text_line_boxes[:, 3], x0+offset, x1-offset)
 
-            score=scores[list(tp_indices)].sum()/float(len(tp_indices))#求全部小框得分的均值作为文本行的均值
+            # 求全部小框得分的均值作为文本行的均值
+            score=scores[list(tp_indices)].sum()/float(len(tp_indices))
 
             text_lines[index, 0]=x0
             text_lines[index, 1]=min(lt_y, rt_y)#文本行上端 线段 的y坐标的小值
@@ -61,6 +75,7 @@ class TextProposalConnector:
             height = np.mean( (text_line_boxes[:,3]-text_line_boxes[:,1]) )#小框平均高度
             text_lines[index, 7]= height + 2.5
 
+        # 进一步微调，得到 【l，9】,含义为 4个点的坐标，加一个概率得分
         text_recs = np.zeros((len(text_lines), 9), np.float)
         index = 0
         for line in text_lines:

@@ -19,7 +19,7 @@ def resize_im(im, scale, max_scale=None):
         f=float(max_scale)/max(im.shape[0], im.shape[1])
     return cv2.resize(im, None,None, fx=f, fy=f,interpolation=cv2.INTER_LINEAR), f
 
-
+# 绘制文本检测框
 def draw_boxes(img,image_name,boxes,scale):
     base_name = image_name.split('/')[-1]
     with open('data/results/' + 'res_{}.txt'.format(base_name.split('.')[0]), 'w') as f:
@@ -57,7 +57,7 @@ def ctpn(sess, net, image_name):
     # 框的概率和框的坐标，此坐标是缩放前的坐标
     scores, boxes = test_ctpn(sess, net, img)
 
-    # 框的合并
+    # 框的合并， 返回[L,9], 四个点的左边和平均概率
     textdetector = TextDetector()
     boxes = textdetector.detect(boxes, scores[:, np.newaxis], img.shape[:2])
 

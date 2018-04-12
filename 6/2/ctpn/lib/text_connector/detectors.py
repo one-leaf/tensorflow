@@ -8,6 +8,7 @@ from .text_connect_cfg import Config as TextLineCfg
 
 # 文本框拼接
 # 将一组不定高度，宽度为16的文本框拼接成连续的大框
+# 默认不考虑文字桶状变形，cfg.TEST.DETECT_MODE 为 H
 class TextDetector:
     def __init__(self):
         self.mode= cfg.TEST.DETECT_MODE
@@ -36,6 +37,9 @@ class TextDetector:
         # 获取检测结果
         text_recs=self.text_proposal_connector.get_text_lines(text_proposals, scores, size)
         # 最后检查框的高宽比，以及概率和最小宽度
+        # 高宽比 需要大于 0.5
+        # 概率   需要大于 0.9
+        # 宽度   需要大于 16
         keep_inds=self.filter_boxes(text_recs)
         return text_recs[keep_inds]
 
