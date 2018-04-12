@@ -106,7 +106,7 @@ def neural_networks():
     # 防止梯度爆炸
     tvars = tf.trainable_variables()
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL)
-    grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 10.0)
+    grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 5.0)
     res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
 
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
