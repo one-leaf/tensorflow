@@ -80,7 +80,7 @@ def RES(inputs, seq_len, reuse = False):
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
-    for i in range(6):
+    for i in range(3):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
