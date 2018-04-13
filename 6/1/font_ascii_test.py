@@ -50,7 +50,7 @@ MODEL_SAVE_NAME = "model_ascii"
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
-        layer = utils_nn.resNet50v2(inputs, True)    # N H/16 W/16 2048
+        layer = utils_nn.resNet101V2(inputs, True)    # N H/16 W/16 2048
         print("resNet shape:",layer.shape)
 
         shape = tf.shape(layer)
