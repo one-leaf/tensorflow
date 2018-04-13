@@ -123,8 +123,8 @@ def neural_networks():
     # 加入日志
     tf.summary.scalar('res_loss', res_loss)
     tf.summary.scalar('res_acc', res_acc)
-    tf.summary.image('net_res', net_res, max_outputs=1)
-    tf.summary.histogram('lstm', res_layer)
+    tf.summary.image('net_res', res_layer, max_outputs=1)
+    tf.summary.histogram('lstm', net_res)
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, summary, \
