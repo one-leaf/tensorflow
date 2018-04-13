@@ -60,15 +60,16 @@ def RES(inputs, seq_len, reuse = False):
         # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         # N H W 1024
         
         # NHWC => NWHC
         layer = tf.transpose(layer, (0, 2, 1, 3))
 
-        layer = tf.reshape(layer, [batch_size, width*height, 512]) # N*H, W, 1024
+        layer = tf.reshape(layer, [batch_size, width*height, 256]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
-        layer.set_shape([None, None, 512])
-        layer = LSTM(layer, 256, 128)    # N, W*H, 256+128*2
+        layer.set_shape([None, None, 256])
+        layer = LSTM(layer, 128, 64)    # N, W*H, 128+64*2
         print("lstm shape:",layer.shape)
         # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,256+128*2
         # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
