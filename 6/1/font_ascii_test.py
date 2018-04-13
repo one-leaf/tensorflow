@@ -319,7 +319,7 @@ def train():
                 start = time.time()                
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
-                errR, acc, _ , steps, summary= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
+                errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 accs.append(acc)
@@ -329,7 +329,7 @@ def train():
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
                 
                 # 保存日志
-                train_writer.add_summary(summary, steps)
+                train_writer.add_summary(logs, steps)
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
                 #     return
