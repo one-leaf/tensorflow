@@ -63,7 +63,7 @@ def RES(inputs, seq_len, reuse = False):
         # NHWC => NWHC
         layer = tf.transpose(layer, (0, 2, 1, 3))
 
-        layer = tf.reshape(layer, [batch_size, width*height, 1024]) # N*H, W, 1024
+        layer = tf.reshape(layer, [batch_size, width*height, 512]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 512])
         layer = LSTM(layer, 256, 128)    # N, W*H, 256+128*2
