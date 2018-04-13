@@ -85,6 +85,7 @@ def LSTM(inputs, fc_size, lstm_size):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # activation 全部用 tanh 根本学习不出来 , 
             # 所以反向用 tanh 在极小值地方补偿一下
+            # 如果用 tanh ，最后一层不能加 relu
             # 注意，没有证据表明这样更好，但心里安慰下
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.tanh)
