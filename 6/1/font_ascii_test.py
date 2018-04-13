@@ -60,23 +60,23 @@ def RES(inputs, seq_len, reuse = False):
         # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        res_layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         # N H W 1024
         
         # NHWC => NWHC
-        layer = tf.transpose(layer, (0, 2, 1, 3))
+        layer = tf.transpose(res_layer, (0, 2, 1, 3))
 
         layer = tf.reshape(layer, [batch_size, width*height, 256]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 256])
-        layer = LSTM(layer, 128, 128)    # N, W*H, 128+128*2
-        print("lstm shape:",layer.shape)
+        lstm_layer = LSTM(layer, 128, 128)    # N, W*H, 128+128*2
+        print("lstm shape:",lstm_layer.shape)
         # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,256+128*2
         # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
         # layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
 
         # print("res fin shape:",layer.shape)
-        return layer
+        return res_layer,lstm_layer
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
@@ -101,7 +101,7 @@ def neural_networks():
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     global_step = tf.Variable(0, trainable=False)
 
-    net_res = RES(inputs, seq_len, reuse = False)
+    res_layer, net_res = RES(inputs, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
@@ -118,10 +118,18 @@ def neural_networks():
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
     res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
-    
-    return  inputs, labels, global_step, \
+
+
+    # 加入日志
+    tf.summary.scalar('res_loss', res_loss)
+    tf.summary.scalar('res_acc', res_acc)
+    tf.summary.image('net_res', net_res, max_outputs=1)
+    tf.summary.histogram('lstm', res_layer)
+    summary = tf.summary.merge_all()
+
+    return  inputs, labels, global_step, summary, \
             res_loss, res_optim, seq_len, res_acc, res_decoded
-            
+
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
 print("EngFontNames", ENGFontNames)
@@ -247,16 +255,18 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     return inputs, sparse_labels, seq_len, info
 
 def train():
-    inputs, labels, global_step, \
+    inputs, labels, global_step, summary, \
         res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
     if not os.path.exists(model_dir): os.mkdir(model_dir)
     model_R_dir = os.path.join(model_dir, "RL32")
-
     if not os.path.exists(model_R_dir): os.mkdir(model_R_dir)
- 
+
+    log_dir = os.path.join(model_dir, "logs")
+    if not os.path.exists(log_dir): os.mkdir(log_dir)
+
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
@@ -285,6 +295,7 @@ def train():
             print("restored fail, return")
             return
 
+        train_writer = tf.summary.FileWriter(log_dir, session.graph)
 
         AllLosts={}
         accs = deque(maxlen=100)
@@ -305,7 +316,7 @@ def train():
                 start = time.time()                
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
-                errR, acc, _ , steps= session.run([res_loss, res_acc, res_optim, global_step], feed)
+                errR, acc, _ , steps, summary= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 accs.append(acc)
@@ -313,7 +324,9 @@ def train():
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
-
+                
+                # 保存日志
+                train_writer.add_summary(summary, steps)
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
                 #     return
