@@ -80,17 +80,13 @@ def RES(inputs, seq_len, reuse = False):
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
-    for i in range(4):
+    for i in range(3):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # activation 全部用 tanh 根本学习不出来 , 
             # 所以正向采用 leaky_relu， 反向用 tanh 在极小值地方补偿一下
             # 注意，没有证据表明这样更好，但心里安慰下
-            if i%2 == 0:
-                activation_fun = tf.nn.leaky_relu
-            else:
-                activation_fun = tf.nn.tanh
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=activation_fun)
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             if i%2 != 0:
                 activation_fun = tf.nn.leaky_relu
             else:
