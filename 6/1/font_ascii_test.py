@@ -84,7 +84,7 @@ def LSTM(inputs, fc_size, lstm_size):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # activation 用 tanh 根本学习不出来 , elu 在后期有更好的表现，但计算的开销比较大，其他地方全部采用 leaky_relu
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.elu)
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.elu)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
             layer = tf.concat([outputs[0], outputs[1], layer], axis=-1)
