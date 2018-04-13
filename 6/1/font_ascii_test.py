@@ -34,11 +34,10 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-7
+LEARNING_RATE_INITIAL = 1e-4
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 750
-MOMENTUM = 0.9
 
 BATCHES = 40
 BATCH_SIZE = 1
@@ -77,7 +76,7 @@ def RES(inputs, seq_len, reuse = False):
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
-    for i in range(2):
+    for i in range(5):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
@@ -107,9 +106,9 @@ def neural_networks():
     # 防止梯度爆炸
     tvars = tf.trainable_variables()
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL)
-    # # 1
-    # grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 5.0)
-    # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
+    # 1
+    grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 5.0)
+    res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
 
     # 2
     # grads, tvars = zip(*res_optim.compute_gradients(res_loss))
@@ -119,9 +118,9 @@ def neural_networks():
     # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
 
     # 3 
-    gvs = res_optim.compute_gradients(res_loss)
-    capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
-    res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
+    # gvs = res_optim.compute_gradients(res_loss)
+    # capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
+    # res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
 
 
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
