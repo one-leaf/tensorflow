@@ -126,8 +126,8 @@ def neural_networks():
     # res_images = res_layer[-1]
     # res_images = tf.transpose(res_images, perm=[2, 0, 1])
     # tf.summary.image('net_res', tf.expand_dims(res_images,-1), max_outputs=9)
-    # tf.summary.histogram('gvs', gvs)
-    tf.summary.histogram('res_vars', res_vars)
+    for var in res_vars:
+        tf.summary.histogram('res_vars', var)
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, summary, \
