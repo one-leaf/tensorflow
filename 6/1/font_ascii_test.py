@@ -50,13 +50,14 @@ MODEL_SAVE_NAME = "model_ascii"
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
-        layer = utils_nn.resNet101V2(inputs, True)    # N H/16 W/16 2048
+        layer = utils_nn.resNet50v2(inputs, True)    # N H/16 W/16 2048
         print("resNet shape:",layer.shape)
 
         shape = tf.shape(layer)
         batch_size, height, width, channel = shape[0], shape[1], shape[2], shape[3]
         
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
+        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
         # N H W 1024
         
         # NHWC => NWHC
@@ -64,7 +65,7 @@ def RES(inputs, seq_len, reuse = False):
 
         layer = tf.reshape(layer, [batch_size, width*height, 1024]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
-        layer.set_shape([None, None, 1024])
+        layer.set_shape([None, None, 512])
         layer = LSTM(layer, 256, 128)    # N, W*H, 256+128*2
         print("lstm shape:",layer.shape)
         # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,256+128*2
@@ -76,7 +77,7 @@ def RES(inputs, seq_len, reuse = False):
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
-    for i in range(5):
+    for i in range(6):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # layer = slim.fully_connected(layer, fc_size, normalizer_fn=None, activation_fn=None)
