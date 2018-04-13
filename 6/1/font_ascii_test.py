@@ -86,6 +86,7 @@ def LSTM(inputs, fc_size, lstm_size):
             # activation 用 tanh 根本学习不出来 , 
             # elu 在后期有更好的表现，但计算的开销比较大，
             # 所以正向采用 leaky_relu， 反向用 elu 补偿一下
+            # 注意，没有证据表明这样更好，但心里安慰下
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.elu)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
