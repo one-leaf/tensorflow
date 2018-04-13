@@ -103,25 +103,12 @@ def neural_networks():
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
     # res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
+ 
     # 防止梯度爆炸
-    tvars = tf.trainable_variables()
     res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL)
-    # 1
-    # grads, norm = tf.clip_by_global_norm(tf.gradients(res_loss, tvars), 5.0)
-    # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
-
-    # 2
-    # grads, tvars = zip(*res_optim.compute_gradients(res_loss))
-    # grads = [
-    #     None if gradient is None else tf.clip_by_norm(gradient, 5.0)
-    #     for gradient in grads]
-    # res_optim = res_optim.apply_gradients(list(zip(grads, tvars)), global_step=global_step)
-
-    # 3 
     gvs = res_optim.compute_gradients(res_loss)
     capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
     res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
-
 
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
