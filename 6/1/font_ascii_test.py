@@ -84,14 +84,10 @@ def LSTM(inputs, fc_size, lstm_size):
         with tf.variable_scope("rnn-%s"%i):
             layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # activation 全部用 tanh 根本学习不出来 , 
-            # 所以在最后一轮的RNN反向用 tanh 在极小值地方补偿一下
+            # 所以反向用 tanh 在极小值地方补偿一下
             # 注意，没有证据表明这样更好，但心里安慰下
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
-            if i==2:
-                activation_fun = tf.nn.tanh            
-            else:
-                activation_fun = tf.nn.leaky_relu
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=activation_fun)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.tanh)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
             layer = tf.concat([outputs[0], outputs[1], layer], axis=-1)
             layer = tf.nn.leaky_relu(layer)
