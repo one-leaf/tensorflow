@@ -330,11 +330,11 @@ def train():
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
 
                 if steps<10000:        
-                    sess.run(tf.assign(lr, 1e-4))
+                    session.run(tf.assign(lr, 1e-4))
                 elif steps<30000:            
-                    sess.run(tf.assign(lr, 1e-5))
+                    session.run(tf.assign(lr, 1e-5))
                 else:
-                    sess.run(tf.assign(lr, 1e-6))
+                    session.run(tf.assign(lr, 1e-6))
 
                 # 保存日志
                 train_writer.add_summary(logs, steps)
