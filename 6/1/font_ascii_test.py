@@ -34,7 +34,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-5
+LEARNING_RATE_INITIAL = 1e-6
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -100,6 +100,7 @@ def neural_networks():
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     global_step = tf.Variable(0, trainable=False)
+    lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
     res_layer, net_res = RES(inputs, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
@@ -110,7 +111,7 @@ def neural_networks():
     # res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
  
     # 防止梯度爆炸
-    res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL)
+    res_optim = tf.train.AdamOptimizer(lr)
     gvs = res_optim.compute_gradients(res_loss)
     capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
     res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
@@ -130,7 +131,7 @@ def neural_networks():
         tf.summary.histogram(var.name, var)
     summary = tf.summary.merge_all()
 
-    return  inputs, labels, global_step, summary, \
+    return  inputs, labels, global_step, lr, summary, \
             res_loss, res_optim, seq_len, res_acc, res_decoded
 
 
@@ -258,7 +259,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     return inputs, sparse_labels, seq_len, info
 
 def train():
-    inputs, labels, global_step, summary, \
+    inputs, labels, global_step, lr, summary, \
         res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
@@ -327,7 +328,14 @@ def train():
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
-                
+
+                if steps<10000:        
+                    sess.run(tf.assign(lr, 1e-4))
+                elif steps<30000:            
+                    sess.run(tf.assign(lr, 1e-5))
+                else:
+                    sess.run(tf.assign(lr, 1e-6))
+
                 # 保存日志
                 train_writer.add_summary(logs, steps)
                 # if np.isnan(errR) or np.isinf(errR) :
