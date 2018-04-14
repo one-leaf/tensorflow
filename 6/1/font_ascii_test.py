@@ -331,7 +331,7 @@ def train():
 
                 if steps<10000:        
                     session.run(tf.assign(lr, 1e-4))
-                elif steps<30000:            
+                elif steps<100000:            
                     session.run(tf.assign(lr, 1e-5))
                 else:
                     session.run(tf.assign(lr, 1e-6))
