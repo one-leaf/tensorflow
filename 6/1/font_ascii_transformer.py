@@ -350,15 +350,15 @@ def train():
             errR = 1
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
-                if len(AllLosts)>10 and random.random()>0.7:
-                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
-                    font_info = sorted_font[random.randint(0,10)]
-                    font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
-                        font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
-                else:
-                    # train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
+                # if len(AllLosts)>10 and random.random()>0.7:
+                #     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
+                #     font_info = sorted_font[random.randint(0,10)]
+                #     font_info = font_info[0].split(",")
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
+                #         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
+                # else:
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
+                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
                 # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 start = time.time()                
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
@@ -377,13 +377,14 @@ def train():
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
-                for _ in range(int(errR//avg_losts)):
+                if errR/avg_losts > 2 or acc/avg_acc < 0.5:
+                # for _ in range(int(errR//avg_losts)):
                     errR, acc, _ , steps, decoded_list = session.run([res_loss, res_acc, res_optim, global_step, res_decoded[0]], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
-                    if acc/avg_acc < 0.8:
+                    if acc/avg_acc < 0.5:
                         report(train_labels, decoded_list)
 
                 if steps<20000:        
