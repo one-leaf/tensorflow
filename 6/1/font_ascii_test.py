@@ -303,6 +303,7 @@ def train():
 
         AllLosts={}
         accs = deque(maxlen=100)
+        losts = deque(maxlen=200)
         while True:
             errR = 1
             batch_size = BATCH_SIZE
@@ -325,15 +326,21 @@ def train():
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 accs.append(acc)
                 avg_acc = sum(accs)/len(accs)
+
+                losts.append(errR)
+                avg_losts = sum(losts)/len(losts)
+
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
 
-                # 如果当前正确率低于平均正确率，就再训练一遍
-                if acc < avg_acc:
+                # 如果当前lost低于平均lost，就多训练
+                for _ in range((errR//avg_losts)-1):
                     errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)
+                    losts.append(errR)
+                    avg_losts = sum(losts)/len(losts)                    
                     print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
 
