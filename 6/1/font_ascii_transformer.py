@@ -381,7 +381,7 @@ def train():
                 # 如果当前lost低于平均lost，就多训练
                 if errR/avg_losts > 2 or acc/avg_acc < 0.5:
                 # for _ in range(int(errR//avg_losts)):
-                    errR, acc, _ , steps, decoded_list = session.run([res_loss, res_acc, res_optim, global_step, res_decoded[0]], feed)
+                    errR, acc, _ , decoded_list = session.run([res_loss, res_acc, res_optim, res_decoded[0]], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
