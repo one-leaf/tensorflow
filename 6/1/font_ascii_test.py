@@ -341,9 +341,7 @@ def train():
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
-
-
-                session.run(global_step.assign(steps))
+                    session.run(global_step.assign(steps))
 
                 if steps<20000:        
                     session.run(tf.assign(lr, 1e-4))
