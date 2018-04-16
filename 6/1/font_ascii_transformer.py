@@ -91,17 +91,18 @@ def feedforward(inputs, f_size, s_size, batch_size, width, height):
     # layer += inputs
     # layer = slim.batch_norm(layer)
     layer = tf.reshape(inputs, [batch_size, width, height, 256]) # N*H, W, 1024
-    layer = slim.conv2d(layer, f_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
-    layer = slim.conv2d(layer, s_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
+    layer = slim.conv2d(layer, f_size, [1,1], normalizer_fn=None, activation_fn=tf.nn.leaky_relu) 
+    layer = slim.conv2d(layer, s_size, [1,1], normalizer_fn=None, activation_fn=tf.nn.leaky_relu) 
     layer += inputs
+    layer = slim.batch_norm(layer)
     layer = tf.reshape(layer, [batch_size, width*height, 256])
     return layer
 
 def multihead_attention(queries, keys, num_units, num_heads):
     # Linear projections    
-    Q = slim.fully_connected(queries, num_units, activation_fn=tf.nn.relu) # (N, T_q, C)
-    K = slim.fully_connected(keys, num_units, activation_fn=tf.nn.relu) # (N, T_k, C)
-    V = slim.fully_connected(keys, num_units, activation_fn=tf.nn.relu) # (N, T_k, C)
+    Q = slim.fully_connected(queries, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_q, C)
+    K = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_k, C)
+    V = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_k, C)
 
     # Split and concat
     Q_ = tf.concat(tf.split(Q, num_heads, axis=2), axis=0) # (h*N, T_q, C/h) 
