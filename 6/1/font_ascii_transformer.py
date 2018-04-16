@@ -81,7 +81,7 @@ def Transformer(inputs, num_units, num_heads, batch_size, width, height):
         with tf.variable_scope("encoder-%s"%i):
             layer = multihead_attention(layer, layer, num_units, num_heads)
             print("Transformer-attention-%s:"%i, layer.shape)
-            layer = feedforward(layer, num_units*2, num_units, batch_size, width, height)
+            # layer = feedforward(layer, num_units*2, num_units, batch_size, width, height)
             print("Transformer-feed-%s:"%i, layer.shape)
     return layer
 
