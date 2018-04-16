@@ -69,7 +69,7 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer, [batch_size, width*height, 256]) # N*H, W, 1024
         print("resNet_seq shape:",layer.shape)
         # layer.set_shape([None, None, 256])
-        layer = Transformer(layer, 128, 64)    
+        layer = Transformer(layer, 128, 128)    
         print("Transformer shape:",layer.shape)
 
         return res_layer,layer
