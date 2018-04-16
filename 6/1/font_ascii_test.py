@@ -336,11 +336,14 @@ def train():
 
                 # 如果当前lost低于平均lost，就多训练
                 for _ in range(int(errR//avg_losts)):
-                    errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
+                    errR, acc, _ , logs= session.run([res_loss, res_acc, res_optim, summary], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
+
+
+                session.run(global_step.assign(steps))
 
                 if steps<20000:        
                     session.run(tf.assign(lr, 1e-4))
