@@ -349,7 +349,7 @@ def train():
         while True:
             errR = 1
             batch_size = BATCH_SIZE
-            for batch in range(BATCHES):
+            for batch in range(batch_size):
                 if len(AllLosts)>10 and random.random()>0.7:
                     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     font_info = sorted_font[random.randint(0,10)]
@@ -378,11 +378,12 @@ def train():
 
                 # 如果当前lost低于平均lost，就多训练
                 for _ in range(int(errR//avg_losts)):
-                    errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
+                    errR, acc, _ , steps, decoded_list = session.run([res_loss, res_acc, res_optim, global_step, res_decoded[0]], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
+                    report(train_labels, decoded_list)
 
                 if steps<20000:        
                     session.run(tf.assign(lr, 1e-4))
@@ -415,7 +416,10 @@ def train():
            
                     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
 
-                    report(train_inputs, train_labels, decoded_list, steps)
+                    for i in range(batch_size): 
+                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
+                        
+                    report(train_labels, decoded_list)
                     
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     for f in sorted_fonts[:20]:
@@ -427,10 +431,7 @@ def train():
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
 
-def report(train_inputs, train_labels, decoded_list, steps):
-    for i in range(len(train_inputs)): 
-        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
-
+def report(train_labels, decoded_list):
     original_list = utils.decode_sparse_tensor(train_labels)
     detected_list = utils.decode_sparse_tensor(decoded_list)
     if len(original_list) != len(detected_list):
