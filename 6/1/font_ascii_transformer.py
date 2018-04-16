@@ -441,7 +441,6 @@ def report(train_labels, decoded_list):
     if len(original_list) != len(detected_list):
         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
             " test and detect length desn't match")
-    print("T/F: original(length) <-------> detectcted(length)")
     acc = 0.
     for idx in range(min(len(original_list),len(detected_list))):
         number = original_list[idx]
