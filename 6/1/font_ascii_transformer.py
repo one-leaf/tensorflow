@@ -415,27 +415,8 @@ def train():
            
                     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
 
-                    for i in range(batch_size): 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
-
-                    original_list = utils.decode_sparse_tensor(train_labels)
-                    detected_list = utils.decode_sparse_tensor(decoded_list)
-                    if len(original_list) != len(detected_list):
-                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-                            " test and detect length desn't match")
-                    print("T/F: original(length) <-------> detectcted(length)")
-                    acc = 0.
-                    for idx in range(min(len(original_list),len(detected_list))):
-                        number = original_list[idx]
-                        detect_number = detected_list[idx]  
-                        hit = (number == detect_number)
-                        print("----------",hit,"------------")          
-                        print(list_to_chars(number), "(", len(number), ")")
-                        print(list_to_chars(detect_number), "(", len(detect_number), ")")
-                        # 计算莱文斯坦比
-                        import Levenshtein
-                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-                    print("Test Accuracy:", acc / len(original_list))
+                    report(train_inputs, train_labels, decoded_list, steps)
+                    
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     for f in sorted_fonts[:20]:
                         print(f)
@@ -445,6 +426,30 @@ def train():
                 continue
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
+
+def report(train_inputs, train_labels, decoded_list, steps):
+    for i in range(len(train_inputs)): 
+        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
+
+    original_list = utils.decode_sparse_tensor(train_labels)
+    detected_list = utils.decode_sparse_tensor(decoded_list)
+    if len(original_list) != len(detected_list):
+        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+            " test and detect length desn't match")
+    print("T/F: original(length) <-------> detectcted(length)")
+    acc = 0.
+    for idx in range(min(len(original_list),len(detected_list))):
+        number = original_list[idx]
+        detect_number = detected_list[idx]  
+        hit = (number == detect_number)
+        print("----------",hit,"------------")          
+        print(list_to_chars(number), "(", len(number), ")")
+        print(list_to_chars(detect_number), "(", len(detect_number), ")")
+        # 计算莱文斯坦比
+        import Levenshtein
+        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+    print("Test Accuracy:", acc / len(original_list))
+
 
 if __name__ == '__main__':
     train()
