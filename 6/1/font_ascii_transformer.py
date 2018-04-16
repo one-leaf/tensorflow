@@ -70,26 +70,31 @@ def RES(inputs, seq_len, reuse = False):
             layer = tf.reshape(layer, [batch_size, width*height, 256]) # N*H, W, 1024
             print("resNet_seq shape:",layer.shape)
             # layer.set_shape([None, None, 256])
-            layer = Transformer(layer, 256, 256)    
+            layer = Transformer(layer, 256, 256, batch_size, width, height)    
             print("Transformer shape:",layer.shape)
 
         return res_layer,layer
 
-def Transformer(inputs, num_units, num_heads):
+def Transformer(inputs, num_units, num_heads, batch_size, width, height):
     layer = inputs
     for i in range(6):
         with tf.variable_scope("encoder-%s"%i):
             layer = multihead_attention(layer, layer, num_units, num_heads)
             print("Transformer-attention-%s:"%i, layer.shape)
-            layer = feedforward(layer, num_units*2, num_units)
+            layer = feedforward(layer, num_units*2, num_units, batch_size, width, height)
             print("Transformer-feed-%s:"%i, layer.shape)
     return layer
 
-def feedforward(inputs, f_size, s_size):
-    layer = tf.layers.conv1d(inputs, f_size, 1, activation=tf.nn.relu, padding='same')
-    layer = tf.layers.conv1d(layer, s_size, 1, activation=tf.nn.relu, padding='same')
+def feedforward(inputs, f_size, s_size, batch_size, width, height):
+    # layer = tf.layers.conv1d(inputs, f_size, 1, activation=tf.nn.relu, padding='same')
+    # layer = tf.layers.conv1d(layer, s_size, 1, activation=tf.nn.relu, padding='same')
+    # layer += inputs
+    # layer = slim.batch_norm(layer)
+    layer = tf.reshape(layer, [batch_size, width, height, 256]) # N*H, W, 1024
+    layer = slim.conv2d(layer, f_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
+    layer = slim.conv2d(layer, s_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
     layer += inputs
-    layer = slim.batch_norm(layer)
+    layer = tf.reshape(layer, [batch_size, width*height, 256])
     return layer
 
 def multihead_attention(queries, keys, num_units, num_heads):
