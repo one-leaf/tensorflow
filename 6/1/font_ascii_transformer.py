@@ -86,17 +86,17 @@ def Transformer(inputs, num_units, num_heads):
     return layer
 
 def feedforward(inputs, f_size, s_size):
-    layer = tf.layers.conv1d(inputs, f_size, 1, activation=tf.nn.leaky_relu)
-    layer = tf.layers.conv1d(layer, s_size, 1, activation=tf.nn.leaky_relu)
+    layer = tf.layers.conv1d(inputs, f_size, 1, activation=tf.nn.relu, padding='same')
+    layer = tf.layers.conv1d(layer, s_size, 1, activation=tf.nn.relu, padding='same')
     layer += inputs
     layer = slim.batch_norm(layer)
     return layer
 
 def multihead_attention(queries, keys, num_units, num_heads):
     # Linear projections    
-    Q = slim.fully_connected(queries, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_q, C)
-    K = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_k, C)
-    V = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_k, C)
+    Q = slim.fully_connected(queries, num_units, activation_fn=tf.nn.relu) # (N, T_q, C)
+    K = slim.fully_connected(keys, num_units, activation_fn=tf.nn.relu) # (N, T_k, C)
+    V = slim.fully_connected(keys, num_units, activation_fn=tf.nn.relu) # (N, T_k, C)
 
     # Split and concat
     Q_ = tf.concat(tf.split(Q, num_heads, axis=2), axis=0) # (h*N, T_q, C/h) 
