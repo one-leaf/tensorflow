@@ -93,9 +93,9 @@ def feedforward(inputs, f_size, s_size, batch_size, width, height):
     layer = tf.reshape(inputs, [batch_size, width, height, 256]) # N*H, W, 1024
     layer = slim.conv2d(layer, f_size, [1,1], normalizer_fn=None, activation_fn=tf.nn.leaky_relu) 
     layer = slim.conv2d(layer, s_size, [1,1], normalizer_fn=None, activation_fn=tf.nn.leaky_relu) 
+    layer = tf.reshape(layer, [batch_size, width*height, 256])
     layer += inputs
     layer = slim.batch_norm(layer)
-    layer = tf.reshape(layer, [batch_size, width*height, 256])
     return layer
 
 def multihead_attention(queries, keys, num_units, num_heads):
