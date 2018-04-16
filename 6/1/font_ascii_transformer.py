@@ -153,8 +153,9 @@ def neural_networks():
  
     # 防止梯度爆炸
     res_optim = tf.train.AdamOptimizer(lr)
-    gvs = res_optim.compute_gradients(res_loss)
-    capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
+    with tf.name_scope("ClipGradients"):
+        gvs = res_optim.compute_gradients(res_loss)
+        capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
     res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
 
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
