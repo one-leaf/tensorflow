@@ -77,7 +77,7 @@ def RES(inputs, seq_len, reuse = False):
 
 def Transformer(inputs, num_units, num_heads):
     layer = inputs
-    for i in range(3):
+    for i in range(6):
         with tf.variable_scope("encoder-%s"%i):
             layer = multihead_attention(layer, layer, num_units, num_heads)
             layer = feedforward(layer, num_units*2, num_units)
