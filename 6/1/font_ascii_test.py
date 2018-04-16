@@ -329,6 +329,14 @@ def train():
                 print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
 
+                # 如果当前正确率低于平均正确率，就再训练一遍
+                if acc < avg_acc:
+                    errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
+                    accs.append(acc)
+                    avg_acc = sum(accs)/len(accs)
+                    print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
+                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
+
                 if steps<20000:        
                     session.run(tf.assign(lr, 1e-4))
                 elif steps<100000:            
