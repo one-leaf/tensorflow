@@ -79,7 +79,7 @@ def Transformer(inputs, num_units, num_heads):
     for i in range(3):
         with tf.variable_scope("encoder-%s"%i):
             layer = multihead_attention(layer, layer, num_units, num_heads)
-            layer = feedforward(num_units*2, num_units)
+            layer = feedforward(layer, num_units*2, num_units)
     return layer
 
 def feedforward(inputs, f_size, s_size):
