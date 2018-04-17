@@ -406,9 +406,9 @@ def train():
                         decoded_list = session.run(res_decoded[0], feed)
                         report(train_labels, decoded_list)
 
-                if steps<20000:        
+                if steps<5000:        
                     session.run(tf.assign(lr, 1e-4))
-                elif steps<100000:            
+                elif steps<50000:            
                     session.run(tf.assign(lr, 1e-5))
                 else:
                     session.run(tf.assign(lr, 1e-6))
