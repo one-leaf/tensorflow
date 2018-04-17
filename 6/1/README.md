@@ -20,3 +20,4 @@ http://ilovin.me/2017-04-23/tensorflow-lstm-ctc-input-output/
 很有意思：
 https://github.com/fchollet/keras/blob/master/examples/image_ocr.py
 https://github.com/mozilla/DeepSpeech/blob/master/DeepSpeech.py
+https://github.com/Kyubyong/transformer
