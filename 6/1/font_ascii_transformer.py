@@ -452,7 +452,7 @@ def train():
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
             # 保存日志
-            logs = session.run(summary)
+            logs = session.run(summary, feed)
             train_writer.add_summary(logs, steps)
 
 
