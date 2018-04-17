@@ -93,7 +93,6 @@ def feedforward(inputs, f_size, s_size, batch_size, width, height):
     layer = tf.reshape(inputs, [batch_size, width, height, s_size]) # N*H, W, 1024
 
     _layer = slim.conv2d(layer, f_size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
-    _layer = slim.conv2d(_layer,  f_size,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
     _layer = slim.conv2d(_layer,  s_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.leaky_relu(_layer + layer)   
     layer = tf.reshape(layer, [batch_size, width*height, s_size])
