@@ -81,7 +81,7 @@ def Transformer(inputs, num_units, num_heads, batch_size, width, height):
         with tf.variable_scope("encoder-%s"%i):
             layer = multihead_attention(layer, layer, num_units, num_heads)
             print("Transformer-attention-%s:"%i, layer.shape)
-            layer = feedforward(layer, num_units*2, num_units, batch_size, width, height)
+            layer = feedforward(layer, num_units*4, num_units, batch_size, width, height)
             print("Transformer-feed-%s:"%i, layer.shape)
     return layer
 
@@ -91,12 +91,20 @@ def feedforward(inputs, f_size, s_size, batch_size, width, height):
     # layer += inputs
     # layer = slim.batch_norm(layer)
     layer = tf.reshape(inputs, [batch_size, width, height, s_size]) # N*H, W, 1024
-    layer = slim.conv2d(layer, f_size, [1,1], normalizer_fn=None, activation_fn=tf.nn.leaky_relu) 
-    layer = slim.conv2d(layer, s_size, [1,1], normalizer_fn=None, activation_fn=tf.nn.leaky_relu) 
+
+    _layer = slim.conv2d(layer, f_size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
+    _layer = slim.conv2d(_layer,  f_size,   [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
+    _layer = slim.conv2d(_layer,  s_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = tf.nn.leaky_relu(_layer + layer)   
     layer = tf.reshape(layer, [batch_size, width*height, s_size])
-    layer += inputs
-    layer = slim.batch_norm(layer)
     return layer
+
+    # layer = slim.conv2d(layer, f_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
+    # layer = slim.conv2d(layer, s_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
+    # layer = tf.reshape(layer, [batch_size, width*height, s_size])
+    # layer += inputs
+    # layer = slim.batch_norm(layer)
+    # return layer
 
 def multihead_attention(queries, keys, num_units, num_heads):
     # Linear projections    
