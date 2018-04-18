@@ -85,7 +85,7 @@ def LSTM(inputs, fc_size, lstm_size):
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
             layer = tf.concat([outputs[0]+layer, outputs[1]+layer], axis=-1)
             # layer = outputs[0] + outputs[1] + layer
-            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=leaky_relu)
+            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
             # layer = tf.nn.leaky_relu(layer)
     return layer
 
