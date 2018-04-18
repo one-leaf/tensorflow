@@ -252,8 +252,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    # seq_len = np.ones(batch_size) * max_width_image
-    print(inputs.shape, seq_len.shape, [len(l) for l in labels])
+    seq_len = np.ones(batch_size) * max_width_image
+    # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
     return inputs, sparse_labels, seq_len, info
 
 def train():
@@ -319,8 +319,8 @@ def train():
                 start = time.time()                
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
-                _res = session.run(net_res, feed)
-                print(_res.shape)
+                # _res = session.run(net_res, feed)
+                # print(_res.shape)
 
                 errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
                 font_length = int(train_info[0][-1])
