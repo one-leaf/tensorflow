@@ -65,12 +65,12 @@ def RES(inputs, seq_len, reuse = False):
 
         layer = tf.reshape(layer,(batch_size, width, 256))
         print("resNet_seq shape:",layer.shape)
-
+        temp_layer = layer
         layer.set_shape([None, None, 256])
         layer = LSTM(layer, 256, 256)    # N, W*H, 256
         print("lstm shape:",layer.shape)
 
-        return layer
+        return layer, temp_layer
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
@@ -98,7 +98,7 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
-    net_res = RES(inputs, seq_len, reuse = False)
+    net_res, temp_layer= RES(inputs, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
@@ -128,7 +128,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            res_loss, res_optim, seq_len, res_acc, res_decoded, net_res
+            res_loss, res_optim, seq_len, res_acc, res_decoded, temp_layer
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
