@@ -81,9 +81,9 @@ def LSTM(inputs, fc_size, lstm_size):
             # 所以反向用 tanh 在极小值地方补偿一下
             # 如果用 tanh ，最后一层不能加 relu
             # 注意，没有证据表明这样更好，但心里安慰下
-            # cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             # cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size)
+            # cell_fw = tf.contrib.rnn.GRUCell(lstm_size)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
             layer = tf.concat([outputs[0], outputs[1], layer], axis=-1)
