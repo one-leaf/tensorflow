@@ -68,7 +68,7 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer,(batch_size, width, 256))
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 256])
-        layer = LSTM(layer, 256, 128)    # N, W*H, 128
+        layer = LSTM(layer, 256, 256)    # N, W*H, 128
         print("lstm shape:",layer.shape)
 
         return layer, temp_layer
@@ -83,7 +83,8 @@ def LSTM(inputs, fc_size, lstm_size):
             # cell_fw = tf.contrib.rnn.GRUCell(lstm_size)
             # cell_bw = tf.contrib.rnn.GRUCell(lstm_size)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-            layer = tf.concat([outputs[0], outputs[1]], axis=-1) + layer
+            # layer = tf.concat([outputs[0], outputs[1]], axis=-1) + layer
+            layer = outputs[0] + outputs[1] + layer
             layer = tf.nn.leaky_relu(layer)
     return layer
 
