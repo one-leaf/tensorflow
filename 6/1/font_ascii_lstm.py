@@ -236,7 +236,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         codes.append([CHARS.index(char) for char in text])                  
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
-        seq_len[i]=len(text)
+        seq_len[i]=len(text)+1
 
     # 凑成2的整数倍
     if max_width_image % 2 > 0:
