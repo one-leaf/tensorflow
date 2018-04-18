@@ -60,7 +60,7 @@ def RES(inputs, seq_len, reuse = False):
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
         # 将图像宽度和高度 // 2
-        layer = slim.avg_pool2d(layer, [2, 3], 2, normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = slim.avg_pool2d(layer, [2, 3], 2) 
 
         shape = tf.shape(layer)
         batch_size, width, channel = shape[0], shape[2], shape[3]
