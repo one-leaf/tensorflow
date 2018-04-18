@@ -45,53 +45,48 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-MODEL_SAVE_NAME = "model_ascii"
+MODEL_SAVE_NAME = "model_ascii_lstm"
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
-        layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
-        print("resNet shape:",layer.shape)
+        # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
+        layer = utils_nn.resNet50(inputs, True) # (N H/16 W 2048)
+        print("resNet50 shape:",layer.shape)
 
-        shape = tf.shape(layer)
-        batch_size, height, width, channel = shape[0], shape[1], shape[2], shape[3]
-        
-
-        # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
-        # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        res_layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        # N H W 256
-        
-        # NHWC => NWHC
-        layer = tf.transpose(layer, (0, 2, 1, 3))
+        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+       
+        layer = slim.conv2d(layer, 256, [2,1], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = tf.squeeze(layer, axis=1)
+        print("squeeze shape:",layer.shape)  # (N, W, 2048)
 
-        layer = tf.reshape(layer, [batch_size, width*height, 256]) # N, W*H, 1024
+        shape = tf.shape(layer)
+        batch_size, width, channel = shape[0], shape[2], shape[3]
+
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 256])
-        lstm_layer = LSTM(layer, 128, 128)    # N, W*H, 128+128*2
+        lstm_layer = LSTM(layer, 256, 256)    # N, W*H, 256
         print("lstm shape:",lstm_layer.shape)
-        # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,256+128*2
-        # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
-        # layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
 
-        # print("res fin shape:",layer.shape)
         return res_layer,lstm_layer
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
     for i in range(3):
         with tf.variable_scope("rnn-%s"%i):
-            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
             # activation 全部用 tanh 根本学习不出来 , 
             # 所以反向用 tanh 在极小值地方补偿一下
             # 如果用 tanh ，最后一层不能加 relu
             # 注意，没有证据表明这样更好，但心里安慰下
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.tanh)
+            # cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
+            # cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
             layer = tf.concat([outputs[0], outputs[1], layer], axis=-1)
+            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None
             # layer = tf.nn.leaky_relu(layer)
     return layer
 
@@ -241,8 +236,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
 
     # 凑成16的整数倍
-    if max_width_image % POOL_SIZE > 0:
-        max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    # if max_width_image % POOL_SIZE > 0:
+    #     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
@@ -256,7 +251,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape)
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (image_height*max_width_image)//(POOL_SIZE*POOL_SIZE)
+    seq_len = np.ones(batch_size) * max_width_image
     return inputs, sparse_labels, seq_len, info
 
 def train():

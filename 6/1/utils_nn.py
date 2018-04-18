@@ -86,12 +86,12 @@ def resNet50(layer, isPoolSize=True, stride=2):
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(3):
             layer = resNetBlockV2(layer, 64)
-        layer = slim.max_pool2d(layer, [2, 2])
+        layer = slim.max_pool2d(layer, [2, 1])
 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(4):
             layer = resNetBlockV2(layer, 128)
-        layer = slim.max_pool2d(layer, [2, 2])
+        layer = slim.max_pool2d(layer, [2, 1])
 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
         for i in range(6):
@@ -101,7 +101,7 @@ def resNet50(layer, isPoolSize=True, stride=2):
         layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
             layer = resNetBlockV2(layer, 512)
-        layer = slim.avg_pool2d(layer, [4, 1], 4)
+        layer = slim.max_pool2d(layer, [2, 1])
 
         return layer
 

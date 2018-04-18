@@ -1,4 +1,5 @@
 # coding=utf-8
+# 参考： https://github.com/Kyubyong/transformer
 
 import tensorflow as tf
 import numpy as np
