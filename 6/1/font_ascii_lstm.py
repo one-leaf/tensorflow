@@ -82,12 +82,12 @@ def LSTM(inputs, fc_size, lstm_size):
             # 如果用 tanh ，最后一层不能加 relu
             # 注意，没有证据表明这样更好，但心里安慰下
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
-            # cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
             # cell_fw = tf.contrib.rnn.GRUCell(lstm_size)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size)
+            # cell_bw = tf.contrib.rnn.GRUCell(lstm_size)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
             layer = tf.concat([outputs[0], outputs[1], layer], axis=-1)
-            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
+            # layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
             # layer = tf.nn.leaky_relu(layer)
     return layer
 
