@@ -59,11 +59,13 @@ def RES(inputs, seq_len, reuse = False):
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
         layer = slim.conv2d(layer, 256, [2,1], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer = tf.squeeze(layer, axis=1)
-        print("squeeze shape:",layer.shape)  # (N, W, 2048)
 
         shape = tf.shape(layer)
         batch_size, width, channel = shape[0], shape[2], shape[3]
+
+        layer = tf.reshape(layer,(batch_size, width, channel))
+        print("squeeze shape:",layer.shape)  # (N, W, 2048)
+
 
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 256])
