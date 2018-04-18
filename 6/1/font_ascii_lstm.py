@@ -75,7 +75,7 @@ def RES(inputs, seq_len, reuse = False):
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
-    for i in range(3):
+    for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
             # activation 全部用 tanh 根本学习不出来 , 
             # 所以反向用 tanh 在极小值地方补偿一下
