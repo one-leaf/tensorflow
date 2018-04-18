@@ -239,8 +239,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         seq_len[i]=len(text)
 
     # 凑成2的整数倍
-    # if max_width_image % 2 > 0:
-    #     max_width_image = max_width_image + (2 - max_width_image % 2)
+    if max_width_image % 2 > 0:
+        max_width_image = max_width_image + 1
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
