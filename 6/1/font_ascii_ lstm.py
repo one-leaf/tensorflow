@@ -50,23 +50,24 @@ MODEL_SAVE_NAME = "model_ascii"
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
-        layer = utils_nn.resNet101V2(inputs, True)    # N H/16 W/16 2048
+        layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
         print("resNet shape:",layer.shape)
 
         shape = tf.shape(layer)
         batch_size, height, width, channel = shape[0], shape[1], shape[2], shape[3]
         
+
         # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
         # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         res_layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        # N H W 1024
+        # N H W 256
         
         # NHWC => NWHC
-        layer = tf.transpose(res_layer, (0, 2, 1, 3))
+        layer = tf.transpose(layer, (0, 2, 1, 3))
 
-        layer = tf.reshape(layer, [batch_size, width*height, 256]) # N*H, W, 1024
+        layer = tf.reshape(layer, [batch_size, width*height, 256]) # N, W*H, 1024
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 256])
         lstm_layer = LSTM(layer, 128, 128)    # N, W*H, 128+128*2
