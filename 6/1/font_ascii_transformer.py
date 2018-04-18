@@ -52,101 +52,103 @@ def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
         with tf.variable_scope("RESNET", reuse=reuse):
-            layer = utils_nn.resNet101V2(inputs, True)    # N H/16 W/16 2048
+            layer = utils_nn.resNet50(inputs, True)    # N H/16 W 2048
             print("resNet shape:",layer.shape)
 
-            shape = tf.shape(layer)
-            batch_size, height, width, channel = shape[0], shape[1], shape[2], shape[3]
-        
-            # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
-            # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
             layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            res_layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            # N H W 1024
-        
-        with tf.variable_scope("Transformer", reuse=reuse):
-            # NHWC => NWHC
-            layer = tf.transpose(res_layer, (0, 2, 1, 3))
-            layer = tf.reshape(layer, [batch_size, width*height, 256]) # N*H, W, 1024
+            layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            # N 1 W//4 256
+            layer = slim.avg_pool2d(layer, [2, 4], [2, 4]) 
+
+            shape = tf.shape(layer)
+            batch_size, width, channel = shape[0], shape[2], shape[3]
+            layer = tf.reshape(layer,(batch_size, width, 256))
             print("resNet_seq shape:",layer.shape)
-            # layer.set_shape([None, None, 256])
-            layer = Transformer(layer, 256, 256, batch_size, width, height)    
+
+        with tf.variable_scope("Transformer", reuse=reuse):
+            # layer = tf.transpose(layer, (0, 2, 1))  # NWC ==> NCW
+            layer = Transformer(layer, 256, width//2, batch_size, width, height)    
             print("Transformer shape:",layer.shape)
 
         return res_layer,layer
 
-def Transformer(inputs, num_units, num_heads, batch_size, width, height):
+def Transformer(inputs, num_units, num_heads, batch_size, width):
     layer = inputs
     for i in range(6):
         with tf.variable_scope("encoder-%s"%i):
             layer = multihead_attention(layer, layer, num_units, num_heads)
             print("Transformer-attention-%s:"%i, layer.shape)
-            layer = feedforward(layer, num_units*4, num_units, batch_size, width, height)
+            layer = feedforward(layer, num_units*4, num_units, batch_size, width)
             print("Transformer-feed-%s:"%i, layer.shape)
     return layer
 
-def feedforward(inputs, f_size, s_size, batch_size, width, height):
-    # layer = tf.layers.conv1d(inputs, f_size, 1, activation=tf.nn.relu, padding='same')
-    # layer = tf.layers.conv1d(layer, s_size, 1, activation=tf.nn.relu, padding='same')
-    # layer += inputs
-    # layer = slim.batch_norm(layer)
-    layer = tf.reshape(inputs, [batch_size, width, height, s_size]) # N*H, W, 1024
-
+def feedforward(inputs, f_size, s_size, batch_size, width):
+    layer = tf.reshape(inputs, [batch_size, width, 1, s_size]) # N, W, 1, 1024
     _layer = slim.conv2d(layer, f_size,   [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
     _layer = slim.conv2d(_layer,  s_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.leaky_relu(_layer + layer)   
-    layer = tf.reshape(layer, [batch_size, width*height, s_size])
+    layer = tf.reshape(layer, [batch_size, width, s_size])
     return layer
-
-    # layer = slim.conv2d(layer, f_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
-    # layer = slim.conv2d(layer, s_size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
-    # layer = tf.reshape(layer, [batch_size, width*height, s_size])
-    # layer += inputs
-    # layer = slim.batch_norm(layer)
-    # return layer
 
 def multihead_attention(queries, keys, num_units, num_heads):
     # Linear projections    
-    Q = slim.fully_connected(queries, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_q, C)
-    K = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_k, C)
-    V = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu) # (N, T_k, C)
+    Q = slim.fully_connected(queries, num_units, activation_fn=tf.nn.leaky_relu) # (N, W_q, C)
+    K = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu)    # (N, W_k, C)
+    V = slim.fully_connected(keys, num_units, activation_fn=tf.nn.leaky_relu)    # (N, W_k, C)
 
     # Split and concat
-    Q_ = tf.concat(tf.split(Q, num_heads, axis=2), axis=0) # (h*N, T_q, C/h) 
-    K_ = tf.concat(tf.split(K, num_heads, axis=2), axis=0) # (h*N, T_k, C/h) 
-    V_ = tf.concat(tf.split(V, num_heads, axis=2), axis=0) # (h*N, T_k, C/h) 
+    Q_ = tf.concat(tf.split(Q, num_heads, axis=2), axis=0) # (h*N, W_q, C/h) 
+    K_ = tf.concat(tf.split(K, num_heads, axis=2), axis=0) # (h*N, W_k, C/h) 
+    V_ = tf.concat(tf.split(V, num_heads, axis=2), axis=0) # (h*N, W_k, C/h) 
 
     # Multiplication
-    outputs = tf.matmul(Q_, tf.transpose(K_, [0, 2, 1])) # (h*N, T_q, T_k)
+    # (h*N, W_q, C/h) matmul (h*N, C/h, W_k) ==> (h*N, W_q, W_k)
+    outputs = tf.matmul(Q_, tf.transpose(K_, [0, 2, 1])) 
 
     # Key Masking
-    key_masks = tf.sign(tf.abs(tf.reduce_sum(keys, axis=-1))) # (N, T_k)
-    key_masks = tf.tile(key_masks, [num_heads, 1]) # (h*N, T_k)
-    key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1, tf.shape(queries)[1], 1]) # (h*N, T_q, T_k)
+    # 取key的最后求和，取绝对值，然后标记 0/1 ，这里基本上应该都不为 1
+    # (N, W_k, C) => (N, W_k)
+    key_masks = tf.sign(tf.abs(tf.reduce_sum(keys, axis=-1))) 
+    # 然后按 h 复制为 => (h*N, W_k)
+    key_masks = tf.tile(key_masks, [num_heads, 1]) 
+    # 再复制为 (h*N, W_q, W_k)
+    key_masks = tf.tile(tf.expand_dims(key_masks, 1), [1, tf.shape(queries)[1], 1]) 
     
+    # 按 key_masks 中 为 0 的 位置，替换 outputs 的值为 -4294967295
+    # (h*N, W_q, W_k)
     paddings = tf.ones_like(outputs)*(-2**32+1)
-    outputs = tf.where(tf.equal(key_masks, 0), paddings, outputs) # (h*N, T_q, T_k)
+    outputs = tf.where(tf.equal(key_masks, 0), paddings, outputs) 
     
     # Activation
-    outputs = tf.nn.softmax(outputs) # (h*N, T_q, T_k)
+    # 取得 (h*N, W_q, W_k) 的影响度, 按 (h*N, W_q) 对 W_k 的影响度
+    outputs = tf.nn.softmax(outputs)
 
     # Query Masking
-    query_masks = tf.sign(tf.abs(tf.reduce_sum(queries, axis=-1))) # (N, T_q)
-    query_masks = tf.tile(query_masks, [num_heads, 1]) # (h*N, T_q)
-    query_masks = tf.tile(tf.expand_dims(query_masks, -1), [1, 1, tf.shape(keys)[1]]) # (h*N, T_q, T_k)
-    outputs *= query_masks # broadcasting. (N, T_q, C)
+    # 得到 Query 的 masking 的 C的和为0和不为0
+    # (N, W_q) 
+    query_masks = tf.sign(tf.abs(tf.reduce_sum(queries, axis=-1))) 
+    # (h*N, W_q)
+    query_masks = tf.tile(query_masks, [num_heads, 1]) 
+    # (h*N, W_q, W_k)
+    query_masks = tf.tile(tf.expand_dims(query_masks, -1), [1, 1, tf.shape(keys)[1]]) 
+   
+    # 删除掉那些加起来为0的项，得到最大影响度
+    # (h*N, W_q, W_k) * (h*N, W_q, W_k)
+    outputs *= query_masks 
 
     # Weighted sum
+    # (h*N, W_q, W_k) matmul (h*N, W_k, C/h) ==> (h*N, W_q, C/h)
     outputs = tf.matmul(outputs, V_) # ( h*N, T_q, C/h)
     
     # Restore shape
-    outputs = tf.concat(tf.split(outputs, num_heads, axis=0), axis=2 ) # (N, T_q, C)
+    # (h*N, W_q, C/h) => (N, W_q, C)
+    outputs = tf.concat(tf.split(outputs, num_heads, axis=0), axis=2 )  
             
-    # Residual connection
+    # 补偿
     outputs += queries
             
-    # Normalize
+    # 归一化
     outputs = slim.batch_norm(outputs) # (N, T_q, C)
     return outputs
 
