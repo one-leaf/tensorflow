@@ -162,6 +162,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     max_width_image = 0
     info = []
     font_length = random.randint(5, 200)
+    seq_len = np.ones(batch_size)
     for i in range(batch_size):
         font_name = _font_name
         font_size = _font_size
@@ -234,7 +235,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         codes.append([CHARS.index(char) for char in text])                  
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
-
+        seq_len[i]=len(text)
     # 凑成16的整数倍
     # if max_width_image % POOL_SIZE > 0:
     #     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
@@ -251,7 +252,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * max_width_image
+    # seq_len = np.ones(batch_size) * max_width_image
     return inputs, sparse_labels, seq_len, info
 
 def train():
