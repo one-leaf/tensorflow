@@ -53,6 +53,7 @@ def RES(inputs, seq_len, reuse = False):
         # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
         layer = utils_nn.resNet50(inputs, True) # (N H/16 W 2048)
         print("resNet50 shape:",layer.shape)
+        temp_layer = layer
 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
@@ -65,7 +66,6 @@ def RES(inputs, seq_len, reuse = False):
 
         layer = tf.reshape(layer,(batch_size, width, 256))
         print("resNet_seq shape:",layer.shape)
-        temp_layer = layer
         layer.set_shape([None, None, 256])
         layer = LSTM(layer, 256, 256)    # N, W*H, 256
         print("lstm shape:",layer.shape)
