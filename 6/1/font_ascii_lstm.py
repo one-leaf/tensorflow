@@ -63,16 +63,14 @@ def RES(inputs, seq_len, reuse = False):
         shape = tf.shape(layer)
         batch_size, width, channel = shape[0], shape[2], shape[3]
 
-        layer = tf.reshape(layer,(batch_size, width, channel))
-        print("squeeze shape:",layer.shape)  # (N, W, 2048)
-
-
+        layer = tf.reshape(layer,(batch_size, width, 256))
         print("resNet_seq shape:",layer.shape)
-        layer.set_shape([None, None, 256])
-        lstm_layer = LSTM(layer, 256, 256)    # N, W*H, 256
-        print("lstm shape:",lstm_layer.shape)
 
-        return res_layer,lstm_layer
+        layer.set_shape([None, None, 256])
+        layer = LSTM(layer, 256, 256)    # N, W*H, 256
+        print("lstm shape:",layer.shape)
+
+        return layer
 
 def LSTM(inputs, fc_size, lstm_size):
     layer = inputs
@@ -100,7 +98,7 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
-    res_layer, net_res = RES(inputs, seq_len, reuse = False)
+    net_res = RES(inputs, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
