@@ -68,7 +68,7 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer,(batch_size, width, 256))
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 256])
-        layer = LSTM(layer, 128, 64)    # N, W*H, 128
+        layer = LSTM(layer, 256, 128)    # N, W*H, 128
         print("lstm shape:",layer.shape)
 
         return layer, temp_layer
