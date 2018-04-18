@@ -59,7 +59,8 @@ def RES(inputs, seq_len, reuse = False):
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
-        layer = slim.conv2d(layer, 256, [2,1], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        # 将图像宽度和高度 // 2
+        layer = slim.conv2d(layer, 256, [2,2], 2, normalizer_fn=slim.batch_norm, activation_fn=None) 
 
         shape = tf.shape(layer)
         batch_size, width, channel = shape[0], shape[2], shape[3]
@@ -67,7 +68,7 @@ def RES(inputs, seq_len, reuse = False):
         layer = tf.reshape(layer,(batch_size, width, 256))
         print("resNet_seq shape:",layer.shape)
         layer.set_shape([None, None, 256])
-        layer = LSTM(layer, 256, 256)    # N, W*H, 256
+        layer = LSTM(layer, 128, 64)    # N, W*H, 128
         print("lstm shape:",layer.shape)
 
         return layer, temp_layer
@@ -236,9 +237,10 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
         info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
         seq_len[i]=len(text)
-    # 凑成16的整数倍
-    # if max_width_image % POOL_SIZE > 0:
-    #     max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+
+    # 凑成2的整数倍
+    if max_width_image % 2 > 0:
+        max_width_image = max_width_image + (2 - max_width_image % 2)
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
@@ -252,7 +254,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * max_width_image
+    seq_len = np.ones(batch_size) * (max_width_image//2)
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
     return inputs, sparse_labels, seq_len, info
 
