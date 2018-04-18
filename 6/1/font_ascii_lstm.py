@@ -59,8 +59,8 @@ def RES(inputs, seq_len, reuse = False):
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
-        # 将图像宽度和高度 // 2
-        layer = slim.avg_pool2d(layer, [2, 2], 2) 
+        # 将图像高度和宽度 // [2, 4]
+        layer = slim.avg_pool2d(layer, [2, 4], [2, 4]) 
 
         shape = tf.shape(layer)
         batch_size, width, channel = shape[0], shape[2], shape[3]
@@ -239,8 +239,8 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         seq_len[i]=len(text)+1
 
     # 凑成2的整数倍
-    if max_width_image % 2 > 0:
-        max_width_image = max_width_image + 1
+    if max_width_image % 4 > 0:
+        max_width_image = max_width_image + 4 - max_width_image % 4
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
@@ -254,7 +254,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (max_width_image//2)
+    seq_len = np.ones(batch_size) * (max_width_image//4)
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
     return inputs, sparse_labels, seq_len, info
 
