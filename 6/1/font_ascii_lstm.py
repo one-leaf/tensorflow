@@ -128,7 +128,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            res_loss, res_optim, seq_len, res_acc, res_decoded
+            res_loss, res_optim, seq_len, res_acc, res_decoded, net_res
 
 
 ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
@@ -258,7 +258,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
 def train():
     inputs, labels, global_step, lr, summary, \
-        res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
+        res_loss, res_optim, seq_len, res_acc, res_decoded, net_res = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -318,6 +318,9 @@ def train():
                 # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
                 start = time.time()                
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
+
+                _res = session.run(net_res, feed)
+                print(_res.shape)
 
                 errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
                 font_length = int(train_info[0][-1])
