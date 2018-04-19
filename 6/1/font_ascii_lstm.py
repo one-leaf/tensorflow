@@ -343,9 +343,9 @@ def train():
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
                     session.run(global_step.assign(steps))
 
-                if steps<20000:        
+                if steps<5000:        
                     session.run(tf.assign(lr, 1e-4))
-                elif steps<100000:            
+                elif steps<50000:            
                     session.run(tf.assign(lr, 1e-5))
                 else:
                     session.run(tf.assign(lr, 1e-6))
