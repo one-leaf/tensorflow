@@ -1,3 +1,4 @@
+ctpn：
 参考 https://github.com/chineseocr/chinese-ocr
 
 1. 编译 bbox, CPU版本需要修改 setup.py 和 __init__.py 关闭 cuda 模块
@@ -29,3 +30,8 @@
 文档：
 
 http://rowl1ng.com/tech/faster-rcnn.html
+
+----------------------------------
+attention_ocr:
+来源： https://github.com/tensorflow/models/tree/master/research/attention_ocr
+
