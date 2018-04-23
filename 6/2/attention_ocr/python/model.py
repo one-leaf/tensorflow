@@ -134,11 +134,11 @@ class Model(object):
     """Initialized model parameters.
 
     Args:
-      num_char_classes: size of character set.
-      seq_length: number of characters in a sequence.
-      num_views: Number of views (conv towers) to use.
+      num_char_classes: size of character set. 字符个数 132，具体对应查看 datasets/fsns/charset_size
+      seq_length: number of characters in a sequence. 字符最大长度 37
+      num_views: Number of views (conv towers) to use. 一张图有几个文字块 ，4
       null_code: A character code corresponding to a character which
-        indicates end of a sequence.
+        indicates end of a sequence. <null> 字符 133  0 表示 开始
       mparams: a dictionary with hyper parameters for methods,  keys -
         function names, values - corresponding namedtuples.
       charset: an optional dictionary with a mapping between character ids and

@@ -84,7 +84,8 @@ TrainingHParams = collections.namedtuple('TrainingHParams', [
     'use_augment_input',
 ])
 
-
+# 缺省：
+# learning_rate: 0.004 ，optimizer: momentum 0.9, use_augment_input: True
 def get_training_hparams():
   return TrainingHParams(
       learning_rate=FLAGS.learning_rate,
@@ -133,6 +134,7 @@ def train(loss, init_fn, hparams):
     startup_delay_steps = 0
     sync_optimizer = None
 
+# clip_gradient_norm: 2.0
   train_op = slim.learning.create_train_op(
       loss,
       optimizer,
@@ -152,7 +154,7 @@ def train(loss, init_fn, hparams):
       sync_optimizer=sync_optimizer,
       init_fn=init_fn)
 
-
+# 检查训练目录
 def prepare_training_dir():
   if not tf.gfile.Exists(FLAGS.train_log_dir):
     logging.info('Create a new training directory %s', FLAGS.train_log_dir)
@@ -175,9 +177,13 @@ def calculate_graph_metrics():
 
 
 def main(_):
+  # 检查训练目录
   prepare_training_dir()
 
+  # 建立数据集 split_name: train test
   dataset = common_flags.create_dataset(split_name=FLAGS.split_name)
+
+  # 建立模型
   model = common_flags.create_model(dataset.num_char_classes,
                                     dataset.max_sequence_length,
                                     dataset.num_of_views, dataset.null_code)
