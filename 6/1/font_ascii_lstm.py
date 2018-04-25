@@ -123,7 +123,7 @@ def LSTM(inputs, lstm_size, seq_len):
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
             lstm_layer = tf.concat([outputs[0], outputs[1]], axis=-1) 
-            fc_layer = slim.fully_connected(lstm_layer, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
+            layer = slim.fully_connected(lstm_layer, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
     return layer
 
 def neural_networks():
