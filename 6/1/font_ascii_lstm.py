@@ -373,17 +373,17 @@ def train():
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
-                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
-
+                print("%s, %d time: %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
+                    (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))
+                    
                 # 如果当前lost低于平均lost，就多训练
                 for _ in range(int(errR//avg_losts)):
                     start = time.time()                
                     errR, acc, _ , logs= session.run([res_loss, res_acc, res_optim, summary], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
-                    print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
-                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
+                    print("%s, %d time: %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
+                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))                        
                     session.run(global_step.assign(steps))
 
                 if steps<5000:        
