@@ -112,7 +112,7 @@ def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
-            # activation 用 tanh 根本学习不出来 , 模拟了残差网络
+            # activation 用 tanh 根本学习不出来 
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
@@ -124,9 +124,8 @@ def LSTM(inputs, lstm_size, seq_len):
             # cell_fw = tf.contrib.rnn.GRUCell(lstm_size)
             # cell_bw = tf.contrib.rnn.GRUCell(lstm_size)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-            # layer = tf.concat([outputs[0], outputs[1]], axis=-1) + layer
-            layer = outputs[0] + outputs[1] + layer
-            layer = tf.nn.leaky_relu(layer)
+            lstm_layer = tf.concat([outputs[0], outputs[1], layer], axis=-1) 
+            fc_layer = slim.fully_connected(lstm_layer, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
     return layer
 
 def neural_networks():
