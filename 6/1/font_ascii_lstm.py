@@ -46,6 +46,7 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_lstm"
+MAX_IMAGE_WIDTH = 4096
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
@@ -66,7 +67,7 @@ def RES(inputs, seq_len, reuse = False):
         # 增加坐标信息，增加的个数为 embedd_size
         # max_width_height, embedd_size
         # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
-        max_width_height = 1024
+        max_width_height = MAX_IMAGE_WIDTH//4
         embedd_size = 16
         layer = Coordinates(layer, max_width_height, embedd_size)
         print("Coordinates shape:",layer.shape)
@@ -253,7 +254,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
-
+           
         #image = image[:, : , np.newaxis]
         #image = np.reshape(image,(image.shape[0],image.shape[1],1))
         # print(image.shape)
@@ -273,9 +274,12 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
         seq_len[i]=len(text)+1
 
-    # 凑成2的整数倍
+    # 凑成4的整数倍
     if max_width_image % 4 > 0:
         max_width_image = max_width_image + 4 - max_width_image % 4
+
+    if max_width_image > MAX_IMAGE_WIDTH:
+        raise "img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH)
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
