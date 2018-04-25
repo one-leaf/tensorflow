@@ -52,7 +52,7 @@ def RES(inputs, seq_len, reuse = False):
         print("inputs shape:",inputs.shape)
         # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
         layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
-        print("resNet50 shape:",layer.shape)
+        print("ResNet50 shape:",layer.shape)
         temp_layer = layer
 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
@@ -61,28 +61,69 @@ def RES(inputs, seq_len, reuse = False):
        
         # 将图像高度和宽度 // [2, 4]
         layer = slim.avg_pool2d(layer, [2, 4], [2, 4]) 
+        print("ResNet shape:",layer.shape)
 
-        shape = tf.shape(layer)
-        batch_size, width, channel = shape[0], shape[2], shape[3]
+        # 增加坐标信息，增加的个数为 embedd_size
+        # max_width_height, embedd_size
+        # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
+        max_width_height = 1024
+        embedd_size = 16
+        layer = Coordinates(layer, max_width_height, embedd_size)
+        print("Coordinates shape:",layer.shape)
 
-        layer = tf.reshape(layer,(batch_size, width, 256))
-        print("resNet_seq shape:",layer.shape)
-        layer.set_shape([None, None, 256])
-        layer = LSTM(layer, 256, 256)    # N, W*H, 128
+        layer = tf.squeeze(layer, squeeze_dims=1)
+        print("SEQ shape:",layer.shape)
+        
+        layer = LSTM(layer, 256+embedd_size, seq_len)    # N, W*H, 128
         print("lstm shape:",layer.shape)
 
         return layer, temp_layer
 
-def LSTM(inputs, fc_size, lstm_size):
+# 插入像素的坐标信息
+def Coordinates(inputs, max_width_height, embedd_size):
+    shape = tf.shape(inputs)
+    batch_size, h, w = shape[0],shape[1],shape[2]
+    x = tf.range(w*h)
+    x = tf.reshape(x, [1, h, w, 1])
+    loc = tf.tile(x, [batch_size, 1, 1, 1])
+
+    embedding = tf.get_variable("embedding", initializer=tf.random_uniform([max_width_height, embedd_size], -1.0, 1.0)) 
+    loc = tf.nn.embedding_lookup(embedding, loc)
+    loc = tf.squeeze(loc, squeeze_dims=3)
+    loc = tf.concat([inputs, loc], 3)
+
+    return loc
+
+# 采用标准正交基的方式初始化参数
+def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
+    del args
+    del kwargs
+    # 扁平化shape
+    flat_shape = (shape[0], np.prod(shape[1:]))
+    # 标准正态分布
+    w = np.random.randn(*flat_shape)
+    # 奇异值分解，提取矩阵特征，返回的 u,v 都是正交随机的，
+    # u,v 分别代表了batch之间的数据相关性和同一批数据之间的相关性，_ 值代表了批次和数据的交叉相关性，舍弃掉
+    u, _, v = np.linalg.svd(w, full_matrices=False)
+    w = u if u.shape == flat_shape else v
+    return tf.constant(w.reshape(shape), dtype=dtype)
+
+def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(3):
         with tf.variable_scope("rnn-%s"%i):
             # activation 用 tanh 根本学习不出来 , 模拟了残差网络
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
+                activation=tf.nn.leaky_relu, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
+                activation=tf.nn.leaky_relu, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
             # cell_fw = tf.contrib.rnn.GRUCell(lstm_size)
             # cell_bw = tf.contrib.rnn.GRUCell(lstm_size)
-            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
+            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
             # layer = tf.concat([outputs[0], outputs[1]], axis=-1) + layer
             layer = outputs[0] + outputs[1] + layer
             layer = tf.nn.leaky_relu(layer)
@@ -102,13 +143,13 @@ def neural_networks():
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
-    # res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step, var_list=res_vars)
  
     # 防止梯度爆炸
-    res_optim = tf.train.AdamOptimizer(lr)
-    gvs = res_optim.compute_gradients(res_loss)
-    capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
-    res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
+    # res_optim = tf.train.AdamOptimizer(lr)
+    # gvs = res_optim.compute_gradients(res_loss)
+    # capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
+    # res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
 
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))

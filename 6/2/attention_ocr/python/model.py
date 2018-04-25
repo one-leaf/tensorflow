@@ -67,7 +67,7 @@ def _dict_to_array(id_to_char, default_character):
     array[k] = v
   return array
 
-
+# 字符串映射转换
 class CharsetMapper(object):
   """A simple class to map tensor ids into strings.
 
@@ -83,10 +83,12 @@ class CharsetMapper(object):
     Args:
       charset: a dictionary with id-to-character mapping.
     """
+    # 映射
     mapping_strings = tf.constant(_dict_to_array(charset, default_character))
     self.table = tf.contrib.lookup.index_to_string_table_from_tensor(
       mapping=mapping_strings, default_value=default_character)
-
+  
+  # 返回映射的原始字符串
   def get_text(self, ids):
     """Returns a string corresponding to a sequence of character ids.
 
@@ -96,7 +98,7 @@ class CharsetMapper(object):
     return tf.reduce_join(
       self.table.lookup(tf.to_int64(ids)), reduction_indices=1)
 
-
+# 获得损失函数，按照是否是labels是否是稀疏矩阵
 def get_softmax_loss_fn(label_smoothing):
   """Returns sparse or dense loss function depending on the label_smoothing.
 
@@ -138,7 +140,7 @@ class Model(object):
       seq_length: number of characters in a sequence. 字符最大长度 37
       num_views: Number of views (conv towers) to use. 一张图有几个文字块 ，4
       null_code: A character code corresponding to a character which
-        indicates end of a sequence. <null> 字符 133  0 表示 开始
+        indicates end of a sequence. <nul> 字符 133，表示结束； 0 表示 开始
       mparams: a dictionary with hyper parameters for methods,  keys -
         function names, values - corresponding namedtuples.
       charset: an optional dictionary with a mapping between character ids and
@@ -182,6 +184,7 @@ class Model(object):
   def set_mparam(self, function, **kwargs):
     self._mparams[function] = self._mparams[function]._replace(**kwargs)
 
+  # 定义CNN特征提取，采用 inception_v3 预训练模型，输出到 Mixed_5d 层
   def conv_tower_fn(self, images, is_training=True, reuse=None):
     """Computes convolutional features using the InceptionV3 model.
 
@@ -208,6 +211,10 @@ class Model(object):
             images, final_endpoint=mparams.final_endpoint)
       return net
 
+  # 转到 RNN LSTM 的输入
+  # 如果 seq_len < features 报错
+  #     seq_len > features 进行裁剪，只保留 seq_len 的长度
+  # 然后按 features 提取得到 [[batch_size, feature_size],[batch_size, feature_size]]
   def _create_lstm_inputs(self, net):
     """Splits an input tensor into a list of tensors (features).
 
@@ -233,6 +240,7 @@ class Model(object):
 
     return tf.unstack(net, axis=1)
 
+  # 序列模型
   def sequence_logit_fn(self, net, labels_one_hot):
     mparams = self._mparams['sequence_logit_fn']
     # TODO(gorban): remove /alias suffixes from the scopes.
@@ -242,6 +250,8 @@ class Model(object):
       layer = layer_class(net, labels_one_hot, self._params, mparams)
       return layer.create_logits()
 
+  # 将4D数据 max_pool2d 
+  # [ [batch_size, height, width, num_features], ] => [batch_size, height, width, num_features]
   def max_pool_views(self, nets_list):
     """Max pool across all nets in spatial dimensions.
 
@@ -251,20 +261,26 @@ class Model(object):
     Returns:
       A tensor with the same size as any input tensors.
     """
+    # 提取各个维度
     batch_size, height, width, num_features = [
       d.value for d in nets_list[0].get_shape().dims
     ]
+    # 定义将高宽合并
     xy_flat_shape = (batch_size, 1, height * width, num_features)
+
     nets_for_merge = []
     with tf.variable_scope('max_pool_views', values=nets_list):
+      # 取得所有的合并高宽后的shape
       for net in nets_list:
         nets_for_merge.append(tf.reshape(net, xy_flat_shape))
+      # 合并为 (batch_size, n, h*w, f)
       merged_net = tf.concat(nets_for_merge, 1)
       net = slim.max_pool2d(
         merged_net, kernel_size=[len(nets_list), 1], stride=1)
       net = tf.reshape(net, (batch_size, height, width, num_features))
     return net
 
+  # 将[[b, h, w, f],] ==> [b, h*len*w, f]
   def pool_views_fn(self, nets):
     """Combines output of multiple convolutional towers into a single tensor.
 
@@ -283,6 +299,11 @@ class Model(object):
       feature_size = net.get_shape().dims[3].value
       return tf.reshape(net, [batch_size, -1, feature_size])
 
+  # 将预测的softmax值 转为可打印值
+  # [batch_size, seq_length, num_char_classes] softmax
+  # => ids :      [batch_size, seq_length]
+  #    log_prob : [batch_size, seq_length, num_char_classes]
+  #    scores :   [batch_size, seq_length]
   def char_predictions(self, chars_logit):
     """Returns confidence scores (softmax values) for predicted characters.
 
@@ -300,15 +321,25 @@ class Model(object):
         tensor
           with shape [batch_size x seq_length].
     """
+    # 优化下数据
     log_prob = utils.logits_to_log_prob(chars_logit)
+
+    # 取出最大概率的编号
     ids = tf.to_int32(tf.argmax(log_prob, axis=2), name='predicted_chars')
+
+    # onehot ids
     mask = tf.cast(
       slim.one_hot_encoding(ids, self._params.num_char_classes), tf.bool)
+    
+    #求得分,进一步求 softmax，拉开分值
     all_scores = tf.nn.softmax(chars_logit)
+
+    # 只取出 ids 的得分，转为 [batch_size, seq_length]
     selected_scores = tf.boolean_mask(all_scores, mask, name='char_scores')
     scores = tf.reshape(selected_scores, shape=(-1, self._params.seq_length))
     return ids, log_prob, scores
 
+  # 增加每个像素的位置信息到net中去，采用 one-hot 编码
   def encode_coordinates_fn(self, net):
     """Adds one-hot encoding of coordinates to different views in the networks.
 
@@ -329,6 +360,7 @@ class Model(object):
       h_loc = slim.one_hot_encoding(y, num_classes=h)
       loc = tf.concat([h_loc, w_loc], 2)
       loc = tf.tile(tf.expand_dims(loc, 0), [batch_size, 1, 1, 1])
+      # loc = [batch_size, h, w, h+w] #这里全是 one_hot 的数据也就是位置数据
       return tf.concat([net, loc], 3)
     else:
       return net
@@ -354,22 +386,27 @@ class Model(object):
     logging.debug('images: %s', images)
     is_training = labels_one_hot is not None
     with tf.variable_scope(scope, reuse=reuse):
+      # 按宽度分割图片，原始输入的图片是4张拼接在一起的
       views = tf.split(
         value=images, num_or_size_splits=self._params.num_views, axis=2)
       logging.debug('Views=%d single view: %s', len(views), views[0])
 
+      # 定义了4个 inception_v3 模型，参数共用
       nets = [
         self.conv_tower_fn(v, is_training, reuse=(i != 0))
         for i, v in enumerate(views)
       ]
       logging.debug('Conv tower: %s', nets[0])
 
+      # 将所有的图片特征中，再插入了像素的坐标信息
       nets = [self.encode_coordinates_fn(net) for net in nets]
       logging.debug('Conv tower w/ encoded coordinates: %s', nets[0])
 
+      # 将 [4, b, h, w, c] => [b, h*4*w, c]
       net = self.pool_views_fn(nets)
       logging.debug('Pooled views: %s', net)
 
+      # 引入注意力lstm序列模型
       chars_logit = self.sequence_logit_fn(net, labels_one_hot)
       logging.debug('chars_logit: %s', chars_logit)
 

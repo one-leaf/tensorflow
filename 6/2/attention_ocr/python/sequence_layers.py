@@ -44,7 +44,7 @@ import tensorflow as tf
 
 from tensorflow.contrib import slim
 
-
+# 采用标准正交基的方式初始化参数
 def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
   """Generates orthonormal matrices with random values.
 
@@ -73,13 +73,17 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
   """
   del args
   del kwargs
+  # 扁平化shape
   flat_shape = (shape[0], np.prod(shape[1:]))
+  # 标准正态分布
   w = np.random.randn(*flat_shape)
+  # 奇异值分解，提取矩阵特征，返回的 u,v 都是正交随机的，
+  # u,v 分别代表了batch之间的数据相关性和同一批数据之间的相关性，_ 值代表了批次和数据的交叉相关性，舍弃掉
   u, _, v = np.linalg.svd(w, full_matrices=False)
   w = u if u.shape == flat_shape else v
   return tf.constant(w.reshape(shape), dtype=dtype)
 
-
+# 默认是 num_lstm_units 256, weight_decay 0.00004, lstm_state_clip_value 10.
 SequenceLayerParams = collections.namedtuple('SequenceLogitsParams', [
     'num_lstm_units', 'weight_decay', 'lstm_state_clip_value'
 ])
@@ -253,6 +257,7 @@ class SequenceLayerBase(object):
           cell_clip=self._mparams.lstm_state_clip_value,
           state_is_tuple=True,
           initializer=orthogonal_initializer)
+          
       lstm_outputs, _ = self.unroll_cell(
           decoder_inputs=decoder_inputs,
           initial_state=lstm_cell.zero_state(self._batch_size, tf.float32),
@@ -396,7 +401,7 @@ class AttentionWithAutoregression(Attention):
       logit = self.char_logit(prev, char_index=i - 1)
       return self.char_one_hot(logit)
 
-
+#调用入口，是否使用注意力模型，是否自动正则化
 def get_layer_class(use_attention, use_autoregression):
   """A convenience function to get a layer class based on requirements.
 
