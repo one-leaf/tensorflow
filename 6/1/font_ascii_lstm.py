@@ -73,7 +73,7 @@ def RES(inputs, seq_len, reuse = False):
 
         layer = tf.squeeze(layer, squeeze_dims=1)
         print("SEQ shape:",layer.shape)
-        
+
         layer = LSTM(layer, 256+embedd_size, seq_len)    # N, W*H, 128
         print("lstm shape:",layer.shape)
 
@@ -110,7 +110,7 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
-    for i in range(3):
+    for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
             # activation 用 tanh 根本学习不出来 , 模拟了残差网络
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
