@@ -245,7 +245,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         image = np.asarray(image) 
         # print(image.shape)
 
-        image = utils.resize(image, height=image_height, MAX_IMAGE_WIDTH)
+        image = utils.resize(image, image_height, MAX_IMAGE_WIDTH)
 
         if random.random()>0.5:
             image = image / 255.
