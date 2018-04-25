@@ -41,9 +41,17 @@ def cvTrimImage(img):
 
 
 # 按高度缩放图片,img_shape=(height,width)
-def resize(img,height=28):
-    if height == img.shape[1]: return img
-    width = round(height*img.shape[1]/img.shape[0])
+def resize(img, height, max_width):
+    h, w = img.shape[0], img.shape[1]
+    if height == h and w <= max_width : return img  
+
+    width = round(w*height/h)
+    if width <= max_width:
+        height = height
+    else:
+        width = max_width
+        height = round(h*max_width/w)
+
     return cv2.resize(img,(width,height),interpolation=cv2.INTER_NEAREST)
 
 # 文本转向量

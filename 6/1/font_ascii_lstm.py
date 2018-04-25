@@ -245,7 +245,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         image = np.asarray(image) 
         # print(image.shape)
 
-        image = utils.resize(image, height=image_height)
+        image = utils.resize(image, height=image_height, MAX_IMAGE_WIDTH)
 
         if random.random()>0.5:
             image = image / 255.
@@ -268,6 +268,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         # print(image.shape, type(image))
         # image = image.eval()
         # print(image.shape, type(image))
+
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
@@ -278,6 +279,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
     if max_width_image % 4 > 0:
         max_width_image = max_width_image + 4 - max_width_image % 4
 
+    # 如果图片超过最大宽度
     if max_width_image > MAX_IMAGE_WIDTH:
         raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
 
