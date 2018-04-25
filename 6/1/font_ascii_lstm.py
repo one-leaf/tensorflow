@@ -374,6 +374,7 @@ def train():
 
                 # 如果当前lost低于平均lost，就多训练
                 for _ in range(int(errR//avg_losts)):
+                    start = time.time()                
                     errR, acc, _ , logs= session.run([res_loss, res_acc, res_optim, summary], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
