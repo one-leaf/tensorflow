@@ -279,7 +279,7 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
         max_width_image = max_width_image + 4 - max_width_image % 4
 
     if max_width_image > MAX_IMAGE_WIDTH:
-        raise "img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH)
+        raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
@@ -375,7 +375,7 @@ def train():
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
                     (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))
-                    
+
                 # 如果当前lost低于平均lost，就多训练
                 for _ in range(int(errR//avg_losts)):
                     start = time.time()                
