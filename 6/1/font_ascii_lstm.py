@@ -92,7 +92,6 @@ def Coordinates(inputs, max_width_height, embedd_size):
     loc = tf.nn.embedding_lookup(embedding, loc)
     loc = tf.squeeze(loc, squeeze_dims=3)
     loc = tf.concat([inputs, loc], 3)
-
     return loc
 
 # 采用标准正交基的方式初始化参数
