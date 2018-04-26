@@ -366,7 +366,7 @@ def train():
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
-                errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
+                errR, acc, _ , steps = session.run([res_loss, res_acc, res_optim, global_step], feed)
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 accs.append(acc)
@@ -383,7 +383,7 @@ def train():
                 for _ in range(10):
                     if errR <=  avg_losts*2: break 
                     start = time.time()                
-                    errR, acc, _ , logs= session.run([res_loss, res_acc, res_optim, summary], feed)
+                    errR, acc, _ = session.run([res_loss, res_acc, res_optim], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
@@ -397,8 +397,6 @@ def train():
                 else:
                     session.run(tf.assign(lr, 1e-6))
 
-                # 保存日志
-                train_writer.add_summary(logs, steps)
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
                 #     return
@@ -451,6 +449,8 @@ def train():
                 continue
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
+            logs = session.run(summary, feed)
+            train_writer.add_summary(logs, steps)
 
 if __name__ == '__main__':
     train()
