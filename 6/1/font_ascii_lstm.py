@@ -53,11 +53,11 @@ def RES(inputs, seq_len, reuse = False):
         print("inputs shape:",inputs.shape)
         # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
         # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
-        layer = utils_nn.resNext50(inputs, True, [2,1]) # (N H/16 W 1024)
+        layer = utils_nn.resNext50(inputs, True, [2,1]) # (N H/16 W 2048)
         print("ResNet shape:",layer.shape)
         temp_layer = layer
 
-        # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
