@@ -379,7 +379,7 @@ def train():
 
                 # 如果当前lost低于平均lost，就多训练
                 for _ in range(10):
-                    if errR <=  avg_losts: break 
+                    if errR <=  avg_losts*2: break 
                     start = time.time()                
                     errR, acc, _ , logs= session.run([res_loss, res_acc, res_optim, summary], feed)
                     accs.append(acc)
