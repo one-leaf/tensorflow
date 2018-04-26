@@ -378,7 +378,8 @@ def train():
                     (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
-                for _ in range(int(errR//avg_losts)):
+                for _ in range(10):
+                    if errR <=  avg_losts: break 
                     start = time.time()                
                     errR, acc, _ , logs= session.run([res_loss, res_acc, res_optim, summary], feed)
                     accs.append(acc)
