@@ -49,7 +49,7 @@ def bytes_feature(values):
 def create_font_dataset():
     with tf.python_io.TFRecordWriter(TRAINING_TFRECORD_NAME) as writer:
         font_length = random.randint(5, 200)
-        images_count = 1000000
+        images_count = 500000
         for i in range(images_count):
             font_name = random.choice(AllFontNames)
             if random.random()>0.5:
