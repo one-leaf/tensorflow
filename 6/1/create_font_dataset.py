@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 import os
 import utils_pil, utils_font, utils_nn
+import random
 
 curr_dir = os.path.dirname(__file__)
 
