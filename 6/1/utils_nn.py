@@ -485,7 +485,7 @@ def pix2pix_d3(layer):
 
 def resNextBlockB(inputs, size=64, depth=4 ):
     layers_split = []
-    split = slim.conv2d(inputs, depth, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
+    split = slim.conv2d(inputs, depth*32, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
     for i in range(32):
         split = slim.conv2d(split, depth, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
         layers_split.append(split)
