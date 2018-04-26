@@ -81,4 +81,6 @@ def create_font_dataset():
             if i%1000==0:
                 print(i, 1.0*i/images_count) 
     print('\nFinished writing data to tfrecord files.')
-            
+
+if __name__ == '__main__':
+    create_font_dataset()
