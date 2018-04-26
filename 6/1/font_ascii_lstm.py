@@ -390,13 +390,6 @@ def train():
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))                        
                     session.run(global_step.assign(steps))
 
-                if steps<5000:        
-                    session.run(tf.assign(lr, 1e-4))
-                elif steps<50000:            
-                    session.run(tf.assign(lr, 1e-5))
-                else:
-                    session.run(tf.assign(lr, 1e-6))
-
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
                 #     return
@@ -443,7 +436,14 @@ def train():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     for f in sorted_fonts[:20]:
                         print(f)
-                        
+
+                    if steps<5000:        
+                        session.run(tf.assign(lr, 1e-4))
+                    elif steps<50000:            
+                        session.run(tf.assign(lr, 1e-5))
+                    else:
+                        session.run(tf.assign(lr, 1e-6))
+
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
                 continue
