@@ -33,9 +33,9 @@ AllFontNames.remove("Gabriola")
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 
-TRAINING_TFRECORD_NAME = os.join(curr_dir,"data","training.tfrecord")
-if not os.path.exists(os.join(curr_dir,"data")):
-    os.makedirs(os.join(curr_dir,"data"))
+TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training.tfrecord")
+if not os.path.exists(os.path.join(curr_dir,"data")):
+    os.makedirs(os.path.join(curr_dir,"data"))
 
 def int64_feature(values):
     if not isinstance(values, (tuple, list)):
