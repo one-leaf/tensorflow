@@ -90,5 +90,39 @@ def create_font_dataset():
                 print(i, 1.0*i/images_count) 
     print('\nFinished writing data to tfrecord files.')
 
+
+def read_and_decode(filename):
+    TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training.tfrecord")
+    reader = tf.TFRecordReader()
+    if not os.path.exists(TRAINING_TFRECORD_NAME):
+        raise Exception("pls run create_font_dataset.py first.")
+
+    #根据文件名生成一个队列
+    filename_queue = tf.train.string_input_producer([TRAINING_TFRECORD_NAME])
+
+    reader = tf.TFRecordReader()
+    _, serialized_example = reader.read(filename_queue)   #返回文件名和文件
+
+    features = tf.parse_single_example(serialized_example,
+                                       features={
+                                           'image/encoded': tf.FixedLenFeature([], tf.string),
+                                           'image/labels' : tf.FixedLenFeature([], tf.string),
+                                           'image/font_name' : tf.FixedLenFeature([], tf.string),
+                                           'image/font_size' : tf.FixedLenFeature([], tf.int64),
+                                           'image/font_mode' : tf.FixedLenFeature([], tf.int64),
+                                           'image/font_hint' : tf.FixedLenFeature([], tf.int64),
+                                       })
+
+    image = utils_pil.frombytes(features['image/encoded'])
+    label = str(features['image/labels'], encoding="utf-8")
+    font_name = str(features['image/font_name'], encoding="utf-8")    
+    font_size = tf.cast(features['image/font_size'], tf.int32)
+    font_mode = tf.cast(features['image/font_mode'], tf.int32)
+    font_hint = tf.cast(features['image/font_hint'], tf.int32)
+
+    return image, label, font_name, font_size, font_mode, font_hint
+
+
+
 if __name__ == '__main__':
     create_font_dataset()

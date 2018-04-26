@@ -443,7 +443,7 @@ def train():
                         session.run(tf.assign(lr, 1e-5))
                     else:
                         session.run(tf.assign(lr, 1e-6))
-
+                                            
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
                 continue

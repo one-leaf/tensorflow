@@ -142,6 +142,9 @@ def convert_to_bw(img_gray_array):
     thresh, img_bw = cv2.threshold(img_gray_array, 50, 255, cv2.THRESH_BINARY)
     return img_bw
 
+def frombytes(img_bytes):
+    return Image.frombytes('RGBA', img_bytes)
+
 def main():
     img = getImage("abced12323","Arial",16)
     show(img)    
