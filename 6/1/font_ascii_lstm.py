@@ -55,7 +55,7 @@ def RES(inputs, seq_len, reuse = False):
         # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
         layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
 
-        layer = utils_nn.resNext50(inputs, True, [2,1]) # (N H/16 W 2048)
+        layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
         print("ResNet shape:",layer.shape)
         temp_layer = layer
 
