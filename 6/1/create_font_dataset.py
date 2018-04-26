@@ -5,6 +5,7 @@ import numpy as np
 import os
 import utils_pil, utils_font, utils_nn
 import random
+from io import BytesIO
 
 curr_dir = os.path.dirname(__file__)
 
@@ -68,7 +69,13 @@ def create_font_dataset():
             text = text.strip()
 
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
-            image = image.tobytes(encoder_name="PNG")
+
+            # 为了节省硬盘空间
+            # byte_io = BytesIO() 
+            # image.save(byte_io, format="png")
+            # image = byte_io.getvalue()
+
+            image = image.tobytes()
 
             example = tf.train.Example(features=tf.train.Features(feature={
                 'image/encoded': bytes_feature(image),
