@@ -42,7 +42,6 @@ def int64_feature(values):
       values = [values]
     return tf.train.Feature(int64_list=tf.train.Int64List(value=values))
 
-
 def bytes_feature(values):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
 
