@@ -72,8 +72,8 @@ def create_font_dataset():
 
             example = tf.train.Example(features=tf.train.Features(feature={
                 'image/encoded': bytes_feature(image),
-                'image/labels': bytes_feature(bytes(text)),
-                'image/font_name': bytes_feature(bytes(font_name)),
+                'image/labels': bytes_feature(bytes(text, encoding="utf-8")),
+                'image/font_name': bytes_feature(bytes(font_name, encoding="utf-8")),
                 'image/font_size': int64_feature(font_size),
                 'image/font_mode': int64_feature(font_mode),
                 'image/font_hint': int64_feature(font_hint),
