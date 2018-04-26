@@ -88,8 +88,7 @@ def Coordinates(inputs, max_width_height, embedd_size):
     x = tf.range(w*h)
     x = tf.reshape(x, [1, h, w, 1])
     loc = tf.tile(x, [batch_size, 1, 1, 1])
-    # 由于后面的lstm activation 用的是 relu，所以分布只能是 0~1
-    embedding = tf.get_variable("embedding", initializer=tf.random_uniform([max_width_height, embedd_size], 0., 1.0)) 
+    embedding = tf.get_variable("embedding", initializer=tf.random_uniform([max_width_height, embedd_size], -1.0, 1.0)) 
     loc = tf.nn.embedding_lookup(embedding, loc)
     loc = tf.squeeze(loc, squeeze_dims=3)
     loc = tf.concat([inputs, loc], 3)
