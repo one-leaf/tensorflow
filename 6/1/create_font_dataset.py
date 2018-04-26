@@ -68,7 +68,7 @@ def create_font_dataset():
             text = text.strip()
 
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
-            image = image.tobytes(encoder_name="png")
+            image = image.tobytes(encoder_name="PNG")
 
             example = tf.train.Example(features=tf.train.Features(feature={
                 'image/encoded': bytes_feature(image),
