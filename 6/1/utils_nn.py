@@ -483,14 +483,13 @@ def pix2pix_d3(layer):
     layer = tf.nn.sigmoid(layer)
     return layer
 
-def resNextBlockB(inputs, size=64, stride=1):
+def resNextBlockB(inputs, size=64, depth=4 ):
     layers_split = []
     for i in range(32):
-        split = slim.conv2d(inputs, 4, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
-        split = slim.conv2d(split, 4, [3,3], stride=stride, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu, padding = "SAME")
+        split = slim.conv2d(inputs, depth, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
+        split = slim.conv2d(split, depth, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
         layers_split.append(split)
-    layer = tf.concat(layers_split,-1)  # 128
-    layer = slim.conv2d(inputs, size, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+    layer = tf.concat(layers_split, -1)  
     return tf.nn.leaky_relu(inputs + layer)   
 
 def resNext50(layer, isPoolSize=True, stride=2):
@@ -499,24 +498,24 @@ def resNext50(layer, isPoolSize=True, stride=2):
     else:
         stride = 1
     with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding="SAME"):
-        layer = slim.conv2d(layer, 64, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-        for i in range(3):
-            layer = resNextBlockB(layer, 64)
-        layer = slim.max_pool2d(layer, [2, 1])
-
         layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
-        for i in range(4):
-            layer = resNextBlockB(layer, 128)
-        layer = slim.max_pool2d(layer, [2, 1])
-
-        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
-        for i in range(6):
-            layer = resNextBlockB(layer, 256)
-        layer = slim.max_pool2d(layer, [2, 1])
-
-        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
-            layer = resNextBlockB(layer, 512)
+            layer = resNextBlockB(layer, 64, 4)
+        layer = slim.max_pool2d(layer, [2, 1])
+
+        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
+        for i in range(4):
+            layer = resNextBlockB(layer, 128, 8)
+        layer = slim.max_pool2d(layer, [2, 1])
+
+        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
+        for i in range(6):
+            layer = resNextBlockB(layer, 256, 16)
+        layer = slim.max_pool2d(layer, [2, 1])
+
+        layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        for i in range(3):
+            layer = resNextBlockB(layer, 512, 32)
         layer = slim.max_pool2d(layer, [2, 1])
 
         return layer
