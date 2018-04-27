@@ -313,6 +313,9 @@ def train():
                 train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
+                feed_time = time.time() - start
+                start = time.time()    
+
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
@@ -326,8 +329,8 @@ def train():
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
-                    (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))
+                print("%s, %d time: %4.4fs / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
+                    (time.ctime(), steps, feed_time, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
                 for _ in range(10):
