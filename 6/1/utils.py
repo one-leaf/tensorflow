@@ -253,7 +253,6 @@ def unsquare_img(srcimg, height):
 def img2vec(img, height=-1, width=-1, value=0, flatten=True):
     h=img.shape[0]
     w=img.shape[1]
-    print(img.shape)
     if width==-1: width=w
     if height==-1: height=h
     if h>height or w>width:
