@@ -218,20 +218,14 @@ def get_next_batch_for_res(batch_size=128):
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)  
 
-        if random.random()>0.5:
-            image = utils_pil.resize_by_height(image, image_height-random.randint(1,5))
-            image, _ = utils_pil.random_space2(image, image,  image_height)
+        image = utils_pil.resize_by_height(image, image_height-random.randint(1,5))
+        image, _ = utils_pil.random_space2(image, image,  image_height)
         
-        # if if_to_G and random.random()>0.5:
-        # if random.random()>0.5:
-        #     image = utils_font.add_noise(image)   
-        # print(dir(image))
+        image = utils_font.add_noise(image)   
         image = np.asarray(image) 
-        # print(image.shape)
 
         print("pil image paid", time.time() - start)
         start = time.time()    
-
 
         image = utils.resize(image, image_height, MAX_IMAGE_WIDTH)
 
@@ -250,11 +244,7 @@ def get_next_batch_for_res(batch_size=128):
         print("np image paid", time.time() - start)
         start = time.time()    
 
-        image = tf.image.random_hue(image, max_delta=0.05)
-        image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
-        image = tf.image.random_brightness(image, max_delta=0.2)
-        image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
-        image = tf.image.rgb_to_grayscale(image)
+
         # image = tf.minimum(image, 1.0)
         # image = tf.maximum(image, 0.0)
         # print(image.shape, type(image))
@@ -278,20 +268,12 @@ def get_next_batch_for_res(batch_size=128):
     if max_width_image > MAX_IMAGE_WIDTH:
         raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
 
-    # inputs = np.zeros([batch_size, image_height, max_width_image, 1])
-    image_list = []
+    inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        # image = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
-        # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
-        image = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
-        image_list.append(image)
-        #image = image.eval()
-
-        # print(image.shape)
-        #inputs[i,:] = image
-
-    inputs= tf.concat(image_list)
-    print("tf crop image paid", time.time() - start)
+        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
+     
+    print("image noise paid", time.time() - start)
     start = time.time()  
 
     # print(inputs.shape, len(codes))
