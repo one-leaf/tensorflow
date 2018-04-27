@@ -176,6 +176,7 @@ def list_to_chars(list):
 dataset = None
 dataset_example=tf.train.Example() 
 def dataset_init():
+    global dataset
     data_dir = os.path.join(curr_dir,"data")
     datafiles = os.listdir(data_dir)
     data_file = os.path.join(data_dir, random.choice(datafiles))

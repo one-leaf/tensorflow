@@ -483,7 +483,7 @@ def pix2pix_d3(layer):
     layer = tf.nn.sigmoid(layer)
     return layer
 
-def resNextBlockB(inputs, size=64, depth=4 ):
+def resNextBlockB(inputs, size=64, depth=4):
     layers_split = []
     for i in range(32):
         split = slim.conv2d(inputs, depth, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
