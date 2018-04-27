@@ -290,7 +290,7 @@ def get_next_batch_for_res(batch_size=128):
         # print(image.shape)
         #inputs[i,:] = image
 
-    inputs= tf.concat(image_list, 0)
+    inputs= tf.concat(image_list)
     print("tf crop image paid", time.time() - start)
     start = time.time()  
 
