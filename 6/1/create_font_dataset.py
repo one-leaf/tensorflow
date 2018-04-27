@@ -48,7 +48,7 @@ def bytes_feature(values):
 
 def create_font_dataset():
     for i in range(20):
-        TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training%s.tfrecord"%i)
+        TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training_%s.tfrecord"%i)
         with tf.python_io.TFRecordWriter(TRAINING_TFRECORD_NAME) as writer:
             font_length = random.randint(5, 200)
             images_count = 50000
