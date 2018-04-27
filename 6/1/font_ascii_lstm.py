@@ -192,6 +192,8 @@ def get_next_batch_for_res(batch_size=128):
 
     for i in range(batch_size):
 
+        start = time.time()    
+
         serialized_example = next(dataset, None)
         if serialized_example==None:
             raise Exception("has finished train one data file, stop")
@@ -207,6 +209,9 @@ def get_next_batch_for_res(batch_size=128):
         size = dataset_example.features.feature['size'].int64_list.value
         image = dataset_example.features.feature['image'].bytes_list.value[0]
         image = utils_pil.frombytes(tuple(size), image)
+
+        print("get image paid", time.time() - start)
+        start = time.time()    
 
         # image = utils_pil.convert_to_gray(image) 
         w, h = size
@@ -224,6 +229,10 @@ def get_next_batch_for_res(batch_size=128):
         image = np.asarray(image) 
         # print(image.shape)
 
+        print("pil image paid", time.time() - start)
+        start = time.time()    
+
+
         image = utils.resize(image, image_height, MAX_IMAGE_WIDTH)
 
         if random.random()>0.5:
@@ -237,6 +246,10 @@ def get_next_batch_for_res(batch_size=128):
         #image = image[:, : , np.newaxis]
         #image = np.reshape(image,(image.shape[0],image.shape[1],1))
         # print(image.shape)
+
+        print("np image paid", time.time() - start)
+        start = time.time()    
+
         image = tf.image.random_hue(image, max_delta=0.05)
         image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
         image = tf.image.random_brightness(image, max_delta=0.2)
@@ -247,6 +260,9 @@ def get_next_batch_for_res(batch_size=128):
         # print(image.shape, type(image))
         # image = image.eval()
         # print(image.shape, type(image))
+
+        print("tf image paid", time.time() - start)
+        start = time.time()    
 
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
@@ -270,7 +286,10 @@ def get_next_batch_for_res(batch_size=128):
         image = image.eval()
         # print(image.shape)
         inputs[i,:] = image
-        
+
+    print("tf crop image paid", time.time() - start)
+    start = time.time()  
+
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
