@@ -278,15 +278,19 @@ def get_next_batch_for_res(batch_size=128):
     if max_width_image > MAX_IMAGE_WIDTH:
         raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
 
-    inputs = np.zeros([batch_size, image_height, max_width_image, 1])
+    # inputs = np.zeros([batch_size, image_height, max_width_image, 1])
+    image_list = []
     for i in range(batch_size):
         # image = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
         # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
         image = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
-        image = image.eval()
-        # print(image.shape)
-        inputs[i,:] = image
+        image_list.append(image)
+        #image = image.eval()
 
+        # print(image.shape)
+        #inputs[i,:] = image
+
+    inputs= tf.concat(image_list, 0)
     print("tf crop image paid", time.time() - start)
     start = time.time()  
 
