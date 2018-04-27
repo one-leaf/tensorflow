@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
 import math
 import urllib,json,io
-import utils_pil, utils_nn
+import utils_pil, utils_font, utils_nn
 import operator
 from collections import deque
 
