@@ -485,7 +485,7 @@ def pix2pix_d3(layer):
 
 def resNextBlockB(inputs, size=64, depth=4):
     layers_split = []
-    for i in range(32):
+    for i in range(size//depth):
         split = slim.conv2d(inputs, depth, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
         split = slim.conv2d(split, depth, [3,3], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
         layers_split.append(split)
@@ -506,17 +506,17 @@ def resNext50(layer, isPoolSize=True, stride=2):
 
         layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(4):
-            layer = resNextBlockB(layer, 256, 8)
+            layer = resNextBlockB(layer, 256, 4)
         layer = slim.max_pool2d(layer, [2, 1])
 
         layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)        
         for i in range(6):
-            layer = resNextBlockB(layer, 512, 16)
+            layer = resNextBlockB(layer, 512, 4)
         layer = slim.max_pool2d(layer, [2, 1])
 
         layer = slim.conv2d(layer, 2048, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
         for i in range(3):
-            layer = resNextBlockB(layer, 1024, 32)
+            layer = resNextBlockB(layer, 1024, 4)
         layer = slim.max_pool2d(layer, [2, 1])
 
         return layer
