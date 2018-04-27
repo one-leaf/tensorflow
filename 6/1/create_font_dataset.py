@@ -41,7 +41,7 @@ if not os.path.exists(os.path.join(curr_dir,"data")):
 
 def int64_feature(values):
     if not isinstance(values, (tuple, list)):
-      values = [values]
+        values = [values]
     return tf.train.Feature(int64_list=tf.train.Int64List(value=values))
 
 def bytes_feature(values):
@@ -70,20 +70,14 @@ def create_font_dataset():
 
             image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
 
-            # 为了节省硬盘空间
-            # byte_io = BytesIO() 
-            # image.save(byte_io, format="png")
-            # image = byte_io.getvalue()
-
-            image = image.tobytes()
-
             example = tf.train.Example(features=tf.train.Features(feature={
-                'image/encoded': bytes_feature(image),
-                'image/labels': bytes_feature(bytes(text, encoding="utf-8")),
-                'image/font_name': bytes_feature(bytes(font_name, encoding="utf-8")),
-                'image/font_size': int64_feature(font_size),
-                'image/font_mode': int64_feature(font_mode),
-                'image/font_hint': int64_feature(font_hint),
+                'image': bytes_feature(image.tobytes()),
+                'label': bytes_feature(bytes(text, encoding="utf-8")),
+                'size':  int64_feature(image.size),
+                'font_name': bytes_feature(bytes(font_name, encoding="utf-8")),
+                'font_size': int64_feature(font_size),
+                'font_mode': int64_feature(font_mode),
+                'font_hint': int64_feature(font_hint),
             }))
             writer.write(example.SerializeToString())
             if i%1000==0:
@@ -91,38 +85,18 @@ def create_font_dataset():
     print('\nFinished writing data to tfrecord files.')
 
 
-def read_and_decode(filename):
+def simple_read():
     TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training.tfrecord")
-    reader = tf.TFRecordReader()
-    if not os.path.exists(TRAINING_TFRECORD_NAME):
-        raise Exception("pls run create_font_dataset.py first.")
-
-    #根据文件名生成一个队列
-    filename_queue = tf.train.string_input_producer([TRAINING_TFRECORD_NAME])
-
-    reader = tf.TFRecordReader()
-    _, serialized_example = reader.read(filename_queue)   #返回文件名和文件
-
-    features = tf.parse_single_example(serialized_example,
-                                       features={
-                                           'image/encoded': tf.FixedLenFeature([], tf.string),
-                                           'image/labels' : tf.FixedLenFeature([], tf.string),
-                                           'image/font_name' : tf.FixedLenFeature([], tf.string),
-                                           'image/font_size' : tf.FixedLenFeature([], tf.int64),
-                                           'image/font_mode' : tf.FixedLenFeature([], tf.int64),
-                                           'image/font_hint' : tf.FixedLenFeature([], tf.int64),
-                                       })
-
-    image = utils_pil.frombytes(features['image/encoded'])
-    label = str(features['image/labels'], encoding="utf-8")
-    font_name = str(features['image/font_name'], encoding="utf-8")    
-    font_size = tf.cast(features['image/font_size'], tf.int32)
-    font_mode = tf.cast(features['image/font_mode'], tf.int32)
-    font_hint = tf.cast(features['image/font_hint'], tf.int32)
-
-    return image, label, font_name, font_size, font_mode, font_hint
-
-
+    for serialized_example in tf.python_io.tf_record_iterator(TRAINING_TFRECORD_NAME):
+        example = tf.train.Example()
+        example.ParseFromString(serialized_example)
+        size = example.features.feature['image/size'].int64_list.value
+        image = example.features.feature['image/encoded'].bytes_list.value[0]
+        image = utils_pil.frombytes(tuple(size), image)
+        label = str(example.features.feature['image/label'].bytes_list.value[0],  encoding="utf-8")
+        font_size = example.features.feature['image/font_size'].int64_list.value[0]
+        print(label)
 
 if __name__ == '__main__':
     create_font_dataset()
+    # simple_read()
