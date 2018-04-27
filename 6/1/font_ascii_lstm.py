@@ -173,15 +173,14 @@ def list_to_chars(list):
     except Exception as err:
         return "Error: %s" % err        
 
-dataset = None
+dataset = dataset_init()
 dataset_example=tf.train.Example() 
 def dataset_init():
-    global dataset
     data_dir = os.path.join(curr_dir,"data")
     datafiles = os.listdir(data_dir)
     data_file = os.path.join(data_dir, random.choice(datafiles))
-    dataset = tf.python_io.tf_record_iterator(data_file)
     print("load data_file", data_file)
+    return tf.python_io.tf_record_iterator(data_file)
 
 def get_next_batch_for_res(batch_size=128):
     inputs_images = []   
@@ -191,17 +190,11 @@ def get_next_batch_for_res(batch_size=128):
     font_length = random.randint(5, 200)
     seq_len = np.ones(batch_size)
 
-    if dataset==None: dataset_init()
-
     for i in range(batch_size):
 
-        while True:
-            serialized_example = next(dataset, None)
-            if serialized_example==None:
-                dataset_init()
-                serialized_example = next(dataset, None)
-            else:
-                continue
+        serialized_example = next(dataset, None)
+        if serialized_example==None:
+            raise Exception("has finished train one data file, stop")
 
         dataset_example.ParseFromString(serialized_example)
 
