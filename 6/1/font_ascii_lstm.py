@@ -192,7 +192,6 @@ def get_next_batch_for_res(batch_size=128):
 
     for i in range(batch_size):
 
-        start = time.time()    
 
         serialized_example = next(dataset, None)
         if serialized_example==None:
@@ -210,9 +209,6 @@ def get_next_batch_for_res(batch_size=128):
         image = dataset_example.features.feature['image'].bytes_list.value[0]
         image = utils_pil.frombytes(tuple(size), image)
 
-        print("get image paid", time.time() - start)
-        start = time.time()    
-
         # image = utils_pil.convert_to_gray(image) 
         w, h = size
         if h > image_height:
@@ -224,8 +220,6 @@ def get_next_batch_for_res(batch_size=128):
         image = utils_font.add_noise(image)   
         image = np.asarray(image) 
 
-        print("pil image paid", time.time() - start)
-        start = time.time()    
 
         image = utils.resize(image, image_height, MAX_IMAGE_WIDTH)
 
@@ -236,10 +230,7 @@ def get_next_batch_for_res(batch_size=128):
 
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
-           
-        print("np image paid", time.time() - start)
-        start = time.time()    
-
+          
         inputs_images.append(image)
         codes.append([CHARS.index(char) for char in text])                  
 
@@ -259,9 +250,6 @@ def get_next_batch_for_res(batch_size=128):
         image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
      
-    print("image noise paid", time.time() - start)
-    start = time.time()  
-
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
