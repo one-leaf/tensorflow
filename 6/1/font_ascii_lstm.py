@@ -115,16 +115,16 @@ def LSTM(inputs, lstm_size, seq_len):
         with tf.variable_scope("rnn-%s"%i):
             # activation 用 tanh 根本学习不出来 , 模拟了残差网络
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
-                activation=tf.nn.leaky_relu, 
+                activation=tf.nn.relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
-                activation=tf.nn.leaky_relu, 
+                activation=tf.nn.relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
             layer = outputs[0] + outputs[1] + layer
-            layer = tf.nn.leaky_relu(layer)
+            layer = tf.nn.relu(layer)
     return layer
 
 def neural_networks():
@@ -339,7 +339,7 @@ def train():
                     errR, acc, _ = session.run([res_loss, res_acc, res_optim], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
-                    print("%s, %d time: %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
+                    print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
                         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))                        
                     session.run(global_step.assign(steps))
 
