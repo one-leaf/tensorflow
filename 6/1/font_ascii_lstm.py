@@ -272,9 +272,10 @@ def train():
     log_dir = os.path.join(model_dir, "logs")
     if not os.path.exists(log_dir): os.mkdir(log_dir)
 
-    init = tf.global_variables_initializer()
     with tf.Session() as session:
-        session.run(init)
+        print("tf init")
+        init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+        session.run(init_op)
 
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
 
@@ -301,6 +302,8 @@ def train():
             return
 
         train_writer = tf.summary.FileWriter(log_dir, session.graph)
+
+        print("tf train")
 
         AllLosts={}
         accs = deque(maxlen=100)
