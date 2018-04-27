@@ -188,7 +188,6 @@ def get_next_batch_for_res(batch_size=128):
     codes = []
     max_width_image = 0
     info = []
-    font_length = random.randint(5, 200)
     seq_len = np.ones(batch_size)
 
     for i in range(batch_size):
@@ -329,17 +328,8 @@ def train():
             errR = 1
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
-                if len(AllLosts)>10 and random.random()>0.7:
-                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
-                    font_info = sorted_font[random.randint(0,10)]
-                    font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
-                        font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
-                else:
-                    # train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
-                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
-                start = time.time()                
+                start = time.time()    
+                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
                 # _res = session.run(net_res, feed)
