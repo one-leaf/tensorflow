@@ -370,7 +370,7 @@ def train():
                     else:
                         AllLosts[key]=acc
 
-                if acc/avg_acc<=0.8:
+                if acc/avg_acc<=0.5:
                     for i in range(batch_size): 
                         filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, steps, i, \
                             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
