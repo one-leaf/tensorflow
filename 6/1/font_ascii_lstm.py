@@ -237,21 +237,7 @@ def get_next_batch_for_res(batch_size=128):
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
            
-        #image = image[:, : , np.newaxis]
-        #image = np.reshape(image,(image.shape[0],image.shape[1],1))
-        # print(image.shape)
-
         print("np image paid", time.time() - start)
-        start = time.time()    
-
-
-        # image = tf.minimum(image, 1.0)
-        # image = tf.maximum(image, 0.0)
-        # print(image.shape, type(image))
-        # image = image.eval()
-        # print(image.shape, type(image))
-
-        print("tf image paid", time.time() - start)
         start = time.time()    
 
         inputs_images.append(image)
