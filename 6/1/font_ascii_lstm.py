@@ -209,7 +209,7 @@ def get_next_batch_for_res(batch_size=128):
         image = dataset_example.features.feature['image'].bytes_list.value[0]
         image = utils_pil.frombytes(tuple(size), image)
 
-        # image = utils_pil.convert_to_gray(image) 
+        image = utils_pil.convert_to_gray(image) 
         w, h = size
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)  
