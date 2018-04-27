@@ -363,7 +363,7 @@ def train():
                             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                if steps >0 and steps % REPORT_STEPS < 2:
+                if steps >0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
            
                     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
