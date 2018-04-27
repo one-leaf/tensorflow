@@ -257,6 +257,8 @@ def get_next_batch_for_res(batch_size=128):
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
     return inputs, sparse_labels, seq_len, info
 
+get_next_batch_for_res(1)
+
 def train():
     inputs, labels, global_step, lr, summary, \
         res_loss, res_optim, seq_len, res_acc, res_decoded, net_res = neural_networks()
