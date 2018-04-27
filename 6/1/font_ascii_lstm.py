@@ -173,14 +173,15 @@ def list_to_chars(list):
     except Exception as err:
         return "Error: %s" % err        
 
-dataset = dataset_init()
-dataset_example=tf.train.Example() 
 def dataset_init():
     data_dir = os.path.join(curr_dir,"data")
     datafiles = os.listdir(data_dir)
     data_file = os.path.join(data_dir, random.choice(datafiles))
     print("load data_file", data_file)
     return tf.python_io.tf_record_iterator(data_file)
+
+dataset = dataset_init()
+dataset_example=tf.train.Example() 
 
 def get_next_batch_for_res(batch_size=128):
     inputs_images = []   
