@@ -35,7 +35,6 @@ AllFontNames.remove("Gabriola")
 
 eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
 
-TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training.tfrecord")
 if not os.path.exists(os.path.join(curr_dir,"data")):
     os.makedirs(os.path.join(curr_dir,"data"))
 
@@ -48,40 +47,42 @@ def bytes_feature(values):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
 
 def create_font_dataset():
-    with tf.python_io.TFRecordWriter(TRAINING_TFRECORD_NAME) as writer:
-        font_length = random.randint(5, 200)
-        images_count = 500000
-        for i in range(images_count):
-            font_name = random.choice(AllFontNames)
-            if random.random()>0.5:
-                font_size = random.randint(9, 49)    
-            else:
-                font_size = random.randint(9, 15) 
-            font_mode = random.choice([0,1,2,4]) 
-            # hint 2 在小字体下会断开笔画，人眼都无法识别
-            if font_size>=14:
-                font_hint = random.choice([0,1,2,3,4,5])  
-            else:
-                font_hint = random.choice([0,1,3,4,5]) 
+    for i in range(20):
+        TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training%s.tfrecord"%i)
+        with tf.python_io.TFRecordWriter(TRAINING_TFRECORD_NAME) as writer:
+            font_length = random.randint(5, 200)
+            images_count = 50000
+            for j in range(images_count):
+                font_name = random.choice(AllFontNames)
+                if random.random()>0.5:
+                    font_size = random.randint(9, 49)    
+                else:
+                    font_size = random.randint(9, 15) 
+                font_mode = random.choice([0,1,2,4]) 
+                # hint 2 在小字体下会断开笔画，人眼都无法识别
+                if font_size>=14:
+                    font_hint = random.choice([0,1,2,3,4,5])  
+                else:
+                    font_hint = random.choice([0,1,3,4,5]) 
 
-            text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-            text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
-            text = text.strip()
+                text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
+                text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
+                text = text.strip()
 
-            image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
+                image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
 
-            example = tf.train.Example(features=tf.train.Features(feature={
-                'image': bytes_feature(image.tobytes()),
-                'label': bytes_feature(bytes(text, encoding="utf-8")),
-                'size':  int64_feature(image.size),
-                'font_name': bytes_feature(bytes(font_name, encoding="utf-8")),
-                'font_size': int64_feature(font_size),
-                'font_mode': int64_feature(font_mode),
-                'font_hint': int64_feature(font_hint),
-            }))
-            writer.write(example.SerializeToString())
-            if i%1000==0:
-                print(i, 1.0*i/images_count) 
+                example = tf.train.Example(features=tf.train.Features(feature={
+                    'image': bytes_feature(image.tobytes()),
+                    'label': bytes_feature(bytes(text, encoding="utf-8")),
+                    'size':  int64_feature(image.size),
+                    'font_name': bytes_feature(bytes(font_name, encoding="utf-8")),
+                    'font_size': int64_feature(font_size),
+                    'font_mode': int64_feature(font_mode),
+                    'font_hint': int64_feature(font_hint),
+                }))
+                writer.write(example.SerializeToString())
+                if j%1000==0:
+                    print(i, j, 1.0*j/images_count) 
     print('\nFinished writing data to tfrecord files.')
 
 
