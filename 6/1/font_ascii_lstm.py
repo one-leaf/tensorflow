@@ -11,8 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 import tensorflow.contrib.slim as slim
 import math
 import urllib,json,io
-import utils_pil, utils_font, utils_nn
-import font_ascii_clean
+import utils_pil, utils_nn
 import operator
 from collections import deque
 
@@ -168,70 +167,55 @@ def neural_networks():
     return  inputs, labels, global_step, lr, summary, \
             res_loss, res_optim, seq_len, res_acc, res_decoded, temp_layer
 
-
-ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
-print("EngFontNames", ENGFontNames)
-print("CHIFontNames", CHIFontNames)
-AllFontNames = ENGFontNames + CHIFontNames
-AllFontNames.remove("方正兰亭超细黑简体")
-AllFontNames.remove("幼圆")
-AllFontNames.remove("方正舒体")
-AllFontNames.remove("方正姚体")
-AllFontNames.remove("华文新魏")
-AllFontNames.remove("Impact")
-AllFontNames.remove("Gabriola")
-
-eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
-
 def list_to_chars(list):
     try:
         return "".join([CHARS[v] for v in list])
     except Exception as err:
         return "Error: %s" % err        
 
-if os.path.exists(os.path.join(curr_dir,"train.txt")):
-    train_text_lines = open(os.path.join(curr_dir,"train.txt")).readlines()
-else:
-    train_text_lines = []
+dataset = None
+dataset_example=tf.train.Example() 
+def dataset_init():
+    data_dir = os.path.join(curr_dir,"data")
+    datafiles = os.listdir(data_dir)
+    data_file = os.path.join(data_dir, random.choice(datafiles))
+    dataset = tf.python_io.tf_record_iterator(data_file)
+    print("load data_file", data_file)
 
-def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
+def get_next_batch_for_res(batch_size=128):
     inputs_images = []   
     codes = []
     max_width_image = 0
     info = []
     font_length = random.randint(5, 200)
     seq_len = np.ones(batch_size)
+
+    if dataset==None: dataset_init()
+
     for i in range(batch_size):
-        font_name = _font_name
-        font_size = _font_size
-        font_mode = _font_mode
-        font_hint = _font_hint
-        if font_name==None:
-            font_name = random.choice(AllFontNames)
-        if font_size==None:
-            if random.random()>0.5:
-                font_size = random.randint(9, 49)    
+
+        while True:
+            serialized_example = next(dataset, None)
+            if serialized_example==None:
+                dataset_init()
+                serialized_example = next(dataset, None)
             else:
-                font_size = random.randint(9, 15) 
-        if font_mode==None:
-            font_mode = random.choice([0,1,2,4]) 
-        if font_hint==None:
-            # hint 2 在小字体下会断开笔画，人眼都无法识别
-            if font_size>=14:
-                font_hint = random.choice([0,1,2,3,4,5])  
-            else:
-                font_hint = random.choice([0,1,3,4,5]) 
+                continue
 
-        text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-        text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
-        text = text.strip()
+        dataset_example.ParseFromString(serialized_example)
 
-            # random.shuffle(text)
-            # text = "".join(text).strip()
+        font_name = str(dataset_example.features.feature['font_name'].bytes_list.value[0],  encoding="utf-8")
+        font_size = dataset_example.features.feature['font_size'].int64_list.value[0]
+        font_mode = dataset_example.features.feature['font_mode'].int64_list.value[0]
+        font_hint = dataset_example.features.feature['font_mode'].int64_list.value[0]
 
-        image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
+        text = str(dataset_example.features.feature['label'].bytes_list.value[0],  encoding="utf-8")
+        size = dataset_example.features.feature['size'].int64_list.value
+        image = dataset_example.features.feature['image'].bytes_list.value[0]
+        image = utils_pil.frombytes(tuple(size), image)
+
         # image = utils_pil.convert_to_gray(image) 
-        w, h = image.size
+        w, h = size
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)  
 
