@@ -133,17 +133,17 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
-    cells_fw = [tf.contrib.rnn.GRUCell(lstm_size//2, 
+    cells_fw = [tf.contrib.rnn.GRUCell(lstm_size, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
-                bias_initializer=tf.zeros_initializer) for _ in range(2)]
-    cells_bw = [tf.contrib.rnn.GRUCell(lstm_size//2, 
+                bias_initializer=tf.zeros_initializer) for _ in range(3)]
+    cells_bw = [tf.contrib.rnn.GRUCell(lstm_size, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
-                bias_initializer=tf.zeros_initializer) for _ in range(2)]
+                bias_initializer=tf.zeros_initializer) for _ in range(3)]
     outputs, _, _ = tf.contrib.rnn.stack_bidirectional_dynamic_rnn(cells_fw, cells_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-    layer = tf.concat(outputs, -1)  
-    return layer
+    #layer = tf.concat(outputs, -1)  
+    return layer+outputs[0]+outputs[1]
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
