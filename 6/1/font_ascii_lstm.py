@@ -155,8 +155,8 @@ def LSTM(inputs, lstm_size, seq_len):
         num_units=lstm_size,
         dropout=0.5,
         dtype=tf.float32,
-        kernel_initializer=orthogonal_initializer,
-        bias_initializer=tf.zeros_initializer,
+        kernel_initializer=orthogonal_initializer(),
+        bias_initializer=tf.zeros_initializer(),
         direction="bidirectional")
     outputs, _ = lstm(convolved)
     outputs = tf.transpose(outputs, [1, 0, 2])
