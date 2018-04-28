@@ -141,7 +141,7 @@ def LSTM(inputs, lstm_size, seq_len):
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer) for _ in range(2)]
-    outputs, _ = tf.nn.stack_bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
+    outputs, _ = tf.contrib.rnn.stack_bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
     layer = tf.concat(outputs, -1)  
     return layer
 
