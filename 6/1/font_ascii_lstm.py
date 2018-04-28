@@ -116,7 +116,7 @@ def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(3):
         layers_split = []
-        for j in range(lstm_size//4):
+        for j in range(lstm_size//8):
             with tf.variable_scope("rnn-%s-%s"%(i,j)):
                 # activation 用 tanh 根本学习不出来 , 模拟了残差网络
                 cell_fw = tf.contrib.rnn.GRUCell(4, 
