@@ -114,21 +114,21 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
-    for i in range(3):
+    for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
             # activation 用 tanh 根本学习不出来 , 模拟了残差网络
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size//2, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size//2, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-            # net = tf.concat(outputs, -1)  
-            # net = slim.fully_connected(net, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
-            layer = tf.nn.leaky_relu(outputs[0] + outputs[1] + layer)
+            net = tf.concat(outputs, -1)  
+            net = slim.fully_connected(net, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
+            layer = tf.nn.leaky_relu(net + layer)
     return layer
 
 def neural_networks():
