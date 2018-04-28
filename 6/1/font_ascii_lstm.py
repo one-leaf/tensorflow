@@ -277,6 +277,7 @@ def train():
         init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
         session.run(init_op)
 
+        print("tf check restore")
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
 
         for i in range(3):
@@ -301,6 +302,7 @@ def train():
             print("restored fail, return")
             return
 
+        print("tf create summary")
         train_writer = tf.summary.FileWriter(log_dir, session.graph)
 
         print("tf train")
