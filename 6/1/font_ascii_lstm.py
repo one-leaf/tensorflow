@@ -280,7 +280,8 @@ def train():
         session.run(tf.global_variables_initializer())
 
         print("tf check restore")
-        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
+        # r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
+        r_saver = tf.train.Saver(max_to_keep=5)
 
         for i in range(3):
             ckpt = tf.train.get_checkpoint_state(model_R_dir)
