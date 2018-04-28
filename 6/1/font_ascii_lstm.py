@@ -52,15 +52,16 @@ def RES(inputs, seq_len, reuse = False):
         print("inputs shape:",inputs.shape)
         # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
         # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
-        layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
-
-        layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
-        print("ResNet shape:",layer.shape)
+        with tf.variable_scope("ResNext"):
+            layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
+        print("ResNext shape:",layer.shape)
         temp_layer = layer
 
-        layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        with tf.variable_scope("Normalize"):
+            layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
         # 将图像高度和宽度 // [2, 4]
         # layer = slim.avg_pool2d(layer, [2, 4], [2, 4]) 
@@ -69,16 +70,17 @@ def RES(inputs, seq_len, reuse = False):
         # 增加坐标信息，增加的个数为 embedd_size
         # max_width_height, embedd_size
         # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
-        max_width_height = MAX_IMAGE_WIDTH//4
-        embedd_size = 16
-        layer = Coordinates(layer, max_width_height, embedd_size)
-        print("Coordinates shape:",layer.shape)
+        with tf.variable_scope("Coordinates"):
+            max_width_height = MAX_IMAGE_WIDTH//4
+            embedd_size = 16
+            layer = Coordinates(layer, max_width_height, embedd_size)
+            print("Coordinates shape:",layer.shape)
 
-        layer = tf.squeeze(layer, squeeze_dims=1)
-        print("SEQ shape:",layer.shape)
-
-        layer = LSTM(layer, 256+embedd_size, seq_len)    # N, W*H, 128
-        print("lstm shape:",layer.shape)
+        with tf.variable_scope("LSTM"):
+            layer = tf.squeeze(layer, squeeze_dims=1)
+            print("SEQ shape:",layer.shape)
+            layer = LSTM(layer, 256+embedd_size, seq_len)    # N, W*H, 128
+            print("lstm shape:",layer.shape)
 
         return layer, temp_layer
 
@@ -136,7 +138,7 @@ def neural_networks():
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
     net_res, temp_layer= RES(inputs, seq_len, reuse = False)
-    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
+    # res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
@@ -160,8 +162,8 @@ def neural_networks():
     # res_images = res_layer[-1]
     # res_images = tf.transpose(res_images, perm=[2, 0, 1])
     # tf.summary.image('net_res', tf.expand_dims(res_images,-1), max_outputs=9)
-    for var in res_vars:
-        tf.summary.histogram(var.name, var)
+    # for var in res_vars:
+    #     tf.summary.histogram(var.name, var)
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
