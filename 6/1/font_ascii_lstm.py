@@ -150,10 +150,12 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     convolved = tf.transpose(layer, [1, 0, 2])
-    lstm = tf.contrib.cudnn_rnn.CudnnLSTM(
+    lstm = tf.contrib.cudnn_rnn.CudnnRNNRelu(
         num_layers=3,
         num_units=lstm_size,
         dropout=0.5,
+        kernel_initializer=orthogonal_initializer,
+        bias_initializer=tf.zeros_initializer,
         direction="bidirectional")
     outputs, _ = lstm(convolved)
     outputs = tf.transpose(outputs, [1, 0, 2])
