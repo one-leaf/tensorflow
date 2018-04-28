@@ -143,7 +143,8 @@ def neural_networks():
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
-    res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    # res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step)
  
     # 防止梯度爆炸
     # res_optim = tf.train.AdamOptimizer(lr)
