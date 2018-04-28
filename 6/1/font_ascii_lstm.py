@@ -274,8 +274,9 @@ def train():
 
     with tf.Session() as session:
         print("tf init")
-        init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
-        session.run(init_op)
+        # init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+        # session.run(init_op)
+        session.run(tf.global_variables_initializer())
 
         print("tf check restore")
         r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
