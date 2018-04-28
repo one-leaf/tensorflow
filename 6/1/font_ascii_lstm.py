@@ -133,11 +133,11 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
-    cells_fw = [tf.contrib.rnn.GRUCell(lstm_size, 
+    cells_fw = [tf.contrib.rnn.GRUCell(lstm_size//2, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer) for _ in range(3)]
-    cells_bw = [tf.contrib.rnn.GRUCell(lstm_size, 
+    cells_bw = [tf.contrib.rnn.GRUCell(lstm_size//2, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer) for _ in range(3)]
