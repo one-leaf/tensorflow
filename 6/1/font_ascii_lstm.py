@@ -119,11 +119,11 @@ def LSTM(inputs, lstm_size, seq_len):
         for j in range(lstm_size//8):
             with tf.variable_scope("rnn-%s-%s"%(i,j)):
                 # activation 用 tanh 根本学习不出来 , 模拟了残差网络
-                cell_fw = tf.contrib.rnn.GRUCell(4, 
+                cell_fw = tf.contrib.rnn.BasicRNNCell(4, 
                     activation=tf.nn.leaky_relu, 
                     kernel_initializer=orthogonal_initializer,
                     bias_initializer=tf.zeros_initializer)
-                cell_bw = tf.contrib.rnn.GRUCell(4, 
+                cell_bw = tf.contrib.rnn.BasicRNNCell(4, 
                     activation=tf.nn.leaky_relu, 
                     kernel_initializer=orthogonal_initializer,
                     bias_initializer=tf.zeros_initializer)
