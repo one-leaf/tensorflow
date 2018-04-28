@@ -194,8 +194,6 @@ def get_next_batch_for_res(batch_size=128):
     seq_len = np.ones(batch_size)
 
     for i in range(batch_size):
-
-
         serialized_example = next(dataset, None)
         if serialized_example==None:
             raise Exception("has finished train one data file, stop")
@@ -222,7 +220,6 @@ def get_next_batch_for_res(batch_size=128):
         
         image = utils_font.add_noise(image)   
         image = np.asarray(image) 
-
 
         image = utils.resize(image, image_height, MAX_IMAGE_WIDTH)
 
