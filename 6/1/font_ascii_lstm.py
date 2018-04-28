@@ -336,6 +336,7 @@ def train():
                     (time.ctime(), steps, feed_time, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
+                need_reset_global_step = False
                 for _ in range(10):
                     if errR <=  avg_losts*2: break 
                     start = time.time()                
@@ -343,8 +344,11 @@ def train():
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
-                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))                        
-                    session.run(global_step.assign(steps))
+                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))   
+                    need_reset_global_step = True
+                    
+                if need_reset_global_step:                     
+                    session.run(tf.assign(global_step, steps))
 
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
