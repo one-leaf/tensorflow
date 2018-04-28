@@ -143,6 +143,7 @@ def LSTM(inputs, lstm_size, seq_len):
                 bias_initializer=tf.zeros_initializer) for _ in range(3)]
     outputs, _, _ = tf.contrib.rnn.stack_bidirectional_dynamic_rnn(cells_fw, cells_bw, layer, sequence_length=seq_len, dtype=tf.float32)
     #layer = tf.concat(outputs, -1)  
+    print(layer.shape, outputs[0].shape, outputs[1].shape)
     return layer+outputs[0]+outputs[1]
 
 def neural_networks():
