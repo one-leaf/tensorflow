@@ -114,14 +114,14 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
-    for i in range(2):
+    for i in range(3):
         with tf.variable_scope("rnn-%s"%i):
             # activation 用 tanh 根本学习不出来 , 模拟了残差网络
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size//2, 
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size//2, 
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
                 activation=tf.nn.leaky_relu, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
