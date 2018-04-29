@@ -153,7 +153,7 @@ def LSTM(inputs, lstm_size, seq_len):
     lstm = tf.contrib.cudnn_rnn.CudnnRNNRelu(
         num_layers=3,
         num_units=lstm_size,
-        dropout=0.5,
+        dropout=0,
         dtype=tf.float32,
         kernel_initializer=orthogonal_initializer,
         bias_initializer=tf.zeros_initializer(),
