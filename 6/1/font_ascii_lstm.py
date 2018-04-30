@@ -176,7 +176,7 @@ def LSTM(inputs, lstm_size, seq_len):
     net = tf.transpose(outputs, [1, 0, 2])
     net = slim.fully_connected(net, 2, normalizer_fn=None, activation_fn=None)
     net =  tf.nn.softmax(net)
-    masks = tf.cast(tf.argmax(net, -1), tf.float32)
+    masks = tf.expand_dims(tf.cast(tf.argmax(net, -1), tf.float32),-1)
     layer *= masks 
     return layer
 
