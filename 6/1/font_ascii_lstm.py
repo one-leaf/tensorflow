@@ -160,6 +160,7 @@ def LSTM(inputs, lstm_size, seq_len):
         direction="bidirectional")
     outputs, _ = lstm(convolved)
     outputs = tf.transpose(outputs, [1, 0, 2])
+    print(outputs.shape)
     # net = tf.concat(outputs, -1)  
     #net = slim.fully_connected(net, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
     layer = tf.nn.leaky_relu(outputs[0] + outputs[1] + layer)
