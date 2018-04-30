@@ -174,8 +174,9 @@ def LSTM(inputs, lstm_size, seq_len):
         direction="bidirectional")
     outputs, _ = lstm(convolved)
     net = tf.transpose(outputs, [1, 0, 2])
-    net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
-    masks = tf.sign(tf.abs(tf.reduce_sum(net, axis=-1))) 
+    net = slim.fully_connected(net, 2, normalizer_fn=None, activation_fn=None)
+    net =  tf.nn.softmax(net)
+    masks = tf.argmax(net, -1)
     layer *= masks 
     return layer
 
