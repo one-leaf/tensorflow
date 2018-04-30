@@ -162,8 +162,7 @@ def LSTM(inputs, lstm_size, seq_len):
     outputs = tf.transpose(outputs, [1, 0, 2])
     #print(outputs.shape)
     # net = tf.concat(outputs, -1)  
-    net = slim.fully_connected(outputs, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
-    layer = tf.nn.leaky_relu(net + layer)
+    layer = slim.fully_connected(outputs, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
     return layer
 
 def neural_networks():
