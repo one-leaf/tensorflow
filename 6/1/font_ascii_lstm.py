@@ -144,6 +144,23 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 #     layer = tf.nn.leaky_relu(net + layer)
 #     return layer
 
+# def LSTM(inputs, lstm_size, seq_len):
+#     layer = inputs
+#     convolved = tf.transpose(layer, [1, 0, 2])
+#     lstm = tf.contrib.cudnn_rnn.CudnnLSTM(
+#         num_layers=4,
+#         num_units=lstm_size,
+#         dropout=0,
+#         dtype=tf.float32,
+#         kernel_initializer=orthogonal_initializer,
+#         bias_initializer=tf.zeros_initializer(),
+#         direction="bidirectional")
+#     outputs, _ = lstm(convolved)
+#     net = tf.transpose(outputs, [1, 0, 2])
+#     net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
+#     layer = tf.nn.leaky_relu(net + layer)
+#     return layer
+
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     convolved = tf.transpose(layer, [1, 0, 2])
@@ -158,8 +175,10 @@ def LSTM(inputs, lstm_size, seq_len):
     outputs, _ = lstm(convolved)
     net = tf.transpose(outputs, [1, 0, 2])
     net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
-    layer = tf.nn.leaky_relu(net + layer)
+    masks = tf.sign(tf.abs(tf.reduce_sum(net, axis=-1))) 
+    layer *= masks 
     return layer
+
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
