@@ -112,24 +112,24 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
     w = u if u.shape == flat_shape else v
     return tf.constant(w.reshape(shape), dtype=dtype)
 
-# def LSTM(inputs, lstm_size, seq_len):
-#     layer = inputs
-#     for i in range(2):
-#         with tf.variable_scope("rnn-%s"%i):
-#             # activation 用 tanh 根本学习不出来 , 模拟了残差网络
-#             cell_fw = tf.contrib.rnn.GRUCell(lstm_size//2, 
-#                 activation=tf.nn.leaky_relu, 
-#                 kernel_initializer=orthogonal_initializer,
-#                 bias_initializer=tf.zeros_initializer)
-#             cell_bw = tf.contrib.rnn.GRUCell(lstm_size//2, 
-#                 activation=tf.nn.leaky_relu, 
-#                 kernel_initializer=orthogonal_initializer,
-#                 bias_initializer=tf.zeros_initializer)
-#             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-#             net = tf.concat(outputs, -1)  
-#             net = slim.fully_connected(net, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
-#             layer = tf.nn.leaky_relu(net + layer)
-#     return layer
+def LSTM(inputs, lstm_size, seq_len):
+    layer = inputs
+    for i in range(2):
+        with tf.variable_scope("rnn-%s"%i):
+            # activation 用 tanh 根本学习不出来 , 模拟了残差网络
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
+                activation=tf.nn.leaky_relu, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
+                activation=tf.nn.leaky_relu, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
+            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
+            net = outputs[0] + outputs[1] + layer  
+            net = slim.fully_connected(net, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
+            layer = tf.nn.leaky_relu(net)
+    return layer
 
 # def LSTM(inputs, lstm_size, seq_len):
 #     layer = inputs
@@ -147,23 +147,23 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 #     layer = tf.nn.leaky_relu(net + layer)
 #     return layer
 
-def LSTM(inputs, lstm_size, seq_len):
-    layer = inputs
-    convolved = tf.transpose(layer, [1, 0, 2])
-    lstm = tf.contrib.cudnn_rnn.CudnnRNNRelu(
-        num_layers=4,
-        num_units=lstm_size,
-        dropout=0,
-        dtype=tf.float32,
-        kernel_initializer=orthogonal_initializer,
-        bias_initializer=tf.zeros_initializer(),
-        direction="bidirectional")
-    outputs, _ = lstm(convolved)
-    outputs = tf.transpose(outputs, [1, 0, 2])
-    #print(outputs.shape)
-    # net = tf.concat(outputs, -1)  
-    layer = slim.fully_connected(outputs, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
-    return layer
+# def LSTM(inputs, lstm_size, seq_len):
+#     layer = inputs
+#     convolved = tf.transpose(layer, [1, 0, 2])
+#     lstm = tf.contrib.cudnn_rnn.CudnnRNNRelu(
+#         num_layers=4,
+#         num_units=lstm_size,
+#         dropout=0,
+#         dtype=tf.float32,
+#         kernel_initializer=orthogonal_initializer,
+#         bias_initializer=tf.zeros_initializer(),
+#         direction="bidirectional")
+#     outputs, _ = lstm(convolved)
+#     outputs = tf.transpose(outputs, [1, 0, 2])
+#     #print(outputs.shape)
+#     # net = tf.concat(outputs, -1)  
+#     layer = slim.fully_connected(outputs, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
+#     return layer
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
