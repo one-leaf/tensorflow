@@ -329,7 +329,7 @@ def train():
                         f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%new_restore_iter)
                     continue
                 session.run(tf.assign(global_step, restore_iter))
-                if restore_iter<5000:        
+                if restore_iter<10000:        
                     session.run(tf.assign(lr, 1e-4))
                 elif restore_iter<50000:            
                     session.run(tf.assign(lr, 1e-5))
@@ -439,7 +439,7 @@ def train():
                     for f in sorted_fonts[:20]:
                         print(f)
 
-                    if steps<5000:        
+                    if steps<10000:        
                         session.run(tf.assign(lr, 1e-4))
                     elif steps<50000:            
                         session.run(tf.assign(lr, 1e-5))
