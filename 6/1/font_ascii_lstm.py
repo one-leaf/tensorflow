@@ -126,9 +126,8 @@ def LSTM(inputs, lstm_size, seq_len):
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-            net = outputs[0] + outputs[1] + layer  
-            net = slim.fully_connected(net, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
-            layer = tf.nn.leaky_relu(net)
+            layer = outputs[0] + outputs[1] + layer  
+            layer = slim.fully_connected(layer, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu)
     return layer
 
 # def LSTM(inputs, lstm_size, seq_len):
