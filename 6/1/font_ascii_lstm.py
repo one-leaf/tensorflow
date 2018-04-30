@@ -151,7 +151,7 @@ def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     convolved = tf.transpose(layer, [1, 0, 2])
     lstm = tf.contrib.cudnn_rnn.CudnnRNNRelu(
-        num_layers=3,
+        num_layers=4,
         num_units=lstm_size,
         dropout=0,
         dtype=tf.float32,
