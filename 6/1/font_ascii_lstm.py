@@ -33,7 +33,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-4
+LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -367,7 +367,7 @@ def train():
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
-                errR, acc, _ , steps = session.run([res_loss, res_acc, res_optim, global_step], feed)
+                errR, acc, _ , steps, res_lr = session.run([res_loss, res_acc, res_optim, global_step, lr], feed)
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 accs.append(acc)
@@ -377,19 +377,19 @@ def train():
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
-                    (time.ctime(), steps, feed_time, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))
+                print("%s, %d time: %4.4fs / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
+                    (time.ctime(), steps, feed_time, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
                 need_reset_global_step = False
                 for _ in range(10):
                     if errR <=  avg_losts*2: break 
                     start = time.time()                
-                    errR, acc, _ = session.run([res_loss, res_acc, res_optim], feed)
+                    errR, acc, _, res_lr = session.run([res_loss, res_acc, res_optim, lr], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
-                    print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, info: %s " % \
-                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, font_info))   
+                    print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
+                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))   
                     need_reset_global_step = True
                     
                 if need_reset_global_step:                     
