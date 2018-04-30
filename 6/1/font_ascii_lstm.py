@@ -332,7 +332,13 @@ def train():
                         f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%new_restore_iter)
                         f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%new_restore_iter)
                     continue
-                session.run(global_step.assign(restore_iter))
+                session.run(tf.assign(global_step, restore_iter))
+                if restore_iter<5000:        
+                    session.run(tf.assign(lr, 1e-4))
+                elif restore_iter<50000:            
+                    session.run(tf.assign(lr, 1e-5))
+                else:
+                    session.run(tf.assign(lr, 1e-6))
                 print("Restored to %s."%restore_iter)
                 break
             else:
