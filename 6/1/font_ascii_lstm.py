@@ -193,7 +193,7 @@ def neural_networks():
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
     net_res, temp_layer= RES(inputs, seq_len, reuse = False)
-    # res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
+    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
@@ -218,8 +218,8 @@ def neural_networks():
     # res_images = res_layer[-1]
     # res_images = tf.transpose(res_images, perm=[2, 0, 1])
     # tf.summary.image('net_res', tf.expand_dims(res_images,-1), max_outputs=9)
-    # for var in res_vars:
-    #     tf.summary.histogram(var.name, var)
+    for var in res_vars:
+        tf.summary.histogram(var.name, var)
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
