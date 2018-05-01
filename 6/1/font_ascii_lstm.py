@@ -54,7 +54,9 @@ def RES(inputs, seq_len, reuse = False):
         # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
         with tf.variable_scope("ResNext"):
             layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            tf.summary.image('1_2_4_zoom', tf.expand_dims(layer[0],-1), max_outputs=9)
             layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
+            tf.summary.image('2_res50', tf.expand_dims(layer[0],-1), max_outputs=9)
         print("ResNext shape:",layer.shape)
         temp_layer = layer
 
