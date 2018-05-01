@@ -173,11 +173,11 @@ def LSTM(inputs, lstm_size, seq_len):
         bias_initializer=tf.zeros_initializer(),
         direction="bidirectional")
     outputs, _ = lstm(convolved)
-    net = tf.transpose(outputs, [1, 0, 2])
-    net = slim.fully_connected(net, 2, normalizer_fn=None, activation_fn=None)
+    outputs = tf.transpose(outputs, [1, 0, 2])
+    net = slim.fully_connected(outputs, 2, normalizer_fn=None, activation_fn=None)
     net =  tf.nn.softmax(net)
     masks = tf.expand_dims(tf.cast(tf.argmax(net, -1), tf.float32),-1)
-    layer *= masks 
+    layer = outputs * masks 
     return layer
 
 
