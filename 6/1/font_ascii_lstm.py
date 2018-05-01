@@ -179,7 +179,7 @@ def LSTM(inputs, lstm_size, seq_len):
     masks = tf.expand_dims(tf.gather(net, axis = -1, indices = 0), -1)
     # 这种直接拉到0，有点太粗暴
     # masks = tf.expand_dims(tf.cast(tf.argmax(net, -1), tf.float32),-1)
-    tf.summary.image('masks', tf.expand_dims(masks[0],-1), max_outputs=9)
+    tf.summary.image('masks', tf.expand_dims(masks,-1), max_outputs=9)
     layer = layer * masks 
     return layer
 
