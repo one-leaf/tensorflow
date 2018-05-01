@@ -144,23 +144,6 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 #     layer = tf.nn.leaky_relu(net + layer)
 #     return layer
 
-# def LSTM(inputs, lstm_size, seq_len):
-#     layer = inputs
-#     convolved = tf.transpose(layer, [1, 0, 2])
-#     lstm = tf.contrib.cudnn_rnn.CudnnLSTM(
-#         num_layers=4,
-#         num_units=lstm_size,
-#         dropout=0,
-#         dtype=tf.float32,
-#         kernel_initializer=orthogonal_initializer,
-#         bias_initializer=tf.zeros_initializer(),
-#         direction="bidirectional")
-#     outputs, _ = lstm(convolved)
-#     net = tf.transpose(outputs, [1, 0, 2])
-#     net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
-#     layer = tf.nn.leaky_relu(net + layer)
-#     return layer
-
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     convolved = tf.transpose(layer, [1, 0, 2])
@@ -173,15 +156,33 @@ def LSTM(inputs, lstm_size, seq_len):
         bias_initializer=tf.zeros_initializer(),
         direction="bidirectional")
     outputs, _ = lstm(convolved)
-    outputs = tf.transpose(outputs, [1, 0, 2])
-    net = slim.fully_connected(outputs, 2, normalizer_fn=None, activation_fn=None)
-    net =  tf.nn.softmax(net)
-    masks = tf.expand_dims(tf.gather(net, axis = -1, indices = 0), -1)
-    # 这种直接拉到0，有点太粗暴
-    # masks = tf.expand_dims(tf.cast(tf.argmax(net, -1), tf.float32),-1)
-    tf.summary.image('masks', tf.expand_dims(masks,-1), max_outputs=9)
-    layer = layer * masks 
+    net = tf.transpose(outputs, [1, 0, 2])
+    net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=tf.nn.leaky_relu)
     return layer
+
+
+# 失败的模型，最后会导致所有的softmax都为1 
+# def LSTM(inputs, lstm_size, seq_len):
+#     layer = inputs
+#     convolved = tf.transpose(layer, [1, 0, 2])
+#     lstm = tf.contrib.cudnn_rnn.CudnnLSTM(
+#         num_layers=4,
+#         num_units=lstm_size,
+#         dropout=0,
+#         dtype=tf.float32,
+#         kernel_initializer=orthogonal_initializer,
+#         bias_initializer=tf.zeros_initializer(),
+#         direction="bidirectional")
+#     outputs, _ = lstm(convolved)
+#     outputs = tf.transpose(outputs, [1, 0, 2])
+#     net = slim.fully_connected(outputs, 2, normalizer_fn=None, activation_fn=None)
+#     net =  tf.nn.softmax(net)
+#     masks = tf.expand_dims(tf.gather(net, axis = -1, indices = 0), -1)
+#     # 这种直接拉到0，有点太粗暴
+#     # masks = tf.expand_dims(tf.cast(tf.argmax(net, -1), tf.float32),-1)
+#     tf.summary.image('masks', tf.expand_dims(masks,-1), max_outputs=9)
+#     layer = layer * masks 
+#     return layer
 
 
 def neural_networks():
