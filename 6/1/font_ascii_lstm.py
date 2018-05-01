@@ -459,9 +459,9 @@ def train():
                     for f in sorted_fonts[:20]:
                         print(f)
 
-                    if steps<10000:        
+                    if avg_acc>100:        
                         session.run(tf.assign(lr, 1e-4))
-                    elif steps<50000:            
+                    elif avg_acc>10:            
                         session.run(tf.assign(lr, 1e-5))
                     else:
                         session.run(tf.assign(lr, 1e-6))
