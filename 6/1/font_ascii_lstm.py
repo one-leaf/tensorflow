@@ -119,7 +119,6 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 #     layer = inputs
 #     for i in range(2):
 #         with tf.variable_scope("rnn-%s"%i):
-#             # activation 用 tanh 根本学习不出来 , 模拟了残差网络
 #             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
 #                 kernel_initializer=orthogonal_initializer,
 #                 bias_initializer=tf.zeros_initializer)
