@@ -143,7 +143,7 @@ def create_mparams():
           average_across_timesteps=FLAGS.average_across_timesteps)
   }
 
-
+# 建立模型
 def create_model(*args, **kwargs):
   ocr_model = model.Model(mparams=create_mparams(), *args, **kwargs)
   return ocr_model

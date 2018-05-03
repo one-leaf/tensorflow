@@ -154,7 +154,8 @@ def train(loss, init_fn, hparams):
       sync_optimizer=sync_optimizer,
       init_fn=init_fn)
 
-# 检查训练目录
+# 检查训练日志目录
+# 如果不存在训练目录，则创建，如果是重新训练，则先删除日志目录，再创建
 def prepare_training_dir():
   if not tf.gfile.Exists(FLAGS.train_log_dir):
     logging.info('Create a new training directory %s', FLAGS.train_log_dir)
@@ -183,7 +184,8 @@ def main(_):
   # 建立数据集 split_name: train test
   dataset = common_flags.create_dataset(split_name=FLAGS.split_name)
 
-  # 建立模型 max_sequence_length: 37, num_of_views: 4, null_code:42 
+  # 建立模型 max_sequence_length: 37, num_of_views: 4, null_code:133 
+  # 这里还没有创建模型，只是返回了模型类，和初始化了模型相关参数
   model = common_flags.create_model(dataset.num_char_classes,
                                     dataset.max_sequence_length,
                                     dataset.num_of_views, dataset.null_code)
@@ -195,12 +197,15 @@ def main(_):
   device_setter = tf.train.replica_device_setter(
       FLAGS.ps_tasks, merge_devices=True)
   with tf.device(device_setter):
+    # 获得训练数据
     data = data_provider.get_data(
         dataset,
         FLAGS.batch_size,
         augment=hparams.use_augment_input,
         central_crop_size=common_flags.get_crop_size())
+    # 创建模型
     endpoints = model.create_base(data.images, data.labels_one_hot)
+    # 创建损失函数
     total_loss = model.create_loss(data, endpoints)
     model.create_summaries(data, endpoints, dataset.charset, is_training=True)
     init_fn = model.create_init_fn_to_restore(FLAGS.checkpoint,

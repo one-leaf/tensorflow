@@ -350,10 +350,11 @@ class NetSliceWithAutoregression(NetSlice):
     image_feature = self.get_image_feature(i)
     return tf.concat([image_feature, prev], 1)
 
-
+# 这个是注意力模型基类
 class Attention(SequenceLayerBase):
   """A layer which uses attention mechanism to select image features."""
 
+  # 初始化了 0的单字符的 lablel one-hot
   def __init__(self, *args, **kwargs):
     super(Attention, self).__init__(*args, **kwargs)
     self._zero_label = tf.zeros(
@@ -378,7 +379,7 @@ class Attention(SequenceLayerBase):
         cell=cell,
         loop_function=self.get_input)
 
-
+# 这个是采用注意力+正则模型
 class AttentionWithAutoregression(Attention):
   """A layer which uses both attention and auto regression."""
 
@@ -401,7 +402,8 @@ class AttentionWithAutoregression(Attention):
       logit = self.char_logit(prev, char_index=i - 1)
       return self.char_one_hot(logit)
 
-#调用入口，是否使用注意力模型，是否自动正则化
+# 调用入口，是否使用注意力模型，是否自动正则化
+# 返回对应类，后续再实例化
 def get_layer_class(use_attention, use_autoregression):
   """A convenience function to get a layer class based on requirements.
 

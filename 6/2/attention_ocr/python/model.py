@@ -122,10 +122,11 @@ def get_softmax_loss_fn(label_smoothing):
 
   return loss_fn
 
-
+# 完整模型
 class Model(object):
   """Class to create the Attention OCR Model."""
 
+  # 构造初始值，定义模型参数，主要为 分类，文字长度，几张图和空字符的序号
   def __init__(self,
                num_char_classes,
                seq_length,
@@ -365,6 +366,7 @@ class Model(object):
     else:
       return net
 
+  # 这里是创建模型的入口
   def create_base(self,
                   images,
                   labels_one_hot,
@@ -384,6 +386,7 @@ class Model(object):
       A named tuple OutputEndpoints.
     """
     logging.debug('images: %s', images)
+    # 确定是否在训练
     is_training = labels_one_hot is not None
     with tf.variable_scope(scope, reuse=reuse):
       # 按宽度分割图片，原始输入的图片是4张拼接在一起的
@@ -392,6 +395,7 @@ class Model(object):
       logging.debug('Views=%d single view: %s', len(views), views[0])
 
       # 定义了4个 inception_v3 模型，参数共用
+      #  返回了 4个 [B, H, W, C]
       nets = [
         self.conv_tower_fn(v, is_training, reuse=(i != 0))
         for i, v in enumerate(views)
@@ -403,6 +407,7 @@ class Model(object):
       logging.debug('Conv tower w/ encoded coordinates: %s', nets[0])
 
       # 将 [4, b, h, w, c] => [b, h*4*w, c]
+      # 这一步将shape转为序列
       net = self.pool_views_fn(nets)
       logging.debug('Pooled views: %s', net)
 

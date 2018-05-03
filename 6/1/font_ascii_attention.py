@@ -30,6 +30,11 @@ ASCII_CHARS = [chr(c) for c in range(32,126+1)]
 
 CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 # CHARS = ASCII_CHARS
+
+# 将空格移动到第一个
+CHARS.remove(" ")
+CHARS.insert(0, " ")
+
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
@@ -46,6 +51,7 @@ POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_resNext50_lstm"
 MAX_IMAGE_WIDTH = 4096
+MAX_SEQ_LENGTH = 1024
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
@@ -130,6 +136,12 @@ def LSTM(inputs, lstm_size, seq_len):
         net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
         layer = tf.nn.leaky_relu(net + layer)
     return layer
+
+# 建立 label 网络
+def label_net():
+    label_decoder_inputs = [None] * MAX_SEQ_LENGTH
+    label_decoder_inputs[0] = np.zeros(CLASSES_NUMBER)
+    return LSTM(label_inputs)
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
