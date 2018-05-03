@@ -183,7 +183,7 @@ def main(_):
   # 建立数据集 split_name: train test
   dataset = common_flags.create_dataset(split_name=FLAGS.split_name)
 
-  # 建立模型
+  # 建立模型 max_sequence_length: 37, num_of_views: 4, null_code:42 
   model = common_flags.create_model(dataset.num_char_classes,
                                     dataset.max_sequence_length,
                                     dataset.num_of_views, dataset.null_code)

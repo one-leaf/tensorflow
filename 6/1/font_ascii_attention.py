@@ -12,7 +12,6 @@ import tensorflow.contrib.slim as slim
 import math
 import urllib,json,io
 import utils_pil, utils_font, utils_nn
-import font_ascii_clean
 import operator
 from collections import deque
 
@@ -34,7 +33,7 @@ CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 CLASSES_NUMBER = len(CHARS) + 1 
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-6
+LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 REPORT_STEPS = 500
@@ -45,56 +44,91 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-MODEL_SAVE_NAME = "model_ascii"
+MODEL_SAVE_NAME = "model_ascii_resNext50_lstm"
+MAX_IMAGE_WIDTH = 4096
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
-        layer = utils_nn.resNet50(inputs, True)    # N 1 W/16 2048
-        print("resNet shape:",layer.shape)
+        # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
+        # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
+        with tf.variable_scope("ResNext"):
+            layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            tf.summary.image('1_2_4_zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
+            layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
+            tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
+        print("ResNext shape:",layer.shape)
+        temp_layer = layer
 
-        shape = tf.shape(layer)
-        batch_size, height, width, channel = shape[0], shape[1], shape[2], shape[3]
-        
+        with tf.variable_scope("Normalize"):
+            # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+       
+        # 将图像高度和宽度 // [2, 4]
+        # layer = slim.avg_pool2d(layer, [2, 4], [2, 4]) 
+        print("ResNet shape:",layer.shape)
 
-        # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
-        # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=tf.nn.leaky_relu) 
-        layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        res_layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        # N H W 256
-        
-        layer = tf.squeeze(res_layer,axis=1)    # N W/16 256
+        # 增加坐标信息，增加的个数为 embedd_size
+        # max_width_height, embedd_size
+        # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
+        with tf.variable_scope("Coordinates"):
+            max_width_height = MAX_IMAGE_WIDTH//4
+            embedd_size = 16
+            layer = Coordinates(layer, max_width_height, embedd_size)
+            print("Coordinates shape:",layer.shape)
 
-        # NWC => NCW
-        layer = tf.transpose(layer, (0, 2, 1))
+        with tf.variable_scope("LSTM"):
+            layer = tf.squeeze(layer, squeeze_dims=1)
+            print("SEQ shape:",layer.shape)
+            layer = LSTM(layer, 128+embedd_size, seq_len)    # N, W*H, 128
+            print("lstm shape:",layer.shape)
 
-        layer = tf.reshape(layer, [batch_size, width*height, 256]) # N*H, W, 1024
-        print("resNet_seq shape:",layer.shape)
-        layer.set_shape([None, None, 256])
-        lstm_layer = LSTM(layer, 128, 128)    # N, W*H, 128+128*2
-        print("lstm shape:",lstm_layer.shape)
-        # layer = tf.reshape(layer, [batch_size, width, height, 512+256+256]) # N,H,W,256+128*2
-        # layer = slim.fully_connected(layer, 1024, normalizer_fn=None, activation_fn=None)  # N, H, W, 1024
-        # layer = tf.reshape(layer, [batch_size, height*width, 1024]) # N, W*H, 1024
+        return layer, temp_layer
 
-        # print("res fin shape:",layer.shape)
-        return res_layer,lstm_layer
+# 插入像素的坐标信息
+def Coordinates(inputs, max_width_height, embedd_size):
+    shape = tf.shape(inputs)
+    batch_size, h, w = shape[0],shape[1],shape[2]
+    x = tf.range(w*h)
+    x = tf.reshape(x, [1, h, w, 1])
+    loc = tf.tile(x, [batch_size, 1, 1, 1])
+    embedding = tf.get_variable("embedding", initializer=tf.random_uniform([max_width_height, embedd_size], -1.0, 1.0)) 
+    loc = tf.nn.embedding_lookup(embedding, loc)
+    loc = tf.squeeze(loc, squeeze_dims=3)
+    loc = tf.concat([inputs, loc], 3)
+    return loc
 
-def LSTM(inputs, fc_size, lstm_size):
+# 采用标准正交基的方式初始化参数
+def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
+    del args
+    del kwargs
+    # 扁平化shape
+    flat_shape = (shape[0], np.prod(shape[1:]))
+    # 标准正态分布
+    w = np.random.randn(*flat_shape)
+    # 奇异值分解，提取矩阵特征，返回的 u,v 都是正交随机的，
+    # u,v 分别代表了batch之间的数据相关性和同一批数据之间的相关性，_ 值代表了批次和数据的交叉相关性，舍弃掉
+    u, _, v = np.linalg.svd(w, full_matrices=False)
+    w = u if u.shape == flat_shape else v
+    return tf.constant(w.reshape(shape), dtype=dtype)
+
+# RNN 不能加上 batch_norm，会在ctc中很难学习到东西
+def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
-    for i in range(3):
+    for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
-            layer = slim.fully_connected(layer, fc_size, normalizer_fn=slim.batch_norm, activation_fn=None)
-            # activation 全部用 tanh 根本学习不出来 , 
-            # 所以反向用 tanh 在极小值地方补偿一下
-            # 如果用 tanh ，最后一层不能加 relu
-            # 注意，没有证据表明这样更好，但心里安慰下
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.leaky_relu)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, activation=tf.nn.tanh)
-            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-            layer = tf.concat([outputs[0], outputs[1], layer], axis=-1)
-            # layer = tf.nn.leaky_relu(layer)
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
+            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
+        net = tf.concat(outputs, -1)  
+        net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
+        layer = tf.nn.leaky_relu(net + layer)
     return layer
 
 def neural_networks():
@@ -105,19 +139,20 @@ def neural_networks():
     global_step = tf.Variable(0, trainable=False)
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
-    res_layer, net_res = RES(inputs, seq_len, reuse = False)
+    net_res, temp_layer= RES(inputs, seq_len, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
     net_res = tf.transpose(net_res, (1, 0, 2))
     res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
-    # res_optim = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    # res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step, var_list=res_vars)
+    res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step)
  
     # 防止梯度爆炸
-    res_optim = tf.train.AdamOptimizer(lr)
-    gvs = res_optim.compute_gradients(res_loss)
-    capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
-    res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
+    # res_optim = tf.train.AdamOptimizer(lr)
+    # gvs = res_optim.compute_gradients(res_loss)
+    # capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
+    # res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
 
     res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
     res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
@@ -135,22 +170,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            res_loss, res_optim, seq_len, res_acc, res_decoded
-
-
-ENGFontNames, CHIFontNames = utils_font.get_font_names_from_url()
-print("EngFontNames", ENGFontNames)
-print("CHIFontNames", CHIFontNames)
-AllFontNames = ENGFontNames + CHIFontNames
-AllFontNames.remove("方正兰亭超细黑简体")
-AllFontNames.remove("幼圆")
-AllFontNames.remove("方正舒体")
-AllFontNames.remove("方正姚体")
-AllFontNames.remove("华文新魏")
-AllFontNames.remove("Impact")
-AllFontNames.remove("Gabriola")
-
-eng_world_list = open(os.path.join(curr_dir,"eng.wordlist.txt"),encoding="UTF-8").readlines() 
+            res_loss, res_optim, seq_len, res_acc, res_decoded, temp_layer
 
 def list_to_chars(list):
     try:
@@ -158,63 +178,52 @@ def list_to_chars(list):
     except Exception as err:
         return "Error: %s" % err        
 
-if os.path.exists(os.path.join(curr_dir,"train.txt")):
-    train_text_lines = open(os.path.join(curr_dir,"train.txt")).readlines()
-else:
-    train_text_lines = []
+def dataset_init():
+    data_dir = os.path.join(curr_dir,"data")
+    datafiles = os.listdir(data_dir)
+    data_file = os.path.join(data_dir, random.choice(datafiles))
+    print("load data_file", data_file)
+    return tf.python_io.tf_record_iterator(data_file)
 
-def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
+dataset = dataset_init()
+dataset_example=tf.train.Example() 
+
+def get_next_batch_for_res(batch_size=128):
     inputs_images = []   
     codes = []
     max_width_image = 0
     info = []
-    font_length = random.randint(5, 200)
+    seq_len = np.ones(batch_size)
+
     for i in range(batch_size):
-        font_name = _font_name
-        font_size = _font_size
-        font_mode = _font_mode
-        font_hint = _font_hint
-        if font_name==None:
-            font_name = random.choice(AllFontNames)
-        if font_size==None:
-            if random.random()>0.5:
-                font_size = random.randint(9, 49)    
-            else:
-                font_size = random.randint(9, 15) 
-        if font_mode==None:
-            font_mode = random.choice([0,1,2,4]) 
-        if font_hint==None:
-            # hint 2 在小字体下会断开笔画，人眼都无法识别
-            if font_size>=14:
-                font_hint = random.choice([0,1,2,3,4,5])  
-            else:
-                font_hint = random.choice([0,1,3,4,5]) 
+        serialized_example = next(dataset, None)
+        if serialized_example==None:
+            raise Exception("has finished train one data file, stop")
 
-        text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-        text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
-        text = text.strip()
+        dataset_example.ParseFromString(serialized_example)
 
-            # random.shuffle(text)
-            # text = "".join(text).strip()
+        font_name = str(dataset_example.features.feature['font_name'].bytes_list.value[0],  encoding="utf-8")
+        font_size = dataset_example.features.feature['font_size'].int64_list.value[0]
+        font_mode = dataset_example.features.feature['font_mode'].int64_list.value[0]
+        font_hint = dataset_example.features.feature['font_mode'].int64_list.value[0]
 
-        image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-        # image = utils_pil.convert_to_gray(image) 
-        w, h = image.size
+        text = str(dataset_example.features.feature['label'].bytes_list.value[0],  encoding="utf-8")
+        size = dataset_example.features.feature['size'].int64_list.value
+        image = dataset_example.features.feature['image'].bytes_list.value[0]
+        image = utils_pil.frombytes(tuple(size), image)
+
+        image = utils_pil.convert_to_gray(image) 
+        w, h = size
         if h > image_height:
             image = utils_pil.resize_by_height(image, image_height)  
 
-        if random.random()>0.5:
-            image = utils_pil.resize_by_height(image, image_height-random.randint(1,5))
-            image, _ = utils_pil.random_space2(image, image,  image_height)
+        image = utils_pil.resize_by_height(image, image_height-random.randint(1,5))
+        image, _ = utils_pil.random_space2(image, image,  image_height)
         
-        # if if_to_G and random.random()>0.5:
-        # if random.random()>0.5:
-        #     image = utils_font.add_noise(image)   
-        # print(dir(image))
+        image = utils_font.add_noise(image)   
         image = np.asarray(image) 
-        # print(image.shape)
 
-        image = utils.resize(image, height=image_height)
+        image = utils.resize(image, image_height, MAX_IMAGE_WIDTH)
 
         if random.random()>0.5:
             image = image / 255.
@@ -223,47 +232,44 @@ def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _fo
 
         if max_width_image < image.shape[1]:
             max_width_image = image.shape[1]
-
-        #image = image[:, : , np.newaxis]
-        #image = np.reshape(image,(image.shape[0],image.shape[1],1))
-        # print(image.shape)
-        image = tf.image.random_hue(image, max_delta=0.05)
-        image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
-        image = tf.image.random_brightness(image, max_delta=0.2)
-        image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
-        image = tf.image.rgb_to_grayscale(image)
-        # image = tf.minimum(image, 1.0)
-        # image = tf.maximum(image, 0.0)
-        # print(image.shape, type(image))
-        # image = image.eval()
-        # print(image.shape, type(image))
+          
         inputs_images.append(image)
-        codes.append([CHARS.index(char) for char in text])                  
-
+        #  codes.append([CHARS.index(char) for char in text])
+        # one-hot    
+        chars = np.array([CHARS.index(char) for char in text]) 
+        chars_one_hot = np.zeros((len(chars), CLASSES_NUMBER))  
+        chars_one_hot[:, chars] = 1
+        codes.append(chars_one_hot)
+        # codes.append(slim.one_hot_encoding(chars, CLASSES_NUMBER))
         info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
+        seq_len[i]=len(text)+1
 
-    # 凑成16的整数倍
-    if max_width_image % POOL_SIZE > 0:
-        max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
+    # 凑成4的整数倍
+    if max_width_image % 4 > 0:
+        max_width_image = max_width_image + 4 - max_width_image % 4
+
+    # 如果图片超过最大宽度
+    if max_width_image > MAX_IMAGE_WIDTH:
+        raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        # image = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
-        # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
-        image = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
-        image = image.eval()
-        # print(image.shape)
-        inputs[i,:] = image
-        
-    # print(inputs.shape)
-    labels = [np.asarray(i) for i in codes]
-    sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (image_height*max_width_image)//(POOL_SIZE*POOL_SIZE)
-    return inputs, sparse_labels, seq_len, info
+        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
+     
+    # print(inputs.shape, len(codes))
+    # labels = [np.asarray(i) for i in codes]
+    # sparse_labels = utils.sparse_tuple_from(labels)
+    labels = np.array(codes)
+    seq_len = np.ones(batch_size) * (max_width_image//4)
+    # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
+    return inputs, labels, seq_len, info
+
+# get_next_batch_for_res(1)
 
 def train():
     inputs, labels, global_step, lr, summary, \
-        res_loss, res_optim, seq_len, res_acc, res_decoded = neural_networks()
+        res_loss, res_optim, seq_len, res_acc, res_decoded, net_res = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -274,11 +280,15 @@ def train():
     log_dir = os.path.join(model_dir, "logs")
     if not os.path.exists(log_dir): os.mkdir(log_dir)
 
-    init = tf.global_variables_initializer()
     with tf.Session() as session:
-        session.run(init)
+        print("tf init")
+        # init_op = tf.group(tf.global_variables_initializer(), tf.local_variables_initializer())
+        # session.run(init_op)
+        session.run(tf.global_variables_initializer())
 
-        r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
+        print("tf check restore")
+        # r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
+        r_saver = tf.train.Saver(max_to_keep=5)
 
         for i in range(3):
             ckpt = tf.train.get_checkpoint_state(model_R_dir)
@@ -294,7 +304,13 @@ def train():
                         f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%new_restore_iter)
                         f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%new_restore_iter)
                     continue
-                session.run(global_step.assign(restore_iter))
+                session.run(tf.assign(global_step, restore_iter))
+                if restore_iter<10000:        
+                    session.run(tf.assign(lr, 1e-4))
+                elif restore_iter<50000:            
+                    session.run(tf.assign(lr, 1e-5))
+                else:
+                    session.run(tf.assign(lr, 1e-6))
                 print("Restored to %s."%restore_iter)
                 break
             else:
@@ -302,7 +318,10 @@ def train():
             print("restored fail, return")
             return
 
+        print("tf create summary")
         train_writer = tf.summary.FileWriter(log_dir, session.graph)
+
+        print("tf train")
 
         AllLosts={}
         accs = deque(maxlen=100)
@@ -311,20 +330,17 @@ def train():
             errR = 1
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
-                if len(AllLosts)>10 and random.random()>0.7:
-                    sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
-                    font_info = sorted_font[random.randint(0,10)]
-                    font_info = font_info[0].split(",")
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
-                        font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
-                else:
-                    # train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, False, _font_size=36)
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
-                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
-                start = time.time()                
+                start = time.time()    
+                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
-                errR, acc, _ , steps, logs= session.run([res_loss, res_acc, res_optim, global_step, summary], feed)
+                feed_time = time.time() - start
+                start = time.time()    
+
+                # _res = session.run(net_res, feed)
+                # print(_res.shape)
+
+                errR, acc, _ , steps, res_lr = session.run([res_loss, res_acc, res_optim, global_step, lr], feed)
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 accs.append(acc)
@@ -334,27 +350,24 @@ def train():
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
-                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
+                print("%s, %d time: %4.4fs / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
+                    (time.ctime(), steps, feed_time, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
-                for _ in range(int(errR//avg_losts)):
-                    errR, acc, _ , logs= session.run([res_loss, res_acc, res_optim, summary], feed)
+                need_reset_global_step = False
+                for _ in range(10):
+                    if errR <=  avg_losts*2: break 
+                    start = time.time()                
+                    errR, acc, _, res_lr = session.run([res_loss, res_acc, res_optim, lr], feed)
                     accs.append(acc)
                     avg_acc = sum(accs)/len(accs)                  
-                    print("%s, %d time: %4.4fs, res_acc: %.4f, avg_acc: %.4f, res_loss: %.4f, info: %s " % \
-                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, font_info))
-                    session.run(global_step.assign(steps))
+                    print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
+                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))   
+                    need_reset_global_step = True
+                    
+                if need_reset_global_step:                     
+                    session.run(tf.assign(global_step, steps))
 
-                if steps<20000:        
-                    session.run(tf.assign(lr, 1e-4))
-                elif steps<100000:            
-                    session.run(tf.assign(lr, 1e-5))
-                else:
-                    session.run(tf.assign(lr, 1e-6))
-
-                # 保存日志
-                train_writer.add_summary(logs, steps)
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
                 #     return
@@ -366,13 +379,13 @@ def train():
                     else:
                         AllLosts[key]=acc
 
-                if acc/avg_acc<=0.8:
+                if acc/avg_acc<=0.2:
                     for i in range(batch_size): 
                         filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, steps, i, \
                             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                if steps >0 and steps % REPORT_STEPS < 2:
+                if steps >0 and steps % REPORT_STEPS == 0:
                     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
            
                     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
@@ -401,12 +414,21 @@ def train():
                     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     for f in sorted_fonts[:20]:
                         print(f)
-                        
+
+                    if avg_losts>100:        
+                        session.run(tf.assign(lr, 1e-4))
+                    elif avg_losts>10:            
+                        session.run(tf.assign(lr, 1e-5))
+                    else:
+                        session.run(tf.assign(lr, 1e-6))
+                                            
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
                 continue
             print("Save Model OCR ...")
             r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
+            logs = session.run(summary, feed)
+            train_writer.add_summary(logs, steps)
 
 if __name__ == '__main__':
     train()
