@@ -21,9 +21,8 @@
                 - if 0 _zero_label else char_one_hot(char_logit(prev, i)) 
                 - char_logit(i) -- (prev * w +b),每一个位置都单独做了一个全连接层 返回 [1]
             + lstm [b,s,c] ==> [b, [s,c]*w+b]==>[s,n]] ==> [s,1,n]] ==> [b, s, 1, n]
-
-
 - model.create_loss
+    + sequence_loss_fn 
 - model.create_summaries
 - model.create_init_fn_to_restore
 - train
