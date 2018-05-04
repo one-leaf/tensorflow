@@ -88,7 +88,7 @@ SequenceLayerParams = collections.namedtuple('SequenceLogitsParams', [
     'num_lstm_units', 'weight_decay', 'lstm_state_clip_value'
 ])
 
-
+# 序列模型，这个是抽象的基类
 class SequenceLayerBase(object):
   """A base abstruct class for all sequence layers.
 
@@ -117,6 +117,7 @@ class SequenceLayerBase(object):
     self._labels_one_hot = labels_one_hot
     self._batch_size = net.get_shape().dims[0].value
 
+    # 初始化 lstm 最后端的 softmax 参数
     # Initialize parameters for char logits which will be computed on the fly
     # inside an LSTM decoder.
     self._char_logits = {}
@@ -354,7 +355,7 @@ class NetSliceWithAutoregression(NetSlice):
 class Attention(SequenceLayerBase):
   """A layer which uses attention mechanism to select image features."""
 
-  # 初始化了 0的单字符的 lablel one-hot
+  # 初始化了 0的单字符的 lablel one-hot [b, 134]
   def __init__(self, *args, **kwargs):
     super(Attention, self).__init__(*args, **kwargs)
     self._zero_label = tf.zeros(

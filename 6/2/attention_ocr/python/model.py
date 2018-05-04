@@ -242,13 +242,19 @@ class Model(object):
     return tf.unstack(net, axis=1)
 
   # 序列模型
+  # 输入 cnn 后的 网络和labels
   def sequence_logit_fn(self, net, labels_one_hot):
+    # 获得前面定义的时候采用注意力和正则化
     mparams = self._mparams['sequence_logit_fn']
     # TODO(gorban): remove /alias suffixes from the scopes.
     with tf.variable_scope('sequence_logit_fn/SQLR'):
+      # 获得类
+      # 返回 AttentionWithAutoregression
       layer_class = sequence_layers.get_layer_class(mparams.use_attention,
                                                     mparams.use_autoregression)
+      # 创建网络实例
       layer = layer_class(net, labels_one_hot, self._params, mparams)
+      # 创建网络
       return layer.create_logits()
 
   # 将4D数据 max_pool2d 
@@ -366,7 +372,9 @@ class Model(object):
     else:
       return net
 
+  ##############################
   # 这里是创建模型的入口
+  ##############################
   def create_base(self,
                   images,
                   labels_one_hot,
@@ -394,8 +402,9 @@ class Model(object):
         value=images, num_or_size_splits=self._params.num_views, axis=2)
       logging.debug('Views=%d single view: %s', len(views), views[0])
 
+      # CNN 模型定义
       # 定义了4个 inception_v3 模型，参数共用
-      #  返回了 4个 [B, H, W, C]
+      # 返回了 4个 [B, H, W, C]
       nets = [
         self.conv_tower_fn(v, is_training, reuse=(i != 0))
         for i, v in enumerate(views)
@@ -406,8 +415,8 @@ class Model(object):
       nets = [self.encode_coordinates_fn(net) for net in nets]
       logging.debug('Conv tower w/ encoded coordinates: %s', nets[0])
 
+      # 这一步将 shape 转为序列
       # 将 [4, b, h, w, c] => [b, h*4*w, c]
-      # 这一步将shape转为序列
       net = self.pool_views_fn(nets)
       logging.debug('Pooled views: %s', net)
 
