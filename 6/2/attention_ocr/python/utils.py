@@ -18,7 +18,7 @@
 import tensorflow as tf
 from tensorflow.contrib import slim
 
-
+# 输入 ligits [32 37 134]
 def logits_to_log_prob(logits):
   """Computes log probabilities using numerically stable trick.
 
@@ -40,8 +40,11 @@ def logits_to_log_prob(logits):
   with tf.variable_scope('log_probabilities'):
     # 将所有的值都降到0和以下
     reduction_indices = len(logits.shape.as_list()) - 1
+    # 取最大值 max_logits [32 37 1]
     max_logits = tf.reduce_max(
         logits, reduction_indices=reduction_indices, keep_dims=True)
+    
+    # 都降到 0 以下 [32 37 134]
     safe_logits = tf.subtract(logits, max_logits)
     # exp(-x) => (0 ~ 1) 求和最后一个维度
     sum_exp = tf.reduce_sum(
@@ -54,6 +57,7 @@ def logits_to_log_prob(logits):
     # c = x - max(x)         ==> (-1, 0)
     # c - log(sum ( exp(c) ))  ==> (-1.74, -0.74)
     # 会提高小差异的敏感度
+    # 返回 [32 27 134]
   return log_probs
 
 

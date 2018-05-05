@@ -251,6 +251,7 @@ class SequenceLayerBase(object):
     """
     with tf.variable_scope('LSTM'):
       first_label = self.get_input(prev=None, i=0)
+      # [32 134]
       decoder_inputs = [first_label] + [None] * (self._params.seq_length - 1)
       lstm_cell = tf.contrib.rnn.LSTMCell(
           self._mparams.num_lstm_units,
@@ -258,19 +259,22 @@ class SequenceLayerBase(object):
           cell_clip=self._mparams.lstm_state_clip_value,
           state_is_tuple=True,
           initializer=orthogonal_initializer)
-          
+
+      # 37 个 tensors [32 256]       
       lstm_outputs, _ = self.unroll_cell(
           decoder_inputs=decoder_inputs,
           initial_state=lstm_cell.zero_state(self._batch_size, tf.float32),
           loop_function=self.get_input,
           cell=lstm_cell)
 
+    #一共有37个 [32 256] * [256 134] + [134] ==> [32 134] ==> [32 1 134]
     with tf.variable_scope('logits'):
       logits_list = [
           tf.expand_dims(self.char_logit(logit, i), dim=1)
           for i, logit in enumerate(lstm_outputs)
       ]
-
+      
+    # 输出为 [32 37 134]
     return tf.concat(logits_list, 1)
 
 
@@ -372,6 +376,8 @@ class Attention(SequenceLayerBase):
     """See SequenceLayerBase.get_train_input for details."""
     return self.get_eval_input(prev, i)
 
+  # 输入 decoder_inputs : [32 134] get_input: [32 1024 288]
+  # 输出 37个 tensors
   def unroll_cell(self, decoder_inputs, initial_state, loop_function, cell):
     return tf.contrib.legacy_seq2seq.attention_decoder(
         decoder_inputs=decoder_inputs,

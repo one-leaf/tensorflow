@@ -242,7 +242,7 @@ class Model(object):
     return tf.unstack(net, axis=1)
 
   # 序列模型
-  # 输入 cnn 后的 网络和labels
+  # 输入 cnn 后的 网络和labels net： [32 1024 288]
   def sequence_logit_fn(self, net, labels_one_hot):
     # 获得前面定义的时候采用注意力和正则化
     mparams = self._mparams['sequence_logit_fn']
@@ -254,7 +254,7 @@ class Model(object):
                                                     mparams.use_autoregression)
       # 创建网络实例
       layer = layer_class(net, labels_one_hot, self._params, mparams)
-      # 创建网络
+      # 创建网络 返回 [32 37 134]
       return layer.create_logits()
 
   # 将4D数据 max_pool2d 
@@ -328,20 +328,25 @@ class Model(object):
         tensor
           with shape [batch_size x seq_length].
     """
-    # 优化下数据
+    # 稳定网络
+    # input chars_logit [32 37 134]
     log_prob = utils.logits_to_log_prob(chars_logit)
 
     # 取出最大概率的编号
+    # ids [32 37]
     ids = tf.to_int32(tf.argmax(log_prob, axis=2), name='predicted_chars')
 
     # onehot ids
+    # mask [32 27 134]
     mask = tf.cast(
       slim.one_hot_encoding(ids, self._params.num_char_classes), tf.bool)
     
-    #求得分,进一步求 softmax，拉开分值
+    # 将概率统一到1以内
+    # softmax 会自动合并前面2维数据 [32 37 134] ==> [1184 134]
     all_scores = tf.nn.softmax(chars_logit)
 
-    # 只取出 ids 的得分，转为 [batch_size, seq_length]
+    # 只取出 ids 的概率，转为 [batch_size, seq_length]
+    # 返回 scores [32 37]
     selected_scores = tf.boolean_mask(all_scores, mask, name='char_scores')
     scores = tf.reshape(selected_scores, shape=(-1, self._params.seq_length))
     return ids, log_prob, scores
@@ -397,14 +402,14 @@ class Model(object):
     # 确定是否在训练
     is_training = labels_one_hot is not None
     with tf.variable_scope(scope, reuse=reuse):
-      # 按宽度分割图片，原始输入的图片是4张拼接在一起的
+      # 按宽度分割图片，原始输入的图片是4张拼接在一起的 转为 views： 4 * [32 * 105 * 105 * 3]
       views = tf.split(
         value=images, num_or_size_splits=self._params.num_views, axis=2)
       logging.debug('Views=%d single view: %s', len(views), views[0])
 
       # CNN 模型定义
       # 定义了4个 inception_v3 模型，参数共用
-      # 返回了 4个 [B, H, W, C]
+      # 返回了 4个 [B, H, W, C] ==> 4 * [32 * 16 * 16 * 288]
       nets = [
         self.conv_tower_fn(v, is_training, reuse=(i != 0))
         for i, v in enumerate(views)
@@ -416,16 +421,22 @@ class Model(object):
       logging.debug('Conv tower w/ encoded coordinates: %s', nets[0])
 
       # 这一步将 shape 转为序列
-      # 将 [4, b, h, w, c] => [b, h*4*w, c]
+      # 将 [4, b, h, w, c] => [b, h*4*w, c] 返回 [32 * 1024 * 288]
       net = self.pool_views_fn(nets)
       logging.debug('Pooled views: %s', net)
 
-      # 引入注意力lstm序列模型
+      # 引入注意力lstm序列模型 返回 [32 * 37 * 134]
       chars_logit = self.sequence_logit_fn(net, labels_one_hot)
       logging.debug('chars_logit: %s', chars_logit)
 
+      # 输出预测结果
+      # predicted_chars [32 37] 预测的值
+      # chars_log_prob [32 37 134] 稳定后的网络预测输出
+      # predicted_scores [32 37] 预测的值对应的概率
       predicted_chars, chars_log_prob, predicted_scores = (
         self.char_predictions(chars_logit))
+
+      # 如果有对应表返回对应的text  
       if self._charset:
         character_mapper = CharsetMapper(self._charset)
         predicted_text = character_mapper.get_text(predicted_chars)
@@ -438,6 +449,7 @@ class Model(object):
       predicted_scores=predicted_scores,
       predicted_text=predicted_text)
 
+  # 创建损失网络
   def create_loss(self, data, endpoints):
     """Creates all losses required to train the model.
 
