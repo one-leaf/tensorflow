@@ -61,10 +61,10 @@ def RES(inputs, seq_len, reuse = False):
         temp_layer = layer
 
         with tf.variable_scope("Normalize"):
-            # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            # layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
         # 将图像高度和宽度 // [2, 4]
         # layer = slim.avg_pool2d(layer, [2, 4], [2, 4]) 
@@ -82,7 +82,7 @@ def RES(inputs, seq_len, reuse = False):
         with tf.variable_scope("LSTM"):
             layer = tf.squeeze(layer, squeeze_dims=1)
             print("SEQ shape:",layer.shape)
-            layer = LSTM(layer, 128+embedd_size, seq_len)    # N, W*H, 128
+            layer = LSTM(layer, 256+embedd_size, seq_len)    # N, W*H, 256
             print("lstm shape:",layer.shape)
 
         return layer, temp_layer
