@@ -15,7 +15,7 @@
 
 """Functions to make unit testing easier."""
 
-import StringIO
+from io import StringIO
 import numpy as np
 from PIL import Image as PILImage
 import tensorflow as tf
@@ -32,7 +32,7 @@ def create_random_image(image_format, shape):
     A tuple (<numpy ndarray>, <a string with encoded image>)
   """
   image = np.random.randint(low=0, high=255, size=shape, dtype='uint8')
-  io = StringIO.StringIO()
+  io = StringIO()
   image_pil = PILImage.fromarray(image)
   image_pil.save(io, image_format, subsampling=0, quality=100)
   return image, io.getvalue()
