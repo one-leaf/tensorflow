@@ -14,7 +14,7 @@
 # ==============================================================================
 
 """Tests for unittest_utils."""
-import StringIO
+from io import StringIO
 
 import numpy as np
 from PIL import Image as PILImage
@@ -30,7 +30,7 @@ class UnittestUtilsTest(tf.test.TestCase):
 
   def test_encoded_image_corresponds_to_numpy_array(self):
     image, encoded = unittest_utils.create_random_image('PNG', (20, 10, 3))
-    pil_image = PILImage.open(StringIO.StringIO(encoded))
+    pil_image = PILImage.open(StringIO(encoded))
     self.assertAllEqual(image, np.array(pil_image))
 
   def test_created_example_has_correct_values(self):
