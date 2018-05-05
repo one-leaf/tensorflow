@@ -28,6 +28,7 @@ from tensorflow.contrib.tfprof import model_analyzer
 
 import data_provider
 import common_flags
+import os
 
 FLAGS = flags.FLAGS
 common_flags.define()
@@ -157,6 +158,10 @@ def train(loss, init_fn, hparams):
 # 检查训练日志目录
 # 如果不存在训练目录，则创建，如果是重新训练，则先删除日志目录，再创建
 def prepare_training_dir():
+  curr_dir = os.path.dirname(__file__)
+
+  FLAGS.train_log_dir= os.path.join(curr_dir,"data","logs")
+
   if not tf.gfile.Exists(FLAGS.train_log_dir):
     logging.info('Create a new training directory %s', FLAGS.train_log_dir)
     tf.gfile.MakeDirs(FLAGS.train_log_dir)
