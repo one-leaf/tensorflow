@@ -21,7 +21,7 @@ import tensorflow as tf
 from tensorflow.contrib import slim
 
 from . import fsns
-import unittest_utils
+from . import unittest_utils
 
 FLAGS = tf.flags.FLAGS
 
