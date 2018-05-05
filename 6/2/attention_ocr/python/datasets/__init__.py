@@ -13,7 +13,7 @@
 # limitations under the License.
 # ==============================================================================
 
-import fsns
-import fsns_test
+from . import fsns
+from . import fsns_test
 
 __all__ = [fsns, fsns_test]
