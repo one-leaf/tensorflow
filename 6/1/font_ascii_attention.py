@@ -14,33 +14,24 @@ import urllib,json,io
 import utils_pil, utils_font, utils_nn
 import operator
 from collections import deque
+import font_dataset
 
 curr_dir = os.path.dirname(__file__)
 
-image_height = 32
-# image_size = 512
-# resize_image_size = 256
-# 所有 unicode CJK统一汉字（4E00-9FBB） + ascii的字符加 + ctc blank
-# https://zh.wikipedia.org/wiki/Unicode
-# https://zh.wikipedia.org/wiki/ASCII
-ASCII_CHARS = [chr(c) for c in range(32,126+1)]
-#ZH_CHARS = [chr(c) for c in range(int('4E00',16),int('9FBB',16)+1)]
-#ZH_CHARS_PUN = ['。','？','！','，','、','；','：','「','」','『','』','‘','’','“','”',\
-#                '（','）','〔','〕','【','】','—','…','–','．','《','》','〈','〉']
+CLASSES_NUMBER = font_dataset.CLASSES_NUMBER
 
-CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
-# CHARS = ASCII_CHARS
-
-# 将空格移动到第一个
-CHARS.remove(" ")
-CHARS.insert(0, " ")
-
-CLASSES_NUMBER = len(CHARS) + 1 
+# 采用注意力模型，需要确定下图片的大小和最大字数
+# 不足高宽的需要补齐
+IMAGE_HEIGHT = 32
+IMAGE_WIDTH = 4096
+SEQ_LENGTH  = 256
 
 #初始化学习速率
 LEARNING_RATE_INITIAL = 1e-3
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
+LSTM_UNITS_NUMBER = 256
+
 REPORT_STEPS = 500
 
 BATCHES = 50
@@ -50,63 +41,51 @@ TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_resNext50_lstm"
-MAX_IMAGE_WIDTH = 4096
-MAX_SEQ_LENGTH = 1024
 
-def RES(inputs, seq_len, reuse = False):
-    with tf.variable_scope("OCR", reuse=reuse):
-        print("inputs shape:",inputs.shape)
-        # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
-        # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
-        with tf.variable_scope("ResNext"):
-            layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            tf.summary.image('1_2_4_zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
-            layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
-            tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
-        print("ResNext shape:",layer.shape)
-        temp_layer = layer
+# CNN特征采集
+# 输入[B 32 4096 1] ==> [B 1 1024 256]
+def CNN(inputs):
+    with tf.variable_scope("CNN"):
+        layer = slim.conv2d(inputs, 64, [8,8], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        # layer [B H//2 W//4 64]
+        # tf.summary.image('zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
+        layer = utils_nn.resNext50(layer, True, [2,1]) 
+        # [N H//32 W 2048]
+        # tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
 
+        # 直接将网络拉到256 [N 1 W 256]
         with tf.variable_scope("Normalize"):
-            # layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            # layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-       
-        # 将图像高度和宽度 // [2, 4]
-        # layer = slim.avg_pool2d(layer, [2, 4], [2, 4]) 
-        print("ResNet shape:",layer.shape)
+            return layer
 
-        # 增加坐标信息，增加的个数为 embedd_size
-        # max_width_height, embedd_size
-        # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
-        with tf.variable_scope("Coordinates"):
-            max_width_height = MAX_IMAGE_WIDTH//4
-            embedd_size = 16
-            layer = Coordinates(layer, max_width_height, embedd_size)
-            print("Coordinates shape:",layer.shape)
+# 增加坐标信息，增加的个数为 embedd_size
+# max_width_height, embedd_size
+# max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
+# 输入[B 1 W 256] ==> [B 1 W 288]
+def Coordinates(inputs):
+    with tf.variable_scope("Coordinates"):
+        max_width_height = MAX_IMAGE_WIDTH//4
+        embedd_size = 32
+        shape = tf.shape(inputs)
+        batch_size, h, w = shape[0], shape[1], shape[2]
+        x = tf.range(w*h)
+        x = tf.reshape(x, [1, h, w, 1])
+        layer = tf.tile(x, [batch_size, 1, 1, 1])
+        embedding = tf.get_variable("embedding", initializer=tf.random_uniform([max_width_height, embedd_size], -1.0, 1.0)) 
+        layer = tf.nn.embedding_lookup(embedding, layer)
+        layer = tf.squeeze(layer, squeeze_dims=3)
+        layer = tf.concat([inputs, layer], 3)
+        return layer
 
-        with tf.variable_scope("LSTM"):
-            layer = tf.squeeze(layer, squeeze_dims=1)
-            print("SEQ shape:",layer.shape)
-            layer = LSTM(layer, 128+embedd_size, seq_len)    # N, W*H, 128
-            print("lstm shape:",layer.shape)
-
-        return layer, temp_layer
-
-# 插入像素的坐标信息
-def Coordinates(inputs, max_width_height, embedd_size):
-    shape = tf.shape(inputs)
-    batch_size, h, w = shape[0],shape[1],shape[2]
-    x = tf.range(w*h)
-    x = tf.reshape(x, [1, h, w, 1])
-    loc = tf.tile(x, [batch_size, 1, 1, 1])
-    embedding = tf.get_variable("embedding", initializer=tf.random_uniform([max_width_height, embedd_size], -1.0, 1.0)) 
-    loc = tf.nn.embedding_lookup(embedding, loc)
-    loc = tf.squeeze(loc, squeeze_dims=3)
-    loc = tf.concat([inputs, loc], 3)
-    return loc
+# 将CNN模型转换到SEQ序列
+def CNN2SEQ(inputs):
+    with tf.variable_scope("CNN2SEQ"):
+        batch_size = inputs.get_shape().dims[0].value
+        feature_size = inputs.get_shape().dims[3].value
+        return tf.reshape(inputs, [batch_size, -1, feature_size])
 
 # 采用标准正交基的方式初始化参数
+# 给LSTM使用，可以提升初始化效果
 def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
     del args
     del kwargs
@@ -120,26 +99,139 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
     w = u if u.shape == flat_shape else v
     return tf.constant(w.reshape(shape), dtype=dtype)
 
-# RNN 不能加上 batch_norm，会在ctc中很难学习到东西
-def LSTM(inputs, lstm_size, seq_len):
-    layer = inputs
-    for i in range(2):
-        with tf.variable_scope("rnn-%s"%i):
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
-                kernel_initializer=orthogonal_initializer,
-                bias_initializer=tf.zeros_initializer)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
-                kernel_initializer=orthogonal_initializer,
-                bias_initializer=tf.zeros_initializer)
-            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-        net = tf.concat(outputs, -1)  
-        net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
-        layer = tf.nn.leaky_relu(net + layer)
-    return layer
+# 注意力模型
+# 输入[B T F]
+def Attention(net, labels_one_hot)
+    with tf.variable_scope("Attention"):
+        regularizer = slim.l2_regularizer(0.00004)
+        _softmax_w = slim.model_variable('softmax_w', [LSTM_UNITS_NUMBER, CLASSES_NUMBER],
+            initializer=orthogonal_initializer, regularizer=regularizer)
+        _softmax_b = slim.model_variable('softmax_b', [CLASSES_NUMBER],
+            initializer=tf.zeros_initializer(), regularizer=regularizer)
+        _zero_label = tf.zeros([BATCH_SIZE, CLASSES_NUMBER])
+
+        first_label = _zero_label
+        decoder_inputs = [first_label] + [None] * (SEQ_LENGTH - 1)
+        lstm_cell = tf.contrib.rnn.LSTMCell(LSTM_UNITS_NUMBER, use_peepholes=False, 
+            cell_clip=10., state_is_tuple=True, initializer=orthogonal_initializer)
+
+        _char_logits={}
+        def char_logit(inputs, char_index):
+            if char_index not in _char_logits:
+                _char_logits[char_index] = tf.nn.xw_plus_b(inputs, _softmax_w, _softmax_b)
+            return _char_logits[char_index]
+
+        def char_one_hot(self, logit):
+            prediction = tf.argmax(logit, axis=1)
+            return slim.one_hot_encoding(prediction, CLASSES_NUMBER)
+            
+        def get_input(prev, i):
+            if i==0:
+                return _zero_label
+            else:
+                if labels_one_hot!=None:
+                    return labels_one_hot[:, i - 1, :]
+                else:
+                    logit = char_logit(prev, char_index=i - 1)
+                    return char_one_hot(logit)
+
+        lstm_outputs, _ = tf.contrib.legacy_seq2seq.attention_decoder(
+            decoder_inputs=decoder_inputs,
+            initial_state=lstm_cell.zero_state(BATCH_SIZE, tf.float32),
+            attention_states=net,
+            cell=lstm_cell,
+            loop_function=self.get_input)
+    
+        logits_list = [
+            tf.expand_dims(char_logit(logit, i), dim=1)
+            for i, logit in enumerate(lstm_outputs)
+        ]
+        
+        return tf.concat(logits_list, 1)
+
+def logits_to_log_prob(logits):
+    with tf.variable_scope('log_probabilities'):
+        # 将所有的值都降到0和以下
+        reduction_indices = len(logits.shape.as_list()) - 1
+        # 取最大值 max_logits 
+        max_logits = tf.reduce_max(logits, reduction_indices=reduction_indices, keep_dims=True)
+        
+        # 都降到 0 以下 
+        safe_logits = tf.subtract(logits, max_logits)
+        # exp(-x) => (0 ~ 1) 求和最后一个维度
+        sum_exp = tf.reduce_sum(tf.exp(safe_logits),  reduction_indices=reduction_indices, keep_dims=True)
+        # 再将 log(sum) => (0 ~ 1)  
+        log_probs = tf.subtract(safe_logits, tf.log(sum_exp))  
+        return log_probs
+
+# 文字预测
+def char_predictions(chars_logit):
+    # 稳定网络
+    log_prob = logits_to_log_prob(chars_logit)
+
+    # 取出最大概率的编号
+    ids = tf.to_int32(tf.argmax(log_prob, axis=2), name='predicted_chars')
+
+    # onehot ids
+    mask = tf.cast(slim.one_hot_encoding(ids, CLASSES_NUMBER), tf.bool)
+    
+    # 将概率统一到1以内
+    all_scores = tf.nn.softmax(chars_logit)
+
+    # 只取出 ids 的概率，转为 [batch_size, seq_length]
+    selected_scores = tf.boolean_mask(all_scores, mask, name='char_scores')
+    scores = tf.reshape(selected_scores, shape=(-1, SEQ_LENGTH))
+    return ids, log_prob, scores
+
+# 损失函数
+# 这里删除了 label_smoothing ， 后续有时间测试下差异
+def sequence_loss_fn(chars_logits, chars_labels):    
+    with tf.variable_scope('sequence_loss_fn'):        
+        labels_list = tf.unstack(chars_labels, axis=1)
+        batch_size, seq_length, _ = chars_logits.shape.as_list()
+        weights = tf.ones((batch_size, seq_length), dtype=tf.float32)
+        logits_list = tf.unstack(chars_logits, axis=1)
+        weights_list = tf.unstack(weights, axis=1)
+        loss = tf.contrib.legacy_seq2seq.sequence_loss(
+            logits_list,
+            labels_list,
+            weights_list,
+            softmax_loss_function = tf.nn.sparse_softmax_cross_entropy_with_logits,
+            average_across_timesteps = False)
+        return loss
+
+def OCR(inputs, labels_one_hot, labels_sparse, reuse = False):
+    with tf.variable_scope("OCR", reuse=reuse):
+        layer = inputs
+        print("Image shape:",layer.shape)
+
+        # CNN
+        layer = CNN(layer)
+        print("CNN shape:",layer.shape)
+
+        # Coordinates
+        layer = Coordinates(layer)
+        print("Coordinates shape:", layer.shape)    
+
+        layer = CNN2SEQ(layer)
+        print("CNN2SEQ shape:", layer.shape)
+
+        # 文字模型
+        chars_logit = Attention(layer, labels_one_hot)    
+        print('chars_logit: %s', chars_logit.shape)
+
+        # 预测的字符， 稳定后的文字模型， 预测的概率
+        predicted_chars, chars_log_prob, predicted_scores = (char_predictions(chars_logit))
+
+        # create_loss
+        loss = sequence_loss_fn(chars_logit, labels_sparse)
+        tf.summary.scalar('TotalLoss', loss)
+        return chars_logit, chars_log_prob, predicted_chars, predicted_scores, loss
+
 
 # 建立 label 网络
 def label_net():
-    label_decoder_inputs = [None] * MAX_SEQ_LENGTH
+    label_decoder_inputs = [None] * SEQ_LENGTH
     label_decoder_inputs[0] = np.zeros(CLASSES_NUMBER)
     return LSTM(label_inputs)
 
@@ -190,92 +282,7 @@ def list_to_chars(list):
     except Exception as err:
         return "Error: %s" % err        
 
-def dataset_init():
-    data_dir = os.path.join(curr_dir,"data")
-    datafiles = os.listdir(data_dir)
-    data_file = os.path.join(data_dir, random.choice(datafiles))
-    print("load data_file", data_file)
-    return tf.python_io.tf_record_iterator(data_file)
 
-dataset = dataset_init()
-dataset_example=tf.train.Example() 
-
-def get_next_batch_for_res(batch_size=128):
-    inputs_images = []   
-    codes = []
-    max_width_image = 0
-    info = []
-    seq_len = np.ones(batch_size)
-
-    for i in range(batch_size):
-        serialized_example = next(dataset, None)
-        if serialized_example==None:
-            raise Exception("has finished train one data file, stop")
-
-        dataset_example.ParseFromString(serialized_example)
-
-        font_name = str(dataset_example.features.feature['font_name'].bytes_list.value[0],  encoding="utf-8")
-        font_size = dataset_example.features.feature['font_size'].int64_list.value[0]
-        font_mode = dataset_example.features.feature['font_mode'].int64_list.value[0]
-        font_hint = dataset_example.features.feature['font_mode'].int64_list.value[0]
-
-        text = str(dataset_example.features.feature['label'].bytes_list.value[0],  encoding="utf-8")
-        size = dataset_example.features.feature['size'].int64_list.value
-        image = dataset_example.features.feature['image'].bytes_list.value[0]
-        image = utils_pil.frombytes(tuple(size), image)
-
-        image = utils_pil.convert_to_gray(image) 
-        w, h = size
-        if h > image_height:
-            image = utils_pil.resize_by_height(image, image_height)  
-
-        image = utils_pil.resize_by_height(image, image_height-random.randint(1,5))
-        image, _ = utils_pil.random_space2(image, image,  image_height)
-        
-        image = utils_font.add_noise(image)   
-        image = np.asarray(image) 
-
-        image = utils.resize(image, image_height, MAX_IMAGE_WIDTH)
-
-        if random.random()>0.5:
-            image = image / 255.
-        else:
-            image = (255. - image) / 255.
-
-        if max_width_image < image.shape[1]:
-            max_width_image = image.shape[1]
-          
-        inputs_images.append(image)
-        #  codes.append([CHARS.index(char) for char in text])
-        # one-hot    
-        chars = np.array([CHARS.index(char) for char in text]) 
-        chars_one_hot = np.zeros((len(chars), CLASSES_NUMBER))  
-        chars_one_hot[:, chars] = 1
-        codes.append(chars_one_hot)
-        # codes.append(slim.one_hot_encoding(chars, CLASSES_NUMBER))
-        info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
-        seq_len[i]=len(text)+1
-
-    # 凑成4的整数倍
-    if max_width_image % 4 > 0:
-        max_width_image = max_width_image + 4 - max_width_image % 4
-
-    # 如果图片超过最大宽度
-    if max_width_image > MAX_IMAGE_WIDTH:
-        raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
-
-    inputs = np.zeros([batch_size, image_height, max_width_image, 1])
-    for i in range(batch_size):
-        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
-        inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
-     
-    # print(inputs.shape, len(codes))
-    # labels = [np.asarray(i) for i in codes]
-    # sparse_labels = utils.sparse_tuple_from(labels)
-    labels = np.array(codes)
-    seq_len = np.ones(batch_size) * (max_width_image//4)
-    # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
-    return inputs, labels, seq_len, info
 
 # get_next_batch_for_res(1)
 

@@ -181,7 +181,9 @@ def calculate_graph_metrics():
       tfprof_options=model_analyzer.TRAINABLE_VARS_PARAMS_STAT_OPTIONS)
   return param_stats.total_parameters
 
-
+#################
+# 训练入口
+#################
 def main(_):
   # 检查训练目录
   prepare_training_dir()
