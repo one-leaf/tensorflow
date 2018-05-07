@@ -64,14 +64,13 @@ def CNN(inputs):
 # 输入[B 1 W 256] ==> [B 1 W 288]
 def Coordinates(inputs):
     with tf.variable_scope("Coordinates"):
-        max_width_height = MAX_IMAGE_WIDTH//4
         embedd_size = 32
         shape = tf.shape(inputs)
         batch_size, h, w = shape[0], shape[1], shape[2]
         x = tf.range(w*h)
         x = tf.reshape(x, [1, h, w, 1])
         layer = tf.tile(x, [batch_size, 1, 1, 1])
-        embedding = tf.get_variable("embedding", initializer=tf.random_uniform([max_width_height, embedd_size], -1.0, 1.0)) 
+        embedding = tf.get_variable("embedding", initializer=tf.random_uniform([w, embedd_size], -1.0, 1.0)) 
         layer = tf.nn.embedding_lookup(embedding, layer)
         layer = tf.squeeze(layer, squeeze_dims=3)
         layer = tf.concat([inputs, layer], 3)
@@ -101,7 +100,7 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 
 # 注意力模型
 # 输入[B T F]
-def Attention(net, labels_one_hot)
+def Attention(net, labels_one_hot):
     with tf.variable_scope("Attention"):
         regularizer = slim.l2_regularizer(0.00004)
         _softmax_w = slim.model_variable('softmax_w', [LSTM_UNITS_NUMBER, CLASSES_NUMBER],
@@ -140,7 +139,7 @@ def Attention(net, labels_one_hot)
             initial_state=lstm_cell.zero_state(BATCH_SIZE, tf.float32),
             attention_states=net,
             cell=lstm_cell,
-            loop_function=self.get_input)
+            loop_function=get_input)
     
         logits_list = [
             tf.expand_dims(char_logit(logit, i), dim=1)
@@ -267,7 +266,7 @@ def list_to_chars(list):
 
 def train():
     inputs, labels, global_step, lr, summary, \
-        res_loss, res_optim, seq_len, res_acc, res_decoded, net_res = neural_networks()
+        chars_loss, ocr_optim  = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -329,7 +328,8 @@ def train():
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
                 start = time.time()    
-                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
+                train_inputs, train_labels, train_seq_len, train_info =  font_dataset.get_next_batch_for_res(batch_size,
+                    has_sparse=False,  max_width=4096, height=32,  need_pad_width_to_max_width=True)
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
                 feed_time = time.time() - start
