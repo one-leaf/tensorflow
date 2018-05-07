@@ -32,7 +32,9 @@ curr_dir = os.path.dirname(__file__)
 def dataset_init():
     data_dir = os.path.join(curr_dir,"data")
     datafiles = os.listdir(data_dir)
-    datafiles.remove('.DS_Store')
+    for f in datafiles:
+        if not f.startswith("training"):
+            datafiles.remove(f)
     data_file = os.path.join(data_dir, random.choice(datafiles))
     print("load data_file", data_file)
     return tf.python_io.tf_record_iterator(data_file)

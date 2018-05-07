@@ -75,12 +75,12 @@ def Coordinates(inputs):
         embedd_size = 64
         shape = tf.shape(inputs)
         batch_size, h, w = shape[0],shape[1],shape[2]
-        image_width = w.value
+        image_width = inputs.get_shape().dims[2].value
         print(image_width)
         x = tf.range(w*h)
         x = tf.reshape(x, [1, h, w, 1])
         loc = tf.tile(x, [batch_size, 1, 1, 1])
-        embedding = tf.get_variable("embedding", initializer=tf.random_uniform([IMAGE_WIDTH//4, embedd_size], -1.0, 1.0)) 
+        embedding = tf.get_variable("embedding", initializer=tf.random_uniform([image_width, embedd_size], -1.0, 1.0)) 
         loc = tf.nn.embedding_lookup(embedding, loc)
         loc = tf.squeeze(loc, squeeze_dims=3)
         loc = tf.concat([inputs, loc], 3)
