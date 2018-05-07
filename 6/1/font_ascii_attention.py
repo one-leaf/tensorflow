@@ -75,6 +75,8 @@ def Coordinates(inputs):
         embedd_size = 64
         shape = tf.shape(inputs)
         batch_size, h, w = shape[0],shape[1],shape[2]
+        image_width = w.value
+        print(image_width)
         x = tf.range(w*h)
         x = tf.reshape(x, [1, h, w, 1])
         loc = tf.tile(x, [batch_size, 1, 1, 1])
