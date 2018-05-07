@@ -46,13 +46,13 @@ def int64_feature(values):
 def bytes_feature(values):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
 
-def create_font_dataset():
-    for i in range(20):        
+def create_font_dataset(filecount=20, filesize=50000):
+    for i in range(filecount):        
         TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training_%s.tfrecord"%i)
         if os.path.exists(TRAINING_TFRECORD_NAME): continue
         with tf.python_io.TFRecordWriter(TRAINING_TFRECORD_NAME) as writer:
             font_length = random.randint(5, 200)
-            images_count = 50000
+            images_count = filesize
             for j in range(images_count):
                 font_name = random.choice(AllFontNames)
                 if random.random()>0.5:
@@ -92,13 +92,13 @@ def simple_read():
     for serialized_example in tf.python_io.tf_record_iterator(TRAINING_TFRECORD_NAME):
         example = tf.train.Example()
         example.ParseFromString(serialized_example)
-        size = example.features.feature['image/size'].int64_list.value
-        image = example.features.feature['image/encoded'].bytes_list.value[0]
+        size = example.features.feature['size'].int64_list.value
+        image = example.features.feature['image'].bytes_list.value[0]
         image = utils_pil.frombytes(tuple(size), image)
-        label = str(example.features.feature['image/label'].bytes_list.value[0],  encoding="utf-8")
-        font_size = example.features.feature['image/font_size'].int64_list.value[0]
+        label = str(example.features.feature['label'].bytes_list.value[0],  encoding="utf-8")
+        font_size = example.features.feature['font_size'].int64_list.value[0]
         print(label)
 
 if __name__ == '__main__':
-    create_font_dataset()
+    create_font_dataset(1,100)
     # simple_read()

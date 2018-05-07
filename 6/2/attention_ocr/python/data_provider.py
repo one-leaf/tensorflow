@@ -149,7 +149,7 @@ def preprocess_image(image, augment=False, central_crop_size=None,
 
   return image
 
-
+# 返回数据集
 def get_data(dataset,
              batch_size,
              augment=False,

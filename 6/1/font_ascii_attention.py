@@ -200,7 +200,7 @@ def sequence_loss_fn(chars_logits, chars_labels):
             average_across_timesteps = False)
         return loss
 
-def OCR(inputs, labels_one_hot, labels_sparse, reuse = False):
+def OCR(inputs, labels_one_hot, labels, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         layer = inputs
         print("Image shape:",layer.shape)
@@ -224,48 +224,27 @@ def OCR(inputs, labels_one_hot, labels_sparse, reuse = False):
         predicted_chars, chars_log_prob, predicted_scores = (char_predictions(chars_logit))
 
         # create_loss
-        loss = sequence_loss_fn(chars_logit, labels_sparse)
-        tf.summary.scalar('TotalLoss', loss)
-        return chars_logit, chars_log_prob, predicted_chars, predicted_scores, loss
+        chars_loss = sequence_loss_fn(chars_logit, labels)
+        tf.summary.scalar('TotalLoss', chars_loss)
+        return chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss
 
-
-# 建立 label 网络
-def label_net():
-    label_decoder_inputs = [None] * SEQ_LENGTH
-    label_decoder_inputs[0] = np.zeros(CLASSES_NUMBER)
-    return LSTM(label_inputs)
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, image_height, None, 1], name="inputs")
-    labels = tf.sparse_placeholder(tf.int32, name="labels")
-    seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
+    inputs = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT, IMAGE_WIDTH, 1], name="inputs")
+    labels = tf.placeholder(tf.int32,[None, SEQ_LENGTH], name="labels")
+    labels_onehot = slim.one_hot_encoding(labels, CLASSES_NUMBER)
+
     global_step = tf.Variable(0, trainable=False)
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
-    net_res, temp_layer= RES(inputs, seq_len, reuse = False)
-    res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
+    chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss = OCR(inputs, labels_onehot, labels)
+    ocr_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
-    # 需要变换到 time_major == True [max_time x batch_size x 2048]
-    net_res = tf.transpose(net_res, (1, 0, 2))
-    res_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=net_res, sequence_length=seq_len))
-    # res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step, var_list=res_vars)
-    res_optim = tf.train.AdamOptimizer(lr).minimize(res_loss, global_step=global_step)
- 
-    # 防止梯度爆炸
-    # res_optim = tf.train.AdamOptimizer(lr)
-    # gvs = res_optim.compute_gradients(res_loss)
-    # capped_gvs = [(tf.clip_by_value(grad, -1., 1.), var) for grad, var in gvs]
-    # res_optim = res_optim.apply_gradients(capped_gvs, global_step=global_step)
-
-    res_decoded, _ = tf.nn.ctc_beam_search_decoder(net_res, seq_len, beam_width=10, merge_repeated=False)
-    res_acc = tf.reduce_sum(tf.edit_distance(tf.cast(res_decoded[0], tf.int32), labels, normalize=False))
-    res_acc = 1 - res_acc / tf.to_float(tf.size(labels.values))
-
-
+    ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
+     
     # 加入日志
-    tf.summary.scalar('res_loss', res_loss)
-    tf.summary.scalar('res_acc', res_acc)
+    tf.summary.scalar('ocr_loss', chars_loss)
     # res_images = res_layer[-1]
     # res_images = tf.transpose(res_images, perm=[2, 0, 1])
     # tf.summary.image('net_res', tf.expand_dims(res_images,-1), max_outputs=9)
@@ -274,7 +253,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            res_loss, res_optim, seq_len, res_acc, res_decoded, temp_layer
+            chars_loss, ocr_optim
 
 def list_to_chars(list):
     try:
