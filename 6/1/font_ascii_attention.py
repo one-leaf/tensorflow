@@ -64,17 +64,26 @@ def CNN(inputs):
 # 输入[B 1 W 256] ==> [B 1 W 288]
 def Coordinates(inputs):
     with tf.variable_scope("Coordinates"):
-        embedd_size = 32
+        # 这个是官方办法，但这个矩阵太大了，直接由 256 => 1281 所以改了
+        # _, h, w, _ = inputs.shape.as_list()
+        # x, y = tf.meshgrid(tf.range(w), tf.range(h))
+        # w_loc = slim.one_hot_encoding(x, num_classes=w)
+        # h_loc = slim.one_hot_encoding(y, num_classes=h)
+        # loc = tf.concat([h_loc, w_loc], 2)
+        # loc = tf.tile(tf.expand_dims(loc, 0), [BATCH_SIZE, 1, 1, 1])
+        # return tf.concat([inputs, loc], 3)
+        embedd_size = 64
         shape = tf.shape(inputs)
-        batch_size, h, w = shape[0], shape[1], shape[2]
+        batch_size, h, w = shape[0],shape[1],shape[2]
         x = tf.range(w*h)
         x = tf.reshape(x, [1, h, w, 1])
-        layer = tf.tile(x, [batch_size, 1, 1, 1])
-        embedding = tf.get_variable("embedding", initializer=tf.random_uniform([w, embedd_size], -1.0, 1.0)) 
-        layer = tf.nn.embedding_lookup(embedding, layer)
-        layer = tf.squeeze(layer, squeeze_dims=3)
-        layer = tf.concat([inputs, layer], 3)
-        return layer
+        loc = tf.tile(x, [batch_size, 1, 1, 1])
+        embedding = tf.get_variable("embedding", initializer=tf.random_uniform([IMAGE_WIDTH//4, embedd_size], -1.0, 1.0)) 
+        loc = tf.nn.embedding_lookup(embedding, loc)
+        loc = tf.squeeze(loc, squeeze_dims=3)
+        loc = tf.concat([inputs, loc], 3)
+        return loc
+
 
 # 将CNN模型转换到SEQ序列
 def CNN2SEQ(inputs):
