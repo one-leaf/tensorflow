@@ -343,7 +343,12 @@ def train():
                 start = time.time()    
                 train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size,
                     has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)
-                feed = {inputs: train_inputs, labels: train_labels} 
+                train_labels_fix = np.ones((batch_size, SEQ_LENGTH))
+                train_labels_fix *= (CLASSES_NUMBER-1)
+                for i in range(batch_size):
+                    np.put(train_labels_fix[i],np.arange(len(train_labels[i]),train_labels[i])
+
+                feed = {inputs: train_inputs, labels: train_labels_fix} 
 
                 feed_time = time.time() - start
                 start = time.time()    

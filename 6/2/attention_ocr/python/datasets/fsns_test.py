@@ -20,8 +20,8 @@ import os
 import tensorflow as tf
 from tensorflow.contrib import slim
 
-from . import fsns
-from . import unittest_utils
+import fsns
+import unittest_utils
 
 FLAGS = tf.flags.FLAGS
 
@@ -43,12 +43,12 @@ class FsnsTest(tf.test.TestCase):
         'PNG', shape=(150, 600, 3))
     serialized = unittest_utils.create_serialized_example({
         'image/encoded': [encoded],
-        'image/format': ['PNG'],
+        'image/format': [b'PNG'],
         'image/class':
         expected_label,
         'image/unpadded_class':
         range(10),
-        'image/text': ['Raw text'],
+        'image/text': [b'Raw text'],
         'image/orig_width': [150],
         'image/width': [600]
     })
@@ -60,7 +60,7 @@ class FsnsTest(tf.test.TestCase):
 
     self.assertAllEqual(expected_image, data.image)
     self.assertAllEqual(expected_label, data.label)
-    self.assertEqual(['Raw text'], data.text)
+    self.assertEqual([b'Raw text'], data.text)
     self.assertEqual([1], data.num_of_views)
 
   def test_label_has_shape_defined(self):

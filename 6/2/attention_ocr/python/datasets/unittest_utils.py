@@ -15,7 +15,7 @@
 
 """Functions to make unit testing easier."""
 
-from io import StringIO
+from io import BytesIO
 import numpy as np
 from PIL import Image as PILImage
 import tensorflow as tf
@@ -32,7 +32,7 @@ def create_random_image(image_format, shape):
     A tuple (<numpy ndarray>, <a string with encoded image>)
   """
   image = np.random.randint(low=0, high=255, size=shape, dtype='uint8')
-  io = StringIO()
+  io = BytesIO()
   image_pil = PILImage.fromarray(image)
   image_pil.save(io, image_format, subsampling=0, quality=100)
   return image, io.getvalue()
@@ -51,8 +51,12 @@ def create_serialized_example(name_to_values):
   """
   example = tf.train.Example()
   for name, values in name_to_values.items():
+    print("###########################")
+    print(name, type(values))
     feature = example.features.feature[name]
-    if isinstance(values[0], str):
+    if isinstance(values[0], bytes):
+      add = feature.bytes_list.value.extend
+    elif isinstance(values[0], str):
       add = feature.bytes_list.value.extend
     elif isinstance(values[0], float):
       add = feature.float32_list.value.extend
