@@ -359,30 +359,30 @@ def train():
                 errR, _ , steps, res_lr = session.run([chars_loss, ocr_optim, global_step, lr], feed)
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
-                accs.append(acc)
-                avg_acc = sum(accs)/len(accs)
+                # accs.append(acc)
+                # avg_acc = sum(accs)/len(accs)
 
                 losts.append(errR)
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
-                    (time.ctime(), steps, feed_time, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))
+                print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
+                    (time.ctime(), steps, feed_time, time.time() - start, errR, avg_losts, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
-                need_reset_global_step = False
-                for _ in range(10):
-                    if errR <=  avg_losts*2: break 
-                    start = time.time()                
-                    errR, acc, _, res_lr = session.run([res_loss, res_acc, res_optim, lr], feed)
-                    accs.append(acc)
-                    avg_acc = sum(accs)/len(accs)                  
-                    print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
-                        (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))   
-                    need_reset_global_step = True
+                # need_reset_global_step = False
+                # for _ in range(10):
+                #     if errR <=  avg_losts*2: break 
+                #     start = time.time()                
+                #     errR, acc, _, res_lr = session.run([res_loss, res_acc, res_optim, lr], feed)
+                #     accs.append(acc)
+                #     avg_acc = sum(accs)/len(accs)                  
+                #     print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
+                #         (time.ctime(), steps, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))   
+                #     need_reset_global_step = True
                     
-                if need_reset_global_step:                     
-                    session.run(tf.assign(global_step, steps))
+                # if need_reset_global_step:                     
+                #     session.run(tf.assign(global_step, steps))
 
                 # if np.isnan(errR) or np.isinf(errR) :
                 #     print("Error: cost is nan or inf")
@@ -395,48 +395,48 @@ def train():
                     else:
                         AllLosts[key]=acc
 
-                if acc/avg_acc<=0.2:
-                    for i in range(batch_size): 
-                        filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, steps, i, \
-                            train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
-                        cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
+                # if acc/avg_acc<=0.2:
+                #     for i in range(batch_size): 
+                #         filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, steps, i, \
+                #             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
+                #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                if steps >0 and steps % REPORT_STEPS == 0:
-                    train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
+                # if steps >0 and steps % REPORT_STEPS == 0:
+                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
            
-                    decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
+                #     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
 
-                    for i in range(batch_size): 
-                        cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
+                #     for i in range(batch_size): 
+                #         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
 
-                    original_list = utils.decode_sparse_tensor(train_labels)
-                    detected_list = utils.decode_sparse_tensor(decoded_list)
-                    if len(original_list) != len(detected_list):
-                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-                            " test and detect length desn't match")
-                    print("T/F: original(length) <-------> detectcted(length)")
-                    acc = 0.
-                    for idx in range(min(len(original_list),len(detected_list))):
-                        number = original_list[idx]
-                        detect_number = detected_list[idx]  
-                        hit = (number == detect_number)
-                        print("----------",hit,"------------")          
-                        print(list_to_chars(number), "(", len(number), ")")
-                        print(list_to_chars(detect_number), "(", len(detect_number), ")")
-                        # 计算莱文斯坦比
-                        import Levenshtein
-                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-                    print("Test Accuracy:", acc / len(original_list))
-                    sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
-                    for f in sorted_fonts[:20]:
-                        print(f)
+                #     original_list = utils.decode_sparse_tensor(train_labels)
+                #     detected_list = utils.decode_sparse_tensor(decoded_list)
+                #     if len(original_list) != len(detected_list):
+                #         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+                #             " test and detect length desn't match")
+                #     print("T/F: original(length) <-------> detectcted(length)")
+                #     acc = 0.
+                #     for idx in range(min(len(original_list),len(detected_list))):
+                #         number = original_list[idx]
+                #         detect_number = detected_list[idx]  
+                #         hit = (number == detect_number)
+                #         print("----------",hit,"------------")          
+                #         print(list_to_chars(number), "(", len(number), ")")
+                #         print(list_to_chars(detect_number), "(", len(detect_number), ")")
+                #         # 计算莱文斯坦比
+                #         import Levenshtein
+                #         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                #     print("Test Accuracy:", acc / len(original_list))
+                #     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
+                #     for f in sorted_fonts[:20]:
+                #         print(f)
 
-                    if avg_losts>100:        
-                        session.run(tf.assign(lr, 1e-4))
-                    elif avg_losts>10:            
-                        session.run(tf.assign(lr, 1e-5))
-                    else:
-                        session.run(tf.assign(lr, 1e-6))
+                    # if avg_losts>100:        
+                    #     session.run(tf.assign(lr, 1e-4))
+                    # elif avg_losts>10:            
+                    #     session.run(tf.assign(lr, 1e-5))
+                    # else:
+                    #     session.run(tf.assign(lr, 1e-6))
                                             
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
