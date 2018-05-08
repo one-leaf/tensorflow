@@ -40,7 +40,7 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-MODEL_SAVE_NAME = "model_ascii_resNext50_lstm"
+MODEL_SAVE_NAME = "model_ascii_attention"
 
 # CNN特征采集
 # 输入[B 32 4096 1] ==> [B 1 1024 256]
