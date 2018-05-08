@@ -210,6 +210,13 @@ def main(_):
         FLAGS.batch_size,
         augment=hparams.use_augment_input,
         central_crop_size=common_flags.get_crop_size())
+    
+    print("#######################")
+    print("images:", data.images.shape)
+    print("labels:", data.labels.shape)
+    print("labels_one_hot:", data.labels_one_hot.shape)
+    print("#######################")
+    
     # 创建模型
     endpoints = model.create_base(data.images, data.labels_one_hot)
     # 创建损失函数

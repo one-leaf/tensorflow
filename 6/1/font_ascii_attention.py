@@ -351,7 +351,7 @@ def train():
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
-                errR, acc, _ , steps, res_lr = session.run([res_loss, res_acc, res_optim, global_step, lr], feed)
+                errR, _ , steps, res_lr = session.run([chars_loss, ocr_optim, global_step, lr], feed)
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 accs.append(acc)
