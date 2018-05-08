@@ -388,12 +388,12 @@ def train():
                 #     print("Error: cost is nan or inf")
                 #     return
 
-                for info in train_info:
-                    key = ",".join(info)
-                    if key in AllLosts:
-                        AllLosts[key]=AllLosts[key]*0.99+acc*0.01
-                    else:
-                        AllLosts[key]=acc
+                # for info in train_info:
+                #     key = ",".join(info)
+                #     if key in AllLosts:
+                #         AllLosts[key]=AllLosts[key]*0.99+acc*0.01
+                #     else:
+                #         AllLosts[key]=acc
 
                 # if acc/avg_acc<=0.2:
                 #     for i in range(batch_size): 
