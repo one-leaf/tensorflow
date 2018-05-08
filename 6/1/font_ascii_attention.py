@@ -346,7 +346,7 @@ def train():
                 train_labels_fix = np.ones((batch_size, SEQ_LENGTH))
                 train_labels_fix *= (CLASSES_NUMBER-1)
                 for i in range(batch_size):
-                    np.put(train_labels_fix[i],np.arange(len(train_labels[i]),train_labels[i]))
+                    np.put(train_labels_fix[i],np.arange(len(train_labels[i])),train_labels[i])
 
                 feed = {inputs: train_inputs, labels: train_labels_fix} 
 
