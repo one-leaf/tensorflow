@@ -215,6 +215,8 @@ def main(_):
     print("images:", data.images.shape)
     print("labels:", data.labels.shape)
     print("labels_one_hot:", data.labels_one_hot.shape)
+    print("labels_0:", data.labels[0])
+    print("labels_one_host_0:", data.labels_one_hot[0])
     print("#######################")
     
     # 创建模型
