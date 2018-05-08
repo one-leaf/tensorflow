@@ -90,9 +90,9 @@ def Coordinates(inputs):
 # 将CNN模型转换到SEQ序列
 def CNN2SEQ(inputs):
     with tf.variable_scope("CNN2SEQ"):
-        batch_size = inputs.get_shape().dims[0].value
+        # batch_size = inputs.get_shape().dims[0].value
         feature_size = inputs.get_shape().dims[3].value
-        return tf.reshape(inputs, [batch_size, -1, feature_size])
+        return tf.reshape(inputs, [BATCH_SIZE, -1, feature_size])
 
 # 采用标准正交基的方式初始化参数
 # 给LSTM使用，可以提升初始化效果
