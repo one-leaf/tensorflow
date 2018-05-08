@@ -49,7 +49,7 @@ def CNN(inputs):
         layer = slim.conv2d(inputs, 64, [8,8], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
         # layer [B H//2 W//4 64]
         # tf.summary.image('zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
-        layer = utils_nn.resNext50(layer, True, [2,1]) 
+        layer = utils_nn.resNet50(layer, True, [2,1]) 
         # [N H//32 W 2048]
         # tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
 
@@ -76,7 +76,6 @@ def Coordinates(inputs):
         shape = tf.shape(inputs)
         batch_size, h, w = shape[0],shape[1],shape[2]
         image_width = inputs.get_shape().dims[2].value
-        print(image_width)
         x = tf.range(w*h)
         x = tf.reshape(x, [1, h, w, 1])
         loc = tf.tile(x, [batch_size, 1, 1, 1])
@@ -230,7 +229,7 @@ def OCR(inputs, labels_one_hot, labels, reuse = False):
 
         # 文字模型
         chars_logit = Attention(layer, labels_one_hot)    
-        print('chars_logit: %s', chars_logit.shape)
+        print('chars_logit:', chars_logit.shape)
 
         # 预测的字符， 稳定后的文字模型， 预测的概率
         predicted_chars, chars_log_prob, predicted_scores = (char_predictions(chars_logit))
@@ -260,8 +259,9 @@ def neural_networks():
     # res_images = res_layer[-1]
     # res_images = tf.transpose(res_images, perm=[2, 0, 1])
     # tf.summary.image('net_res', tf.expand_dims(res_images,-1), max_outputs=9)
-    for var in res_vars:
+    for var in ocr_vars:
         tf.summary.histogram(var.name, var)
+
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
@@ -341,9 +341,9 @@ def train():
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
                 start = time.time()    
-                train_inputs, train_labels, train_seq_len, train_info =  font_dataset.get_next_batch_for_res(batch_size,
-                    has_sparse=False,  max_width=4096, height=32,  need_pad_width_to_max_width=True)
-                feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
+                train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size,
+                    has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)
+                feed = {inputs: train_inputs, labels: train_labels} 
 
                 feed_time = time.time() - start
                 start = time.time()    
