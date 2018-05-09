@@ -46,12 +46,16 @@ MODEL_SAVE_NAME = "model_ascii_attention"
 # 输入[B 32 4096 1] ==> [B 1 1024 256]
 def CNN(inputs):
     with tf.variable_scope("CNN"):
-        layer = slim.conv2d(inputs, 64, [8,8], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        # layer = slim.conv2d(inputs, 64, [8,8], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
         # layer [B H//2 W//4 64]
         # tf.summary.image('zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
-        layer = utils_nn.resNet50(layer, True, [2,1]) 
+        # layer = utils_nn.resNet50(layer, True, [2,1]) 
         # [N H//32 W 2048]
         # tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
+
+        with slim.arg_scope(inception.inception_v3_arg_scope()):
+            with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
+                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
 
         # 直接将网络拉到256 [N 1 W 256]
         with tf.variable_scope("Normalize"):
