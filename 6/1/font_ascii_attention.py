@@ -170,12 +170,12 @@ def logits_to_log_prob(logits):
         # 将所有的值都降到0和以下
         reduction_indices = len(logits.shape.as_list()) - 1
         # 取最大值 max_logits 
-        max_logits = tf.reduce_max(logits, reduction_indices=reduction_indices, keep_dims=True)
+        max_logits = tf.reduce_max(logits, reduction_indices=reduction_indices, keepdims=True)
         
         # 都降到 0 以下 
         safe_logits = tf.subtract(logits, max_logits)
         # exp(-x) => (0 ~ 1) 求和最后一个维度
-        sum_exp = tf.reduce_sum(tf.exp(safe_logits),  reduction_indices=reduction_indices, keep_dims=True)
+        sum_exp = tf.reduce_sum(tf.exp(safe_logits),  reduction_indices=reduction_indices, keepdims=True)
         # 再将 log(sum) => (0 ~ 1)  
         log_probs = tf.subtract(safe_logits, tf.log(sum_exp))  
         return log_probs
