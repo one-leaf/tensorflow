@@ -220,15 +220,15 @@ def main(_):
     print("labels_0:", data.labels[0])
     print("labels_one_host_0:", data.labels_one_hot[0])
     print("#######################")
-    provider = slim.dataset_data_provider.DatasetDataProvider(
-                    dataset, num_readers=3, shuffle=False)
-    [image, label, text] = provider.get(['image', 'label', 'text'])
+    # provider = slim.dataset_data_provider.DatasetDataProvider(
+    #                 dataset, num_readers=3, shuffle=False)
+    # [image, label, text] = provider.get(['image', 'label', 'text'])
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
         tf.train.start_queue_runners()
-        labels = session.run(label)
-        print(labels)
+        labels = session.run(data.labels)
+        print(labels[0])
 
     raise Exception("Exit")
     
