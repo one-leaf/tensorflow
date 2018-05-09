@@ -194,7 +194,7 @@ def LSTM(inputs, lstm_size, seq_len):
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, image_height, 3034, 1], name="inputs")
+    inputs = tf.placeholder(tf.float32, [None, image_height, None, 1], name="inputs")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     global_step = tf.Variable(0, trainable=False)
