@@ -318,7 +318,7 @@ def get_next_batch_for_res(batch_size=128):
     sparse_labels = utils.sparse_tuple_from(labels)
 
     for i in range(3):
-        max_width_image = math.ceil((max_width_image-3+1)/2)
+        max_width_image = math.floor((max_width_image-3+1)/2)
 
     seq_len = np.ones(batch_size) * max_width_image
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
