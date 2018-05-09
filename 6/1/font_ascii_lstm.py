@@ -302,8 +302,8 @@ def get_next_batch_for_res(batch_size=128):
         seq_len[i]=len(text)+1
 
     # 凑成4的整数倍
-    if max_width_image % 4 > 0:
-        max_width_image = max_width_image + 4 - max_width_image % 4
+    # if max_width_image % 4 > 0:
+    #     max_width_image = max_width_image + 4 - max_width_image % 4
 
     # 如果图片超过最大宽度
     if max_width_image > MAX_IMAGE_WIDTH:
