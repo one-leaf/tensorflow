@@ -212,8 +212,9 @@ def main(_):
         central_crop_size=common_flags.get_crop_size())
     
     print("#######################")
-    print("images:", data.images.shape)
-    print("labels:", data.labels.shape)
+    print("images:", data.images)
+    print("labels:", data.labels)
+    print(dir(data.labels))
     print("labels_one_hot:", data.labels_one_hot.shape)
     print("labels_0:", data.labels[0])
     print("labels_one_host_0:", data.labels_one_hot[0])
@@ -224,6 +225,8 @@ def main(_):
     # 创建损失函数
     total_loss = model.create_loss(data, endpoints)
     model.create_summaries(data, endpoints, dataset.charset, is_training=True)
+
+    # 恢复数据
     init_fn = model.create_init_fn_to_restore(FLAGS.checkpoint,
                                               FLAGS.checkpoint_inception)
     if FLAGS.show_graph_stats:
