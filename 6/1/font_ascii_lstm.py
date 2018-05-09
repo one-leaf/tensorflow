@@ -8,7 +8,8 @@ import time
 import random
 import cv2
 from PIL import Image, ImageDraw, ImageFont
-import tensorflow.contrib.slim as slim
+from tensorflow.contrib import slim 
+from tensorflow.contrib.slim.nets import inception
 import math
 import urllib,json,io
 import utils_pil, utils_font, utils_nn
@@ -52,17 +53,23 @@ def RES(inputs, seq_len, reuse = False):
         print("inputs shape:",inputs.shape)
         # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
         # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
-        with tf.variable_scope("ResNext"):
-            layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            tf.summary.image('1_2_4_zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
-            layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
-            tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
-        print("ResNext shape:",layer.shape)
+
+
+        with slim.arg_scope(inception.inception_v3_arg_scope()):
+            with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
+                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
+                    
+        # with tf.variable_scope("ResNext"):
+        #     layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        #     tf.summary.image('1_2_4_zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
+        #     layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
+        #     tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
+        print("CNN shape:",layer.shape)
         temp_layer = layer
 
         with tf.variable_scope("Normalize"):
-            layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        #     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        #     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             # layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
@@ -75,7 +82,7 @@ def RES(inputs, seq_len, reuse = False):
         # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
         with tf.variable_scope("Coordinates"):
             max_width_height = MAX_IMAGE_WIDTH//4
-            embedd_size = 16
+            embedd_size = 64
             layer = Coordinates(layer, max_width_height, embedd_size)
             print("Coordinates shape:",layer.shape)
 
@@ -115,21 +122,21 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
     return tf.constant(w.reshape(shape), dtype=dtype)
 
 # RNN 不能加上 batch_norm，会在ctc中很难学习到东西
-# def LSTM(inputs, lstm_size, seq_len):
-#     layer = inputs
-#     for i in range(2):
-#         with tf.variable_scope("rnn-%s"%i):
-#             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
-#                 kernel_initializer=orthogonal_initializer,
-#                 bias_initializer=tf.zeros_initializer)
-#             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
-#                 kernel_initializer=orthogonal_initializer,
-#                 bias_initializer=tf.zeros_initializer)
-#             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-#         net = tf.concat(outputs, -1)  
-#         net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
-#         layer = tf.nn.leaky_relu(net + layer)
-#     return layer
+def LSTM(inputs, lstm_size, seq_len):
+    layer = inputs
+    for i in range(2):
+        with tf.variable_scope("rnn-%s"%i):
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
+                kernel_initializer=orthogonal_initializer,
+                bias_initializer=tf.zeros_initializer)
+            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
+        net = tf.concat(outputs, -1)  
+        net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
+        layer = tf.nn.leaky_relu(net + layer)
+    return layer
 
 # def LSTM(inputs, lstm_size, seq_len):
 #     layer = inputs
@@ -145,21 +152,21 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 #     layer = tf.nn.leaky_relu(net + layer)
 #     return layer
 
-def LSTM(inputs, lstm_size, seq_len):
-    layer = inputs
-    convolved = tf.transpose(layer, [1, 0, 2])
-    lstm = tf.contrib.cudnn_rnn.CudnnLSTM(
-        num_layers=4,
-        num_units=lstm_size,
-        dropout=0,
-        dtype=tf.float32,
-        kernel_initializer=orthogonal_initializer,
-        bias_initializer=tf.zeros_initializer(),
-        direction="bidirectional")
-    outputs, _ = lstm(convolved)
-    net = tf.transpose(outputs, [1, 0, 2])
-    net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=tf.nn.leaky_relu)
-    return layer
+# def LSTM(inputs, lstm_size, seq_len):
+#     layer = inputs
+#     convolved = tf.transpose(layer, [1, 0, 2])
+#     lstm = tf.contrib.cudnn_rnn.CudnnLSTM(
+#         num_layers=4,
+#         num_units=lstm_size,
+#         dropout=0,
+#         dtype=tf.float32,
+#         kernel_initializer=orthogonal_initializer,
+#         bias_initializer=tf.zeros_initializer(),
+#         direction="bidirectional")
+#     outputs, _ = lstm(convolved)
+#     net = tf.transpose(outputs, [1, 0, 2])
+#     net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=tf.nn.leaky_relu)
+#     return layer
 
 
 # 失败的模型，最后会导致所有的softmax都为1 
