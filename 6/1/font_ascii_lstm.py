@@ -192,10 +192,9 @@ def LSTM(inputs, lstm_size, seq_len):
 #     layer = layer * masks 
 #     return layer
 
-
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, image_height, None, 1], name="inputs")
+    inputs = tf.placeholder(tf.float32, [None, image_height, 503, 1], name="inputs")
     labels = tf.sparse_placeholder(tf.int32, name="labels")
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     global_step = tf.Variable(0, trainable=False)
@@ -317,7 +316,11 @@ def get_next_batch_for_res(batch_size=128):
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (((max_width_image//2-1)//2-1)//2-1)
+
+    for i in range(3):
+        max_width_image = math.ceil((max_width_image-3+1)/2)
+
+    seq_len = np.ones(batch_size) * max_width_image
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
     return inputs, sparse_labels, seq_len, info
 
