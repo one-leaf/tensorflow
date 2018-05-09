@@ -45,7 +45,7 @@ TRAIN_SIZE = BATCHES * BATCH_SIZE
 TEST_BATCH_SIZE = BATCH_SIZE
 POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
-MODEL_SAVE_NAME = "model_ascii_resNext50_lstm"
+MODEL_SAVE_NAME = "model_ascii_cnn_lstm"
 MAX_IMAGE_WIDTH = 4096
 
 def RES(inputs, seq_len, reuse = False):
