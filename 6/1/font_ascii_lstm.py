@@ -396,11 +396,10 @@ def train():
                 feed_time = time.time() - start
                 start = time.time()    
 
-                _res = session.run(net_res, feed)
-                print(train_inputs.shape)
-
-                print(_res.shape)
-                print(train_seq_len[0])
+                # _res = session.run(net_res, feed)
+                # print(train_inputs.shape)
+                # print(_res.shape)
+                # print(train_seq_len[0])
 
                 errR, acc, _ , steps, res_lr = session.run([res_loss, res_acc, res_optim, global_step, lr], feed)
                 font_length = int(train_info[0][-1])
