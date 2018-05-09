@@ -8,7 +8,8 @@ import time
 import random
 import cv2
 from PIL import Image, ImageDraw, ImageFont
-import tensorflow.contrib.slim as slim
+from tensorflow.contrib import slim
+from tensorflow.contrib.slim.nets import inception
 import math
 import urllib,json,io
 import utils_pil, utils_font, utils_nn
