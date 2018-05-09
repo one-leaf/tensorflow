@@ -226,13 +226,12 @@ def main(_):
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
-        return
         tf.train.start_queue_runners()
         labels = session.run(data.labels)
         print(labels[0])
+        return
 
 
-  
     # 创建模型
     endpoints = model.create_base(data.images, data.labels_one_hot)
     # 创建损失函数
