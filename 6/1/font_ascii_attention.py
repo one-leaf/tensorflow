@@ -244,6 +244,18 @@ def OCR(inputs, labels_one_hot, labels, reuse = False):
         tf.summary.scalar('TotalLoss', chars_loss)
         return chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss
 
+def create_optimizer(optimizer_name):
+    if optimizer_name == 'momentum':
+        optimizer = tf.train.MomentumOptimizer(LEARNING_RATE_INITIAL, momentum=0.9)
+    elif optimizer_name == 'adam':
+        optimizer = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL)
+    elif optimizer_name == 'adadelta':
+        optimizer = tf.train.AdadeltaOptimizer(LEARNING_RATE_INITIAL)
+    elif optimizer_name == 'adagrad':
+        optimizer = tf.train.AdagradOptimizer(LEARNING_RATE_INITIAL)
+    elif optimizer_name == 'rmsprop':
+        optimizer = tf.train.RMSPropOptimizer(LEARNING_RATE_INITIAL, momentum=0.9)
+    return optimizer
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
@@ -257,8 +269,9 @@ def neural_networks():
     chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss = OCR(inputs, labels_onehot, labels)
     ocr_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
-    ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
-     
+    # ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
+    ocr_optim = create_optimizer("momentum").minimize(chars_loss, global_step=global_step) 
+    
     # 加入日志
     tf.summary.scalar('ocr_loss', chars_loss)
     # res_images = res_layer[-1]
