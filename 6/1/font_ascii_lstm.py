@@ -57,7 +57,7 @@ def RES(inputs, seq_len, reuse = False):
 
         with slim.arg_scope(inception.inception_v3_arg_scope()):
             with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
-                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
+                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Conv2d_1a_3x3")
                     
         # with tf.variable_scope("ResNext"):
         #     layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
@@ -395,6 +395,7 @@ def train():
 
                 _res = session.run(net_res, feed)
                 print(train_inputs.shape)
+
                 print(_res.shape)
                 print(train_seq_len[0])
 
