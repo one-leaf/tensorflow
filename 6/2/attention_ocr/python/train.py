@@ -211,6 +211,7 @@ def main(_):
         augment=hparams.use_augment_input,
         central_crop_size=common_flags.get_crop_size())
     
+
     print("#######################")
     print("images:", data.images)
     print("labels:", data.labels)
@@ -219,6 +220,13 @@ def main(_):
     print("labels_0:", data.labels[0])
     print("labels_one_host_0:", data.labels_one_hot[0])
     print("#######################")
+    init = tf.global_variables_initializer()
+    with tf.Session() as session:
+        session.run(init)
+        labels = session.run(data.labels)
+        print(labels)
+
+    raise Exception("Exit")
     
     # 创建模型
     endpoints = model.create_base(data.images, data.labels_one_hot)
