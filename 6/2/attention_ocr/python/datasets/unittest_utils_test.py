@@ -20,7 +20,7 @@ import numpy as np
 from PIL import Image as PILImage
 import tensorflow as tf
 
-import unittest_utils
+from . import unittest_utils
 
 
 class UnittestUtilsTest(tf.test.TestCase):
