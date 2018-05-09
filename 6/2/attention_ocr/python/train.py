@@ -222,7 +222,7 @@ def main(_):
     print("#######################")
     provider = slim.dataset_data_provider.DatasetDataProvider(
                     dataset, num_readers=3, shuffle=False
-    [image, label, text] = provider.get(['image', 'label', 'text'])
+    image, label, text = provider.get(['image', 'label', 'text'])
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
