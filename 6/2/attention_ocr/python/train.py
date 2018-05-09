@@ -223,9 +223,9 @@ def main(_):
     provider = slim.dataset_data_provider.DatasetDataProvider(
                     dataset, num_readers=3, shuffle=False)
     [image, label, text] = provider.get(['image', 'label', 'text'])
-    init = tf.global_variables_initializer()
+    # init = tf.global_variables_initializer()
     with tf.Session() as session:
-        session.run(init)
+        # session.run(init)
         labels = session.run(label)
         print(labels)
 
