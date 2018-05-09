@@ -394,6 +394,7 @@ def train():
                 start = time.time()    
 
                 _res = session.run(net_res, feed)
+                print(train_inputs.shape)
                 print(_res.shape)
 
                 errR, acc, _ , steps, res_lr = session.run([res_loss, res_acc, res_optim, global_step, lr], feed)
