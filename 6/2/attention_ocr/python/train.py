@@ -220,10 +220,13 @@ def main(_):
     print("labels_0:", data.labels[0])
     print("labels_one_host_0:", data.labels_one_hot[0])
     print("#######################")
+    provider = slim.dataset_data_provider.DatasetDataProvider(
+                    dataset, num_readers=3, shuffle=False
+    [image, label, text] = provider.get(['image', 'label', 'text'])
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
-        labels = session.run(data.labels)
+        labels = session.run(label)
         print(labels)
 
     raise Exception("Exit")
