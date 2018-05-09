@@ -28,7 +28,7 @@ IMAGE_WIDTH = 4096
 SEQ_LENGTH  = 256
 
 #初始化学习速率
-LEARNING_RATE_INITIAL = 1e-3
+LEARNING_RATE_INITIAL = 1e-4
 # LEARNING_RATE_DECAY_FACTOR = 0.9
 # LEARNING_RATE_DECAY_STEPS = 2000
 LSTM_UNITS_NUMBER = 256
@@ -271,7 +271,7 @@ def neural_networks():
 
     # ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
     ocr_optim = create_optimizer("momentum").minimize(chars_loss, global_step=global_step) 
-    
+
     # 加入日志
     tf.summary.scalar('ocr_loss', chars_loss)
     # res_images = res_layer[-1]
