@@ -57,7 +57,7 @@ def RES(inputs, seq_len, reuse = False):
 
         with slim.arg_scope(inception.inception_v3_arg_scope()):
             with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
-                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Conv2d_1a_3x3")
+                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
                     
         # with tf.variable_scope("ResNext"):
         #     layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
@@ -317,7 +317,7 @@ def get_next_batch_for_res(batch_size=128):
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (max_width_image//4)
+    seq_len = np.ones(batch_size) * (((max_width_image/2-1)/2-1)/2-1)
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
     return inputs, sparse_labels, seq_len, info
 
