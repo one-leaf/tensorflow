@@ -223,9 +223,11 @@ def main(_):
     init = tf.global_variables_initializer()
     with tf.Session() as session:
         session.run(init)
-        tf.train.start_queue_runners()
+        coord = tf.train.Coordinator()
+        tf.train.start_queue_runners(coord=coord)
         labels = session.run(data.labels[0])
         print(labels[0])
+        coord.request_stop()
         return
 
 
