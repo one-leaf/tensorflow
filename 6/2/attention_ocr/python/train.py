@@ -211,28 +211,27 @@ def main(_):
         augment=hparams.use_augment_input,
         central_crop_size=common_flags.get_crop_size())
     
-
-    print("#######################")
-    print("images:", data.images)
-    print("labels:", data.labels)
-    print(dir(data.labels))
-    print("labels_one_hot:", data.labels_one_hot.shape)
-    print("labels_0:", data.labels[0])
-    print("labels_one_host_0:", data.labels_one_hot[0])
-    print("#######################")
-    init = tf.global_variables_initializer()
-    with tf.Session() as session:
-        session.run(init)
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord=coord)
-        labels = session.run(data.labels)
-        print(labels[0])
-        labels = session.run(data.labels_one_hot)
-        print(labels[0])
-        coord.request_stop()
-        coord.join(threads)
-        return
-
+    # 打印 dataset 的数据，看一下
+    # print("#######################")
+    # print("images:", data.images)
+    # print("labels:", data.labels)
+    # print(dir(data.labels))
+    # print("labels_one_hot:", data.labels_one_hot.shape)
+    # print("labels_0:", data.labels[0])
+    # print("labels_one_host_0:", data.labels_one_hot[0])
+    # print("#######################")
+    # init = tf.global_variables_initializer()
+    # with tf.Session() as session:
+    #     session.run(init)
+    #     coord = tf.train.Coordinator()
+    #     threads = tf.train.start_queue_runners(coord=coord)
+    #     labels = session.run(data.labels)
+    #     print(labels[0])
+    #     labels = session.run(data.labels_one_hot)
+    #     print(labels[0])
+    #     coord.request_stop()
+    #     coord.join(threads)
+    #     return
 
     # 创建模型
     endpoints = model.create_base(data.images, data.labels_one_hot)
