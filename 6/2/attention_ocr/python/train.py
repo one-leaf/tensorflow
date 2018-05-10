@@ -225,7 +225,7 @@ def main(_):
         session.run(init)
         coord = tf.train.Coordinator()
         threads = tf.train.start_queue_runners(coord=coord)
-        labels = session.run(data.labels[0])
+        labels = session.run(data.labels)
         print(labels[0])
         coord.request_stop()
         coord.join(threads)
