@@ -227,6 +227,8 @@ def main(_):
         threads = tf.train.start_queue_runners(coord=coord)
         labels = session.run(data.labels)
         print(labels[0])
+        labels = session.run(data.labels_one_hot)
+        print(labels[0])
         coord.request_stop()
         coord.join(threads)
         return
