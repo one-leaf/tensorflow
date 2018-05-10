@@ -224,10 +224,11 @@ def main(_):
     with tf.Session() as session:
         session.run(init)
         coord = tf.train.Coordinator()
-        tf.train.start_queue_runners(coord=coord)
+        threads = tf.train.start_queue_runners(coord=coord)
         labels = session.run(data.labels[0])
         print(labels[0])
         coord.request_stop()
+        coord.join(threads)
         return
 
 
