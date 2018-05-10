@@ -482,9 +482,9 @@ def train():
                     if avg_losts>100:        
                         session.run(tf.assign(lr, 1e-4))
                     elif avg_losts>10:            
-                        session.run(tf.assign(lr, 1e-5))
+                        session.run(tf.assign(lr, 5e-5))
                     else:
-                        session.run(tf.assign(lr, 1e-6))
+                        session.run(tf.assign(lr, 1e-5))
                                             
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
