@@ -227,7 +227,7 @@ def main(_):
     with tf.Session() as session:
         session.run(init)
         tf.train.start_queue_runners()
-        labels = session.run(data.labels)
+        labels = session.run(data.text)
         print(labels[0])
         return
 
