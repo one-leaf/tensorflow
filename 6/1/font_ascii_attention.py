@@ -262,8 +262,6 @@ def accuracy(predictions, targets):
     with tf.variable_scope('CharAccuracy'):
         predictions.get_shape().assert_is_compatible_with(targets.get_shape())
         targets = tf.to_int32(targets)
-        print(NULL_CODE)
-        print(targets.get_shape())
         const_rej_char = tf.constant(NULL_CODE, shape=targets.get_shape(), dtype=tf.int32)
         weights = tf.to_float(tf.not_equal(targets, const_rej_char))
         correct_chars = tf.to_float(tf.equal(predictions, targets))
@@ -293,8 +291,8 @@ def accuracy(predictions, targets):
 
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
-    inputs = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT, IMAGE_WIDTH, 1], name="inputs")
-    labels = tf.placeholder(tf.int32,[None, SEQ_LENGTH], name="labels")
+    inputs = tf.placeholder(tf.float32, [BATCH_SIZE, IMAGE_HEIGHT, IMAGE_WIDTH, 1], name="inputs")
+    labels = tf.placeholder(tf.int32,[BATCH_SIZE, SEQ_LENGTH], name="labels")
     labels_onehot = slim.one_hot_encoding(labels, CLASSES_NUMBER)
 
     global_step = tf.Variable(0, trainable=False)
