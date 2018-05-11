@@ -268,7 +268,8 @@ def accuracy(predictions, targets):
         accuracy_per_example = tf.div(
             tf.reduce_sum(tf.multiply(correct_chars, weights), 1),
             tf.reduce_sum(weights, 1))
-        accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
+        # accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
+        accuracy_value = tf.reduce_mean(accuracy_per_example)
         accuracy_values.append(accuracy_value)
         tf.summary.scalar('CharAccuracy', tf.Print(accuracy_value, [accuracy_value], 'CharAccuracy'))
 
@@ -283,7 +284,8 @@ def accuracy(predictions, targets):
         target_length = targets.get_shape().dims[1].value
         target_chars_counts = tf.constant(target_length, shape=correct_chars_counts.get_shape())
         accuracy_per_example = tf.to_float(tf.equal(correct_chars_counts, target_chars_counts))
-        accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
+        # accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
+        accuracy_value = tf.reduce_mean(accuracy_per_example)
         accuracy_values.append(accuracy_value)
         tf.summary.scalar('SequenceAccuracy', tf.Print(accuracy_value, [accuracy_value], 'SequenceAccuracy'))
 
