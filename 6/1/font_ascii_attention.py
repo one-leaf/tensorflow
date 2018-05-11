@@ -244,17 +244,17 @@ def OCR(inputs, labels_one_hot, labels, reuse = False):
         tf.summary.scalar('TotalLoss', chars_loss)
         return chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss
 
-def create_optimizer(optimizer_name):
+def create_optimizer(optimizer_name, lr):
     if optimizer_name == 'momentum':
-        optimizer = tf.train.MomentumOptimizer(LEARNING_RATE_INITIAL, momentum=0.9)
+        optimizer = tf.train.MomentumOptimizer(lr, momentum=0.9)
     elif optimizer_name == 'adam':
-        optimizer = tf.train.AdamOptimizer(LEARNING_RATE_INITIAL)
+        optimizer = tf.train.AdamOptimizer(lr)
     elif optimizer_name == 'adadelta':
-        optimizer = tf.train.AdadeltaOptimizer(LEARNING_RATE_INITIAL)
+        optimizer = tf.train.AdadeltaOptimizer(lr)
     elif optimizer_name == 'adagrad':
-        optimizer = tf.train.AdagradOptimizer(LEARNING_RATE_INITIAL)
+        optimizer = tf.train.AdagradOptimizer(lr)
     elif optimizer_name == 'rmsprop':
-        optimizer = tf.train.RMSPropOptimizer(LEARNING_RATE_INITIAL, momentum=0.9)
+        optimizer = tf.train.RMSPropOptimizer(lr, momentum=0.9)
     return optimizer
 
 def accuracy(predictions, targets):
@@ -304,7 +304,7 @@ def neural_networks():
     ocr_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
-    ocr_optim = create_optimizer("momentum").minimize(chars_loss, global_step=global_step) 
+    ocr_optim = create_optimizer("momentum", lr).minimize(chars_loss, global_step=global_step) 
 
     oc_accs = accuracy(predicted_chars, labels)
 
@@ -372,9 +372,9 @@ def train():
                 if restore_iter<10000:        
                     session.run(tf.assign(lr, 1e-4))
                 elif restore_iter<50000:            
-                    session.run(tf.assign(lr, 1e-5))
+                    session.run(tf.assign(lr, 1e-4))
                 else:
-                    session.run(tf.assign(lr, 1e-6))
+                    session.run(tf.assign(lr, 1e-4))
                 print("Restored to %s."%restore_iter)
                 break
             else:
