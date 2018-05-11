@@ -301,7 +301,7 @@ def neural_networks():
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
     chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss = OCR(inputs, labels_onehot, labels)
-    ocr_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
+    # ocr_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
     ocr_optim = create_optimizer("momentum", lr).minimize(chars_loss, global_step=global_step) 
@@ -313,8 +313,8 @@ def neural_networks():
     # res_images = res_layer[-1]
     # res_images = tf.transpose(res_images, perm=[2, 0, 1])
     # tf.summary.image('net_res', tf.expand_dims(res_images,-1), max_outputs=9)
-    for var in ocr_vars:
-        tf.summary.histogram(var.name, var)
+    # for var in ocr_vars:
+    #     tf.summary.histogram(var.name, var)
 
     summary = tf.summary.merge_all()
 
