@@ -20,7 +20,7 @@ import font_dataset
 curr_dir = os.path.dirname(__file__)
 
 CLASSES_NUMBER = font_dataset.CLASSES_NUMBER
-
+NULL_CODE = font_dataset.CLASSES_NUMBER - 1 
 # 采用注意力模型，需要确定下图片的大小和最大字数
 # 不足高宽的需要补齐
 IMAGE_HEIGHT = 32
@@ -257,6 +257,38 @@ def create_optimizer(optimizer_name):
         optimizer = tf.train.RMSPropOptimizer(LEARNING_RATE_INITIAL, momentum=0.9)
     return optimizer
 
+def accuracy(predictions, targets):
+    accuracy_values=[]
+    with tf.variable_scope('CharAccuracy'):
+        predictions.get_shape().assert_is_compatible_with(targets.get_shape())
+        targets = tf.to_int32(targets)
+        const_rej_char = tf.constant(NULL_CODE, shape=targets.get_shape())
+        weights = tf.to_float(tf.not_equal(targets, const_rej_char))
+        correct_chars = tf.to_float(tf.equal(predictions, targets))
+        accuracy_per_example = tf.div(
+            tf.reduce_sum(tf.multiply(correct_chars, weights), 1),
+            tf.reduce_sum(weights, 1))
+        accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
+        accuracy_values.append(accuracy_value)
+        tf.summary.scalar('CharAccuracy', tf.Print(accuracy_value, [accuracy_value], 'CharAccuracy'))
+
+    with tf.variable_scope('SequenceAccuracy'):
+        predictions.get_shape().assert_is_compatible_with(targets.get_shape())
+        targets = tf.to_int32(targets)
+        const_rej_char = tf.constant(NULL_CODE, shape=targets.get_shape(), dtype=tf.int32)
+        include_mask = tf.not_equal(targets, const_rej_char)
+        include_predictions = tf.to_int32(tf.where(include_mask, predictions, tf.zeros_like(predictions) + NULL_CODE))
+        correct_chars = tf.to_float(tf.equal(include_predictions, targets))
+        correct_chars_counts = tf.cast(tf.reduce_sum(correct_chars, reduction_indices=[1]), dtype=tf.int32)
+        target_length = targets.get_shape().dims[1].value
+        target_chars_counts = tf.constant(target_length, shape=correct_chars_counts.get_shape())
+        accuracy_per_example = tf.to_float(tf.equal(correct_chars_counts, target_chars_counts))
+        accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
+        accuracy_values.append(accuracy_value)
+        tf.summary.scalar('SequenceAccuracy', tf.Print(accuracy_value, [accuracy_value], 'SequenceAccuracy'))
+
+    return accuracy_values
+
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, IMAGE_HEIGHT, IMAGE_WIDTH, 1], name="inputs")
@@ -272,6 +304,8 @@ def neural_networks():
     # ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
     ocr_optim = create_optimizer("momentum").minimize(chars_loss, global_step=global_step) 
 
+    oc_accs = accuracy(predicted_chars, labels)
+
     # 加入日志
     tf.summary.scalar('ocr_loss', chars_loss)
     # res_images = res_layer[-1]
@@ -283,7 +317,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            chars_loss, ocr_optim
+            chars_loss, ocr_optim, oc_accs[0], oc_accs[1]
 
 def list_to_chars(list):
     try:
@@ -297,7 +331,7 @@ def list_to_chars(list):
 
 def train():
     inputs, labels, global_step, lr, summary, \
-        chars_loss, ocr_optim  = neural_networks()
+        chars_loss, ocr_optim, cacc, sacc  = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -362,7 +396,7 @@ def train():
                 train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size,
                     has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)
                 train_labels_fix = np.ones((batch_size, SEQ_LENGTH))
-                train_labels_fix *= (CLASSES_NUMBER-1)
+                train_labels_fix *= (NULL_CODE)
                 for i in range(batch_size):
                     np.put(train_labels_fix[i],np.arange(len(train_labels[i])),train_labels[i])
 
@@ -374,7 +408,8 @@ def train():
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
-                errR, _ , steps, res_lr = session.run([chars_loss, ocr_optim, global_step, lr], feed)
+                errR, _ , steps, res_lr, char_acc, seq_acc  = session.run([chars_loss, ocr_optim, global_step, lr, cacc, sacc], feed)
+
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
                 # accs.append(acc)
@@ -384,8 +419,8 @@ def train():
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
-                    (time.ctime(), steps, feed_time, time.time() - start, errR, avg_losts, res_lr, font_info))
+                print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f, avg_loss: %.4f, acc: %.8f / %.8f,  lr:%.8f, info: %s " % \
+                    (time.ctime(), steps, feed_time, time.time() - start, errR, avg_losts, char_acc, seq_acc, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
                 # need_reset_global_step = False
