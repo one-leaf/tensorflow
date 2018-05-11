@@ -262,7 +262,7 @@ def accuracy(predictions, targets):
     with tf.variable_scope('CharAccuracy'):
         predictions.get_shape().assert_is_compatible_with(targets.get_shape())
         targets = tf.to_int32(targets)
-        const_rej_char = tf.constant(NULL_CODE, shape=targets.get_shape())
+        const_rej_char = tf.constant(NULL_CODE, shape=targets.get_shape(), dtype=tf.int32)
         weights = tf.to_float(tf.not_equal(targets, const_rej_char))
         correct_chars = tf.to_float(tf.equal(predictions, targets))
         accuracy_per_example = tf.div(
