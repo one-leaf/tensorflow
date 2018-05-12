@@ -362,7 +362,7 @@ def train():
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         if ckpt and ckpt.model_checkpoint_path:
             checkpoint = ckpt.model_checkpoint_path
-            print('Request to re-store %d weights from %s', len(variables), checkpoint)
+            print('Request to re-store %d weights from %s' % (len(variables), checkpoint))
             assign_op, feed_dict = slim.assign_from_checkpoint(checkpoint, variables)
             session.run(assign_op, feed_dict)
             
