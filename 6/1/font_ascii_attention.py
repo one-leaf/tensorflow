@@ -468,7 +468,7 @@ def train():
                 #             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                 #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                # if steps >0 and steps % REPORT_STEPS == 0:
+                if steps >0 and steps % REPORT_STEPS == 0:
                 #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
            
                 #     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
@@ -498,12 +498,12 @@ def train():
                 #     for f in sorted_fonts[:20]:
                 #         print(f)
 
-                    # if avg_losts>100:        
-                    #     session.run(tf.assign(lr, 1e-4))
-                    # elif avg_losts>10:            
-                    #     session.run(tf.assign(lr, 1e-5))
-                    # else:
-                    #     session.run(tf.assign(lr, 1e-6))
+                    if avg_losts>100:        
+                        session.run(tf.assign(lr, 1e-4))
+                    elif avg_losts>10:            
+                        session.run(tf.assign(lr, 1e-5))
+                    else:
+                        session.run(tf.assign(lr, 1e-6))
                                             
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
