@@ -33,6 +33,7 @@ ASCII_CHARS = [chr(c) for c in range(32,126+1)]
 CHARS = ASCII_CHARS #+ ZH_CHARS + ZH_CHARS_PUN
 # CHARS = ASCII_CHARS
 CLASSES_NUMBER = len(CHARS) + 1 
+SEQ_LENGTH = 250
 
 #初始化学习速率
 LEARNING_RATE_INITIAL = 1e-6
@@ -48,7 +49,7 @@ POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_transformer"
 
-def RES(inputs, seq_len, reuse = False):
+def RES(inputs, lables, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
         print("inputs shape:",inputs.shape)
         with tf.variable_scope("RESNET", reuse=reuse):
@@ -73,11 +74,11 @@ def RES(inputs, seq_len, reuse = False):
 
         return res_layer,layer
 
-def Transformer(inputs, num_units, num_heads, batch_size, width):
+def Transformer(inputs, lables, num_units, num_heads, batch_size, width):
     layer = inputs
     for i in range(6):
         with tf.variable_scope("encoder-%s"%i):
-            layer = multihead_attention(layer, layer, num_units, num_heads)
+            layer = multihead_attention(layer, lables, num_units, num_heads)
             print("Transformer-attention-%s:"%i, layer.shape)
             layer = feedforward(layer, num_units*4, num_units, batch_size, width)
             print("Transformer-feed-%s:"%i, layer.shape)
@@ -156,12 +157,13 @@ def multihead_attention(queries, keys, num_units, num_heads):
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [None, image_height, None, 1], name="inputs")
-    labels = tf.sparse_placeholder(tf.int32, name="labels")
+    labels_sparse = tf.sparse_placeholder(tf.int32, name="labels_sparse")
+    labels_fix = tf.placeholder(tf.int32, name="labels_fix")
     seq_len = tf.placeholder(tf.int32, [None], name="seq_len")
     global_step = tf.Variable(0, trainable=False)
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
-    res_layer, net_res = RES(inputs, seq_len, reuse = False)
+    res_layer, net_res = RES(inputs, labels_fix, reuse = False)
     res_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # 需要变换到 time_major == True [max_time x batch_size x 2048]
@@ -220,103 +222,6 @@ if os.path.exists(os.path.join(curr_dir,"train.txt")):
 else:
     train_text_lines = []
 
-def get_next_batch_for_res(batch_size=128, _font_name=None, _font_size=None, _font_mode=None, _font_hint=None):
-    inputs_images = []   
-    codes = []
-    max_width_image = 0
-    info = []
-    font_length = random.randint(5, 150)
-    for i in range(batch_size):
-        font_name = _font_name
-        font_size = _font_size
-        font_mode = _font_mode
-        font_hint = _font_hint
-        if font_name==None:
-            font_name = random.choice(AllFontNames)
-        if font_size==None:
-            if random.random()>0.5:
-                font_size = random.randint(9, 49)    
-            else:
-                font_size = random.randint(9, 15) 
-        if font_mode==None:
-            font_mode = random.choice([0,1,2,4]) 
-        if font_hint==None:
-            # hint 2 在小字体下会断开笔画，人眼都无法识别
-            if font_size>=14:
-                font_hint = random.choice([0,1,2,3,4,5])  
-            else:
-                font_hint = random.choice([0,1,3,4,5]) 
-
-        text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
-        text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
-        text = text.strip()
-
-            # random.shuffle(text)
-            # text = "".join(text).strip()
-
-        image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint )
-        # image = utils_pil.convert_to_gray(image) 
-        w, h = image.size
-        if h > image_height:
-            image = utils_pil.resize_by_height(image, image_height)  
-
-        if random.random()>0.5:
-            image = utils_pil.resize_by_height(image, image_height-random.randint(1,5))
-            image, _ = utils_pil.random_space2(image, image,  image_height)
-        
-        # if if_to_G and random.random()>0.5:
-        # if random.random()>0.5:
-        #     image = utils_font.add_noise(image)   
-        # print(dir(image))
-        image = np.asarray(image) 
-        # print(image.shape)
-
-        image = utils.resize(image, height=image_height)
-
-        if random.random()>0.5:
-            image = image / 255.
-        else:
-            image = (255. - image) / 255.
-
-        if max_width_image < image.shape[1]:
-            max_width_image = image.shape[1]
-
-        #image = image[:, : , np.newaxis]
-        #image = np.reshape(image,(image.shape[0],image.shape[1],1))
-        # print(image.shape)
-        image = tf.image.random_hue(image, max_delta=0.05)
-        image = tf.image.random_contrast(image, lower=0.3, upper=1.0)
-        image = tf.image.random_brightness(image, max_delta=0.2)
-        image = tf.image.random_saturation(image, lower=0.0, upper=2.0)
-        image = tf.image.rgb_to_grayscale(image)
-        # image = tf.minimum(image, 1.0)
-        # image = tf.maximum(image, 0.0)
-        # print(image.shape, type(image))
-        # image = image.eval()
-        # print(image.shape, type(image))
-        inputs_images.append(image)
-        codes.append([CHARS.index(char) for char in text])                  
-
-        info.append([font_name, str(font_size), str(font_mode), str(font_hint), str(len(text))])
-
-    # 凑成16的整数倍
-    if max_width_image % POOL_SIZE > 0:
-        max_width_image = max_width_image + (POOL_SIZE - max_width_image % POOL_SIZE)
-
-    inputs = np.zeros([batch_size, image_height, max_width_image, 1])
-    for i in range(batch_size):
-        # image = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
-        # inputs[i,:] = image_vec # np.reshape(image_vec,(image_height, max_width_image, 1))
-        image = tf.image.resize_image_with_crop_or_pad(inputs_images[i], image_height, max_width_image)
-        image = image.eval()
-        # print(image.shape)
-        inputs[i,:] = image
-        
-    # print(inputs.shape)
-    labels = [np.asarray(i) for i in codes]
-    sparse_labels = utils.sparse_tuple_from(labels)
-    seq_len = np.ones(batch_size) * (image_height*max_width_image)//(POOL_SIZE*POOL_SIZE)
-    return inputs, sparse_labels, seq_len, info
 
 def train():
     inputs, labels, global_step, lr, summary, \
@@ -368,16 +273,15 @@ def train():
             errR = 1
             batch_size = BATCH_SIZE
             for batch in range(BATCHES):
-                # if len(AllLosts)>10 and random.random()>0.7:
-                #     sorted_font = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
-                #     font_info = sorted_font[random.randint(0,10)]
-                #     font_info = font_info[0].split(",")
-                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size, \
-                #         font_info[0], int(font_info[1]), int(font_info[2]), int(font_info[3]))
-                # else:
-                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
-                train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)
-                # feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
+                train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size,
+                    has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)
+
+                train_labels_fix = np.ones((batch_size, SEQ_LENGTH))
+                train_labels_fix *= (CLASSES_NUMBER-1)
+                for i in range(batch_size):
+                    np.put(train_labels_fix[i],np.arange(len(train_labels[i])),train_labels[i])
+                train_seq_len = np.ones(batch_size) * SEQ_LENGTH
+
                 start = time.time()                
                 feed = {inputs: train_inputs, labels: train_labels, seq_len: train_seq_len} 
 
