@@ -304,7 +304,7 @@ def neural_networks():
     # ocr_vars  = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR')
 
     # ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
-    ocr_optim = create_optimizer("momentum", lr).minimize(chars_loss, global_step=global_step) 
+    ocr_optim = create_optimizer("adam", lr).minimize(chars_loss, global_step=global_step) 
 
     oc_accs = accuracy(predicted_chars, labels)
 
