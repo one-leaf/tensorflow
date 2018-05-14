@@ -314,17 +314,19 @@ def get_next_batch_for_res(batch_size=128):
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
         image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
+        print(inputs.shape)
+        print(image_vec.shape)
         inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
      
     # print(inputs.shape, len(codes))
     labels = [np.asarray(i) for i in codes]
     sparse_labels = utils.sparse_tuple_from(labels)
 
-    max_width_image = math.ceil((max_width_image-3+1.)/2.)
-    max_width_image = math.ceil((max_width_image-3+1.)/1.)
-    max_width_image = math.ceil((max_width_image-3+1.)/2.)
-    max_width_image = math.ceil((max_width_image-3+1.)/1.)
-    max_width_image = math.ceil((max_width_image-3+1.)/2.)
+    # max_width_image = math.ceil((max_width_image-3+1.)/2.)
+    # max_width_image = math.ceil((max_width_image-3+1.)/1.)
+    # max_width_image = math.ceil((max_width_image-3+1.)/2.)
+    # max_width_image = math.ceil((max_width_image-3+1.)/1.)
+    # max_width_image = math.ceil((max_width_image-3+1.)/2.)
 
     seq_len = np.ones(batch_size) * SEQ_LENGTH
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
