@@ -314,8 +314,6 @@ def get_next_batch_for_res(batch_size=128):
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
         image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
-        print(inputs.shape)
-        print(image_vec.shape)
         inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
      
     # print(inputs.shape, len(codes))
