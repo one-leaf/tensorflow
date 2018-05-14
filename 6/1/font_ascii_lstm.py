@@ -307,12 +307,13 @@ def get_next_batch_for_res(batch_size=128):
     #     max_width_image = max_width_image + 4 - max_width_image % 4
 
     # 如果图片超过最大宽度
-    if max_width_image > MAX_IMAGE_WIDTH:
-        raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
+    if max_width_image < MAX_IMAGE_WIDTH:
+        max_width_image = MAX_IMAGE_WIDTH
+        # raise Exception("img width must %s <= %s " % (max_width_image, MAX_IMAGE_WIDTH))
 
     inputs = np.zeros([batch_size, image_height, max_width_image, 1])
     for i in range(batch_size):
-        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=MAX_IMAGE_WIDTH, flatten=False)
+        image_vec = utils.img2vec(inputs_images[i], height=image_height, width=max_width_image, flatten=False)
         inputs[i,:] = np.reshape(image_vec,(image_height, max_width_image, 1))
      
     # print(inputs.shape, len(codes))
