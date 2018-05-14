@@ -54,9 +54,11 @@ def CNN(inputs):
         # [N H//32 W 2048]
         # tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
 
-        with slim.arg_scope(inception.inception_v3_arg_scope()):
-            with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
-                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
+        # with slim.arg_scope(inception.inception_v3_arg_scope()):
+        #     with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
+        #         layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
+
+        layer = utils_nn.resNet101(layer, True)
 
         # 直接将网络拉到256 [N 1 W 256]
         with tf.variable_scope("Normalize"):
