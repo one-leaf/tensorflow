@@ -404,7 +404,7 @@ def train():
         print("tf train")
 
         AllLosts={}
-        accs = deque(maxlen=100)
+        accs = deque(maxlen=200)
         losts = deque(maxlen=200)
         while True:
             errR = 1
@@ -426,19 +426,20 @@ def train():
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
-                errR, _ , steps, res_lr, char_acc, seq_acc  = session.run([chars_loss, ocr_optim, global_step, lr, cacc, sacc], feed)
+                errR, _ , steps, res_lr, char_acc  = session.run([chars_loss, ocr_optim, global_step, lr, cacc], feed)
 
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
-                # accs.append(acc)
-                # avg_acc = sum(accs)/len(accs)
+
+                accs.append(char_acc)
+                avg_acc = sum(accs)/len(accs)
 
                 losts.append(errR)
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f, avg_loss: %.4f, acc: %.8f / %.8f,  lr:%.8f, info: %s " % \
-                    (time.ctime(), steps, feed_time, time.time() - start, errR, avg_losts, char_acc, seq_acc, res_lr, font_info))
+                print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f / %.4f, acc: %.4f / %.4f,  lr:%.8f, info: %s " % \
+                    (time.ctime(), steps, feed_time, time.time() - start, errR, avg_losts, char_acc, avg_acc, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
                 # need_reset_global_step = False
