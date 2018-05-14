@@ -58,7 +58,7 @@ def CNN(inputs):
         #     with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
         #         layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
 
-        layer = utils_nn.resNet101(layer, True)
+        layer = utils_nn.resNet101(inputs, True)
 
         # 直接将网络拉到256 [N 1 W 256]
         with tf.variable_scope("Normalize"):
