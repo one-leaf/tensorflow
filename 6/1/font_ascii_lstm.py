@@ -389,7 +389,7 @@ def train():
         print("tf train")
 
         AllLosts={}
-        accs = deque(maxlen=100)
+        accs = deque(maxlen=200)
         losts = deque(maxlen=200)
         while True:
             errR = 1
@@ -417,7 +417,7 @@ def train():
                 avg_losts = sum(losts)/len(losts)
 
                 # errR = errR / font_length
-                print("%s, %d time: %4.4fs / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
+                print("%s, %d time: %4.4fs / %4.4fs, acc: %.4f / %.4f, loss: %.4f / %.4f, lr:%.8f, info: %s " % \
                     (time.ctime(), steps, feed_time, time.time() - start, acc, avg_acc, errR, avg_losts, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
