@@ -363,40 +363,40 @@ def train():
         print('moving_average_variables:\n%s' % [v.op.name for v in tf.moving_average_variables()])
         print('trainable_variables:\n%s' % [v.op.name for v in tf.trainable_variables()])
 
-        ckpt = tf.train.get_checkpoint_state(model_R_dir)
-        if ckpt and ckpt.model_checkpoint_path:
-            checkpoint = ckpt.model_checkpoint_path
-            print('Request to re-store %d weights from %s' % (len(variables), checkpoint))
-            assign_op, feed_dict = slim.assign_from_checkpoint(checkpoint, variables)
-            session.run(assign_op, feed_dict)
+        # ckpt = tf.train.get_checkpoint_state(model_R_dir)
+        # if ckpt and ckpt.model_checkpoint_path:
+        #     checkpoint = ckpt.model_checkpoint_path
+        #     print('Request to re-store %d weights from %s' % (len(variables), checkpoint))
+        #     assign_op, feed_dict = slim.assign_from_checkpoint(checkpoint, variables)
+        #     session.run(assign_op, feed_dict)
             
-        # for i in range(3):
-        #     ckpt = tf.train.get_checkpoint_state(model_R_dir)
-        #     if ckpt and ckpt.model_checkpoint_path:
-        #         print("Restore Model OCR...")
-        #         stem = os.path.basename(ckpt.model_checkpoint_path)
-        #         restore_iter = int(stem.split('-')[-1])
-        #         try:
-        #             r_saver.restore(session, ckpt.model_checkpoint_path)    
-        #         except:
-        #             new_restore_iter = restore_iter - BATCHES
-        #             with open(os.path.join(model_R_dir,"checkpoint"),'w') as f:
-        #                 f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%new_restore_iter)
-        #                 f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%new_restore_iter)
-        #             continue
-        #         session.run(tf.assign(global_step, restore_iter))
-        #         if restore_iter<10000:        
-        #             session.run(tf.assign(lr, 1e-4))
-        #         elif restore_iter<50000:            
-        #             session.run(tf.assign(lr, 1e-4))
-        #         else:
-        #             session.run(tf.assign(lr, 1e-4))
-        #         print("Restored to %s."%restore_iter)
-        #         break
-        #     else:
-        #         break
-        #     print("restored fail, return")
-        #     return
+        for i in range(3):
+            ckpt = tf.train.get_checkpoint_state(model_R_dir)
+            if ckpt and ckpt.model_checkpoint_path:
+                print("Restore Model OCR...")
+                stem = os.path.basename(ckpt.model_checkpoint_path)
+                restore_iter = int(stem.split('-')[-1])
+                try:
+                    r_saver.restore(session, ckpt.model_checkpoint_path)    
+                except:
+                    new_restore_iter = restore_iter - BATCHES
+                    with open(os.path.join(model_R_dir,"checkpoint"),'w') as f:
+                        f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%new_restore_iter)
+                        f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%new_restore_iter)
+                    continue
+                session.run(tf.assign(global_step, restore_iter))
+                if restore_iter<10000:        
+                    session.run(tf.assign(lr, 1e-4))
+                elif restore_iter<50000:            
+                    session.run(tf.assign(lr, 1e-4))
+                else:
+                    session.run(tf.assign(lr, 1e-4))
+                print("Restored to %s."%restore_iter)
+                break
+            else:
+                break
+            print("restored fail, return")
+            return
 
         print("tf create summary")
         train_writer = tf.summary.FileWriter(log_dir, session.graph)
