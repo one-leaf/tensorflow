@@ -47,6 +47,7 @@ POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_cnn_lstm"
 MAX_IMAGE_WIDTH = 4096
+SEQ_LENGTH  = 255
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
@@ -54,10 +55,11 @@ def RES(inputs, seq_len, reuse = False):
         # layer = utils_nn.resNet101V2(inputs, True)    # N H W/16 2048
         # layer = utils_nn.resNet50(inputs, True, [2,1]) # (N H/16 W 2048)
 
+        # with slim.arg_scope(inception.inception_v3_arg_scope()):
+        #     with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
+        #         layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
 
-        with slim.arg_scope(inception.inception_v3_arg_scope()):
-            with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
-                layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
+        layer = utils_nn.resNet101(inputs, True)
                     
         # with tf.variable_scope("ResNext"):
         #     layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
@@ -323,7 +325,7 @@ def get_next_batch_for_res(batch_size=128):
     max_width_image = math.ceil((max_width_image-3+1.)/1.)
     max_width_image = math.ceil((max_width_image-3+1.)/2.)
 
-    seq_len = np.ones(batch_size) * max_width_image
+    seq_len = np.ones(batch_size) * SEQ_LENGTH
     # print(inputs.shape, seq_len.shape, [len(l) for l in labels])
     return inputs, sparse_labels, seq_len, info
 
