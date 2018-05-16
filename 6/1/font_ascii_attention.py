@@ -293,7 +293,7 @@ def accuracy(predictions, targets):
     return accuracy_values
 
 def tensor2sparse(dense):
-    zero = tf.constant(0, dtype=tf.float32)
+    zero = tf.constant(0, dtype=tf.int32)
     where = tf.not_equal(dense, zero)
     indices = tf.where(where)
     values = tf.gather_nd(dense, indices)
