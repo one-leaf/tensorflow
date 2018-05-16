@@ -505,11 +505,13 @@ def resNextBlockC(inputs, depth=4):
     return tf.nn.leaky_relu(inputs + layer)   
 
 def resNext50(layer, isPoolSize=True, stride=2):
-    if isPoolSize:
-        stride = stride
+   if isPoolSize:
+        stride = 2
+        padding = "VALID"
     else:
         stride = 1
-    with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding="SAME"):
+        padding = "SAME"
+    with slim.arg_scope([slim.max_pool2d, slim.avg_pool2d], stride=stride, padding=padding):
         layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None)
         for i in range(3):
             layer = resNextBlockC(layer, 4)
