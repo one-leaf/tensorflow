@@ -317,7 +317,7 @@ def neural_networks():
     ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=ctc_net, sequence_length=seq_len))
     tf.losses.add_loss(ctc_loss)
 
-    total_loss = slim.losses.get_total_loss()
+    total_loss = tf.losses.get_total_loss()
 
     ocr_optim = create_optimizer("adam", lr).minimize(total_loss, global_step=global_step) 
 
@@ -337,7 +337,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            chars_loss, ocr_optim, oc_accs[0], oc_accs[1]
+            total_loss, ocr_optim, oc_accs[0], oc_accs[1]
 
 def list_to_chars(list):
     try:
