@@ -505,7 +505,7 @@ def resNextBlockC(inputs, depth=4):
     return tf.nn.leaky_relu(inputs + layer)   
 
 def resNext50(layer, isPoolSize=True, stride=2):
-   if isPoolSize:
+    if isPoolSize:
         stride = 2
         padding = "VALID"
     else:
