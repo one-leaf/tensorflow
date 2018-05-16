@@ -313,7 +313,7 @@ def neural_networks():
     cnn_net, chars_logit, chars_log_prob, predicted_chars, predicted_scores = OCR(inputs, labels_onehot, labels)
 
     seq_len = tf.ones(BATCH_SIZE, dtype=tf.int32) * SEQ_LENGTH
-    ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=cnn_net, sequence_length=seq_len))
+    ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels, inputs=cnn_net, sequence_length=seq_len))
     tf.losses.add_loss(ctc_loss)
 
     total_loss = slim.losses.get_total_loss()
