@@ -293,7 +293,7 @@ def accuracy(predictions, targets):
     return accuracy_values
 
 def tensor2sparse(dense):
-    zero = tf.constant(0, dtype=tf.int32)
+    zero = tf.constant(0, tf.int32)
     where = tf.not_equal(dense, zero)
     indices = tf.where(where)
     values = tf.gather_nd(dense, indices)
@@ -312,7 +312,7 @@ def neural_networks():
 
     cnn_net, chars_logit, chars_log_prob, predicted_chars, predicted_scores = OCR(inputs, labels_onehot, labels)
 
-    seq_len = tf.ones(BATCH_SIZE, dtype=tf.int32) * SEQ_LENGTH
+    seq_len = tf.ones(BATCH_SIZE, tf.int32) * SEQ_LENGTH
     ctc_net = tf.transpose(cnn_net, (1, 0, 2))
     ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=ctc_net, sequence_length=seq_len))
     tf.losses.add_loss(ctc_loss)
