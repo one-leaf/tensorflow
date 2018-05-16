@@ -216,7 +216,7 @@ def sequence_loss_fn(chars_logits, chars_labels):
             weights_list,
             softmax_loss_function = tf.nn.sparse_softmax_cross_entropy_with_logits,
             average_across_timesteps = False)
-        return loss
+        tf.losses.add_loss(loss)
 
 def OCR(inputs, labels_one_hot, labels, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
@@ -242,9 +242,8 @@ def OCR(inputs, labels_one_hot, labels, reuse = False):
         predicted_chars, chars_log_prob, predicted_scores = (char_predictions(chars_logit))
 
         # create_loss
-        chars_loss = sequence_loss_fn(chars_logit, labels)
-        tf.summary.scalar('TotalLoss', chars_loss)
-        return chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss
+        sequence_loss_fn(chars_logit, labels)
+        return layer, chars_logit, chars_log_prob, predicted_chars, predicted_scores
 
 def create_optimizer(optimizer_name, lr):
     if optimizer_name == 'momentum':
@@ -293,24 +292,38 @@ def accuracy(predictions, targets):
 
     return accuracy_values
 
+def tensor2sparse(dense):
+    zero = tf.constant(0, dtype=tf.float32)
+    where = tf.not_equal(dense, zero)
+    indices = tf.where(where)
+    values = tf.gather_nd(dense, indices)
+    sparse = tf.SparseTensor(indices, values, dense.shape)
+    return sparse
+
 def neural_networks():
     # 输入：训练的数量，一张图片的宽度，一张图片的高度 [-1,-1,16]
     inputs = tf.placeholder(tf.float32, [BATCH_SIZE, IMAGE_HEIGHT, IMAGE_WIDTH, 1], name="inputs")
     labels = tf.placeholder(tf.int32,[BATCH_SIZE, SEQ_LENGTH], name="labels")
     labels_onehot = slim.one_hot_encoding(labels, CLASSES_NUMBER)
+    labels_sparse = tensor2sparse(labels)
 
     global_step = tf.Variable(0, trainable=False)
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
-    chars_logit, chars_log_prob, predicted_chars, predicted_scores, chars_loss = OCR(inputs, labels_onehot, labels)
+    cnn_net, chars_logit, chars_log_prob, predicted_chars, predicted_scores = OCR(inputs, labels_onehot, labels)
 
-    # ocr_optim = tf.train.AdamOptimizer(lr).minimize(chars_loss, global_step=global_step)
-    ocr_optim = create_optimizer("adam", lr).minimize(chars_loss, global_step=global_step) 
+    seq_len = tf.ones(BATCH_SIZE) * SEQ_LENGTH
+    ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=cnn_net, sequence_length=seq_len))
+    tf.losses.add_loss(ctc_loss)
+
+    total_loss = slim.losses.get_total_loss()
+
+    ocr_optim = create_optimizer("adam", lr).minimize(total_loss, global_step=global_step) 
 
     oc_accs = accuracy(predicted_chars, labels)
 
     # 加入日志
-    tf.summary.scalar('ocr_loss', chars_loss)
+    tf.summary.scalar('ocr_loss', total_loss)
     # res_images = res_layer[-1]
     # res_images = tf.transpose(res_images, perm=[2, 0, 1])
     # tf.summary.image('net_res', tf.expand_dims(res_images,-1), max_outputs=9)
