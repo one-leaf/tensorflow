@@ -293,8 +293,8 @@ def accuracy(predictions, targets):
     return accuracy_values
 
 def tensor2sparse(dense):
-    zero = tf.constant(0, tf.int32)
-    where = tf.not_equal(dense, zero)
+    null = tf.constant(NULL_CODE, tf.int32)
+    where = tf.not_equal(dense, null)
     indices = tf.where(where)
     values = tf.gather_nd(dense, indices)
     sparse = tf.SparseTensor(indices, values, dense.shape)
@@ -305,17 +305,17 @@ def neural_networks():
     inputs = tf.placeholder(tf.float32, [BATCH_SIZE, IMAGE_HEIGHT, IMAGE_WIDTH, 1], name="inputs")
     labels = tf.placeholder(tf.int32,[BATCH_SIZE, SEQ_LENGTH], name="labels")
     labels_onehot = slim.one_hot_encoding(labels, CLASSES_NUMBER)
-    # labels_sparse = tensor2sparse(labels)
+    labels_sparse = tensor2sparse(labels)
 
     global_step = tf.Variable(0, trainable=False)
     lr = tf.Variable(LEARNING_RATE_INITIAL, trainable=False)
 
     cnn_net, chars_logit, chars_log_prob, predicted_chars, predicted_scores = OCR(inputs, labels_onehot, labels)
 
-    # seq_len = tf.ones(BATCH_SIZE, tf.int32) * SEQ_LENGTH
-    # ctc_net = tf.transpose(cnn_net, (1, 0, 2))
-    # ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=ctc_net, sequence_length=seq_len))
-    # tf.losses.add_loss(ctc_loss)
+    seq_len = tf.ones(BATCH_SIZE, tf.int32) * SEQ_LENGTH
+    ctc_net = tf.transpose(cnn_net, (1, 0, 2))
+    ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=ctc_net, sequence_length=seq_len))
+    tf.losses.add_loss(ctc_loss)
 
     total_loss = tf.losses.get_total_loss()
 
