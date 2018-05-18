@@ -9,7 +9,7 @@ import random
 import cv2
 from PIL import Image, ImageDraw, ImageFont
 from tensorflow.contrib import slim
-from tensorflow.contrib.slim.nets import inception
+from tensorflow.contrib.slim.nets import inception, resnet_v2
 import math
 import urllib,json,io
 import utils_pil, utils_font, utils_nn
@@ -58,10 +58,17 @@ def CNN(inputs):
         #     with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
         #         layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
 
-        layer = utils_nn.resNet101(inputs, True)
-
-        # 直接将网络拉到256 [N 1 W 256]
+        # layer = utils_nn.resNet101(inputs, True)
+        with slim.arg_scope(resnet_v2.resnet_arg_scope()):
+            layer, _ = resnet_v2.resnet_v2_152(inputs,
+                                                None,
+                                                is_training=True,
+                                                global_pool=False,
+                                                output_stride=16) 
+        # 直接将网络拉到256 [N 1 256 256]
         with tf.variable_scope("Normalize"):
+            layer = slim.conv2d(layer, 1024, [2,2], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             return layer
 
