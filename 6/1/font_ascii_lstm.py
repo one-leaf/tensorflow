@@ -80,6 +80,7 @@ def RES(inputs, seq_len, reuse = False):
         #     layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
         #     tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
         # print("CNN shape:",layer.shape)
+        
         temp_layer = layer
         with tf.variable_scope("Normalize"):
             layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
