@@ -96,7 +96,7 @@ def RES(inputs, seq_len, reuse = False):
         # max_width_height, embedd_size
         # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
         with tf.variable_scope("Coordinates"):
-            max_width_height = MAX_IMAGE_WIDTH//4
+            max_width_height = MAX_IMAGE_WIDTH//16
             embedd_size = 64
             layer = Coordinates(layer, max_width_height, embedd_size)
             print("Coordinates shape:",layer.shape)
