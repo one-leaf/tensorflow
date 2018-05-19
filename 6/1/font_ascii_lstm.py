@@ -59,33 +59,33 @@ def RES(inputs, seq_len, reuse = False):
         #     with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=True):
         #         layer, _ = inception.inception_v3_base(inputs, final_endpoint="Mixed_5d")
 
-        # with slim.arg_scope(resnet_v2.resnet_arg_scope()):
-        #     layer, _ = resnet_v2.resnet_v2_152(inputs,
-        #                                         None,
-        #                                         is_training=True,
-        #                                         global_pool=False,
-        #                                         output_stride=16) 
-        # # 直接将网络拉到256 [N 1 256 256]
-        # with tf.variable_scope("Normalize"):
-        #     layer = slim.conv2d(layer, 1024, [2,2], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        #     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        #     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-        #     return layer
+        with slim.arg_scope(resnet_v2.resnet_arg_scope()):
+            layer, _ = resnet_v2.resnet_v2_152(inputs,
+                                                None,
+                                                is_training=True,
+                                                global_pool=False,
+                                                output_stride=16) 
+        print("ResNet shape:",layer.shape)
 
-        layer = utils_nn.resNet101(inputs, True)
+        # 直接将网络拉到256 [N 1 256 256]
+        with tf.variable_scope("Normalize"):
+            layer = slim.conv2d(layer, 1024, [2,2], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+
+        # layer = utils_nn.resNet101(inputs, True)
                     
         # with tf.variable_scope("ResNext"):
         #     layer = slim.conv2d(inputs, 64, [2,4], [2,4], normalizer_fn=slim.batch_norm, activation_fn=None) 
         #     tf.summary.image('1_2_4_zoom', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
         #     layer = utils_nn.resNext50(layer, True, [2,1]) # (N H/16 W 2048)
         #     tf.summary.image('2_res50', tf.transpose (layer, [3, 1, 2, 0]), max_outputs=6)
-        # print("CNN shape:",layer.shape)
-        
+
         temp_layer = layer
-        with tf.variable_scope("Normalize"):
-            layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        # with tf.variable_scope("Normalize"):
+        #     layer = slim.conv2d(layer, 1024, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        #     layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+        #     layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             # layer = slim.conv2d(layer, 128, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
        
         # 将图像高度和宽度 // [2, 4]
