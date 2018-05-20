@@ -325,11 +325,14 @@ def neural_networks():
     ctc_net = tf.transpose(cnn_net, (1, 0, 2))
     ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=ctc_net, sequence_length=seq_len))
     tf.summary.scalar('ctc_loss', ctc_loss)
-    tf.losses.add_loss(ctc_loss)
 
+    seq_loss = tf.losses.get_total_loss()
+    seq_optim = create_optimizer("adam", lr).minimize(seq_loss, global_step=global_step) 
+
+    tf.losses.add_loss(ctc_loss)
     total_loss = tf.losses.get_total_loss()
 
-    ocr_optim = create_optimizer("adam", lr).minimize(total_loss, global_step=global_step) 
+    total_optim = create_optimizer("adam", lr).minimize(total_loss, global_step=global_step) 
 
     oc_accs = accuracy(predicted_chars, labels)
 
@@ -347,7 +350,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            total_loss, ocr_optim, oc_accs[0], oc_accs[1]
+            seq_loss, total_loss, seq_optim, total_optim, oc_accs[0], oc_accs[1]
 
 def list_to_chars(list):
     try:
@@ -361,7 +364,7 @@ def list_to_chars(list):
 
 def train():
     inputs, labels, global_step, lr, summary, \
-        chars_loss, ocr_optim, cacc, sacc  = neural_networks()
+        seq_loss, total_loss, seq_optim, total_optim, cacc, sacc  = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -393,29 +396,29 @@ def train():
         #     print('Request to re-store %d weights from %s' % (len(variables), checkpoint))
         #     assign_op, feed_dict = slim.assign_from_checkpoint(checkpoint, variables)
         #     session.run(assign_op, feed_dict)
-            
+        step = 0    
         for i in range(3):
             ckpt = tf.train.get_checkpoint_state(model_R_dir)
             if ckpt and ckpt.model_checkpoint_path:
                 print("Restore Model OCR...")
                 stem = os.path.basename(ckpt.model_checkpoint_path)
-                restore_iter = int(stem.split('-')[-1])
+                step = int(stem.split('-')[-1])
                 try:
                     r_saver.restore(session, ckpt.model_checkpoint_path)    
                 except:
-                    new_restore_iter = restore_iter - BATCHES
+                    step = step - BATCHES
                     with open(os.path.join(model_R_dir,"checkpoint"),'w') as f:
-                        f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%new_restore_iter)
-                        f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%new_restore_iter)
+                        f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%step)
+                        f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%step)
                     continue
-                session.run(tf.assign(global_step, restore_iter))
-                if restore_iter<10000:        
+                session.run(tf.assign(global_step, step))
+                if step<10000:        
                     session.run(tf.assign(lr, 1e-4))
-                elif restore_iter<50000:            
+                elif step<50000:            
                     session.run(tf.assign(lr, 1e-4))
                 else:
                     session.run(tf.assign(lr, 1e-4))
-                print("Restored to %s."%restore_iter)
+                print("Restored to %s."%step)
                 break
             else:
                 break
@@ -450,8 +453,11 @@ def train():
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
-                errR, _ , steps, res_lr, char_acc  = session.run([chars_loss, ocr_optim, global_step, lr, cacc], feed)
-
+                if step>150000:
+                    errR, _ , step, res_lr, char_acc  = session.run([seq_loss, seq_optim, global_step, lr, cacc], feed)
+                else:
+                    errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
+                    
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
 
@@ -463,7 +469,7 @@ def train():
 
                 # errR = errR / font_length
                 print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f / %.4f, acc: %.4f / %.4f,  lr:%.8f, info: %s " % \
-                    (time.ctime(), steps, feed_time, time.time() - start, errR, avg_losts, char_acc, avg_acc, res_lr, font_info))
+                    (time.ctime(), step, feed_time, time.time() - start, errR, avg_losts, char_acc, avg_acc, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
                 # need_reset_global_step = False
@@ -478,7 +484,7 @@ def train():
                 #     need_reset_global_step = True
                     
                 # if need_reset_global_step:                     
-                #     session.run(tf.assign(global_step, steps))
+                #     session.run(tf.assign(global_step, step))
 
                 if np.isnan(errR) or np.isinf(errR) :
                     print("Error: cost is nan or inf")
@@ -493,11 +499,11 @@ def train():
 
                 # if acc/avg_acc<=0.2:
                 #     for i in range(batch_size): 
-                #         filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, steps, i, \
+                #         filename = "%s_%s_%s_%s_%s_%s_%s.png"%(acc, step, i, \
                 #             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                 #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                if steps >0 and steps % REPORT_STEPS == 0:
+                if step >0 and step % REPORT_STEPS == 0:
                 #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
            
                 #     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
