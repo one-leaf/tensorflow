@@ -326,8 +326,8 @@ def neural_networks():
     ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=ctc_net, sequence_length=seq_len))
     tf.summary.scalar('ctc_loss', ctc_loss)
 
-    seq_loss = tf.losses.get_total_loss()
-    seq_optim = create_optimizer("adam", lr).minimize(seq_loss, global_step=global_step) 
+    # seq_loss = tf.losses.get_total_loss()
+    # seq_optim = create_optimizer("adam", lr).minimize(seq_loss, global_step=global_step) 
 
     tf.losses.add_loss(ctc_loss)
     total_loss = tf.losses.get_total_loss()
@@ -350,7 +350,7 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            seq_loss, total_loss, seq_optim, total_optim, oc_accs[0], oc_accs[1]
+            total_loss, total_optim, oc_accs[0], oc_accs[1]
 
 def list_to_chars(list):
     try:
@@ -364,7 +364,7 @@ def list_to_chars(list):
 
 def train():
     inputs, labels, global_step, lr, summary, \
-        seq_loss, total_loss, seq_optim, total_optim, cacc, sacc  = neural_networks()
+        total_loss, total_optim, cacc, sacc  = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -452,11 +452,8 @@ def train():
 
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
-
-                if step>500000:
-                    errR, _ , step, res_lr, char_acc  = session.run([seq_loss, seq_optim, global_step, lr, cacc], feed)
-                else:
-                    errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
+            
+                errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
                     
                 font_length = int(train_info[0][-1])
                 font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
