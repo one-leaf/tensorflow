@@ -541,9 +541,9 @@ def train():
             if np.isnan(errR) or np.isinf(errR):
                 continue
             print("Save Model OCR ...")
-            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=steps)         
+            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=step)         
             logs = session.run(summary, feed)
-            train_writer.add_summary(logs, steps)
+            train_writer.add_summary(logs, step)
 
 if __name__ == '__main__':
     train()
