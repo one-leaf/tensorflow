@@ -453,7 +453,7 @@ def train():
                 # _res = session.run(net_res, feed)
                 # print(_res.shape)
 
-                if step>150000:
+                if step>500000:
                     errR, _ , step, res_lr, char_acc  = session.run([seq_loss, seq_optim, global_step, lr, cacc], feed)
                 else:
                     errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
@@ -533,12 +533,12 @@ def train():
                 #     for f in sorted_fonts[:20]:
                 #         print(f)
 
-                    if avg_losts>100:        
-                        session.run(tf.assign(lr, 1e-4))
-                    elif avg_losts>10:            
+                    if avg_acc>0.9:        
+                        session.run(tf.assign(lr, 1e-6))
+                    elif avg_acc>0.8:            
                         session.run(tf.assign(lr, 1e-5))
                     else:
-                        session.run(tf.assign(lr, 1e-6))
+                        session.run(tf.assign(lr, 1e-4))
                                             
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
