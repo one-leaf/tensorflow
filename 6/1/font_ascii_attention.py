@@ -533,7 +533,7 @@ def train():
                 #     for f in sorted_fonts[:20]:
                 #         print(f)
 
-                    if avg_acc>0.9:        
+                    if avg_acc>0.95:        
                         session.run(tf.assign(lr, 1e-6))
                     elif avg_acc>0.8:            
                         session.run(tf.assign(lr, 1e-5))
