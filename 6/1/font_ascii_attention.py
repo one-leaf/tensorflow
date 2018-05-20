@@ -415,9 +415,9 @@ def train():
                 if step<10000:        
                     session.run(tf.assign(lr, 1e-4))
                 elif step<50000:            
-                    session.run(tf.assign(lr, 1e-4))
+                    session.run(tf.assign(lr, 1e-5))
                 else:
-                    session.run(tf.assign(lr, 1e-4))
+                    session.run(tf.assign(lr, 1e-6))
                 print("Restored to %s."%step)
                 break
             else:
