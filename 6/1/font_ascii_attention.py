@@ -318,7 +318,7 @@ def neural_networks():
     ctc_net = tf.transpose(cnn_net, (1, 0, 2))
     ctc_loss = tf.reduce_mean(tf.nn.ctc_loss(labels=labels_sparse, inputs=ctc_net, sequence_length=seq_len))
     tf.summary.scalar('ctc_loss', ctc_loss)
-    tf.losses.add_loss(ctc_loss)
+    # tf.losses.add_loss(ctc_loss)
 
     total_loss = tf.losses.get_total_loss()
 
