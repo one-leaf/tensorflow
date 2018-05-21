@@ -142,10 +142,10 @@ def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size//2, 
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size//2, 
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
