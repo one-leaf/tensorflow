@@ -140,7 +140,7 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 # 如果用relu代替默认的tanh会收敛快很多，但后期网络很难收敛
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
-    for i in range(2):
+    for i in range(3):
         with tf.variable_scope("rnn-%s"%i):
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
