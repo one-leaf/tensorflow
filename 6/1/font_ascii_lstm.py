@@ -142,17 +142,34 @@ def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(2):
         with tf.variable_scope("rnn-%s"%i):
-            cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
+            cell_fw = tf.contrib.rnn.GRUCell(lstm_size//2, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
-            cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
+            cell_bw = tf.contrib.rnn.GRUCell(lstm_size//2, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
-        net = tf.concat(outputs, -1)  
-        net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
-        layer = tf.nn.leaky_relu(net + layer)
+        # net = tf.concat(outputs, -1) 
+        net = slim.batch_norm(outputs[0]+outputs[1]+layer)         
+        net = tf.nn.leaky_relu(net)
     return layer
+
+# 这个模型中后期的网络非常不稳定
+# def LSTM(inputs, lstm_size, seq_len):
+#     layer = inputs
+#     for i in range(2):
+#         with tf.variable_scope("rnn-%s"%i):
+#             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
+#                 kernel_initializer=orthogonal_initializer,
+#                 bias_initializer=tf.zeros_initializer)
+#             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
+#                 kernel_initializer=orthogonal_initializer,
+#                 bias_initializer=tf.zeros_initializer)
+#             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
+#         net = tf.concat(outputs, -1)  
+#         net = slim.fully_connected(net, lstm_size, normalizer_fn=None, activation_fn=None)
+#         layer = tf.nn.leaky_relu(net + layer)
+#     return layer
 
 # def LSTM(inputs, lstm_size, seq_len):
 #     layer = inputs
