@@ -150,7 +150,7 @@ def LSTM(inputs, lstm_size, seq_len):
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
         # net = tf.concat(outputs, -1) 
-        net = slim.batch_norm(outputs[0]+outputs[1]+layer)         
+        net = slim.batch_norm(outputs[0]+outputs[1])+layer         
         net = tf.nn.leaky_relu(net)
     return layer
 
