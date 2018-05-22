@@ -406,7 +406,16 @@ def train():
                 try:
                     r_saver.restore(session, ckpt.model_checkpoint_path)    
                 except:
-                    step = step - BATCHES
+                    filenames  = os.listdir(model_R_dir)
+                    pre_step = 0 
+                    for filename in filenames:
+                        if not filename.endswith("index"): continue
+                        filename = filename.split['.'][1]
+                        filename = filename.split['-'][1]
+                        fileno = int(filename)
+                        if fileno < step and fileno > pre_step:
+                            pre_step = fileno
+                    step = pre_step
                     with open(os.path.join(model_R_dir,"checkpoint"),'w') as f:
                         f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%step)
                         f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%step)
@@ -469,7 +478,7 @@ def train():
                     (time.ctime(), step, feed_time, time.time() - start, errR, avg_losts, char_acc, avg_acc, res_lr, font_info))
 
                 # 如果当前lost低于平均lost，就多训练
-                need_reset_global_step = False
+                # need_reset_global_step = False
                 for _ in range(10):
                     if errR <=  avg_losts*2: break 
                     start = time.time()                
@@ -478,10 +487,10 @@ def train():
                     avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
                         (time.ctime(), step, time.time() - start, char_acc, avg_acc, errR, avg_losts, res_lr, font_info))   
-                    need_reset_global_step = True
+                    # need_reset_global_step = True
                     
-                if need_reset_global_step:                     
-                    session.run(tf.assign(global_step, step))
+                # if need_reset_global_step:                     
+                #     session.run(tf.assign(global_step, step))
 
                 if np.isnan(errR) or np.isinf(errR) :
                     print("Error: cost is nan or inf")
