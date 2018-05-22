@@ -410,8 +410,8 @@ def train():
                     pre_step = 0 
                     for filename in filenames:
                         if not filename.endswith("index"): continue
-                        filename = filename.split['.'][1]
-                        filename = filename.split['-'][1]
+                        filename = filename.split()['.'][1]
+                        filename = filename.split()['-'][1]
                         fileno = int(filename)
                         if fileno < step and fileno > pre_step:
                             pre_step = fileno
