@@ -68,7 +68,7 @@ def create_font_dataset(filecount=20, filesize=50000):
 
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
                 text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
-                text = text.strip()
+                text = text.strip()            
 
                 image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
 
