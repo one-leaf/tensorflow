@@ -502,7 +502,7 @@ def train():
                 #             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                 #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                if step >0: # and step % REPORT_STEPS == 0:                     
+                if step >0 and step % REPORT_STEPS == 0:                     
                     detected_list = session.run(predicted_chars, feed) 
 
                 #     for i in range(batch_size): 
@@ -523,7 +523,7 @@ def train():
                         # 计算莱文斯坦比
                         import Levenshtein
                         acc += Levenshtein.ratio(original_text, detected_text)
-                    print("Test Accuracy:", acc / len(original_text))
+                    print("Test Accuracy:", acc / len(detected_list))
                     # sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     # for f in sorted_fonts[:20]:
                     #     print(f)
