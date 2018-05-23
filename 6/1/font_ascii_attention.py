@@ -451,6 +451,7 @@ def train():
                 start = time.time()    
                 train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size,
                     has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)
+                print(train_labels)
                 train_labels_fix = np.ones((batch_size, SEQ_LENGTH))
                 train_labels_fix *= (NULL_CODE)
                 for i in range(batch_size):
