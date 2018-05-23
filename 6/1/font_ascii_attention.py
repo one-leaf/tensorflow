@@ -512,12 +512,7 @@ def train():
                 #             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                 #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                # if step >0 and step % REPORT_STEPS == 0:
-                if step >0:
-                    train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size, \
-                        has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)  
-                    
-                    feed = {inputs: train_inputs, labels: np.zeros((batch_size, SEQ_LENGTH))}
+                if step >0 and step % REPORT_STEPS == 0:                     
                     decoded_list = session.run(predicted_chars, feed) 
 
                 #     for i in range(batch_size): 
