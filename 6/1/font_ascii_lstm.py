@@ -149,7 +149,7 @@ def LSTM(inputs, lstm_size, seq_len):
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
-        layer += tf.nn.leaky_relu(outputs[0]+outputs[1])
+        layer += slim.batch_norm(outputs[0]+outputs[1])
     return layer
 
 # 这个模型中后期的网络非常不稳定
