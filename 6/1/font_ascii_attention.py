@@ -352,7 +352,8 @@ def neural_networks():
     summary = tf.summary.merge_all()
 
     return  inputs, labels, global_step, lr, summary, \
-            total_loss, total_optim, oc_accs[0], oc_accs[1]
+            total_loss, total_optim, oc_accs[0], oc_accs[1], \
+            predicted_chars, predicted_scores
 
 def list_to_chars(list):
     try:
@@ -366,7 +367,8 @@ def list_to_chars(list):
 
 def train():
     inputs, labels, global_step, lr, summary, \
-        total_loss, total_optim, cacc, sacc  = neural_networks()
+        total_loss, total_optim, cacc, sacc, \
+        predicted_chars, predicted_scores  = neural_networks()
 
     curr_dir = os.path.dirname(__file__)
     model_dir = os.path.join(curr_dir, MODEL_SAVE_NAME)
@@ -511,34 +513,35 @@ def train():
                 #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
                 # if step >0 and step % REPORT_STEPS == 0:
-                #     train_inputs, train_labels, train_seq_len, train_info = get_next_batch_for_res(batch_size)   
-           
-                #     decoded_list = session.run(res_decoded[0], {inputs: train_inputs, seq_len: train_seq_len}) 
+                if step >0:
+                    train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size, \
+                        has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)    
+                    
+                    decoded_list = session.run(predicted_chars, {inputs: train_inputs}) 
 
                 #     for i in range(batch_size): 
                 #         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
 
-                #     original_list = utils.decode_sparse_tensor(train_labels)
-                #     detected_list = utils.decode_sparse_tensor(decoded_list)
-                #     if len(original_list) != len(detected_list):
-                #         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
-                #             " test and detect length desn't match")
-                #     print("T/F: original(length) <-------> detectcted(length)")
-                #     acc = 0.
-                #     for idx in range(min(len(original_list),len(detected_list))):
-                #         number = original_list[idx]
-                #         detect_number = detected_list[idx]  
-                #         hit = (number == detect_number)
-                #         print("----------",hit,"------------")          
-                #         print(list_to_chars(number), "(", len(number), ")")
-                #         print(list_to_chars(detect_number), "(", len(detect_number), ")")
-                #         # 计算莱文斯坦比
-                #         import Levenshtein
-                #         acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
-                #     print("Test Accuracy:", acc / len(original_list))
-                #     sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
-                #     for f in sorted_fonts[:20]:
-                #         print(f)
+                    original_list = train_labels
+                    if len(original_list) != len(detected_list):
+                        print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
+                            " test and detect length desn't match")
+                    print("T/F: original(length) <-------> detectcted(length)")
+                    acc = 0.
+                    for idx in range(min(len(original_list),len(detected_list))):
+                        number = original_list[idx]
+                        detect_number = detected_list[idx]  
+                        hit = (number == detect_number)
+                        print("----------",hit,"------------")          
+                        print(list_to_chars(number), "(", len(number), ")")
+                        print(list_to_chars(detect_number), "(", len(detect_number), ")")
+                        # 计算莱文斯坦比
+                        import Levenshtein
+                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                    print("Test Accuracy:", acc / len(original_list))
+                    # sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
+                    # for f in sorted_fonts[:20]:
+                    #     print(f)
 
             if avg_acc>0.99:
                 if res_lr!=1e-6: session.run(tf.assign(lr, 1e-6))
