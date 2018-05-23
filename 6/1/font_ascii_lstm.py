@@ -64,13 +64,13 @@ def RES(inputs, seq_len, reuse = False):
                                                 None,
                                                 is_training=True,
                                                 global_pool=False,
-                                                output_stride=8) 
+                                                output_stride=16) 
         print("ResNet shape:",layer.shape)
 
         # 直接将网络拉到256 [N 1 512 256]
         with tf.variable_scope("Normalize"):
             layer = slim.conv2d(layer, 1024, [2,2], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
-            layer = slim.conv2d(layer, 512, [2,2], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
+            layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             layer = slim.conv2d(layer, 256, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
 
         # layer = utils_nn.resNet101(inputs, True)
@@ -141,12 +141,11 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(3):
-        layer = slim.fully_connected(layer, lstm_size, normalizer_fn=None, activation_fn=None)
         with tf.variable_scope("rnn-%s"%i):
             cell = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer,
-                # activation=tf.nn.relu
+                activation=tf.nn.relu
                 )
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell, cell, layer, dtype=tf.float32)
         layer += outputs[0] + outputs[1]
