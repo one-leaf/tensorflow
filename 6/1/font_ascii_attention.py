@@ -466,9 +466,8 @@ def train():
             
                 errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
                     
-                font_length = int(train_info[0][-1])
-                font_info = train_info[0][0]+"/"+train_info[0][1]+"/"+str(font_length)
-
+                font_info = "/".join(train_info[0])
+                
                 accs.append(char_acc)
                 avg_acc = sum(accs)/len(accs)
 
