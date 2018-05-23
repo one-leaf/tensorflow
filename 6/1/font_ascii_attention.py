@@ -25,7 +25,7 @@ NULL_CODE = font_dataset.CLASSES_NUMBER - 1
 # 不足高宽的需要补齐
 IMAGE_HEIGHT = 32
 IMAGE_WIDTH = 4096
-SEQ_LENGTH  = 255
+SEQ_LENGTH  = 250
 
 #初始化学习速率
 LEARNING_RATE_INITIAL = 1e-4
@@ -467,7 +467,7 @@ def train():
                 errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
                     
                 font_info = "/".join(train_info[0])
-                
+
                 accs.append(char_acc)
                 avg_acc = sum(accs)/len(accs)
 

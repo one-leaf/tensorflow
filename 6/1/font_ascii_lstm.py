@@ -47,7 +47,7 @@ POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_cnn_lstm"
 MAX_IMAGE_WIDTH = 4096
-SEQ_LENGTH  = 256
+SEQ_LENGTH  = 250
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
