@@ -46,12 +46,12 @@ def int64_feature(values):
 def bytes_feature(values):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
 
-def create_font_dataset(filecount=20, filesize=50000):
+def create_font_dataset(filecount=20, filesize=50000, max_length=255):
     for i in range(filecount):        
         TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training_%s.tfrecord"%i)
         if os.path.exists(TRAINING_TFRECORD_NAME): continue
         with tf.python_io.TFRecordWriter(TRAINING_TFRECORD_NAME) as writer:
-            font_length = random.randint(5, 200)
+            font_length = random.randint(5, max_length)
             images_count = filesize
             for j in range(images_count):
                 font_name = random.choice(AllFontNames)
@@ -68,6 +68,7 @@ def create_font_dataset(filecount=20, filesize=50000):
 
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
                 text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
+                if len(text)>max_length: text=text[:max_length]
                 text = text.strip()            
 
                 image = utils_font.get_font_image_from_url(text, font_name, font_size, font_mode, font_hint)
