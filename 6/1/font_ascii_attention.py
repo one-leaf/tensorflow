@@ -355,16 +355,6 @@ def neural_networks():
             total_loss, total_optim, oc_accs[0], oc_accs[1], \
             predicted_chars, predicted_scores
 
-def list_to_chars(list):
-    try:
-        return "".join([CHARS[v] for v in list])
-    except Exception as err:
-        return "Error: %s" % err        
-
-
-
-# get_next_batch_for_res(1)
-
 def train():
     inputs, labels, global_step, lr, summary, \
         total_loss, total_optim, cacc, sacc, \
@@ -529,11 +519,11 @@ def train():
                         detect_number = detected_list[idx]  
                         hit = (number == detect_number)
                         print("----------",hit,"------------")          
-                        print(list_to_chars(number), "(", len(number), ")")
-                        print(list_to_chars(detect_number), "(", len(detect_number), ")")
+                        print(font_dataset.list_to_chars(number), "(", len(number), ")")
+                        print(font_dataset.list_to_chars(detect_number), "(", len(detect_number), ")")
                         # 计算莱文斯坦比
                         import Levenshtein
-                        acc += Levenshtein.ratio(list_to_chars(number),list_to_chars(detect_number))
+                        acc += Levenshtein.ratio(font_dataset.list_to_chars(number),font_dataset.list_to_chars(detect_number))
                     print("Test Accuracy:", acc / len(original_list))
                     # sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     # for f in sorted_fonts[:20]:
