@@ -97,14 +97,14 @@ def RES(inputs, seq_len, reuse = False):
         # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
         with tf.variable_scope("Coordinates"):
             max_width_height = MAX_IMAGE_WIDTH//8
-            embedd_size = 128
+            embedd_size = 64
             layer = Coordinates(layer, max_width_height, embedd_size)
             print("Coordinates shape:",layer.shape)
 
         with tf.variable_scope("LSTM"):
             layer = tf.squeeze(layer, squeeze_dims=1)
             print("SEQ shape:",layer.shape)
-            layer = LSTM(layer, 512+embedd_size, seq_len)    # N, W*H, 256
+            layer = LSTM(layer, 256+embedd_size, seq_len)    # N, W*H, 256
             print("lstm shape:",layer.shape)
 
         return layer, temp_layer
