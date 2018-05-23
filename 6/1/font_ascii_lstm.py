@@ -463,9 +463,9 @@ def train():
                 if need_reset_global_step:                     
                     session.run(tf.assign(global_step, steps))
 
-                # if np.isnan(errR) or np.isinf(errR) :
-                #     print("Error: cost is nan or inf")
-                #     return
+                if np.isnan(errR) or np.isinf(errR) :
+                    print("Error: cost is nan or inf")
+                    return
 
                 for info in train_info:
                     key = ",".join(info)
