@@ -512,19 +512,18 @@ def train():
                     if len(original_list) != len(detected_list):
                         print("len(original_list)", len(original_list), "len(detected_list)", len(detected_list),
                             " test and detect length desn't match")
-                    print("T/F: original(length) <-------> detectcted(length)")
                     acc = 0.
                     for idx in range(min(len(original_list),len(detected_list))):
-                        number = original_list[idx]
-                        detect_number = detected_list[idx]  
-                        hit = (number == detect_number)
+                        original_text = font_dataset.list_to_chars(original_list[idx])
+                        detected_text = font_dataset.list_to_chars(detected_list[idx])
+                        hit = (original_text == detected_text)
                         print("----------",hit,"------------")          
-                        print(font_dataset.list_to_chars(number), "(", len(number), ")")
-                        print(font_dataset.list_to_chars(detect_number), "(", len(detect_number), ")")
+                        print(original_text, "(", len(original_text), ")")
+                        print(detected_text, "(", len(detected_text), ")")
                         # 计算莱文斯坦比
                         import Levenshtein
-                        acc += Levenshtein.ratio(font_dataset.list_to_chars(number),font_dataset.list_to_chars(detect_number))
-                    print("Test Accuracy:", acc / len(original_list))
+                        acc += Levenshtein.ratio(original_text, detected_text)
+                    print("Test Accuracy:", acc / len(original_text))
                     # sorted_fonts = sorted(AllLosts.items(), key=operator.itemgetter(1), reverse=False)
                     # for f in sorted_fonts[:20]:
                     #     print(f)
