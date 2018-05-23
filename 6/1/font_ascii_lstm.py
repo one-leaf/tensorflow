@@ -47,7 +47,7 @@ POOL_COUNT = 4
 POOL_SIZE  = round(math.pow(2,POOL_COUNT))
 MODEL_SAVE_NAME = "model_ascii_cnn_lstm"
 MAX_IMAGE_WIDTH = 4096
-SEQ_LENGTH  = 255
+SEQ_LENGTH  = 256
 
 def RES(inputs, seq_len, reuse = False):
     with tf.variable_scope("OCR", reuse=reuse):
@@ -148,7 +148,7 @@ def LSTM(inputs, lstm_size, seq_len):
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer)
-            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, sequence_length=seq_len, dtype=tf.float32)
+            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
         layer += tf.nn.leaky_relu(outputs[0]+outputs[1])
     return layer
 
