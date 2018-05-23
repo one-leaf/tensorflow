@@ -51,7 +51,6 @@ def create_font_dataset(filecount=20, filesize=50000, max_length=255):
         TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training_%s.tfrecord"%i)
         if os.path.exists(TRAINING_TFRECORD_NAME): continue
         with tf.python_io.TFRecordWriter(TRAINING_TFRECORD_NAME) as writer:
-            font_length = random.randint(5, max_length)
             images_count = filesize
             for j in range(images_count):
                 font_name = random.choice(AllFontNames)
@@ -66,6 +65,7 @@ def create_font_dataset(filecount=20, filesize=50000, max_length=255):
                 else:
                     font_hint = random.choice([0,1,3,4,5]) 
 
+                font_length = random.randint(5, max_length)
                 text  = utils_font.get_words_text(CHARS, eng_world_list, font_length)
                 text = text + " " + "".join(random.sample(CHARS, random.randint(1,5)))
                 if len(text)>max_length: text=text[:max_length]
