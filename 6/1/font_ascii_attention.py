@@ -486,8 +486,8 @@ def train():
                     errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
                     accs.append(char_acc)
                     avg_acc = sum(accs)/len(accs)                  
-                    print("%s, %d time: 0.0000s / %4.4fs, acc: %.4f, avg_acc: %.4f, loss: %.4f, avg_loss: %.4f, lr:%.8f, info: %s " % \
-                        (time.ctime(), step, time.time() - start, char_acc, avg_acc, errR, avg_losts, res_lr, font_info))   
+                    print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f / %.4f, acc: %.4f / %.4f,  lr:%.8f, info: %s " % \
+                        (time.ctime(), step, feed_time, time.time() - start, errR, avg_losts, char_acc, avg_acc, res_lr, font_info))
                     # need_reset_global_step = True
                     
                 # if need_reset_global_step:                     
