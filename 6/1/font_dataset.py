@@ -61,7 +61,7 @@ def get_next_batch_for_res(batch_size=128, has_sparse=True, has_onehot=True, \
         font_name = str(dataset_example.features.feature['font_name'].bytes_list.value[0],  encoding="utf-8")
         font_size = dataset_example.features.feature['font_size'].int64_list.value[0]
         font_mode = dataset_example.features.feature['font_mode'].int64_list.value[0]
-        font_hint = dataset_example.features.feature['font_mode'].int64_list.value[0]
+        font_hint = dataset_example.features.feature['font_hint'].int64_list.value[0]
 
         text = str(dataset_example.features.feature['label'].bytes_list.value[0],  encoding="utf-8")
         size = dataset_example.features.feature['size'].int64_list.value
