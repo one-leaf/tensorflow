@@ -280,7 +280,8 @@ def accuracy(predictions, targets):
         # accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
         accuracy_value = tf.reduce_mean(accuracy_per_example)
         accuracy_values.append(accuracy_value)
-        tf.summary.scalar('CharAccuracy', tf.Print(accuracy_value, [accuracy_value], 'CharAccuracy'))
+        # tf.summary.scalar('CharAccuracy', tf.Print(accuracy_value, [accuracy_value], 'CharAccuracy'))
+        tf.summary.scalar('CharAccuracy', accuracy_value)
 
     with tf.variable_scope('SequenceAccuracy'):
         predictions.get_shape().assert_is_compatible_with(targets.get_shape())
@@ -296,7 +297,8 @@ def accuracy(predictions, targets):
         # accuracy_value = tf.contrib.metrics.streaming_mean(accuracy_per_example)
         accuracy_value = tf.reduce_mean(accuracy_per_example)
         accuracy_values.append(accuracy_value)
-        tf.summary.scalar('SequenceAccuracy', tf.Print(accuracy_value, [accuracy_value], 'SequenceAccuracy'))
+        # tf.summary.scalar('SequenceAccuracy', tf.Print(accuracy_value, [accuracy_value], 'SequenceAccuracy'))
+        tf.summary.scalar('SequenceAccuracy', accuracy_value)
 
     return accuracy_values
 
