@@ -141,7 +141,7 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(3):
-        layer = slim.fully_connected(layer, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
+        layer = slim.fully_connected(layer, lstm_size, normalizer_fn=None, activation_fn=None)
         with tf.variable_scope("rnn-%s"%i):
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
