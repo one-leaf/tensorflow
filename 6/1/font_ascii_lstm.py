@@ -148,7 +148,7 @@ def LSTM(inputs, lstm_size, seq_len):
                 activation=tf.nn.relu
                 )
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell, cell, layer, dtype=tf.float32)
-        layer += outputs[0] + outputs[1]
+        layer = slim.batch_norm(layer + outputs[0] + outputs[1])
     return layer
 
 # 这个模型中后期的网络非常不稳定
