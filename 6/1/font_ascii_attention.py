@@ -513,7 +513,7 @@ def train():
                 #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
                 if step >0: # and step % REPORT_STEPS == 0:                     
-                    decoded_list = session.run(predicted_chars, feed) 
+                    detected_list = session.run(predicted_chars, feed) 
 
                 #     for i in range(batch_size): 
                 #         cv2.imwrite(os.path.join(curr_dir,"test","%s_%s.png"%(steps,i)), train_inputs[i] * 255) 
