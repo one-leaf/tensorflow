@@ -146,12 +146,12 @@ def LSTM(inputs, lstm_size, seq_len):
             cell_fw = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer,
-                activation=tf.nn.relu
+                # activation=tf.nn.relu
                 )
             cell_bw = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer,
-                activation=tf.nn.relu
+                # activation=tf.nn.relu
                 )
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, layer, dtype=tf.float32)
         layer = tf.concat(outputs, -1)
