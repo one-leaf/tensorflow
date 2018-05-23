@@ -148,6 +148,7 @@ def LSTM(inputs, lstm_size, seq_len):
                 activation=tf.nn.relu
                 )
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell, cell, layer, dtype=tf.float32)
+        # 这里多次rnn必须归一化，不然会出现 loss inf
         layer = slim.batch_norm(layer + outputs[0] + outputs[1])
     return layer
 
