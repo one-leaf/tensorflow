@@ -101,5 +101,5 @@ def simple_read():
         print(label)
 
 if __name__ == '__main__':
-    create_font_dataset(1,100)
+    create_font_dataset()
     # simple_read()
