@@ -517,7 +517,7 @@ def train():
                     train_inputs, train_labels, _, _, train_info =  font_dataset.get_next_batch_for_res(batch_size, \
                         has_sparse=False, has_onehot=False, max_width=4096, height=32, need_pad_width_to_max_width=True)  
                     
-                    feed = {inputs: train_inputs, labels: np.empty((batch_size, SEQ_LENGTH))}
+                    feed = {inputs: train_inputs, labels: np.zeros((batch_size, SEQ_LENGTH))}
                     decoded_list = session.run(predicted_chars, feed) 
 
                 #     for i in range(batch_size): 
