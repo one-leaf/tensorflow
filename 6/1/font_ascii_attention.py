@@ -512,7 +512,7 @@ def train():
                 #             train_info[i][0], train_info[i][1], train_info[i][2], train_info[i][3])
                 #         cv2.imwrite(os.path.join(curr_dir,"test",filename), train_inputs[i] * 255)                    
                 # 报告
-                if step >0 and step % REPORT_STEPS == 0:                     
+                if step >0: # and step % REPORT_STEPS == 0:                     
                     decoded_list = session.run(predicted_chars, feed) 
 
                 #     for i in range(batch_size): 
