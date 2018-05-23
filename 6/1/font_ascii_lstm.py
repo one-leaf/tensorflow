@@ -136,7 +136,7 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
     w = u if u.shape == flat_shape else v
     return tf.constant(w.reshape(shape), dtype=dtype)
 
-# RNN 不能加上 batch_norm，会在ctc中很难学习到东西
+# LSTM 不能加上 batch_norm，会抹杀特征，在ctc中很难学习到东西
 # 如果用relu代替默认的tanh会收敛快很多，但后期网络很难收敛
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
