@@ -539,20 +539,22 @@ def train():
                 #     for f in sorted_fonts[:20]:
                 #         print(f)
 
-            if avg_acc>0.99:        
-                session.run(tf.assign(lr, 1e-6))
+            if avg_acc>0.99:
+                if res_lr!=1e-6: session.run(tf.assign(lr, 1e-6))
             elif avg_acc>0.8:            
-                session.run(tf.assign(lr, 1e-5))
+                if res_lr!=1e-5: session.run(tf.assign(lr, 1e-5))
             else:
-                session.run(tf.assign(lr, 1e-4))
+                if res_lr!=1e-4: session.run(tf.assign(lr, 1e-4))
                                             
             # 如果当前 loss 为 nan，就先不要保存这个模型
             if np.isnan(errR) or np.isinf(errR):
                 continue
             print("Save Model OCR ...")
-            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=step)         
+            r_saver.save(session, os.path.join(model_R_dir, "OCR.ckpt"), global_step=step) 
+            print("Strat calc summary ...")        
             logs = session.run(summary, feed)
             train_writer.add_summary(logs, step)
+            print("Saved summary.")        
 
 if __name__ == '__main__':
     train()
