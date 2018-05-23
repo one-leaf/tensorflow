@@ -46,7 +46,7 @@ def int64_feature(values):
 def bytes_feature(values):
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=[values]))
 
-def create_font_dataset(filecount=20, filesize=50000, max_length=255):
+def create_font_dataset(filecount=20, filesize=50000, max_length=250):
     for i in range(filecount):        
         TRAINING_TFRECORD_NAME = os.path.join(curr_dir,"data","training_%s.tfrecord"%i)
         if os.path.exists(TRAINING_TFRECORD_NAME): continue
