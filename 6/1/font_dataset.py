@@ -133,10 +133,11 @@ def get_next_batch_for_res(batch_size=128, has_sparse=True, has_onehot=True, \
     return inputs, np.array(labels), sparse_labels, onehot_labels, info
 
 def list_to_chars(list):
-    try:
-        return "".join([CHARS[v] for v in list])
-    except Exception as err:
-        return "Error: %s" % err  
+    text = ""
+    for v in list:
+        if v>=len(CHARS): return text
+        text += CHARS[v]
+    return text
 
 if __name__ == '__main__':
     inputs, labels, sparse_labels, onehot_labels, info = get_next_batch_for_res(2, need_pad_width_to_max_width=True)
