@@ -67,7 +67,7 @@ def RES(inputs, seq_len, reuse = False):
                                                 output_stride=16) 
         print("ResNet shape:",layer.shape)
 
-        # 直接将网络拉到256 [N 1 256 256]
+        # 直接将网络拉到256 [N 1 512 256]
         with tf.variable_scope("Normalize"):
             layer = slim.conv2d(layer, 1024, [2,2], [2,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
             layer = slim.conv2d(layer, 512, [1,1], normalizer_fn=slim.batch_norm, activation_fn=None) 
@@ -96,7 +96,7 @@ def RES(inputs, seq_len, reuse = False):
         # max_width_height, embedd_size
         # max_width_height 为缩放后的 w 的最大宽度，实际上的最大图片宽度为 max_width_height * 4
         with tf.variable_scope("Coordinates"):
-            max_width_height = MAX_IMAGE_WIDTH//16
+            max_width_height = MAX_IMAGE_WIDTH//8
             embedd_size = 64
             layer = Coordinates(layer, max_width_height, embedd_size)
             print("Coordinates shape:",layer.shape)
@@ -141,7 +141,6 @@ def orthogonal_initializer(shape, dtype=tf.float32, *args, **kwargs):
 def LSTM(inputs, lstm_size, seq_len):
     layer = inputs
     for i in range(3):
-        layer = slim.fully_connected(layer, lstm_size, normalizer_fn=None, activation_fn=None)
         with tf.variable_scope("rnn-%s"%i):
             cell = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
@@ -149,7 +148,9 @@ def LSTM(inputs, lstm_size, seq_len):
                 # activation=tf.nn.relu
                 )
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell, cell, layer, dtype=tf.float32)
-        layer += outputs[0] + outputs[1]
+        # 这里多次rnn必须归一化，不然会出现 loss inf
+        layer = tf.concat(outputs, -1)
+        layer = slim.fully_connected(layer, lstm_size, normalizer_fn=slim.batch_norm, activation_fn=None)
     return layer
 
 # 这个模型中后期的网络非常不稳定
@@ -464,9 +465,9 @@ def train():
                 if need_reset_global_step:                     
                     session.run(tf.assign(global_step, steps))
 
-                # if np.isnan(errR) or np.isinf(errR) :
-                #     print("Error: cost is nan or inf")
-                #     return
+                if np.isnan(errR) or np.isinf(errR) :
+                    print("Error: cost is nan or inf")
+                    return
 
                 for info in train_info:
                     key = ",".join(info)
