@@ -145,7 +145,7 @@ def LSTM(inputs, lstm_size, seq_len):
             cell = tf.contrib.rnn.GRUCell(lstm_size, 
                 kernel_initializer=orthogonal_initializer,
                 bias_initializer=tf.zeros_initializer,
-                # activation=tf.nn.relu
+                activation=tf.nn.relu
                 )
             outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell, cell, layer, dtype=tf.float32)
         # 这里多次rnn必须归一化，不然会出现 loss inf
