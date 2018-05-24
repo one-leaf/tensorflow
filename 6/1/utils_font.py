@@ -37,13 +37,17 @@ def get_font_url(text,  font_name, font_size, fontmode=None, fonthint=None):
 
 # 从字体服务器上获取字体图片
 def get_font_image_from_url(text, font_name, font_size, fontmode=None, fonthint=None, trim=True):
-    r = http(get_font_url(text, font_name, font_size, fontmode, fonthint))
-    img = Image.open(io.BytesIO(r))
-    img = utils_pil.convert_to_rgb(img)
-    if trim:
-        img = utils_pil.trim(img)
-    return img
-
+    for i in range(3):
+        try:
+            r = http(get_font_url(text, font_name, font_size, fontmode, fonthint))
+            img = Image.open(io.BytesIO(r))
+            img = utils_pil.convert_to_rgb(img)
+            if trim:
+                img = utils_pil.trim(img)
+            return img
+        except:
+            pass
+    raise Exception("Can't get image from url")
 # 获得随机字符串
 def get_random_text(CHARS, word_dict, font_length):
     text=''
