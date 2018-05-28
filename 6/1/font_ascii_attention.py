@@ -472,12 +472,13 @@ def train():
 
                 # 如果当前lost低于平均lost，就多训练
                 # need_reset_global_step = False
-                for _ in range(10):
-                    if errR <=  avg_losts*2: break 
+                for _ in range(50):
+                    if errR <=  avg_losts: break 
                     start = time.time()                
                     errR, _ , step, res_lr, char_acc  = session.run([total_loss, total_optim, global_step, lr, cacc], feed)
-                    accs.append(char_acc)
-                    avg_acc = sum(accs)/len(accs)                  
+                    # 重复学的不计算正确率
+                    # accs.append(char_acc)
+                    # avg_acc = sum(accs)/len(accs)                  
                     print("%s, %d time: %4.4fs / %4.4fs, loss: %.4f / %.4f, acc: %.4f / %.4f,  lr:%.8f, info: %s " % \
                         (time.ctime(), step, feed_time, time.time() - start, errR, avg_losts, char_acc, avg_acc, res_lr, font_info))
                     # need_reset_global_step = True
