@@ -434,8 +434,8 @@ def train():
         print("tf train")
 
         AllLosts={}
-        accs = deque(maxlen=200)
-        losts = deque(maxlen=200)
+        accs = deque(maxlen=1000)
+        losts = deque(maxlen=1000)
         while True:
             errR = 1
             batch_size = BATCH_SIZE
