@@ -379,10 +379,10 @@ def train():
         # r_saver = tf.train.Saver(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='OCR'), sharded=True, max_to_keep=5)
         r_saver = tf.train.Saver(max_to_keep=5)
 
-        variables = {v.op.name: v for v in slim.get_variables_to_restore()}
-        print('variables_to_restore:\n%s' % variables.keys())
-        print('moving_average_variables:\n%s' % [v.op.name for v in tf.moving_average_variables()])
-        print('trainable_variables:\n%s' % [v.op.name for v in tf.trainable_variables()])
+        # variables = {v.op.name: v for v in slim.get_variables_to_restore()}
+        # print('variables_to_restore:\n%s' % variables.keys())
+        # print('moving_average_variables:\n%s' % [v.op.name for v in tf.moving_average_variables()])
+        # print('trainable_variables:\n%s' % [v.op.name for v in tf.trainable_variables()])
 
         # ckpt = tf.train.get_checkpoint_state(model_R_dir)
         # if ckpt and ckpt.model_checkpoint_path:
