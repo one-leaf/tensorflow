@@ -391,42 +391,36 @@ def train():
         #     assign_op, feed_dict = slim.assign_from_checkpoint(checkpoint, variables)
         #     session.run(assign_op, feed_dict)
         step = 0    
-        for i in range(3):
-            ckpt = tf.train.get_checkpoint_state(model_R_dir)
-            if ckpt and ckpt.model_checkpoint_path:
-                print("Restore Model OCR...")
-                stem = os.path.basename(ckpt.model_checkpoint_path)
-                step = int(stem.split('-')[-1])
-                try:
-                    r_saver.restore(session, ckpt.model_checkpoint_path)    
-                except:
-                    filenames  = os.listdir(model_R_dir)
-                    pre_step = 0 
-                    for filename in filenames:
-                        if not filename.endswith("index"): continue
-                        filename = filename.split('.')[1]
-                        filename = filename.split('-')[1]
-                        fileno = int(filename)
-                        if fileno < step and fileno > pre_step:
-                            pre_step = fileno
-                    step = pre_step
-                    with open(os.path.join(model_R_dir,"checkpoint"),'w') as f:
-                        f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%step)
-                        f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%step)
-                    continue
-                session.run(tf.assign(global_step, step))
-                if step<10000:        
-                    session.run(tf.assign(lr, 1e-4))
-                elif step<50000:            
-                    session.run(tf.assign(lr, 1e-5))
-                else:
-                    session.run(tf.assign(lr, 1e-6))
-                print("Restored to %s."%step)
-                break
+        ckpt = tf.train.get_checkpoint_state(model_R_dir)
+        if ckpt and ckpt.model_checkpoint_path:
+            print("Restore Model OCR...")
+            stem = os.path.basename(ckpt.model_checkpoint_path)
+            step = int(stem.split('-')[-1])
+            try:
+                r_saver.restore(session, ckpt.model_checkpoint_path)    
+            except:
+                filenames  = os.listdir(model_R_dir)
+                pre_step = 0 
+                for filename in filenames:
+                    if not filename.endswith("index"): continue
+                    filename = filename.split('.')[1]
+                    filename = filename.split('-')[1]
+                    fileno = int(filename)
+                    if fileno < step and fileno > pre_step:
+                        pre_step = fileno
+                step = pre_step
+                with open(os.path.join(model_R_dir,"checkpoint"),'w') as f:
+                    f.write('model_checkpoint_path: "OCR.ckpt-%s"\n'%step)
+                    f.write('all_model_checkpoint_paths: "OCR.ckpt-%s"\n'%step)
+                return
+            session.run(tf.assign(global_step, step))
+            if step<10000:        
+                session.run(tf.assign(lr, 1e-4))
+            elif step<50000:            
+                session.run(tf.assign(lr, 1e-5))
             else:
-                break
-            print("restored fail, return")
-            return
+                session.run(tf.assign(lr, 1e-6))
+            print("Restored to %s."%step)
 
         print("tf create summary")
         train_writer = tf.summary.FileWriter(log_dir, session.graph)
