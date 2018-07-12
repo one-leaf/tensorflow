@@ -393,7 +393,7 @@ def train():
         step = 0    
         ckpt = tf.train.get_checkpoint_state(model_R_dir)
         if ckpt and ckpt.model_checkpoint_path:
-            print("Restore Model OCR...")
+            print("Restore Model OCR", ckpt.model_checkpoint_path)
             stem = os.path.basename(ckpt.model_checkpoint_path)
             step = int(stem.split('-')[-1])
             try:
@@ -420,7 +420,7 @@ def train():
                 session.run(tf.assign(lr, 1e-5))
             else:
                 session.run(tf.assign(lr, 1e-6))
-            print("Restored to %s."%step)
+            print("Restored")
 
         print("tf create summary")
         train_writer = tf.summary.FileWriter(log_dir, session.graph)
