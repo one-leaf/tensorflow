@@ -66,6 +66,21 @@ def sparseTest(sess):
     print(sess.run(dense))
 
 
+# 交错合并数据
+def concat2(sess):
+    x1 = [[1, 2, 3], [1, 2, 3], [1, 2, 3]]
+    x2 = [[2, 3, 4], [3, 4, 5], [5, 6, 7]]
+    
+    y = tf.concat([x1, x2], 0)
+    print(y.shape)
+    print(sess.run(y))      # [[1 2 3] [4 5 6] [2 3 4] [7 8 9]]
+    y = tf.concat([x1, x2], 1) 
+    print(sess.run(y))      # [[1 2 3 2 3 4] [4 5 6 7 8 9]]
+    y = tf.concat([x1, x2], -1) 
+    print(sess.run(y))      # [[1 2 3 2 3 4] [4 5 6 7 8 9]]
+    print(sess.run(tf.reshape(y,(6,3))))      # [[1 2 3 2 3 4] [4 5 6 7 8 9]]
+
+
 if __name__ == '__main__':
     with tf.Session() as sess:
         # shape(sess)
@@ -74,4 +89,5 @@ if __name__ == '__main__':
         # concat(sess)
         # reshape(sess)
         # slice(sess)
-        sparseTest(sess)
+        # sparseTest(sess)
+        concat2(sess)
