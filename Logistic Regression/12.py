@@ -2,8 +2,20 @@
 # 参考 https://github.com/chenxi116/PNASNet.TF
 
 import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
+from tensorflow.examples.tutorials.mnist import input_data
+import os
+curr_dir = os.path.dirname(__file__)
+mnist = input_data.read_data_sets(os.path.join(curr_dir,"data"), one_hot=True)
+
 arg_scope = tf.contrib.framework.arg_scope
 slim = tf.contrib.slim
+
+# 55000 组图片和标签, 用于训练
+def getBatch(batchSize):
+    batch_x, batch_y = mnist.train.next_batch(batchSize)
+    return batch_x, batch_y  
 
 # 定义NAS单元
 class NASBaseCell(object):
@@ -203,7 +215,7 @@ class NASBaseCell(object):
       # [1, ... 0.5 ]
       drop_path_keep_prob = 1 - current_ratio * (1 - drop_path_keep_prob)
       # Drop path
-      noise_shape = [net.shape[0], 1, 1, 1]
+      noise_shape = np.array([net.shape[0], 1, 1, 1], dtype=np.int32) # 
       random_tensor = drop_path_keep_prob
       random_tensor += tf.random_uniform(noise_shape, dtype=tf.float32)
       # 向下取整，[0,1]
@@ -330,8 +342,7 @@ def _build_aux_head(net, end_points, num_classes, hparams, scope):
   with tf.variable_scope(scope):
     aux_logits = tf.identity(net)
     with tf.variable_scope('aux_logits'):
-      aux_logits = slim.avg_pool2d(
-          aux_logits, [5, 5], stride=3, padding='VALID')
+      aux_logits = slim.avg_pool2d(aux_logits, [5, 5], stride=3, padding='VALID')
       aux_logits = slim.conv2d(aux_logits, 128, [1, 1], scope='proj')
       aux_logits = slim.batch_norm(aux_logits, scope='aux_bn0')
       aux_logits = tf.nn.relu(aux_logits)
@@ -355,7 +366,9 @@ def large_imagenet_config():
       filter_scaling_rate=2.0,
       num_conv_filters=216,
       drop_path_keep_prob=0.6,
-      use_aux_head=1,
+     # 这里由于 mnist 的图片过小，不用 use_aux_head
+      use_aux_head = 0,
+      # use_aux_head=1,
       num_reduction_layers=2,
       total_training_steps=250000,
       num_stem_cells=2,
@@ -458,31 +471,49 @@ def build_pnasnet_large(images,
 # 训练
 def main():
   # 输入图像
-  images = tf.placeholder(tf.float32, (None, 28, 28, 1))
+  batch_size=128
+  images = tf.placeholder(tf.float32, (batch_size, 28, 28, 1))
   with slim.arg_scope(pnasnet_large_arg_scope()):
-    logits, _ = build_pnasnet_large(images, num_classes=1001, is_training=False)
+    logits, end_points = build_pnasnet_large(images, num_classes=10, is_training=False)
+  lables = tf.placeholder(tf.float32, [batch_size, 10], name='y')   
+  predictions = end_points['Predictions']
+  cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=logits, labels=lables))
+#   cost = tf.reduce_mean(-tf.reduce_sum(lables * tf.log(predictions), reduction_indices=[1]))
+  optimizer = tf.train.AdamOptimizer(0.0001).minimize(cost)
+  correct_prediction = tf.equal(tf.argmax(lables,1), tf.argmax(predictions,1))
+  accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
   config = tf.ConfigProto()
   config.gpu_options.allow_growth = True
   sess = tf.Session(config=config)
-  ckpt_restorer = tf.train.Saver()
-  ckpt_restorer.restore(sess, 'data/model.ckpt')
+  init = tf.global_variables_initializer()
+  sess.run(init)
 
-  c1, c5 = 0, 0
-  val_dataset = datasets.ImageFolder(args.valdir)
-  for i, (image, label) in enumerate(val_dataset):
-    logits_val = sess.run(logits, feed_dict={image_ph: image})
-    top5 = logits_val.squeeze().argsort()[::-1][:5]
-    top1 = top5[0]
-    if label + 1 == top1:
-      c1 += 1
-    if label + 1 in top5:
-      c5 += 1
-    print('Test: [{0}/{1}]\t'
-          'Prec@1 {2:.3f}\t'
-          'Prec@5 {3:.3f}\t'.format(
-          i + 1, len(val_dataset), c1 / (i + 1.), c5 / (i + 1.)))
+  plt.ion()
+  plt.show()
+  plt_n=[]
+  plt_loss=[]
+  plt_acc=[]
+  
+  step = 0
+  while mnist.train.epochs_completed < 8:
+    batch_x, batch_y= getBatch(batch_size)
+    batch_x = np.reshape(batch_x, [batch_size, 28, 28, 1])
+    _, loss, pred, acc = sess.run([optimizer, cost, predictions, accuracy], feed_dict={images: batch_x, lables: batch_y})
 
+    print(step, loss, acc)
+
+    plt.clf()
+    plt_n.append(step)
+    plt_loss.append(loss)
+    plt_acc.append(acc)
+    plt.plot(plt_n, plt_loss, 'b', label="loss")
+    plt.plot(plt_n, plt_acc, 'r', label="acc")
+    plt.legend(loc='upper right')    
+    plt.draw()
+    plt.pause(0.1)
+    step += 1
+    
 
 if __name__ == '__main__':
   main()
