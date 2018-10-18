@@ -609,6 +609,46 @@ DEEP LEARNING 学习笔记
 
         希望在x的某些集合$\mathbb {S}$中找到f(x)的最大值或最小值，这个称为约束优化。集合$\mathbb {S}$中的点x称为可行点。例如对 x 加一个范数约束 $||x|| \leq 1$。
 
+        简单的做法修改梯度下降的步长或将线上的每一个点投影到约束区域。
+
+        或设计一个不同的、无约束的优化问题，其解可以转化为原始约束的解。如：求解有x约束为L2范数的解，可以转换为求解最小化 $\theta$, $\theta = f(|cos\theta,sin\theta|^T)$ ，最后返回 $[cos\theta,sin\theta]$ 做为原始 L2 范数约束的解。 
+
+        还可以使用卡罗需-库恩-塔克条件（KKT）来求解。
+
+        假设目标函数$f:\mathbb {R}^n\rightarrow \mathbb {R}$及约束函数$g_i:\mathbb {R}^n\rightarrow \mathbb {R}$皆为凸函数，而$h_i:\mathbb {R}^n\rightarrow \mathbb {R}$是一仿射函数，假设有一可行点$x^*$，如果有常数$\mu _i \geq 0(i=1,...m)$及$v_j(j=1,...,l)$令到：
+        $$\nabla _xf(x^*)+\sum _{i=1}^m\mu _i\nabla g_i(x^*)+\sum _{j=1}^lv_j \nabla h_j(x^*)=0$$
+        $$\mu _ig_i(x^*)=0\ for\ all\ i=1,...,m,$$
+        那么$x^*$这点就是全局极小值。
+
+    1. 实例：线性最小乘
+
+        假设，我们找到下面x的最小化值：
+        $$f(x)=\dfrac {1}{2}||Ax-b||_2^2$$
+        - 定义：
+
+        $$||x||_2^2=\sqrt {(\sum _{i=1}^mx_i^2)}=\sqrt {x^Tx}$$
+
+        - 求解：
+
+        $$f(x)=\dfrac {1}{2}(Ax-b)^T(Ax-b)$$
+        $$=\dfrac {1}{2}(x^TA^T-b^T)(Ax-b)$$
+        $$=\dfrac {1}{2}(x^TA^TAx-2b^TAx+b^Tb)$$
+        注：b、x都是列向量，所以$b^TAx$是标量，标量的转置等于自身，即：$b^TAx=X^TA^Tb$
+
+        - 对x求导，得到梯度：
+        $$\nabla _x f(x)=A^TAx-A^Tb=A^T(Ax-b)$$
+
+        - 最小二乘法计算：
+        >将步长($\varepsilon$)和容差($\delta$)设置为小的正数
+        
+        > $while\ ||A^TAx-A^Tb||_2>\delta\ do$
+        >
+        > $\qquad x\leftarrow - \varepsilon(A^TAx-A^Tb)$
+        >
+        > $end\ while$
+
+
+
 
 
 
