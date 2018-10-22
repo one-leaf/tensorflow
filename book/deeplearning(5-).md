@@ -60,5 +60,37 @@
 
             机器学习算法分为无监督算法和监督算法。
 
+        - 示例：线性回归
 
+            $$ \hat {y} =w^Tx $$
+
+            向量$x \in \mathbb R^n$作为输入，预测标量$\hat y \in \mathbb R$为输出，$w \in \mathbb R^n$是参数的向量。
+
+            w可以看做是一组决定每个特征如何影响预测的权重。
+
+            $X^{(test)}$表示测试集，回归目标为$y^{(test)}$
+
+            度量模型的性能第一种办法是在测试集上的均方误差。
+
+            $$ MSE_{test}= \dfrac {1}{m} \sum _i(\hat y^{(test)}-y^{(test)})^2_i $$
+
+            这个计算式和求欧几里得距离等价，欧几里得距离如下：
+            
+            $$ MSE_{test}= \dfrac {1}{m}||\hat y^{(test)}-y^{(test)})||^2_2 $$
+
+            目标是最小化 $MSE_{train}$ ，因此直接求导数为0。
+
+            $$ \nabla_wMSE_{train}=0 $$
+            $$ \Rightarrow \nabla_w\dfrac 1m||\hat y^{(train)}-y^{(train)}||^2_2=0 $$
+            $$ \Rightarrow \dfrac 1m\nabla_w||\hat X^{(train)}w-y^{(train)}||^2_2=0 $$
+            $$ \Rightarrow \nabla_w(||\hat X^{(train)}w||^2-2||\hat X^{(train)}w||||y^{(train)}||-||y^{(train)}||^2)=0 $$
+
+
+            $$ A =\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix} $$
+
+            $$ ||A||^2_2= \begin{bmatrix} \sqrt{(1^2 + 2^2 + 3^2)} \\ \sqrt {(4^2 + 5^2 + 6^2)} \end{bmatrix} = \begin{bmatrix} \sqrt {14} \\ \sqrt {77} \end{bmatrix} $$
+
+            $$ ||A||^2_2= A^T A=\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix}*\begin{bmatrix} 1 & 4 \\2 & 5 \\ 3 & 6 \end{bmatrix}$$
+            $$=\begin{bmatrix} 1*1+2*2+3*3 & 1*4+2*5+3*6 \\ 4*1+5*2+6*3 & 4*4+5*5+6*6 \end{bmatrix}$$
+            $$=\begin{bmatrix} 14 & 32 \\ 32 & 77 \end{bmatrix}$$
 
