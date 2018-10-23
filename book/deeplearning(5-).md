@@ -91,4 +91,16 @@
             $$ ||A||^2_2= A^T A=\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix}*\begin{bmatrix} 1 & 4 \\2 & 5 \\ 3 & 6 \end{bmatrix}$$
             $$=\begin{bmatrix} 1*1+2*2+3*3 & 1*4+2*5+3*6 \\ 4*1+5*2+6*3 & 4*4+5*5+6*6 \end{bmatrix}$$
             $$=\begin{bmatrix} 14 & 32 \\ 32 & 77 \end{bmatrix}$$
+            
+            求$A=\begin{bmatrix} 1& 1 & -1\\1 &-2&2 \\-3&1&3 \end {bmatrix}$ 的特征值
+            1. 根据特征多项式展开为 $\lambda$ 的三次方程
+            $$|\lambda E-A|=\begin{bmatrix} \lambda-1& -1 & 1\\-1 &\lambda+2&-2 \\3&-1&\lambda-3 \end {bmatrix}$$
+            第1行减去第三行，得到一个0
+            $$=\begin{bmatrix} \lambda-4& 0 & 4-\lambda\\-1 &\lambda+2&-2 \\3&-1&\lambda-3 \end {bmatrix}$$
+            第3列加上第一列，得到第二个0
+            $$=\begin{bmatrix} \lambda-4& 0 & 0\\-1 &\lambda+2&-3 \\3&-1&\lambda \end {bmatrix}$$
+            $$=(\lambda-4)((\lambda+2)(\lambda)-(-1*-3))$$
+            $$=(\lambda-4)(\lambda^2+2\lambda-3)$$
+            $$=(\lambda-4)(\lambda-1)(\lambda+3)=0$$
+            $$\lambda:[4,1,-3]$$
 

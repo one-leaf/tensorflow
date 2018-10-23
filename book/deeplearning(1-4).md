@@ -84,7 +84,35 @@ DEEP LEARNING 学习笔记
         向量中的冗余称为线性相关，如果一组向量中的任意一个向量都不能表示成其他向量的线性组合，那么称为线性无关。
 
         列线性相关的矩阵被称为奇异的。如果矩阵A是一个方阵并且不是一个奇异的，可以用矩阵逆求解。
+    
+    - 行列式
+
+        矩阵的行列式$|A|$是一个可以从方形矩阵（方阵）计算出的特别的数。用于解线性方程或找逆矩阵。
+
+        2x2矩阵：
+
+        $$A=\begin{bmatrix} x_{11} & x_{12} \\ x_{21} & x_{22} \end{bmatrix}$$
+        $$|A|=x_{11}*x_{22}-x_{12}*x_{21}$$
+
+        3x3 矩阵：
+
+        $$A=\begin{bmatrix} a & b & c \\ d & e & f \\ g & h & i \end{bmatrix}$$
+        $$|A|=a*\begin{bmatrix} e&f \\ h&i \end{bmatrix}-b*\begin{bmatrix} d&f \\ g&i \end{bmatrix}+c*\begin{bmatrix} d&e \\ g&h \end{bmatrix}$$
+        $$|A|=a(ei-fh)-b(di-fg)+c(dh-eg)$$
+
+        4x4 和更大的矩阵：
         
+        $$A=\begin{bmatrix} a&b&c&d \\ e&f&g&h \\ i&j&k&l \\ m&n&o&p \end{bmatrix}$$
+        $$|A|=a*\begin{bmatrix} &f&g&h \\ &j&k&l \\ &n&o&p \end{bmatrix}
+             -b*\begin{bmatrix} e&&g&h \\ i&&k&l \\ m&&o&p \end{bmatrix}
+             +c*\begin{bmatrix} e&f&&h \\ i&j&&l \\ m&n&&p \end{bmatrix}
+             -d*\begin{bmatrix} e&f&g& \\ i&j&k& \\ m&n&o& \end{bmatrix}
+        $$
+
+        注意 +-+- 的规律，(+a... -b... +c... -d...) 依次类推。
+
+        这个称为拉普拉斯展开。
+
     - 范数
 
         范数是满足下列性质的函数:
