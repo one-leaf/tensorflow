@@ -83,24 +83,18 @@
             $$ \nabla_wMSE_{train}=0 $$
             $$ \Rightarrow \nabla_w\dfrac 1m||\hat y^{(train)}-y^{(train)}||^2_2=0 $$
             $$ \Rightarrow \dfrac 1m\nabla_w||\hat X^{(train)}w-y^{(train)}||^2_2=0 $$
-            $$ \Rightarrow \nabla_w(||\hat X^{(train)}w||^2-2||\hat X^{(train)}w||||y^{(train)}||-||y^{(train)}||^2)=0 $$
+            $$ \Rightarrow \nabla_w(X^{(train)}w-y^{(train)})^T(X^{(train)}w-y^{(train)})=0$$
+            $$ \Rightarrow \nabla_w(w^TX^{(train)T}X^{(train)}w-2w^TX^{(train)T})y^{(train)}+y^{(train)T}y^{(train)})=0$$
+            $$ \Rightarrow 2X^{(train)T}X^{(train)}w-2X^{(train)T}y^{(train)}=0$$
+            $$ \Rightarrow w= \dfrac {X^{(train)T}y^{(train)}}{X^{(train)T}X^{(train)}}$$      
 
+            这个方程称为正规方程，实际上的线性回归还要加上额外的参数偏置b，即：
 
-            $$ A =\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix} $$
+            $$\hat y = w^Tx+b$$      
 
-            $$ ||A||^2_2= A^T A=\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix}*\begin{bmatrix} 1 & 4 \\2 & 5 \\ 3 & 6 \end{bmatrix}$$
-            $$=\begin{bmatrix} 1*1+2*2+3*3 & 1*4+2*5+3*6 \\ 4*1+5*2+6*3 & 4*4+5*5+6*6 \end{bmatrix}$$
-            $$=\begin{bmatrix} 14 & 32 \\ 32 & 77 \end{bmatrix}$$
+    2. 容量、过拟合和欠拟合
+
+    
             
-            求$A=\begin{bmatrix} 1& 1 & -1\\1 &-2&2 \\-3&1&3 \end {bmatrix}$ 的特征值
-            1. 根据特征多项式展开为 $\lambda$ 的三次方程
-            $$|\lambda E-A|=\begin{bmatrix} \lambda-1& -1 & 1\\-1 &\lambda+2&-2 \\3&-1&\lambda-3 \end {bmatrix}$$
-            第1行减去第三行，得到一个0
-            $$=\begin{bmatrix} \lambda-4& 0 & 4-\lambda\\-1 &\lambda+2&-2 \\3&-1&\lambda-3 \end {bmatrix}$$
-            第3列加上第一列，得到第二个0
-            $$=\begin{bmatrix} \lambda-4& 0 & 0\\-1 &\lambda+2&-3 \\3&-1&\lambda \end {bmatrix}$$
-            $$=(\lambda-4)((\lambda+2)(\lambda)-(-1*-3))$$
-            $$=(\lambda-4)(\lambda^2+2\lambda-3)$$
-            $$=(\lambda-4)(\lambda-1)(\lambda+3)=0$$
-            $$\lambda:[4,1,-3]$$
+ 
 

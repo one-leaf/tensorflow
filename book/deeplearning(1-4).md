@@ -103,11 +103,13 @@ DEEP LEARNING 学习笔记
         4x4 和更大的矩阵：
         
         $$A=\begin{bmatrix} a&b&c&d \\ e&f&g&h \\ i&j&k&l \\ m&n&o&p \end{bmatrix}$$
-        $$|A|=a*\begin{bmatrix} &f&g&h \\ &j&k&l \\ &n&o&p \end{bmatrix}
-             -b*\begin{bmatrix} e&&g&h \\ i&&k&l \\ m&&o&p \end{bmatrix}
-             +c*\begin{bmatrix} e&f&&h \\ i&j&&l \\ m&n&&p \end{bmatrix}
-             -d*\begin{bmatrix} e&f&g& \\ i&j&k& \\ m&n&o& \end{bmatrix}
-        $$
+
+        $$
+        |A|=a*\begin{bmatrix} &f&g&h \\ &j&k&l \\ &n&o&p \end{bmatrix}
+        -b*\begin{bmatrix} e&&g&h \\ i&&k&l \\ m&&o&p \end{bmatrix}
+        +c*\begin{bmatrix} e&f&&h \\ i&j&&l \\ m&n&&p \end{bmatrix}
+        -d*\begin{bmatrix} e&f&g& \\ i&j&k& \\ m&n&o& \end{bmatrix}
+        $$
 
         注意 +-+- 的规律，(+a... -b... +c... -d...) 依次类推。
 
@@ -180,6 +182,24 @@ DEEP LEARNING 学习笔记
 
         $\theta$ 表示 x 和 y 之间的夹角 
 
+        例子，求 矩阵$A =\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix}$ 的L2范数
+
+        矩阵范数定义
+
+        $$ ||A||^2_2= \sqrt {\lambda_1} $$
+        
+        $\lambda_1$为矩阵A的最大特征值
+
+        $$ \lambda = A^T A=\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix}*\begin{bmatrix} 1 & 4 \\2 & 5 \\ 3 & 6 \end{bmatrix}$$
+        $$=\begin{bmatrix} 1*1+2*2+3*3 & 1*4+2*5+3*6 \\ 4*1+5*2+6*3 & 4*4+5*5+6*6 \end{bmatrix}$$
+        $$=\begin{bmatrix} 14 & 32 \\ 32 & 77 \end{bmatrix}$$
+        $$|\lambda E-A|=\begin{bmatrix} \lambda -14 & -32 \\ -32 & \lambda -77 \end{bmatrix}=0$$
+        $$\Rightarrow(\lambda-14)*(\lambda-77)-(-32*-32)=0$$
+        $$\Rightarrow\lambda^2-91\lambda+54=0$$
+        $$\Rightarrow{(\lambda-{\dfrac {91}{2}})} ^2-\dfrac {91^2}{4}+54=0$$
+        $$\lambda= \pm\sqrt{\dfrac {91^2}{4}-54}+\dfrac{91}{2}$$
+        $$\lambda=[90.4\ 0.6]$$
+        $$||A||^2_2=\sqrt{\max_i\lambda}=\sqrt {90.4}=9.5079$$
 
     - 特殊类型的矩阵和向量
 
@@ -200,6 +220,31 @@ DEEP LEARNING 学习笔记
         $$ Av=\lambda v $$
 
         $\lambda$ 就是这个特征向量对应的特征值
+
+        例子：求$A=\begin{bmatrix} 1& 1 & -1\\1 &-2&2 \\-3&1&3 \end {bmatrix}$ 的特征值
+
+        1. 根据特征多项式得
+        
+        $$|\lambda E-A|=\begin{bmatrix} \lambda-1& -1 & 1\\-1 &\lambda+2&-2 \\3&-1&\lambda-3 \end {bmatrix}=0$$
+        
+        2. 第1行减去第三行，得到一个0
+        
+        $$=\begin{bmatrix} \lambda-4& 0 & 4-\lambda\\-1 &\lambda+2&-2 \\3&-1&\lambda-3 \end {bmatrix}$$
+        
+        3. 第3列加上第一列，得到第二个0
+        
+        $$=\begin{bmatrix} \lambda-4& 0 & 0\\-1 &\lambda+2&-3 \\3&-1&\lambda \end {bmatrix}$$
+
+        4. 展开多项式
+
+        $$=(\lambda-4)\begin{bmatrix} \lambda+2&-3 \\-1&\lambda \end {bmatrix} - 0*... + 0*...$$
+        $$=(\lambda-4)((\lambda+2)(\lambda)-(-1*-3))$$
+        $$=(\lambda-4)(\lambda^2+2\lambda-3)$$
+        $$=(\lambda-4)(\lambda-1)(\lambda+3)=0$$
+        
+        5. 解得
+        
+        $$\lambda=[4,1,-3]$$
 
         矩阵A有n个线性无关的特征向量 {$v^{(1)},...,v^{(1)}$,对应的特征值{$\lambda^{(1)},...,\lambda^{(n)}$}。将特征向量连接成一个矩阵，每一列是一个特征向量: $V=[v^{(1)},...,v^{(n)}]$，类似特征值也可以接连成一个向量，因此A的特征分解可以记为：
 
