@@ -88,8 +88,6 @@
 
             $$ A =\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix} $$
 
-            $$ ||A||^2_2= \begin{bmatrix} \sqrt{(1^2 + 2^2 + 3^2)} \\ \sqrt {(4^2 + 5^2 + 6^2)} \end{bmatrix} = \begin{bmatrix} \sqrt {14} \\ \sqrt {77} \end{bmatrix} $$
-
             $$ ||A||^2_2= A^T A=\begin{bmatrix} 1 & 2 & 3 \\ 4 & 5 & 6 \end{bmatrix}*\begin{bmatrix} 1 & 4 \\2 & 5 \\ 3 & 6 \end{bmatrix}$$
             $$=\begin{bmatrix} 1*1+2*2+3*3 & 1*4+2*5+3*6 \\ 4*1+5*2+6*3 & 4*4+5*5+6*6 \end{bmatrix}$$
             $$=\begin{bmatrix} 14 & 32 \\ 32 & 77 \end{bmatrix}$$
