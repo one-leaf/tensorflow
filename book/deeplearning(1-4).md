@@ -807,13 +807,26 @@ DEEP LEARNING 学习笔记
 
         由于有2个未知数a、b，分别求偏导：
 
-        $$\dfrac {\partial S}{\partial a}=\dfrac {d\sum((ax_i)^2+2ax_i(b-y_i)+(b-y_i)^2)}{da}  $$
-        $$=\sum 2ax_i^2+2x_i(b-y_i)$$
-        $$=2\sum(ax_i+b-y_i)x_i=0  $$
-        $$\dfrac {\partial S}{\partial b}=\dfrac {d\sum(ax_i-y_i+b)^2}{db}$$
-        $$=\dfrac {d\sum((ax_i-y_i)^2+2(ax_i-y_i)b+b^2)}{db}$$
-        $$=\sum (2(axi-y_i)+2b)$$
-        $$=2\sum(ax_i+b-y_i)=0$$
+        $$\begin{aligned}
+        \dfrac {\partial S}{\partial a}&=\dfrac {d\sum((ax_i)^2+2ax_i(b-y_i)+(b-y_i)^2)}{da}  \\
+        &=\sum 2ax_i^2+2x_i(b-y_i) \\
+        &=2\sum(ax_i+b-y_i)x_i=0  
+        \end{aligned}$$
+
+        $$\begin{aligned}
+        \dfrac {\partial S}{\partial b}&=\dfrac {d\sum(ax_i-y_i+b)^2}{db} \\
+        &=\dfrac {d\sum((ax_i-y_i)^2+2(ax_i-y_i)b+b^2)}{db} \\
+        &=\sum (2(axi-y_i)+2b) \\
+        &=2\sum(ax_i+b-y_i)=0  
+        \end{aligned}$$
+
+        列方程为：
+        $$
+        \begin{cases}
+        2((31a+b+113)*31+(33a+b+119)*33+(35a+b+123)*35)=0\\
+        2((31a+b-113)+(33a+b-119)+(35a+b-123))=0
+        \end{cases}
+        $$
 
         解方程得：
 
