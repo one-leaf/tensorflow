@@ -185,11 +185,10 @@
 
             如果$bias(\hat \theta_m)=0$,那么估计量$\hat \theta_m$被称为无偏，这意味着$\mathbb E(\hat \theta_m)=0$;如果$\lim _{m\rightarrow\infty } bias(\hat \theta_m)=0$, 估计量$\hat \theta_m$被称为渐进无偏。
 
-            例子：
 
-            伯努利分布，考虑 {$x_1,...,x_m$}:
+            示例 1：伯努利分布，考虑 {$x_1,...,x_m$}:
 
-            $$P(x_i;\theta)=\theta^{x_i}(1-\theta)^{(1-x_i)}=\begin{cases}\theta, \ if\ x=1\\ 1-\theta, \ if\ x=0\end{cases}$$
+            $$p(x_i;\theta)=\theta^{x_i}(1-\theta)^{(1-x_i)}=\begin{cases}\theta, \ if\ x=1\\ 1-\theta, \ if\ x=0\end{cases}$$
 
             $\theta$的常用估计量是训练样本的均值：
 
@@ -199,11 +198,11 @@
 
             $$
             \begin{aligned}
-            bias(\hat \theta_m) &= \mathbb E|\hat \theta_m|-\theta \\
-            &=\mathbb E[\dfrac {1}{m}\sum _{i=1}^mX_i]-\theta \\
-            &=\dfrac {1}{m}\sum _{i=1}^m\mathbb E[x_i]-\theta\\
-            &=\dfrac {1}{m}\sum _{i=1}^m\sum _{x_i=0}^1(x_i\theta^{x_i}(1-\theta)^{(1-x_i)})-\theta \\
-            &=\dfrac {1}{m}\sum _{i=1}^m(\theta)-\theta \\
+            bias(\hat \theta_m) &= \mathbb E|\hat \theta_m|-\theta \\\\
+            &=\mathbb E[\dfrac {1}{m}\sum _{i=1}^mX_i]-\theta \\\\
+            &=\dfrac {1}{m}\sum _{i=1}^m\mathbb E[x_i]-\theta\\\\
+            &=\dfrac {1}{m}\sum _{i=1}^m\sum _{x_i=0}^1(x_i\theta^{x_i}(1-\theta)^{(1-x_i)})-\theta \\\\
+            &=\dfrac {1}{m}\sum _{i=1}^m(\theta)-\theta \\\\
             &=\theta - \theta=0
             \end{aligned} 
             $$
@@ -216,4 +215,39 @@
 
             $$\mathbb E[x]=1*\dfrac 16+2*\dfrac 16+3*\dfrac 16+4*\dfrac 16+5*\dfrac 16+6*\dfrac 16=3.5$$
 
-            示例：均值的高斯分布估计
+            示例 2：均值的高斯分布估计
+
+            $$p(x_1;\mu,\sigma^2)=\dfrac 1{\sqrt{2\pi\sigma^2}}e^{-\dfrac {(x_i-\mu)^2}{2\sigma^2}}$$
+
+            高斯的均值参数常用估计量称为样本均值：
+
+            $$\hat \mu=\dfrac 1m\sum _{(i=1)^m}x_i$$
+
+            看是否有偏，计算如下：
+
+            $$\begin{aligned}
+            bias(\hat \mu_m)&=\mathbb E|\hat \mu_m|-\mu \\\\
+            &=\mathbb E[\dfrac 1m\sum _{i=1}^mx_i]-\mu \\\\
+            &=(\dfrac 1m\sum _{i=1}^m\mathbb E[x_i])-\mu \\\\
+            &=(\dfrac 1m\sum _{i=1}^m\mu)-u \\\\
+            &=\mu-\mu=0
+            \end{aligned}$$
+
+            示例 3：高斯分布方差估计
+            
+            来比较高斯分布参数$\sigma^2$的两个不同估计
+
+            第一个方差为样本方差，如下：
+
+            $$\hat \sigma_m^2=\dfrac 1m\sum(x_i-\hat \mu_m)^2$$ 
+
+            $\hat \mu_m$为样本均值
+
+            看是否有偏，计算如下：
+
+            $$\begin{aligned}
+            bias(\hat \sigma_m^2)&=\mathbb E[\sigma_m^2]-\sigma^2 \\\\
+            &=\mathbb E[\dfrac 1m\sum _{i=1}^m(x_i-\hat\mu_m)^2]-\sigma^2 \\\\
+            &=\dfrac {m-1}{m}\sigma^2-\sigma^2\\\\
+            &=-\dfrac 1m\sigma^2
+            \end{aligned}$$
