@@ -217,7 +217,33 @@
 
             示例 2：均值的高斯分布估计
 
-            $$p(x_1;\mu,\sigma^2)=\dfrac 1{\sqrt{2\pi\sigma^2}}e^{-\dfrac {(x_i-\mu)^2}{2\sigma^2}}$$
+            $$p(x_1;\mu,\sigma^2)=\dfrac 1{\sigma\sqrt{2\pi}}e^{-\dfrac {(x_i-\mu)^2}{2\sigma^2}}$$
+
+            高斯分布的期望值推导：
+
+            1. 对偏差的期望值
+
+                $$\mathbb E(X)=\int ^{\infty }_{-\infty }x\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {(x-\mu)^2}{2\sigma^2} \}dx$$
+
+                令$y=x-\mu$
+
+                $$\mathbb E(X)=\int ^{\infty }_{-\infty }(y+\mu)\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {y^2}{2\sigma^2} \}dy$$
+                $$=\int ^{\infty }_{-\infty }y\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {y^2}{2\sigma^2} \}dy+\int ^{\infty }_{-\infty }\mu\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {y^2}{2\sigma^2} \}dy$$
+
+                第一部分用$I_1$表示
+
+                $$I_1=\int ^{\infty }_{-\infty }x\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {x^2}{2\sigma^2} \}dx$$
+
+                显然这个积分的函数是对称的是奇函数f(x)=−f(−x))，所以对称区间的积分为0，即$I_1=0$。
+
+                所以：
+
+                $$\mathbb E(X)=\int ^{\infty }_{-\infty }\mu\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {x^2}{2\sigma^2} \}dx$$
+                $$=\mu\int ^{\infty }_{-\infty }\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {x^2}{2\sigma^2} \}dx$$
+
+                根据高斯密度函数的积分等于1，证明需要涉及极坐标变换忽略，所以：
+
+                $$\mathbb E(X)=\mu$$
 
             高斯的均值参数常用估计量称为样本均值：
 
@@ -235,6 +261,19 @@
 
             示例 3：高斯分布方差估计
             
+            1. 对方差的期望值
+
+                $$\mathbb V(X)=\int ^{\infty }_{-\infty }(x-\mu)^2\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac{(x-\mu)^2}{2\sigma^2}\}dx$$
+                $$=\int ^{\infty }_{-\infty }x^2\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac{x^2}{2\sigma^2}\}dx$$
+                $$=\sigma\sqrt 2\int ^{\infty }_{-\infty }(\sigma\sqrt 2x)^2\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac{(\sigma\sqrt 2x)^2}{2\sigma^2}\}dx$$
+                $$=\sigma^2\dfrac 4{\sqrt \pi}\int ^{\infty }_{-\infty }x^2e^{-x^2}dx$$
+
+                另 $t=x^2$， 则 $dt=2xdx=2\sqrt tdx$ ，则$dx=(2\sqrt t)^{-t}dt$ 代入上式：
+
+                $$\mathbb V(X)=\sigma^2\dfrac 4{\sqrt \pi}\int ^{\infty }_0(\sqrt t)^2(2\sqrt t)^{-1}e^{-t}dt$$
+                $$=\sigma^2\dfrac 4{\sqrt \pi}\dfrac 12\int ^{\infty }_0t^{\dfrac 32-1}e^{-t}dt$$
+                $$=\sigma^2\dfrac 4{\sqrt \pi}\dfrac 12\dfrac {\sqrt \pi}2=\sigma^2$$
+
             来比较高斯分布参数$\sigma^2$的两个不同估计
 
             第一个方差为样本方差，如下：
@@ -246,8 +285,41 @@
             看是否有偏，计算如下：
 
             $$\begin{aligned}
-            bias(\hat \sigma_m^2)&=\mathbb E[\sigma_m^2]-\sigma^2 \\\\
+            bias(\hat \sigma_m^2)&=\mathbb E[\hat\sigma_m^2]-\sigma^2 \\\\
             &=\mathbb E[\dfrac 1m\sum _{i=1}^m(x_i-\hat\mu_m)^2]-\sigma^2 \\\\
             &=\dfrac {m-1}{m}\sigma^2-\sigma^2\\\\
             &=-\dfrac 1m\sigma^2
             \end{aligned}$$
+
+            所以是有偏估计。
+
+            无偏样本方差估计：
+
+            $$\overline \sigma^2_m=\dfrac 1{m-1}\sum ^m_{i=1}(x_i-\hat \mu_m)^2$$
+
+            看看是否有偏，计算如下：
+
+            $$\mathbb E[\overline \sigma^2_m]=\mathbb E[\dfrac 1{(m-1)}\sum ^m_{i=1}(x_i-\hat \mu_m)^2]$$
+            $$=\dfrac m{m-1}\mathbb E[\hat \sigma_m^2]$$
+            $$=\dfrac m{m-1}(\dfrac {m-1}m\sigma^2)$$
+            $$=\sigma^2$$
+
+            所以是无偏估计。
+
+            - 方差和标准差
+
+            方差的平方根称为标准差
+
+            均值的标准差记为：
+
+            $$SE(\hat \mu_m)=\sqrt {Var[\dfrac 1m\sum ^m_{i=1}x_i]}=\dfrac \sigma{\sqrt m}$$
+
+            以均值 $\hat \mu_m$ 为中心的 95% 的置信空间为：
+
+            $$(\hat \mu_m-1.96SE(\hat \mu_m),\hat \mu_m+1.96SE(\hat \mu_m))$$
+
+            在机器学习中，常说的算法A比算法B好，是指算法A的误差的95%的置信区间的上界小于算法B的误差的95%置信区间的下界。
+
+            - 权衡偏差和方差的最小化均方误差
+
+            
