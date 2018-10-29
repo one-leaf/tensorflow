@@ -1,4 +1,103 @@
 DEEP LEARNING 学习笔记
+1. 微积分
+
+    - 求导
+
+    f,g是可微函数，其他均为常数
+
+    常量的导数
+
+    $$\dfrac {d(M)}{dx}=0$$
+
+    例子：
+
+    $$f(x)=3 \Rightarrow f'(x)=0$$
+
+    自身的导数
+
+    $$\dfrac {d(x)}{dx}=1$$
+
+    例子：
+
+    $$f(x)=x \Rightarrow f'(x)=1$$
+
+    线性法则
+
+    $$\dfrac {d(Mf)}{dx}=M$$
+
+    例子：
+
+    $$f(x)=3(x+1)$$
+    $$\Rightarrow f'(x)=3f'(x+1)$$
+
+    $$\dfrac {d(f \pm g)}{dx}=\dfrac {df}{dx} \pm \dfrac {dg}{dx}$$
+
+    例子：
+
+    $$f(x)=3x-x^2$$
+    $$\Rightarrow f'(x)=f'(3x)-f'(x^2)$$
+
+    乘法法则
+
+    $$\dfrac {dfg}{dx}=\dfrac {df}{dx}g+f\dfrac {dg}{dx}$$
+
+    例子：
+
+    $$f(x)=(x-4)(x^2+3)$$
+    $$\Rightarrow f'(x)=f'(x-4)*(x^2+3)+(x-4)*f'(x^2+3)$$
+
+    除法法则
+
+    $$\dfrac {\dfrac {f}{g}}{dx}=\dfrac {\dfrac {df}{dx}g-f\dfrac{dg}{dx}}{g^2}$$
+
+    例子：
+
+    $$f(x)=\dfrac {(x^2+3)}{x}$$
+    $$\Rightarrow f'(x)=\dfrac {f'(x^2+3)x-(x^2+3)f'(x)}{x^2}$$
+
+    导数法则
+
+    $$\dfrac {d\dfrac 1g}{dx}=\dfrac {-\dfrac {dg}{dx}}{g^2}$$
+
+    例子：
+
+    $$f(x)=\dfrac {1}{x+3}$$
+    $$\Rightarrow f'(x)=\dfrac {-f'(x+3)}{(x+3)^2}$$
+
+    复合函数求导：
+
+    $$\dfrac {df(g(x))}{dx}=\dfrac {df(g)}{dg}\dfrac {dg}{dx}$$
+
+    例子：
+
+    $$f(x)=(x^2+1)^3$$
+    
+    设 $g(x)=(x^2+1),h(g)=g^3 \Rightarrow h(g(x))=g(x)^3$
+
+    $$\Rightarrow f'(x)=h'(g(x))g'(x)$$
+    $$ =3(g(x)^2g'(x^2+1)$$
+    $$ =3(g(x)^2(2x)$$
+    $$ =3((x^2+1)^2(2x)$$
+    $$ =6x(x^2+1)^2$$
+
+    反函数的导数是原函数导数的倒数
+
+    $$[f^{-1}(x)]'=\dfrac 1{f'(y)}$$
+
+    或
+
+    $$\dfrac {dy}{dx}=\dfrac 1{\dfrac {dx}{dy}}$$
+
+    例子：
+
+    设：$f(x)=x^3$,反函数为$y(x)=x^{1/3}$
+
+    求导： $f'(x)=3x^2$ 
+
+    $$y(x)=x^{(1/3)}=\dfrac 1{x^3}=\dfrac 1{f(x)}$$
+    $$y'(x)=\dfrac {1}{f'(x)}=\dfrac 1{3x^2}$$
+
+    
 
 2. 线性代数
 
