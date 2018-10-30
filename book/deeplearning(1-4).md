@@ -3,101 +3,205 @@ DEEP LEARNING 学习笔记
 
     - 求导
 
-    f,g是可微函数，其他均为常数
+        f,g是可微函数，其他均为常数
 
-    常量的导数
+        - 常量的导数
 
-    $$\dfrac {d(M)}{dx}=0$$
+        $$\frac {d(M)}{dx}=0$$
 
-    例子：
+        例子：
 
-    $$f(x)=3 \Rightarrow f'(x)=0$$
+        $$f(x)=3 \Rightarrow f'(x)=0$$
 
-    自身的导数
+        - 自身的导数
 
-    $$\dfrac {d(x)}{dx}=1$$
+        $$\frac {d(x)}{dx}=1$$
 
-    例子：
+        例子：
 
-    $$f(x)=x \Rightarrow f'(x)=1$$
+        $$f(x)=x \Rightarrow f'(x)=1$$
 
-    线性法则
+        - 线性法则
 
-    $$\dfrac {d(Mf)}{dx}=M$$
+        $$\frac {d(Mf)}{dx}=M$$
 
-    例子：
+        例子：
 
-    $$f(x)=3(x+1)$$
-    $$\Rightarrow f'(x)=3f'(x+1)$$
+        $$f(x)=3(x+1)$$
+        $$\Rightarrow f'(x)=3f'(x+1)$$
 
-    $$\dfrac {d(f \pm g)}{dx}=\dfrac {df}{dx} \pm \dfrac {dg}{dx}$$
+        $$\frac {d(f \pm g)}{dx}=\frac {df}{dx} \pm \frac {dg}{dx}$$
 
-    例子：
+        例子：
 
-    $$f(x)=3x-x^2$$
-    $$\Rightarrow f'(x)=f'(3x)-f'(x^2)$$
+        $$f(x)=3x-x^2$$
+        $$\Rightarrow f'(x)=f'(3x)-f'(x^2)$$
 
-    乘法法则
+        - 乘法法则
 
-    $$\dfrac {dfg}{dx}=\dfrac {df}{dx}g+f\dfrac {dg}{dx}$$
+        $$\frac {dfg}{dx}=\frac {df}{dx}g+f\frac {dg}{dx}$$
 
-    例子：
+        例子：
 
-    $$f(x)=(x-4)(x^2+3)$$
-    $$\Rightarrow f'(x)=f'(x-4)*(x^2+3)+(x-4)*f'(x^2+3)$$
+        $$f(x)=(x-4)(x^2+3)$$
+        $$\Rightarrow f'(x)=f'(x-4)*(x^2+3)+(x-4)*f'(x^2+3)$$
 
-    除法法则
+        - 除法法则
 
-    $$\dfrac {\dfrac {f}{g}}{dx}=\dfrac {\dfrac {df}{dx}g-f\dfrac{dg}{dx}}{g^2}$$
+        $$\frac {\frac {f}{g}}{dx}=\frac {\frac {df}{dx}g-f\frac{dg}{dx}}{g^2}$$
 
-    例子：
+        例子：
 
-    $$f(x)=\dfrac {(x^2+3)}{x}$$
-    $$\Rightarrow f'(x)=\dfrac {f'(x^2+3)x-(x^2+3)f'(x)}{x^2}$$
+        $$f(x)=\frac {(x^2+3)}{x}$$
+        $$\Rightarrow f'(x)=\frac {f'(x^2+3)x-(x^2+3)f'(x)}{x^2}$$
 
-    导数法则
+        - 倒数法则
 
-    $$\dfrac {d\dfrac 1g}{dx}=\dfrac {-\dfrac {dg}{dx}}{g^2}$$
+        $$\frac {d\frac 1g}{dx}=\frac {-\frac {dg}{dx}}{g^2}$$
 
-    例子：
+        例子：
 
-    $$f(x)=\dfrac {1}{x+3}$$
-    $$\Rightarrow f'(x)=\dfrac {-f'(x+3)}{(x+3)^2}$$
+        $$f(x)=\frac {1}{x+3}$$
+        $$\Rightarrow f'(x)=\frac {-f'(x+3)}{(x+3)^2}$$
 
-    复合函数求导：
+        - 复合函数求导：
 
-    $$\dfrac {df(g(x))}{dx}=\dfrac {df(g)}{dg}\dfrac {dg}{dx}$$
+        $$\frac {df(g(x))}{dx}=\frac {df(g)}{dg}\frac {dg}{dx}$$
 
-    例子：
+        例子：
 
-    $$f(x)=(x^2+1)^3$$
+        $$f(x)=(x^2+1)^3$$
     
-    设 $g(x)=(x^2+1),h(g)=g^3 \Rightarrow h(g(x))=g(x)^3$
+        设 $g(x)=(x^2+1),h(g)=g^3 \Rightarrow h(g(x))=g(x)^3$
 
-    $$\Rightarrow f'(x)=h'(g(x))g'(x)$$
-    $$ =3(g(x)^2g'(x^2+1)$$
-    $$ =3(g(x)^2(2x)$$
-    $$ =3((x^2+1)^2(2x)$$
-    $$ =6x(x^2+1)^2$$
+        $$\Rightarrow f'(x)=h'(g(x))g'(x)$$
+        $$ =3(g(x)^2g'(x^2+1)$$
+        $$ =3(g(x)^2(2x)$$
+        $$ =3((x^2+1)^2(2x)$$
+        $$ =6x(x^2+1)^2$$
 
-    反函数的导数是原函数导数的倒数
+        - 反函数的导数是原函数导数的倒数
 
-    $$[f^{-1}(x)]'=\dfrac 1{f'(y)}$$
+        $$[f^{-1}(x)]'=\frac 1{f'(y)}$$
 
-    或
+        或
 
-    $$\dfrac {dy}{dx}=\dfrac 1{\dfrac {dx}{dy}}$$
+        $$\frac {dy}{dx}=\frac 1{\frac {dx}{dy}}$$
 
-    例子：
+        例子：
 
-    设：$f(x)=x^3$,反函数为$y(x)=x^{1/3}$
+        设：$y=x^3$,反函数为$y=x^{1/3}$
 
-    求导： $f'(x)=3x^2$ 
+        求导：$y'=3x^2$ 
 
-    $$y(x)=x^{(1/3)}=\dfrac 1{x^3}=\dfrac 1{f(x)}$$
-    $$y'(x)=\dfrac {1}{f'(x)}=\dfrac 1{3x^2}$$
+        反函数还原为同含义变量， $x=y^{1/3}$ 
 
+        对反函数求导： $x'=\frac 13y^{-2/3}$
+
+        $$y'*x'=3x^2*\frac 13y^{-2/3}=x^2*y^{-2/3}$$
+
+        因为： $y=x^3$ ,所以上面乘积继续化简：
+
+        $$y'*x'=x^2*y^{-2/3}=x^2*(x^3)^{-2/3}=1$$
+
+        证明x'和y'互为倒数。
+
+        例子：
+
+        设：$f(x)=\frac 1{x}$,反函数为$g(y)=\frac 1y$
+
+        求导： $f'(x)=-x^{-2}$ 
     
+        反函数求导: $g'(y)=-y^{-2}=-(\frac 1x)^{-2}=-x^2$
+
+        - 代数的导数
+
+        $$\frac {dx^n}{dx}=nx^{(n-1)}$$
+
+        例子：
+
+        $$f(x)=x^{-3}$$
+        $$\Rightarrow f'(x)=-3x^{-4}$$
+
+        - 绝对值的导数
+
+        $$\frac {d|x|}{dx}=\frac {x}{|x|}=\text {sgn }x$$
+
+        - 指数的导数
+
+        $$\frac {de^x}{dx}=e^x$$
+
+        $$\frac {d\alpha^x}{dx}=\alpha^x\ln\alpha$$
+
+        $$\frac {dx^x}{dx}=x^x(1+\ln x)$$
+
+        - 对数的导数
+
+        $$\frac {d\ln x}{dx}=\frac 1x$$
+        
+        $$\frac {d\log _a|x|}{dx}=\frac 1{x\ln \alpha}$$
+
+        - 三角函数的导数
+
+        $$(\sin x)'=\cos x$$
+        $$(\cos x)'=-\sin x$$
+        $$(\tan x)'=\frac 1{\cos^2 x}=\sec^2 x$$
+        $$(\cot x)'=-\frac 1{\sin^2 x}=-\csc^2 x$$
+        $$(\sec x)'=\sec x\tan x$$
+        $$(\csc x)'=\frac {-\cos x}{\sin ^2x}=-\csc x\cot x$$
+
+        - 反三角函数(是三角函数的反函数)的导数
+
+        $$(\arcsin x)'=\frac 1{\sqrt {1-x^2}}$$
+        $$(\arccos x)'=-\frac 1{\sqrt {1-x^2}}$$
+        $$(\arctan x)'=\frac 1{1+x^2}$$
+        $$(\text {arccot }x)'=-\frac 1{1+x^2}$$
+        $$(\text {arcsec }x)'=\frac 1{|x|\sqrt {x^2-1}}$$
+        $$(\text {arccsc }x)'=-\frac 1{|x|\sqrt {x^2-1}}$$
+
+        - 双曲函数的导数
+        $$\sinh x=\frac {e^x-e^{-x}}{2}$$
+        $$\cosh x=\frac {e^x+e^{-x}}{2}$$
+        $$\text{tanh }x=\frac {\sinh x}{\cosh x}$$
+        $$(\sinh x)'=\cosh x=\frac {e^x+e^{-x}}{2}$$
+        $$(\cosh x)'=\sinh x=\frac {e^x-e^{-x}}{2}$$
+        $$(\text{tanh }x)'=(\frac 1{\cosh x})^2=(\frac 2{e^x+e^{-x}})^2$$
+        $$(\text{arsinh }x)'=\frac 1{\sqrt {x^2+1}}$$
+        $$(\text{arcosh }x)'=\frac 1{\sqrt {x^2-1}}(x>1)$$
+        $$(\text{artanh }x)'=\frac 1{1-x^2}(|x|<1)$$
+
+    - 积分
+
+        - 积分是线性的
+
+        $$\int (af+bg)=a\int f+b\int g$$
+
+        $$\int (af+bg)(x)dx=a\int f(x)dx+b\int g(x)dx$$
+
+        $$\int _a^cf(x)dx=\int _a^bf(x)dx+\int _b^cf(x)dx $$
+
+        - 高斯积分
+
+        $$\int ^{\infty}_{\infty}e^{-x^2}dx=\sqrt \pi $$
+        $$\int ^{\infty}_{\infty}e^{-a(x+b)^2}dx=\sqrt \frac {\pi}{a} $$
+        $$\int ^{\infty}_{\infty}e^{-ax^2+bx+c}dx=\sqrt {\frac \pi a}e^{b^2/4a+c} $$
+
+        - 伽玛函数积分
+
+        $$\Gamma (z)=\int ^{\infty}_0\frac {t^{z-1}}{e^t}dt=\int ^{\infty}_0 t^{z-1}e^{-t}dt$$
+
+        $$\Gamma(\frac 12)=\sqrt \pi$$
+        $$\Gamma(n+\frac 12)=\frac {(2n)!\sqrt \pi}{n!4^n}$$
+        $$\Gamma(-\frac 32)=\frac 43\sqrt \pi$$
+        $$\Gamma(-\frac 12)=-2\sqrt \pi$$
+        $$\Gamma(\frac 32)=\frac 12\sqrt \pi$$
+        $$\Gamma(2)=1!=\Gamma(1)=0!=1$$
+
+        - 反常积分
+
+        $$\int _0^\infty \frac {dx}{(x+1)\sqrt x}=\pi$$
+        $$\int _0^1 \frac {dx}{(x+1)\sqrt x}=\frac \pi 2$$
+        $$\int _1^\infty \frac {dx}{(x+1)\sqrt x}=\frac \pi 2$$
 
 2. 线性代数
 
@@ -295,8 +399,8 @@ DEEP LEARNING 学习笔记
         $$|\lambda E-A|=\begin{bmatrix} \lambda -14 & -32 \\ -32 & \lambda -77 \end{bmatrix}=0$$
         $$\Rightarrow(\lambda-14)*(\lambda-77)-(-32*-32)=0$$
         $$\Rightarrow\lambda^2-91\lambda+54=0$$
-        $$\Rightarrow{(\lambda-{\dfrac {91}{2}})} ^2-\dfrac {91^2}{4}+54=0$$
-        $$\lambda= \pm\sqrt{\dfrac {91^2}{4}-54}+\dfrac{91}{2}$$
+        $$\Rightarrow{(\lambda-{\frac {91}{2}})} ^2-\frac {91^2}{4}+54=0$$
+        $$\lambda= \pm\sqrt{\frac {91^2}{4}-54}+\frac{91}{2}$$
         $$\lambda=[90.4\ 0.6]$$
         $$||A||^2_2=\sqrt{\max_i\lambda}=\sqrt {90.4}=9.5079$$
 
@@ -421,7 +525,7 @@ DEEP LEARNING 学习笔记
 
         在给定其他事件时，求某个指定事件的发生概率。
 
-        $$ P(y=y|x=x) = \dfrac {P(y=y,x=x)}{P(x=x)}$$
+        $$ P(y=y|x=x) = \frac {P(y=y,x=x)}{P(x=x)}$$
 
         P(x=x) > 0 才有意义，不能计算永不能发生的事件上的条件概率
 
@@ -473,7 +577,7 @@ DEEP LEARNING 学习笔记
 
             概率密度函数为：
 
-            $$ f(x) = \dfrac {1}{\sigma\sqrt {2\pi}}e^{-\dfrac {(x-\mu)^2}{2\sigma^2}} $$
+            $$ f(x) = \frac {1}{\sigma\sqrt {2\pi}}e^{-\frac {(x-\mu)^2}{2\sigma^2}} $$
 
             $\mu$是位置参数，觉得分布的位置；方差$\sigma^2$的开平方或标准差$\sigma$等于尺度参数，决定了分布的幅度。
 
@@ -493,11 +597,11 @@ DEEP LEARNING 学习笔记
 
             期望值：
 
-            $$ E[X] = \dfrac {1}{\lambda} $$
+            $$ E[X] = \frac {1}{\lambda} $$
 
             方差：
 
-            $$ D[X] = \dfrac {1}{\lambda^2} $$
+            $$ D[X] = \frac {1}{\lambda^2} $$
 
             拉普拉斯分布为双指数分布，尾端比正态分布更平缓
 
@@ -517,13 +621,13 @@ DEEP LEARNING 学习笔记
 
             - logistic sigmoid 函数
             
-            $$ f(x) = \dfrac {1}{1+e^{-x}} $$
+            $$ f(x) = \frac {1}{1+e^{-x}} $$
 
             最初是指数增长，后面变得饱和，对输入不敏感增长变慢，值区间0~1，当输入在[-1,1]之间时，函数变化敏感，一旦超过就饱和
 
             - tanh
 
-            $$ f(x) = \dfrac {e^x-e^{-x}}{e^x+e^{-x}}$$
+            $$ f(x) = \frac {e^x-e^{-x}}{e^x+e^{-x}}$$
 
             近似于sigmoid函数，但后端能保持非线性变化，延迟了饱和期，用的多，sigmoid 已经少用，饱和区间很容易由于变化太小造成梯度消失。
 
@@ -539,13 +643,13 @@ DEEP LEARNING 学习笔记
 
             - softmax 函数
 
-            $$ \sigma(z)_j= \dfrac {e^{z_j}}{\sum _{k=1}^Ke^{z_k}}$$
+            $$ \sigma(z)_j= \frac {e^{z_j}}{\sum _{k=1}^Ke^{z_k}}$$
 
             也就是离散数据归一化，将任意向量压缩到(0,1)区间，并让所有元素之和为1. 特点是反向传播时求偏导简单快速。
 
         - 贝叶斯规则
 
-            $$ P(x|y)=\dfrac {P(x)P(y|x)}{P(y)} $$
+            $$ P(x|y)=\frac {P(x)P(y|x)}{P(y)} $$
 
             上述公式是已知 P(y|x) 求 P(x|y)， $P(y)=\sum _xP(y|x)P(x)$ 计算。
             
@@ -560,9 +664,9 @@ DEEP LEARNING 学习笔记
 
             得： 
 
-            $$ P(D|+) = \dfrac {P(+|D)P(D)}{P(+)} $$
-            $$ = \dfrac {P(+|D)P(D)}{P(+|D)P(D)+P(+|N)P(N)} $$
-            $$ = \dfrac {0.99 * 0.005} {0.99*0.005+0.01*0.995} $$
+            $$ P(D|+) = \frac {P(+|D)P(D)}{P(+)} $$
+            $$ = \frac {P(+|D)P(D)}{P(+|D)P(D)+P(+|N)P(N)} $$
+            $$ = \frac {0.99 * 0.005} {0.99*0.005+0.01*0.995} $$
             $$ = 0.3322 $$
 
             尽管吸毒检测的准确率高达99%，但贝叶斯定理告诉我们：如果某人检测呈阳性，其吸毒的概率只有大约33%，不吸毒的可能性比较大。假阳性高，则检测的结果不可靠。
@@ -573,7 +677,7 @@ DEEP LEARNING 学习笔记
 
             某性质几乎处处存在，是指在零测度集外都成立
 
-            y=g(x),g是连续可微的函数，$P_y(y)=P_x(g^{-1}(y))$ 不成立，应该为$P_y(y)=P_x(g^{-1}(y))\left| \dfrac {\partial g\left( x\right) }{\partial x}\right|$
+            y=g(x),g是连续可微的函数，$P_y(y)=P_x(g^{-1}(y))$ 不成立，应该为$P_y(y)=P_x(g^{-1}(y))\left| \frac {\partial g\left( x\right) }{\partial x}\right|$
 
         - 信息论
 
@@ -593,11 +697,11 @@ DEEP LEARNING 学习笔记
 
             $$ D_{kl}(p||q) <> D_{kl}(q||p)   $$
 
-            $$ D_{kl}(p||q) = \sum _{x\in X} p(x)log \dfrac {p(x)}{q(x)} = H_p(Q)-H(p)$$
+            $$ D_{kl}(p||q) = \sum _{x\in X} p(x)log \frac {p(x)}{q(x)} = H_p(Q)-H(p)$$
 
             为了保证连续性，约定：
 
-            $$ 0log\dfrac {0}{0}=0,\ 0log\dfrac {0}{q}=0,\ plog\dfrac{p}{0}=\infty$$
+            $$ 0log\frac {0}{0}=0,\ 0log\frac {0}{q}=0,\ plog\frac{p}{0}=\infty$$
 
             交叉熵主要是用于度量两个概率分布间的差异性信息。相当于将相对熵中的H(p)视为0，也成为最小化KL距离。
 
@@ -611,7 +715,7 @@ DEEP LEARNING 学习笔记
             $$ = -[ylogh_\theta(x)+(1-y)log(1-h_\theta(x))] $$
             对所有样本取均值：
 
-            $$ -\dfrac {1}{m}\sum _{i=1}^m[y^{(i)}logh_\theta(x^{(i)})+(1-y^{(i)})log(1-h_\theta(x^{(i)}))]$$
+            $$ -\frac {1}{m}\sum _{i=1}^m[y^{(i)}logh_\theta(x^{(i)})+(1-y^{(i)})log(1-h_\theta(x^{(i)}))]$$
 
 
             连续分布的交叉熵：
@@ -650,13 +754,13 @@ DEEP LEARNING 学习笔记
 
             线性回归，用MSE,均方误差:
 
-            $$ loss = \dfrac {1}{m}\sum _{i=1}^m(p_i-q_i)^2 $$
+            $$ loss = \frac {1}{m}\sum _{i=1}^m(p_i-q_i)^2 $$
 
             逻辑回归，用交叉熵，因为小概率更有信息价值，符合人脑学习方式：
 
             单分类问题：
 
-            $$ loss = -\dfrac {1}{m}\sum _{i=1}^mp_ilog(q_i) $$
+            $$ loss = -\frac {1}{m}\sum _{i=1}^mp_ilog(q_i) $$
 
             | * | 猫 | 青蛙 | 狗 |
             | ------ | ------ | ------ | ------ |
@@ -701,7 +805,7 @@ DEEP LEARNING 学习笔记
 
     1. 上溢和下溢
 
-        $softmax(x)_i=\dfrac {e^{x_i}}{\sum _{j=1}^ne^{x_j}}$ 如果 $x_j$的值很小的负数，则$e^{x_j}$为0，则分母为0，导致值无意义；如果$x_i$为大的正数时，$e^{x_i}$ 趋于无穷大，超界。
+        $softmax(x)_i=\frac {e^{x_i}}{\sum _{j=1}^ne^{x_j}}$ 如果 $x_j$的值很小的负数，则$e^{x_j}$为0，则分母为0，导致值无意义；如果$x_i$为大的正数时，$e^{x_i}$ 趋于无穷大，超界。
 
         这两个问题可以采用 softmax(z) 解决，$z=x-max_ix_i$ 
 
@@ -709,14 +813,14 @@ DEEP LEARNING 学习笔记
 
         传统方法：
 
-        $$ softmax(1) = \dfrac {e^1}{e^3+e^1+e^{-3}} = \dfrac {2.7}{20+2.7+0.05} = 0.12 $$
+        $$ softmax(1) = \frac {e^1}{e^3+e^1+e^{-3}} = \frac {2.7}{20+2.7+0.05} = 0.12 $$
 
         新方法：
         
         $$ M = max([3,1,-3]) = 3 $$
 
-        $$ softmax(1) = \dfrac {e^{1-M}}{e^{3-M}+e^{1-M}+e^{-3-M}} $$
-        $$ = \dfrac {e^{1-3}}{e^{3-3}+e^{1-3}+e^{-3-3}} = \dfrac {0.1353}{1+0.1353+0.0025} = 0.12 $$
+        $$ softmax(1) = \frac {e^{1-M}}{e^{3-M}+e^{1-M}+e^{-3-M}} $$
+        $$ = \frac {e^{1-3}}{e^{3-3}+e^{1-3}+e^{-3-3}} = \frac {0.1353}{1+0.1353+0.0025} = 0.12 $$
 
         以上分子最大0，分母最小1，所以同时解决了上溢和下溢的问题。
 
@@ -724,9 +828,9 @@ DEEP LEARNING 学习笔记
 
         解决办法：
 
-        $$ log[f(x_i)]=log(\dfrac{e^{x_i}}{e^{x_1}+e^{x_2}+...e^{x_n}})  $$
-        $$ =log(\dfrac{ \dfrac{e^{x_i}}{e^M} }{ \dfrac{e^{x_1}}{e^M}+\dfrac{e^{x_2}}{e^M}+...\dfrac{e^{x_n}}{e^M} })  $$
-        $$ =log(\dfrac {e^{(x_i-M)}} {\sum _j^ne^{(x_j-M)} }) $$
+        $$ log[f(x_i)]=log(\frac{e^{x_i}}{e^{x_1}+e^{x_2}+...e^{x_n}})  $$
+        $$ =log(\frac{ \frac{e^{x_i}}{e^M} }{ \frac{e^{x_1}}{e^M}+\frac{e^{x_2}}{e^M}+...\frac{e^{x_n}}{e^M} })  $$
+        $$ =log(\frac {e^{(x_i-M)}} {\sum _j^ne^{(x_j-M)} }) $$
         $$ =log({e^{(x_i-M)}}) - log(\sum _j^ne^{(x_j-M)}) $$
         $$ = (x_i-M)-log(\sum _j^ne^{(x_j-M)}) $$
 
@@ -748,7 +852,7 @@ DEEP LEARNING 学习笔记
 
         - 微积分与优化
 
-            - 定义 $y=f(x)$,其中x、y都是实数，这个函数的导数为 $f'(x)$ 或 $\dfrac {d_y}{d_x}$ , 导数 f‘(x) 代表 f(x) 在 x 点上的斜率。
+            - 定义 $y=f(x)$,其中x、y都是实数，这个函数的导数为 $f'(x)$ 或 $\frac {d_y}{d_x}$ , 导数 f‘(x) 代表 f(x) 在 x 点上的斜率。
 
             - 导数对最小化的用处在于，告诉我们如何更改x来略微的改善y。我们将x往导数的反方向移动一小步来减小f(x),这种技术成为梯度下降。
 
@@ -756,9 +860,9 @@ DEEP LEARNING 学习笔记
 
             - f(x) 绝对的最小值的点，称为全局最小点。当出现多个局部极小点或平坦区域时，优化函数将有可能无法找到全剧最小点。
 
-            - 如果有多维输入的情况，则采用偏导数。偏导数$\dfrac {\partial }{\partial x_{i}}f(x)$ 衡量点x处只有$x_i$增加时f(x)如何变化。梯度是相对一个向量求导的导数，f的导数是包含所有偏导数的向量，记做：$\nabla _xf(x)$, 梯度的第i个元素是f关于$x_i$的偏导数。在多维情况下，临界点是梯度中所有元素都为0的点。
+            - 如果有多维输入的情况，则采用偏导数。偏导数$\frac {\partial }{\partial x_{i}}f(x)$ 衡量点x处只有$x_i$增加时f(x)如何变化。梯度是相对一个向量求导的导数，f的导数是包含所有偏导数的向量，记做：$\nabla _xf(x)$, 梯度的第i个元素是f关于$x_i$的偏导数。在多维情况下，临界点是梯度中所有元素都为0的点。
 
-            - 在u(单位向量)方向的方向导数，是函数f在u方向的斜率。方向导数是函数 $f(x+\alpha u)$关于$\alpha$的导数（在$\alpha=0$时取得）。根据链式法则，当$\alpha=0$时， $\dfrac {\partial }{\partial x_{i}}f(x+\alpha u)=u^T\nabla _xf(x)$, 为了最小化f，找到使f下降最快的方向，计算方向导数：
+            - 在u(单位向量)方向的方向导数，是函数f在u方向的斜率。方向导数是函数 $f(x+\alpha u)$关于$\alpha$的导数（在$\alpha=0$时取得）。根据链式法则，当$\alpha=0$时， $\frac {\partial }{\partial x_{i}}f(x+\alpha u)=u^T\nabla _xf(x)$, 为了最小化f，找到使f下降最快的方向，计算方向导数：
 
             $$ \min _{u,u^Tu=1} u^T\nabla _xf(x) $$
             $$ = \min _{u,u^Tu=1} ||u||_2||\nabla _xf(x)||_2cos\theta $$
@@ -777,7 +881,7 @@ DEEP LEARNING 学习笔记
 
             定义：$f:\ \mathbb{R}^m \rightarrow \mathbb{R}^n$ 
 
-            则雅可比矩阵J为： $J \in \mathbb{R}^{nxm}$ ,$J_{i,j}=\dfrac {\partial}{\partial x_j}f(x)_i$
+            则雅可比矩阵J为： $J \in \mathbb{R}^{nxm}$ ,$J_{i,j}=\frac {\partial}{\partial x_j}f(x)_i$
 
             导数的导数称为二阶导数
 
@@ -785,7 +889,7 @@ DEEP LEARNING 学习笔记
 
             如果是多维的情况，所有的维度的二阶导数组成的矩阵，称为海森矩阵(Hessian)。
 
-            定义： $H(f)(x)_{i,j}=\dfrac {\partial^2}{\partial x_i\partial x_j}f(x)$
+            定义： $H(f)(x)_{i,j}=\frac {\partial^2}{\partial x_i\partial x_j}f(x)$
 
             海森矩阵等于梯度的雅可比矩阵。
 
@@ -797,7 +901,7 @@ DEEP LEARNING 学习笔记
 
             为了求解 f'=0 的根，利用泰勒公式把f(x)在$X_n$展开到二阶，即：
 
-            $$f(x)\approx f(x_n)+f'(x_0)(x-x_n)+\dfrac {f''(x_n)}{2}(x-x_n)^2$$
+            $$f(x)\approx f(x_n)+f'(x_0)(x-x_n)+\frac {f''(x_n)}{2}(x-x_n)^2$$
 
             然后用f(x)的最小点作为新的探索点$x_{n+1}$，据此，令：
 
@@ -805,7 +909,7 @@ DEEP LEARNING 学习笔记
 
             求出迭代公式，即：
 
-            $$x_{n+1}=x_n-\dfrac {f'(x_n)}{f''(x_n)},\ n=0,1,...$$
+            $$x_{n+1}=x_n-\frac {f'(x_n)}{f''(x_n)},\ n=0,1,...$$
 
             高维度的牛顿迭代公式为：
 
@@ -837,16 +941,16 @@ DEEP LEARNING 学习笔记
 
         假设，我们找到下面x的最小化值：
 
-        $$f(x)=\dfrac {1}{2}||Ax-b||_2^2$$
+        $$f(x)=\frac {1}{2}||Ax-b||_2^2$$
         - 定义：
 
         $$||x||_2^2=\sqrt {(\sum _{i=1}^mx_i^2)}=\sqrt {x^Tx}$$
 
         - 求解：
 
-        $$f(x)=\dfrac {1}{2}(Ax-b)^T(Ax-b)$$
-        $$=\dfrac {1}{2}(x^TA^T-b^T)(Ax-b)$$
-        $$=\dfrac {1}{2}(x^TA^TAx-2b^TAx+b^Tb)$$
+        $$f(x)=\frac {1}{2}(Ax-b)^T(Ax-b)$$
+        $$=\frac {1}{2}(x^TA^T-b^T)(Ax-b)$$
+        $$=\frac {1}{2}(x^TA^TAx-2b^TAx+b^Tb)$$
         注：b、x都是列向量，所以$b^TAx$是标量，标量的转置等于自身，即：$b^TAx=X^TA^Tb$
 
         - 对x求导，得到梯度：
@@ -869,7 +973,7 @@ DEEP LEARNING 学习笔记
         | ------ | ------ | ------ | ------ |
         | 温度 | 29.7 | 28.7 | 30.1 |
 
-        常规解法，求平均值 $\overline C = \dfrac {(C1+C2+C3)}{3} = 29.5$
+        常规解法，求平均值 $\overline C = \frac {(C1+C2+C3)}{3} = 29.5$
 
         最小二乘解法：
 
@@ -877,8 +981,8 @@ DEEP LEARNING 学习笔记
 
         S为种误差值，我们需要最小化S，求C。两边求导：
 
-        $$\dfrac {dS}{dC}=0=\dfrac {d\sum _{i=1}^3(C-C_i)^2}{dC}$$
-        $$=\dfrac {d\sum _{i=1}^3(C^2-2CC_i+C_i^2)}{dC}$$
+        $$\frac {dS}{dC}=0=\frac {d\sum _{i=1}^3(C-C_i)^2}{dC}$$
+        $$=\frac {d\sum _{i=1}^3(C^2-2CC_i+C_i^2)}{dC}$$
         $$= \sum_{i=1}^32C-2C_i $$
         $$= 2\sum_{i=1}^3(C-C_i)$$
         $$= 2((C-C_1)+(C-C_2)+(C-C_3))$$
@@ -887,7 +991,7 @@ DEEP LEARNING 学习笔记
         求解得：
 
         $$ 2(3C-(C_1+C_2+C_3))=0 $$
-        $$ C = \dfrac {C_1+C_2+C_3}{3}=29.5$$
+        $$ C = \frac {C_1+C_2+C_3}{3}=29.5$$
 
         已知温度和冰淇淋的销量，预测某一温度下销量：
         | 温度 | 31 | 33 | 35 |
@@ -907,14 +1011,14 @@ DEEP LEARNING 学习笔记
         由于有2个未知数a、b，分别求偏导：
 
         $$\begin{aligned}
-        \dfrac {\partial S}{\partial a}&=\dfrac {d\sum((ax_i)^2+2ax_i(b-y_i)+(b-y_i)^2)}{da}  \\\\
+        \frac {\partial S}{\partial a}&=\frac {d\sum((ax_i)^2+2ax_i(b-y_i)+(b-y_i)^2)}{da}  \\\\
         &=\sum 2ax_i^2+2x_i(b-y_i) \\\\
         &=2\sum(ax_i+b-y_i)x_i=0  
         \end{aligned}$$
 
         $$\begin{aligned}
-        \dfrac {\partial S}{\partial b}&=\dfrac {d\sum(ax_i-y_i+b)^2}{db} \\\\
-        &=\dfrac {d\sum((ax_i-y_i)^2+2(ax_i-y_i)b+b^2)}{db} \\\\
+        \frac {\partial S}{\partial b}&=\frac {d\sum(ax_i-y_i+b)^2}{db} \\\\
+        &=\frac {d\sum((ax_i-y_i)^2+2(ax_i-y_i)b+b^2)}{db} \\\\
         &=\sum (2(axi-y_i)+2b) \\\\
         &=2\sum(ax_i+b-y_i)=0  
         \end{aligned}$$

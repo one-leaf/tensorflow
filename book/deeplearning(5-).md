@@ -72,21 +72,21 @@
 
             度量模型的性能第一种办法是在测试集上的均方误差。
 
-            $$ MSE_{test}= \dfrac {1}{m} \sum _i(\hat y^{(test)}-y^{(test)})^2_i $$
+            $$ MSE_{test}= \frac {1}{m} \sum _i(\hat y^{(test)}-y^{(test)})^2_i $$
 
             这个计算式和求欧几里得距离等价，欧几里得距离如下：
             
-            $$ MSE_{test}= \dfrac {1}{m}||\hat y^{(test)}-y^{(test)})||^2_2 $$
+            $$ MSE_{test}= \frac {1}{m}||\hat y^{(test)}-y^{(test)})||^2_2 $$
 
             目标是最小化 $MSE_{train}$ ，因此直接求导数为0。
 
             $$ \nabla_wMSE_{train}=0 $$
-            $$ \Rightarrow \nabla_w\dfrac 1m||\hat y^{(train)}-y^{(train)}||^2_2=0 $$
-            $$ \Rightarrow \dfrac 1m\nabla_w||\hat X^{(train)}w-y^{(train)}||^2_2=0 $$
+            $$ \Rightarrow \nabla_w\frac 1m||\hat y^{(train)}-y^{(train)}||^2_2=0 $$
+            $$ \Rightarrow \frac 1m\nabla_w||\hat X^{(train)}w-y^{(train)}||^2_2=0 $$
             $$ \Rightarrow \nabla_w(X^{(train)}w-y^{(train)})^T(X^{(train)}w-y^{(train)})=0$$
             $$ \Rightarrow \nabla_w(w^TX^{(train)T}X^{(train)}w-2w^TX^{(train)T})y^{(train)}+y^{(train)T}y^{(train)})=0$$
             $$ \Rightarrow 2X^{(train)T}X^{(train)}w-2X^{(train)T}y^{(train)}=0$$
-            $$ \Rightarrow w= \dfrac {X^{(train)T}y^{(train)}}{X^{(train)T}X^{(train)}}$$      
+            $$ \Rightarrow w= \frac {X^{(train)T}y^{(train)}}{X^{(train)T}X^{(train)}}$$      
 
             这个方程称为正规方程，实际上的线性回归还要加上额外的参数偏置b，即：
 
@@ -98,9 +98,9 @@
 
         在训练集计算的叫训练误差，机器学习优化是指期望泛化误差（测试误差）的优化问题。
 
-        线性回归采用 $\dfrac {1}{m^{train}}||X^{(train)}w-y^{(train)}||_2^2$ 
+        线性回归采用 $\frac {1}{m^{train}}||X^{(train)}w-y^{(train)}||_2^2$ 
 
-        但我们实际期望 $\dfrac {1}{m^{test}}||X^{(test)}w-y^{(test)}||_2^2$
+        但我们实际期望 $\frac {1}{m^{test}}||X^{(test)}w-y^{(test)}||_2^2$
             
         按统计学理论，训练集和测试集上，默认为独立同分布假设，就是每个数据集中的样本都是互相独立的，并且训练集和测试集是同分布的。所以可以观察到随机训练误差和测试误差的期望是一致的。
 
@@ -197,7 +197,7 @@
 
             均值的标准差记为：
 
-            $$SE(\hat \mu_m)=\sqrt {Var[\dfrac 1m\sum ^m_{i=1}x_i]}=\dfrac \sigma{\sqrt m}$$
+            $$SE(\hat \mu_m)=\sqrt {Var[\frac 1m\sum ^m_{i=1}x_i]}=\frac \sigma{\sqrt m}$$
 
             以均值 $\hat \mu_m$ 为中心的 95% 的置信空间为：
 
@@ -205,13 +205,13 @@
 
             在机器学习中，常说的算法A比算法B好，是指算法A的误差的95%的置信区间的上界小于算法B的误差的95%置信区间的下界。
 
-            在伯努利分布中，估计 $\hat \theta_m=\dfrac 1m\sum ^m_{x=1} x_i$ 的方差：
+            在伯努利分布中，估计 $\hat \theta_m=\frac 1m\sum ^m_{x=1} x_i$ 的方差：
 
-            $$Var(\hat\theta_m)=Var(\dfrac 1m\sum ^m_{x=1} x_i)$$
-            $$=\dfrac 1{m^2}\sum ^m_{x=1} Var(x_i)$$
-            $$=\dfrac 1{m^2}\sum ^m_{x=1}\theta(1-\theta)$$
-            $$=\dfrac 1{m^2}m\theta(1-\theta)$$
-            $$=\dfrac 1{m}\theta(1-\theta)$$
+            $$Var(\hat\theta_m)=Var(\frac 1m\sum ^m_{x=1} x_i)$$
+            $$=\frac 1{m^2}\sum ^m_{x=1} Var(x_i)$$
+            $$=\frac 1{m^2}\sum ^m_{x=1}\theta(1-\theta)$$
+            $$=\frac 1{m^2}m\theta(1-\theta)$$
+            $$=\frac 1{m}\theta(1-\theta)$$
 
             可以看出方差下降的速度是数据集的样本 m 的函数。
 
@@ -232,17 +232,17 @@
 
             $\theta$的常用估计量是训练样本的均值：
 
-            $$\hat \theta_m=\dfrac {1}{m}\sum _{i=1}^mX_i$$
+            $$\hat \theta_m=\frac {1}{m}\sum _{i=1}^mX_i$$
 
             下面来判断这个是否有偏：
 
             $$
             \begin{aligned}
             bias(\hat \theta_m) &= \mathbb E|\hat \theta_m|-\theta \\\\
-            &=\mathbb E[\dfrac {1}{m}\sum _{i=1}^mX_i]-\theta \\\\
-            &=\dfrac {1}{m}\sum _{i=1}^m\mathbb E[x_i]-\theta\\\\
-            &=\dfrac {1}{m}\sum _{i=1}^m\sum _{x_i=0}^1(x_i\theta^{x_i}(1-\theta)^{(1-x_i)})-\theta \\\\
-            &=\dfrac {1}{m}\sum _{i=1}^m(\theta)-\theta \\\\
+            &=\mathbb E[\frac {1}{m}\sum _{i=1}^mX_i]-\theta \\\\
+            &=\frac {1}{m}\sum _{i=1}^m\mathbb E[x_i]-\theta\\\\
+            &=\frac {1}{m}\sum _{i=1}^m\sum _{x_i=0}^1(x_i\theta^{x_i}(1-\theta)^{(1-x_i)})-\theta \\\\
+            &=\frac {1}{m}\sum _{i=1}^m(\theta)-\theta \\\\
             &=\theta - \theta=0
             \end{aligned} 
             $$
@@ -253,33 +253,33 @@
 
             所以骰子的期望值为：
 
-            $$\mathbb E[x]=1*\dfrac 16+2*\dfrac 16+3*\dfrac 16+4*\dfrac 16+5*\dfrac 16+6*\dfrac 16=3.5$$
+            $$\mathbb E[x]=1*\frac 16+2*\frac 16+3*\frac 16+4*\frac 16+5*\frac 16+6*\frac 16=3.5$$
 
             示例 2：均值的高斯分布估计
 
-            $$p(x_1;\mu,\sigma^2)=\dfrac 1{\sigma\sqrt{2\pi}}e^{-\dfrac {(x_i-\mu)^2}{2\sigma^2}}$$
+            $$p(x_1;\mu,\sigma^2)=\frac 1{\sigma\sqrt{2\pi}}e^{-\frac {(x_i-\mu)^2}{2\sigma^2}}$$
 
             高斯分布的期望值推导：
 
             1. 对偏差的期望值
 
-                $$\mathbb E(X)=\int ^{\infty }_{-\infty }x\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {(x-\mu)^2}{2\sigma^2} \}dx$$
+                $$\mathbb E(X)=\int ^{\infty }_{-\infty }x\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {(x-\mu)^2}{2\sigma^2} \}dx$$
 
                 令$y=x-\mu$
 
-                $$\mathbb E(X)=\int ^{\infty }_{-\infty }(y+\mu)\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {y^2}{2\sigma^2} \}dy$$
-                $$=\int ^{\infty }_{-\infty }y\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {y^2}{2\sigma^2} \}dy+\int ^{\infty }_{-\infty }\mu\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {y^2}{2\sigma^2} \}dy$$
+                $$\mathbb E(X)=\int ^{\infty }_{-\infty }(y+\mu)\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {y^2}{2\sigma^2} \}dy$$
+                $$=\int ^{\infty }_{-\infty }y\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {y^2}{2\sigma^2} \}dy+\int ^{\infty }_{-\infty }\mu\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {y^2}{2\sigma^2} \}dy$$
 
                 第一部分用$I_1$表示
 
-                $$I_1=\int ^{\infty }_{-\infty }x\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {x^2}{2\sigma^2} \}dx$$
+                $$I_1=\int ^{\infty }_{-\infty }x\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {x^2}{2\sigma^2} \}dx$$
 
                 显然这个积分的函数是对称的是奇函数f(x)=−f(−x))，所以对称区间的积分为0，即$I_1=0$。
 
                 所以：
 
-                $$\mathbb E(X)=\int ^{\infty }_{-\infty }\mu\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {x^2}{2\sigma^2} \}dx$$
-                $$=\mu\int ^{\infty }_{-\infty }\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac {x^2}{2\sigma^2} \}dx$$
+                $$\mathbb E(X)=\int ^{\infty }_{-\infty }\mu\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {x^2}{2\sigma^2} \}dx$$
+                $$=\mu\int ^{\infty }_{-\infty }\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {x^2}{2\sigma^2} \}dx$$
 
                 根据高斯密度函数的积分等于1，证明需要涉及极坐标变换忽略，所以：
 
@@ -287,15 +287,15 @@
 
             高斯的均值参数常用估计量称为样本均值：
 
-            $$\hat \mu=\dfrac 1m\sum _{(i=1)^m}x_i$$
+            $$\hat \mu=\frac 1m\sum _{(i=1)^m}x_i$$
 
             看是否有偏，计算如下：
 
             $$\begin{aligned}
             bias(\hat \mu_m)&=\mathbb E|\hat \mu_m|-\mu \\\\
-            &=\mathbb E[\dfrac 1m\sum _{i=1}^mx_i]-\mu \\\\
-            &=(\dfrac 1m\sum _{i=1}^m\mathbb E[x_i])-\mu \\\\
-            &=(\dfrac 1m\sum _{i=1}^m\mu)-u \\\\
+            &=\mathbb E[\frac 1m\sum _{i=1}^mx_i]-\mu \\\\
+            &=(\frac 1m\sum _{i=1}^m\mathbb E[x_i])-\mu \\\\
+            &=(\frac 1m\sum _{i=1}^m\mu)-u \\\\
             &=\mu-\mu=0
             \end{aligned}$$
 
@@ -303,22 +303,22 @@
             
             1. 对方差的期望值
 
-                $$V(X)=\int ^{\infty }_{-\infty }(x-\mu)^2\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac{(x-\mu)^2}{2\sigma^2}\}dx$$
-                $$=\int ^{\infty }_{-\infty }x^2\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac{x^2}{2\sigma^2}\}dx$$
-                $$=\sigma\sqrt 2\int ^{\infty }_{-\infty }(\sigma\sqrt 2x)^2\dfrac 1{\sigma\sqrt{2\pi}}exp\{-\dfrac{(\sigma\sqrt 2x)^2}{2\sigma^2}\}dx$$
-                $$=\sigma^2\dfrac 4{\sqrt \pi}\int ^{\infty }_{-\infty }x^2e^{-x^2}dx$$
+                $$V(X)=\int ^{\infty }_{-\infty }(x-\mu)^2\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac{(x-\mu)^2}{2\sigma^2}\}dx$$
+                $$=\int ^{\infty }_{-\infty }x^2\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac{x^2}{2\sigma^2}\}dx$$
+                $$=\sigma\sqrt 2\int ^{\infty }_{-\infty }(\sigma\sqrt 2x)^2\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac{(\sigma\sqrt 2x)^2}{2\sigma^2}\}dx$$
+                $$=\sigma^2\frac 4{\sqrt \pi}\int ^{\infty }_{-\infty }x^2e^{-x^2}dx$$
 
                 另 $t=x^2$， 则 $dt=2xdx=2\sqrt tdx$ ，则$dx=(2\sqrt t)^{-t}dt$ 代入上式：
 
-                $$V(X)=\sigma^2\dfrac 4{\sqrt \pi}\int ^{\infty }_0(\sqrt t)^2(2\sqrt t)^{-1}e^{-t}dt$$
-                $$=\sigma^2\dfrac 4{\sqrt \pi}\dfrac 12\int ^{\infty }_0t^{\dfrac 32-1}e^{-t}dt$$
-                $$=\sigma^2\dfrac 4{\sqrt \pi}\dfrac 12\dfrac {\sqrt \pi}2=\sigma^2$$
+                $$V(X)=\sigma^2\frac 4{\sqrt \pi}\int ^{\infty }_0(\sqrt t)^2(2\sqrt t)^{-1}e^{-t}dt$$
+                $$=\sigma^2\frac 4{\sqrt \pi}\frac 12\int ^{\infty }_0t^{\frac 32-1}e^{-t}dt$$
+                $$=\sigma^2\frac 4{\sqrt \pi}\frac 12\Gamma(\frac 32)=\sigma^2\frac 4{\sqrt \pi}\frac 12\frac {\sqrt \pi}2=\sigma^2$$
 
             来比较高斯分布参数$\sigma^2$的两个不同估计
 
             第一个方差为样本方差，如下：
 
-            $$\hat \sigma_m^2=\dfrac 1m\sum(x_i-\hat \mu_m)^2$$ 
+            $$\hat \sigma_m^2=\frac 1m\sum(x_i-\hat \mu_m)^2$$ 
 
             $\hat \mu_m$为样本均值
 
@@ -326,22 +326,22 @@
 
             $$\begin{aligned}
             bias(\hat \sigma_m^2)&=\mathbb E[\hat\sigma_m^2]-\sigma^2 \\\\
-            &=\mathbb E[\dfrac 1m\sum _{i=1}^m(x_i-\hat\mu_m)^2]-\sigma^2 \\\\
-            &=\dfrac {m-1}{m}\sigma^2-\sigma^2\\\\
-            &=-\dfrac 1m\sigma^2
+            &=\mathbb E[\frac 1m\sum _{i=1}^m(x_i-\hat\mu_m)^2]-\sigma^2 \\\\
+            &=\frac {m-1}{m}\sigma^2-\sigma^2\\\\
+            &=-\frac 1m\sigma^2
             \end{aligned}$$
 
             所以是有偏估计。
 
             无偏样本方差估计：
 
-            $$\overline \sigma^2_m=\dfrac 1{m-1}\sum ^m_{i=1}(x_i-\hat \mu_m)^2$$
+            $$\overline \sigma^2_m=\frac 1{m-1}\sum ^m_{i=1}(x_i-\hat \mu_m)^2$$
 
             看看是否有偏，计算如下：
 
-            $$\mathbb E[\overline \sigma^2_m]=\mathbb E[\dfrac 1{(m-1)}\sum ^m_{i=1}(x_i-\hat \mu_m)^2]$$
-            $$=\dfrac m{m-1}\mathbb E[\hat \sigma_m^2]$$
-            $$=\dfrac m{m-1}(\dfrac {m-1}m\sigma^2)$$
+            $$\mathbb E[\overline \sigma^2_m]=\mathbb E[\frac 1{(m-1)}\sum ^m_{i=1}(x_i-\hat \mu_m)^2]$$
+            $$=\frac m{m-1}\mathbb E[\hat \sigma_m^2]$$
+            $$=\frac m{m-1}(\frac {m-1}m\sigma^2)$$
             $$=\sigma^2$$
 
             所以是无偏估计。
@@ -401,7 +401,7 @@
 
             平均对数似然：
 
-            $$\hat e=\dfrac 12lnL(\theta|x_1,x_2)$$
+            $$\hat e=\frac 12lnL(\theta|x_1,x_2)$$
 
             最大似然估计，就是找到一个合适的$\theta$，使平均对数似然最大。
 
@@ -413,7 +413,7 @@
 
             转换为平均似然：
 
-            $$\hat e=\dfrac 1{10}P(x_1,x_2,...,x_{10}|M)=\dfrac 1{10}ln(\theta^7(1-\theta)^3)$$
+            $$\hat e=\frac 1{10}P(x_1,x_2,...,x_{10}|M)=\frac 1{10}ln(\theta^7(1-\theta)^3)$$
 
             为了求最大的平均似然，直接对上面求导，导数为0时为最大值。
 
@@ -441,11 +441,11 @@
             条件对数似然如下：
 
             $$\hat \theta=\sum ^m_{i=1}logp(y_i|x_i;\theta)$$
-            $$=-mlog\sigma-\dfrac m2log(2\pi)-\sum ^m_{i=1}\dfrac {||\hat y_i-\hat y_i||^2}{2\sigma^2}$$
+            $$=-mlog\sigma-\frac m2log(2\pi)-\sum ^m_{i=1}\frac {||\hat y_i-\hat y_i||^2}{2\sigma^2}$$
 
             对比均方误差为：
 
-            $$MSE_{train}=\dfrac 1m\sum ^m_{i=1}||\hat y_i-y_i||^2$$
+            $$MSE_{train}=\frac 1m\sum ^m_{i=1}||\hat y_i-y_i||^2$$
 
             可以看出，最大化w的对数似然和最小化均方误差可以得到相同的参数估计w。但这两种方法有不同值，所以最大似然有不同的性质。
 
@@ -481,21 +481,21 @@
 
         继续计算阳性的癌症的概率，直接将样本中的9和99做归一化：
 
-        $$P(Y|A)=\dfrac {0.009}{0.099+0.009}=0.083$$
+        $$P(Y|A)=\frac {0.009}{0.099+0.009}=0.083$$
 
         阳性未得癌症的概率：
         
-        $$P(N|A)=\dfrac {0.099}{0.099+0.009}=0.917$$
+        $$P(N|A)=\frac {0.099}{0.099+0.009}=0.917$$
 
         这个条件概率就是贝叶斯统计的后验概率，而P(Y)、P(N)是先验概率。
 
         知道先验概率，是否为阳性；再根据观察值，来判断癌症的后验概率，这个就是贝叶斯统计。即，后验概率为：
 
-        $$P(Y|A)=\dfrac {P(Y)*P(A|Y)}{P(Y)*P(A|Y)+P(N)*P(A|N)}$$
+        $$P(Y|A)=\frac {P(Y)*P(A|Y)}{P(Y)*P(A|Y)+P(N)*P(A|N)}$$
 
         将上述的A变成样本X，Y/N 变成参数 $\theta$ 于是得到贝叶斯公式：
 
-        $$p(\theta|x)=\dfrac {p(x|\theta)p(\theta)}{\sum _ip(x|\theta)p(\theta)}$$
+        $$p(\theta|x)=\frac {p(x|\theta)p(\theta)}{\sum _ip(x|\theta)p(\theta)}$$
 
         
 
