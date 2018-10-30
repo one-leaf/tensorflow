@@ -545,7 +545,35 @@
 
         第二个不同是贝叶斯的先验概率能够影响概率密度朝先验的区域偏离。先验是人为主观判断影响概率的来源，这样会导致比较好的泛化性能。
 
-        实例贝叶斯线性回归：
+        贝叶斯线性回归
+
+        线性回归的模型是$\hat y=w^Tx$,带入训练样本即：$\hat y_{train}=X_{train}w$,求$y_{train}$高斯条件分布得：
+
+        $$p(y_{train}|X_(train),w)=N(y_{train};X_{train},I)$$
+        $$\propto \exp(-\frac 12(y_{train-X_{train}w})^T(y_{train}-X_{train}w))$$
+
+        按MSE的标准公式，假设y上的高斯方差为1。为了求后验分布，先假定一个先验分布，通常我们用高斯分布作为先验分布：
+
+        $$p(w)=N(w;\mu_0,\Lambda_0) \propto \exp(-\frac 12(w-\mu_0)^T\Lambda _0^{-1}(w-\mu_0))$$
+
+        其中，$\mu_0$ 和 $\Lambda_0$ 分别是先验分布的均值向量和对角协方差矩阵。
+
+        继续确定模型的后验分布：
+
+        $$p(w|X,y)\propto p(y|X,w)p(w)$$
+        $$\propto exp(-\frac 12(y-Xw)^T(w-Xw))exp(-\frac 12(w-\mu_0)^T\Lambda _0^{-1}(w-\mu_0))$$
+        $$\propto exp(-\frac 12(-2y^TXw+w^TX^TXw+w^T\Lambda_0^{-1}w-2\mu_0^T\Lambda_0^{-1}w))$$
+
+        定义： $\Lambda_m=(X^TX+\Lambda_0^{-1})^{-1}$ 和 $\mu_m=\Lambda_m(X^Ty+\Lambda_0^{-1}\mu_0)$ 则上式可以改写为高斯分布：
+
+        $$p(w|X,y)\propto exp(-\frac 12(w-\mu_m)^T\Lambda_m^{-1}(w-\mu_m)+\frac 12\mu_m^T\Lambda_m^{-1}\mu_m)$$
+        $$\propto exp(-\frac 12(w-\mu_m)^T\Lambda_m^{-1}(w-\mu_m))$$
+
+        得出：分布的积分必须归一，意味要删去所有不包括参数向量w的项。
+
+        
+
+
 
 
 
