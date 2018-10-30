@@ -280,10 +280,11 @@
 
                 $$\mathbb E(X)=\int ^{\infty }_{-\infty }\mu\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {x^2}{2\sigma^2} \}dx$$
                 $$=\mu\int ^{\infty }_{-\infty }\frac 1{\sigma\sqrt{2\pi}}exp\{-\frac {x^2}{2\sigma^2} \}dx$$
-
-                根据高斯密度函数的积分等于1，证明需要涉及极坐标变换忽略，所以：
-
-                $$\mathbb E(X)=\mu$$
+                $$=\mu\frac 1{\sigma\sqrt{2\pi}}\int ^{\infty }_{-\infty }exp\{-\frac {x^2}{2\sigma^2} \}dx$$
+                $$=\mu\frac 1{\sigma\sqrt{2\pi}}\int ^{\infty }_{-\infty }exp\{-\frac {1}{2\sigma^2}x^2 \}dx$$
+                $$=\mu\frac 1{\sigma\sqrt{2\pi}}\frac {\sqrt \pi}{\sqrt {\frac 1{2\sigma^2}}}$$
+                $$=\mu\frac 1{\sigma\sqrt{2\pi}}\sqrt \pi\sqrt {2 \sigma^2}$$                
+                $$=\mu$$
 
             高斯的均值参数常用估计量称为样本均值：
 
