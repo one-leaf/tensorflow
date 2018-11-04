@@ -6,3 +6,8 @@
 
 pip install numpy sympy
 
+一些资源：
+
+sympy 的中文教程：
+
+http://www.asmeurer.com/sympy_doc/dev-py3k/tutorial/tutorial.zh.html
