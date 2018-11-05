@@ -51,10 +51,10 @@ for step in range(50000):
     if step % 1000 == 0:
         print(step, tmp_loss) 
 
+# 展示数据
 x_test = np.linspace(0, 1, 1000, dtype=np.float32)
 y_test = np.sin(2 * np.pi * x_test)
 y_test_pred = sess.run(y_pred, feed_dict={x:x_test})
-
 plt.plot(x_test, y_test, 'b', label='real data')
 plt.plot(x_train, y_train, 'bo', label='train data')
 plt.plot(x_test, y_test_pred, 'r', label='predicted data')
