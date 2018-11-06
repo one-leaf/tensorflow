@@ -5,7 +5,7 @@ import random
 # 定义多少个质心
 k_count = 6
 # 是否是k聚类++算法
-is_k_means_plus = True
+is_k_means_plus = False
 
 # 按质心产生随机数据
 def loadDataSet(count=200):
@@ -31,7 +31,7 @@ def init_k_points(dataSet):
                 for point in k_points:
                     vec2 = point
                     distance = calc_distance(vec1, vec2)
-                    if distance<d[-1]:
+                    if distance < d[-1]:
                         d[-1] = distance
             k_points.append(dataSet[d.index(max(d))])
         return k_points
