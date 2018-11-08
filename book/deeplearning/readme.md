@@ -8,6 +8,10 @@
 
 pip install numpy sympy tensorflow matplotlib
 
+或
+
+python -m pip install numpy sympy tensorflow matplotlib
+
 一些资源：
 
 sympy 的中文教程：
