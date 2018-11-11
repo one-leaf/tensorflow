@@ -9,7 +9,7 @@ def draw(n):
     p = 0.3
     s=np.random.binomial(n, p, size=sampleNo)
     plt.hist(s, 50, label='n=%s, p=%s'%(n,p))
-    plt.xlim(0, n)
+    plt.xlim(0,n)
     plt.grid(True)
     plt.legend()
     plt.show()
