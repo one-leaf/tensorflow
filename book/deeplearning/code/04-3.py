@@ -1,3 +1,5 @@
+# 绘制高斯分布模型
+
 import matplotlib.pyplot as plt
 import numpy as np
 import math

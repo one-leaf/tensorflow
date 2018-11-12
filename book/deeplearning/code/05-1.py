@@ -1,3 +1,4 @@
+# pca 分解
 import numpy as np
 
 # X 是输入的矩阵，k是分类个数

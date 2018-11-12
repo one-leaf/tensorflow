@@ -1,3 +1,4 @@
+# relu 和梯度下降计算 xor
 import numpy as np
 import tensorflow as tf
 

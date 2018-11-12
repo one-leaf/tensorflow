@@ -1,3 +1,4 @@
+# 绘制二项分布模型
 import matplotlib.pyplot as plt
 import numpy as np
 import math
