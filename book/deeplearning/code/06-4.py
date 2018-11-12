@@ -18,6 +18,12 @@ def loadDataSet(count=200):
         data[i, :] = center_point[i % K, :]+np.random.normal(0, 0.05, (2))
     return data
 
+# 这里直接用平均值，使用标准softmax会指数太大
+def softmax(z):
+    s = np.sum(z,axis=1)
+    s = s[:, np.newaxis]
+    return z/s
+
 # 初始化参数
 def initParams(K, D):
     # 每个簇的中心值：[K D]
@@ -26,8 +32,6 @@ def initParams(K, D):
     sigmas = np.zeros((D, D, K))
 
     # [D D] 必须是对称矩阵
-    # 1 0
-    # 0 1
     sig = np.eye(D)
     for k in np.arange(0, K):
         sigmas[:, :, k] = sig
@@ -37,26 +41,25 @@ def initParams(K, D):
     return aves, sigmas, pPis
 
 # 样本点对簇的贡献系数
-# pPi : [1 K]
-# px: [N K]
+# pPi : [1 K] 影响系数
+# px: [N K]   概率密度
 # return value: [N K]
 def fgamma(px, pPi):
     z = pPi * px
-    s = np.sum(z,axis=1)
-    s = s[:, np.newaxis]
-    return z/s
+    return softmax(z)
 
 # 每个簇中的样本点的贡献系数之和
-# gam: [N K]
+# gam: [N K]    样本簇概率密度
 # return value: [1 K]
 def fNk(gam):
     nk = np.sum(gam, axis=0)
     return nk[np.newaxis, :]
 
 # 每个簇的均值
-# Nk: [1 K]
-# gam: [N K]
-# x : [N D]
+# aves: [K D]   每个簇的中心点
+# Nk: [1 K]     影响系数
+# gam: [N K]    贡献系数
+# x : [N D]     样本
 # return value: [K D]
 def faverage(aves, Nk, gam, x):
     for k in np.arange(0, K):
@@ -64,10 +67,10 @@ def faverage(aves, Nk, gam, x):
         aves[k, :] = sumd.reshape(1, D)/Nk[:, k]
 
 # 每个簇的方差
-# Nk: [1 K]
-# gam: [N K]
-# x : [N D]
-# aves: [K D]
+# Nk: [1 K]     影响系数
+# gam: [N K]    贡献系数
+# x : [N D]     样本
+# aves: [K D]   每个簇的中心点
 # return value: [D D K]
 def fsigma(sigmas, Nk, gam, x, aves):
     for k in np.arange(0, K):
@@ -80,10 +83,10 @@ def fsigma(sigmas, Nk, gam, x, aves):
         sigmas[:, :, k] = shift2/Nk[:, k]
     return sigmas
 
-# D-维高斯分布的概率密度
-# x ： [N D]
-# aves : [K D]
-# sigmas: [D D K]
+# D-维的概率
+# x ： [N D]            样本
+# aves : [K D]          每个簇的中心点
+# sigmas: [D D K]       每个簇的偏差
 # return value: [N K]
 def fpx(x, aves, sigmas):
     Px = np.zeros((N, K))
@@ -101,12 +104,11 @@ def fpx(x, aves, sigmas):
         # epowsum : N
         epowsum = np.sum(epow, axis=1)
         Px[:, k] = coef3 * np.exp(epowsum)
-    return Px
-
+    return softmax(Px)
 
 # 迭代求解的停止策略
-# px: [N K]
-# pPi: [1 K]
+# px: [N K]         概率密度
+# pPi: [1 K]        影响系数
 # Loss function [1 1]
 def fL(px, pPi):
     # sub: [N 1]
@@ -124,14 +126,15 @@ def stop_iter(threshold, preL, curL):
 def GMM(x, K):
     # loss value initilize
     preL = -np.inf
-    # aves 每个簇的中心值：[K D]
-    # sigmas 每个簇的偏差 [D D K]
-    # pPi 每个簇的影响系数：[1 K]
+    # aves      每个簇的中心值：[K D]
+    # sigmas    每个簇的偏差 [D D K]
+    # pPi       每个簇的影响系数：[1 K]
     aves, sigmas, pPi = initParams(K, D)
     while True:
         # px: 每个数据所属簇的概率 [N K]
         px = fpx(x, aves, sigmas)
-        # print(px)
+        print(px)
+
         # 贡献系数 [N K]
         gam = fgamma(px, pPi)
         # 每个簇中的样本点的贡献系数之和 [1 K]
