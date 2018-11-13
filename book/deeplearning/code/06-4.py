@@ -28,7 +28,7 @@ def softmax(z):
 def initParams(K, D):
     # 每个簇的中心值：[K D]
     aves = np.random.rand(K, D)
-    # 每个簇的偏差 [D D K]
+    # 每个簇的协方差矩阵 [D D K]
     sigmas = np.zeros((D, D, K))
 
     # [D D] 必须是对称矩阵
@@ -86,7 +86,7 @@ def fsigma(sigmas, Nk, gam, x, aves):
 # D-维的概率
 # x ： [N D]            样本
 # aves : [K D]          每个簇的中心点
-# sigmas: [D D K]       每个簇的偏差
+# sigmas: [D D K]       每个簇的协方差矩阵
 # return value: [N K]
 def fpx(x, aves, sigmas):
     Px = np.zeros((N, K))
@@ -94,7 +94,8 @@ def fpx(x, aves, sigmas):
     coef1 = np.power((2*np.pi), (D/2.0))
     for k in np.arange(0, K):
         # coef2 : [1 1]
-        coef2 = np.power((np.linalg.det(sigmas[:, :, k])), 0.5)
+        # 计算行列式的开方
+        coef2 = np.power(np.linalg.det(sigmas[:, :, k]), 0.5) 
         coef3 = 1/(coef1 * coef2)
         # shift: [N D]
         shift = x - aves[k, :]
@@ -104,7 +105,7 @@ def fpx(x, aves, sigmas):
         # epowsum : N
         epowsum = np.sum(epow, axis=1)
         Px[:, k] = coef3 * np.exp(epowsum)
-    return softmax(Px)
+    return Px
 
 # 迭代求解的停止策略
 # px: [N K]         概率密度
@@ -127,22 +128,23 @@ def GMM(x, K):
     # loss value initilize
     preL = -np.inf
     # aves      每个簇的中心值：[K D]
-    # sigmas    每个簇的偏差 [D D K]
+    # sigmas    每个簇的协方差矩阵： [D D K]
     # pPi       每个簇的影响系数：[1 K]
+    # 初始化高斯混合成分参数
     aves, sigmas, pPi = initParams(K, D)
     while True:
         # px: 每个数据所属簇的概率 [N K]
+        # 计算混合成分生成的后验概率
         px = fpx(x, aves, sigmas)
-        print(px)
 
         # 贡献系数 [N K]
         gam = fgamma(px, pPi)
         # 每个簇中的样本点的贡献系数之和 [1 K]
         Nk = fNk(gam)
         pPi = Nk/N
-        # 每个簇的均值 [K D]
+        # 计算每个簇的均值向量 [K D]
         faverage(aves, Nk, gam, x)
-        # 每个簇的方差 [D D K]
+        # 计算每个簇的新协方差矩阵 [D D K]
         fsigma(sigmas, Nk, gam, x, aves)
         # loss function
         curL = fL(px, pPi)
@@ -159,12 +161,32 @@ def classifior(px):
         rslt.append(np.where(row == np.max(row)))
     return np.array(rslt).reshape(-1)
 
+# 计算聚类得分，越大越好
+def calinski_harabasz_score(x, labels):
+    extra_disp, intra_disp = 0., 0.
+    mean = np.mean(x, axis=0)
+    for k in range(K):
+        cluster_k = x[labels == k]
+        mean_k = np.mean(cluster_k, axis=0)
+        extra_disp += len(cluster_k) * np.sum((mean_k - mean) ** 2)
+        intra_disp += np.sum((cluster_k - mean_k) ** 2)
+    return (1. if intra_disp == 0. else
+            extra_disp * (N - K) / (intra_disp * (K - 1.)))
+
 def main():
     x = loadDataSet(N)
 
     # 二维特征的GMM聚类模拟
-    px, aves, sigmas = GMM(x, K)
-    mylabel = classifior(px)
+    score = 0
+    for i in range(10):
+        _px, _aves, _sigmas = GMM(x, K)
+        _mylabel = classifior(_px)
+        _score = calinski_harabasz_score(x, _mylabel)
+
+        if score < _score:
+            aves = _aves
+            mylabel = _mylabel
+            score = _score
 
     # 绘制
     plt.scatter(x[:, 0], x[:, 1], marker='o', c=mylabel)
