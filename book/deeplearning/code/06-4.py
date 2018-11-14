@@ -99,8 +99,8 @@ def fpx(x, aves, sigmas):
         coef3 = 1/(coef1 * coef2)
         # shift: [N D]
         shift = x - aves[k, :]
-        # sigmaInv: [D D]
-        sigmaInv = np.linalg.inv(sigmas[:, :, k])
+        # sigmaInv: [D D] 加了一个随机数防止无解
+        sigmaInv = np.linalg.inv(sigmas[:, :, k] + 1e-8*np.random.rand(D, D))
         epow = -0.5*(shift.dot(sigmaInv)*shift)
         # epowsum : N
         epowsum = np.sum(epow, axis=1)
@@ -132,7 +132,7 @@ def GMM(x, K):
     # pPi       每个簇的影响系数：[1 K]
     # 初始化高斯混合成分参数
     aves, sigmas, pPi = initParams(K, D)
-    while True:
+    for _ in range(100):
         # px: 每个数据所属簇的概率 [N K]
         # 计算混合成分生成的后验概率
         px = fpx(x, aves, sigmas)
@@ -149,7 +149,7 @@ def GMM(x, K):
         # loss function
         curL = fL(px, pPi)
         # 迭代求解的停止策略
-        if stop_iter(1e-10, preL, curL):
+        if stop_iter(1e-16, preL, curL):
             break
         preL = curL
     return px, aves, sigmas
