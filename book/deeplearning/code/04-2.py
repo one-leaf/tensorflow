@@ -9,11 +9,11 @@ def draw(n):
     # 投掷为正面的概率
     p = 0.3
     s=np.random.binomial(n, p, size=sampleNo)
+    plt.figure()
     plt.hist(s, 50, label='n=%s, p=%s'%(n,p))
     plt.xlim(0,n)
     plt.grid(True)
     plt.legend()
-    plt.show()
 
     p_list = [0.1, 0.3, 0.5, 0.8] 
 
@@ -28,6 +28,7 @@ def draw(n):
         y_value = [y_nk[k]*y_value[k] for k in range(n)]
         y_data.append(y_value)
 
+    plt.figure()
     plt.plot(x_data, y_data[0], 'b-', label='n=%s, p=%s'%(n, p_list[0]))
     plt.plot(x_data, y_data[1], 'r-', label='n=%s, p=%s'%(n, p_list[1]))
     plt.plot(x_data, y_data[2], 'g-', label='n=%s, p=%s'%(n, p_list[2]))
@@ -35,7 +36,7 @@ def draw(n):
 
     plt.grid(True)
     plt.legend()
-    plt.show()
 
 draw(100)
 draw(1000)
+plt.show()

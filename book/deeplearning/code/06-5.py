@@ -80,11 +80,11 @@ def main():
     pred[pred!=y_data]=2
 
     # 显示预测结果
-    plt.figure(1)
+    plt.figure()
     plt.scatter(x_data[:, 0], x_data[:, 1], marker='o', c=pred, s=3)
 
     # 显示w的梯度变化
-    plt.figure(2)
+    plt.figure()
     c = iter(cm.rainbow(np.linspace(0, 1, len(grad_list))))
     x = np.linspace(1, 16, 16)
     for i, grad in enumerate(grad_list):
@@ -94,7 +94,7 @@ def main():
     plt.legend()
 
     # 显示梯度，w，和损失函数3者之间的关系
-    fig = plt.figure(3); 
+    fig = plt.figure(); 
     from mpl_toolkits.mplot3d import Axes3D
 
     ax = Axes3D(fig)

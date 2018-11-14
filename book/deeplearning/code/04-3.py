@@ -14,7 +14,7 @@ sigma = 0.1
 # 产生一个符合高斯的分布 
 s = np.random.normal(mu, sigma, sampleNo )
 
-plt.figure(1)
+plt.figure()
 plt.hist(s, 50, label='sigma=0.1, mu=0')
 plt.grid(True)
 plt.legend()
@@ -34,7 +34,7 @@ for sig in sig_list:
     y_data.append(y_sig)
     y_d_data.append(y_sig_d)
 
-plt.figure(2)
+plt.figure()
 plt.plot(x_data, y_data[0], "r-", linewidth=1, label="sigma=%s"%sigma[0])
 plt.plot(x_data, y_data[1], "g-", linewidth=1, label="sigma=%s"%sigma[1])
 plt.plot(x_data, y_data[2], "b-", linewidth=1, label="sigma=%s"%sigma[2])
@@ -42,7 +42,7 @@ plt.plot(x_data, y_data[3], "y-", linewidth=1, label="sigma=%s"%sigma[3])
 plt.grid(True)
 plt.legend()
 
-plt.figure(3)
+plt.figure()
 plt.plot(x_data, y_d_data[0], "r-", linewidth=1, label="d sigma=%s"%sigma[0])
 plt.plot(x_data, y_d_data[1], "g-", linewidth=1, label="d sigma=%s"%sigma[1])
 plt.plot(x_data, y_d_data[2], "b-", linewidth=1, label="d sigma=%s"%sigma[2])
@@ -50,7 +50,7 @@ plt.plot(x_data, y_d_data[3], "y-", linewidth=1, label="d sigma=%s"%sigma[3])
 plt.grid(True)
 plt.legend()
 
-plt.figure(4)
+plt.figure()
 plt.plot(x_data, y_data[2], "r-", linewidth=1, label="sigma=%s"%sigma[2])
 plt.plot(x_data, y_d_data[2], "b-", linewidth=1, label="d sigma=%s"%sigma[2])
 plt.grid(True)
