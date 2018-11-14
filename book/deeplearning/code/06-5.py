@@ -27,15 +27,15 @@ def network():
     layers=[x]
     for i in range(L):
         input_shape = layers[-1].get_shape().as_list()
-        w = tf.Variable(tf.random_uniform([input_shape[1], H_SIZE*(2**i)],-1,1),"hide_w%s"%i)
-        b = tf.Variable(tf.zeros([H_SIZE*(2**i)]),"hide_b%s"%i)
+        w = tf.Variable(tf.random_uniform([input_shape[1], H_SIZE*(2**i)],-1,1),name="hide_weights_%s"%i)
+        b = tf.Variable(tf.zeros([H_SIZE*(2**i)]),name="hide_bias_%s"%i)
         hide_layer = tf.add(tf.matmul(layers[-1], w), b)
         hide_layer = tf.nn.relu(hide_layer)
         layers.append(hide_layer)
 
     input_shape = layers[-1].get_shape().as_list()
-    w = tf.Variable(tf.random_uniform([input_shape[1], 1],-1,1),"full_w%s"%i)
-    b = tf.Variable(tf.zeros([1]),"full_b%s"%i)
+    w = tf.Variable(tf.random_uniform([input_shape[1], 1],-1,1),name="full_weights_%s"%i)
+    b = tf.Variable(tf.zeros([1]),name="full_bias_%s"%i)
     full_connect_layer = tf.add(tf.matmul(layers[-1], w), b)
 
     pred = tf.nn.sigmoid(full_connect_layer)
@@ -45,7 +45,11 @@ def network():
     # tf 的 sigmoid_cross_entropy_with_logits 函数加了防止极大值和极小值，不会出现梯度消失。
     cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y,logits=full_connect_layer))
  
-    train = tf.train.GradientDescentOptimizer(0.005).minimize(cross_entropy)
+    # 增加所有 weights 的正则化
+    vars   = tf.trainable_variables() 
+    lossL2 = tf.add_n([ tf.nn.l2_loss(v) for v in vars if 'weights' in v.name]) * 0.001
+
+    train = tf.train.GradientDescentOptimizer(0.005).minimize(cross_entropy+lossL2)
     
     correct_prediction = tf.equal(tf.round(pred), tf.round(y))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
