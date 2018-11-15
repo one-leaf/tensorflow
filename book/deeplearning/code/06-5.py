@@ -41,7 +41,7 @@ def network():
 
     pred = tf.nn.sigmoid(full_connect_layer,name='y_pred')
 
-    grads = tf.gradients(pred, [w])  
+    w_grads = tf.gradients(pred, [w])  
 
     # tf 的 sigmoid_cross_entropy_with_logits 函数加了防止极大值和极小值，不会出现梯度消失。
     cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y,logits=full_connect_layer))
@@ -52,22 +52,36 @@ def network():
     lossL2 = tf.add_n([ tf.nn.l2_loss(v) for v in vars if 'weights' in v.name]) * k
 
     loss = tf.add(cross_entropy, lossL2, name="loss")
-
-    train = tf.train.GradientDescentOptimizer(0.005).minimize(loss)
+    optimizer = tf.train.GradientDescentOptimizer(0.005)
+    train = optimizer.minimize(loss)
     
     correct_prediction = tf.equal(tf.round(pred), tf.round(y))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
-    return x,y,loss,train,accuracy,pred,grads,w,b
+
+    # 增加可视化数据图
+    tf.summary.scalar('loss', loss)
+    tf.summary.scalar('accuracy', accuracy)
+    # for v in vars:
+    #     if "weights" in v.name:
+    #         name="weights/%s"%v.name
+    #     elif "bias" in v.name:
+    #         name="bias/%s"%v.name
+    #     else:
+    #         name=v.name
+    #     tf.summary.histogram(name, v)
+    
+    grads = optimizer.compute_gradients(loss)
+    for i, (g, v) in enumerate(grads):
+        tf.summary.histogram("gradients/%s/%s"%(i,g.name), g)
+        tf.summary.histogram("vriables/%s/%s"%(i,v.name), v)
+
+    return x,y,loss,train,accuracy,pred,w_grads,w,b
 
 def main():
     x,y,loss,train,accuracy,pred,grads,w,b = network()
 
     # 创建可视化输出
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    tf.summary.scalar('loss', loss)
-    tf.summary.scalar('accuracy', accuracy)
-    tf.summary.histogram('w', w)
-    tf.summary.histogram('b', b)
     merged = tf.summary.merge_all()
 
     sess = tf.Session()
