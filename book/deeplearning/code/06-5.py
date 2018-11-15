@@ -73,6 +73,8 @@ def main():
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
 
+    # 定义日志输出目录
+    # 先运行 tensorboard --logdir=../logs 然后访问 http://127.0.0.1:6006 查看
     writer = tf.summary.FileWriter(os.path.join(dir_path,"../logs"), sess.graph)
 
     batch_size = 100
@@ -82,7 +84,9 @@ def main():
     for t in range(10000):
         x_data, y_data = getData(batch_size)
         
+        # 运行训练和数据采集
         summary, _, _loss, acc = sess.run([merged, train, loss, accuracy], feed_dict={x: x_data, y: y_data})
+        # 保存训练中间的采集数据值
         writer.add_summary(summary, t)
 
         if t % 100==0:
@@ -91,8 +95,6 @@ def main():
             grad_list.append(np.squeeze(_grads))
             w_list.append(np.squeeze(_w))
             lost_list.append(_loss)
-
-
 
     x_data, y_data = getData(10000)
     pred = np.round(sess.run(pred, feed_dict={x: x_data}))
