@@ -12,10 +12,13 @@ mu = 0
 # 标准差
 sigma = 0.1
 # 产生一个符合高斯的分布 
-s = np.random.normal(mu, sigma, sampleNo )
+s = np.random.normal(mu, sigma, sampleNo)
 
 plt.figure()
-plt.hist(s, 50, label='sigma=0.1, mu=0')
+plt.hist(s, sampleNo, label="sigma=%s"%sigma)
+x_data = np.linspace(-1, 1, sampleNo)
+y_data = np.exp(-(x_data - mu) ** 2 /(2* sigma **2))/(math.sqrt(2*math.pi)*sigma)
+plt.plot(x_data, y_data, "r-", linewidth=1, label="sigma=%s"%sigma)
 plt.grid(True)
 plt.legend()
 
@@ -53,6 +56,15 @@ plt.legend()
 plt.figure()
 plt.plot(x_data, y_data[2], "r-", linewidth=1, label="sigma=%s"%sigma[2])
 plt.plot(x_data, y_d_data[2], "b-", linewidth=1, label="d sigma=%s"%sigma[2])
+plt.grid(True)
+plt.legend()
+
+plt.figure()
+plt.plot(x_data, y_data[2], "r-", linewidth=1, label="sigma=%s"%sigma[2])
+y_data_sum = []
+for i in range(len(y_data[2])):
+    y_data_sum.append(np.trapz(y_data[2][0:i])/50)
+plt.plot(x_data, y_data_sum, "g-", linewidth=1, label="s sigma=%s"%sigma[2])   
 plt.grid(True)
 plt.legend()
 
