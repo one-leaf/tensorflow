@@ -4,11 +4,12 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 import tensorflow as tf
+import os
 
 # 网络深度
-L = 3
+L = 1
 # 隐藏层的宽度
-H_SIZE = 4
+H_SIZE = 16
 
 # 获得样本数据x, y
 # x，是随机2维数据，y是分类，x到原点的距离>05，分类为1，否则为0
@@ -22,15 +23,15 @@ def getData(size=100):
 
 # 定义神经网络
 def network():
-    x = tf.placeholder('float', [None, 2])
-    y = tf.placeholder('float', [None, 1])
+    x = tf.placeholder('float', [None, 2], name='x')
+    y = tf.placeholder('float', [None, 1], name='y')
     layers=[x]
     for i in range(L):
         input_shape = layers[-1].get_shape().as_list()
         w = tf.Variable(tf.random_uniform([input_shape[1], H_SIZE*(2**i)],-1,1),name="hide_weights_%s"%i)
         b = tf.Variable(tf.zeros([H_SIZE*(2**i)]),name="hide_bias_%s"%i)
         hide_layer = tf.add(tf.matmul(layers[-1], w), b)
-        hide_layer = tf.nn.relu(hide_layer)
+        hide_layer = tf.nn.relu(hide_layer,name='hide_relu_%s'%i)
         layers.append(hide_layer)
 
     input_shape = layers[-1].get_shape().as_list()
@@ -38,7 +39,7 @@ def network():
     b = tf.Variable(tf.zeros([1]),name="full_bias_%s"%i)
     full_connect_layer = tf.add(tf.matmul(layers[-1], w), b)
 
-    pred = tf.nn.sigmoid(full_connect_layer)
+    pred = tf.nn.sigmoid(full_connect_layer,name='y_pred')
 
     grads = tf.gradients(pred, [w])  
 
@@ -47,32 +48,51 @@ def network():
  
     # 增加所有 weights 的正则化
     vars   = tf.trainable_variables() 
-    lossL2 = tf.add_n([ tf.nn.l2_loss(v) for v in vars if 'weights' in v.name]) * 0.001
+    k = tf.constant(0.001,name="lambda")
+    lossL2 = tf.add_n([ tf.nn.l2_loss(v) for v in vars if 'weights' in v.name]) * k
 
-    train = tf.train.GradientDescentOptimizer(0.005).minimize(cross_entropy+lossL2)
+    loss = tf.add(cross_entropy, lossL2, name="loss")
+
+    train = tf.train.GradientDescentOptimizer(0.005).minimize(loss)
     
     correct_prediction = tf.equal(tf.round(pred), tf.round(y))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, 'float'))
-    return x,y,cross_entropy,train,accuracy,pred,grads,w,b
+    return x,y,loss,train,accuracy,pred,grads,w,b
 
 def main():
-    x,y,cross_entropy,train,accuracy,pred,grads,w,b = network()
+    x,y,loss,train,accuracy,pred,grads,w,b = network()
+
+    # 创建可视化输出
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    tf.summary.scalar('loss', loss)
+    tf.summary.scalar('accuracy', accuracy)
+    tf.summary.histogram('w', w)
+    tf.summary.histogram('b', b)
+    merged = tf.summary.merge_all()
 
     sess = tf.Session()
     sess.run(tf.global_variables_initializer())
+
+    writer = tf.summary.FileWriter(os.path.join(dir_path,"../logs"), sess.graph)
+
     batch_size = 100
     grad_list = []
     w_list = []
     lost_list = []
     for t in range(10000):
         x_data, y_data = getData(batch_size)
-        _, loss, acc = sess.run([train, cross_entropy, accuracy], feed_dict={x: x_data, y: y_data})
+        
+        summary, _, _loss, acc = sess.run([merged, train, loss, accuracy], feed_dict={x: x_data, y: y_data})
+        writer.add_summary(summary, t)
+
         if t % 100==0:
-            print(t, acc, loss)
+            print(t, acc, _loss)
             _grads,_w,_b=(sess.run([grads,w,b], feed_dict={x: x_data, y: y_data}))
             grad_list.append(np.squeeze(_grads))
             w_list.append(np.squeeze(_w))
-            lost_list.append(loss)
+            lost_list.append(_loss)
+
+
 
     x_data, y_data = getData(10000)
     pred = np.round(sess.run(pred, feed_dict={x: x_data}))
@@ -86,7 +106,7 @@ def main():
     # 显示w的梯度变化
     plt.figure()
     c = iter(cm.rainbow(np.linspace(0, 1, len(grad_list))))
-    x = np.linspace(1, 16, 16)
+    x = np.linspace(1, H_SIZE*2**(L-1), H_SIZE*2**(L-1))
     for i, grad in enumerate(grad_list):
         color = next(c)
         if i%10!=0: continue
