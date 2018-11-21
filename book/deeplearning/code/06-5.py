@@ -44,11 +44,11 @@ def network():
     w_grads = tf.gradients(pred, [w])  
 
 
-    # 通过设置log前的最小值不让归0，也可以防止出现log失败
+    # 通过设置log前的最小值不让归0，防止出现 log(0) 未定义
     tf.clip_by_value(pred, 1e-15, 1.0)
     cross_entropy = -tf.reduce_mean(y*tf.log(pred)+(1-y)*tf.log(1-pred))
     
-    # tf 的 sigmoid_cross_entropy_with_logits 函数加了防止极大值和极小值
+    # 也可以直接使用 tf 的 sigmoid_cross_entropy_with_logits 函数，加了防止0
     # cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=y,logits=full_connect_layer))
  
     # 增加所有 weights 的正则化
