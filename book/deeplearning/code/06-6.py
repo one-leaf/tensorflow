@@ -61,7 +61,9 @@ class network():
 
 def main():
     net = network()
-    cross_entropy, optimizer = net.get_loss1()
+    # cross_entropy, optimizer = net.get_loss1()
+    cross_entropy, optimizer = net.get_loss2()
+    # cross_entropy, optimizer = net.get_loss3()
     accuracy = net.get_accuracy()
 
     with tf.Session() as sess:
