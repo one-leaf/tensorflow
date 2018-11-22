@@ -72,7 +72,7 @@ def main():
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
                 sess.run(optimizer, feed_dict={net.x: batch_xs, net.y: batch_ys})
-            print(step, "cross_entropy:", cross_entropy.eval({net.x: batch_xs, net.y: batch_ys}))
+            print(epoch, "cross_entropy:", cross_entropy.eval({net.x: batch_xs, net.y: batch_ys}))
         print('accuracy:', accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels}))
         
 if __name__ == '__main__':
