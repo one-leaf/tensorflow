@@ -11,7 +11,7 @@ mnist = input_data.read_data_sets(os.path.join(curr_path,"../data"), one_hot=Tru
 # 定义神经网络
 class network():
     def __init__(self):
-        self.learning_rate = 0.001
+        self.learning_rate = 0.01
         self.x = tf.placeholder(tf.float32, [None, 784], name='x')
         self.y = tf.placeholder(tf.float32, [None, 10], name='y')
         self.w = tf.Variable(tf.random_uniform([784, 10],-1,1), name="weights")
@@ -59,11 +59,20 @@ class network():
         optimizer= tf.train.GradientDescentOptimizer(self.learning_rate).minimize(cross_entropy)
         return cross_entropy, optimizer
 
+    # tf动量梯度下降
+    def get_loss4(self):
+        # 通过设置log前的最小值不让归0，防止出现 log(0) 未定义
+        tf.clip_by_value(self.pred, 1e-15, 1.0)
+        cross_entropy = tf.reduce_mean(-tf.reduce_sum(self.y*tf.log(self.pred), reduction_indices=1)) 
+        optimizer= tf.train.MomentumOptimizer(self.learning_rate, 0.9).minimize(cross_entropy)
+        return cross_entropy, optimizer
+
 def main():
     net = network()
-    # cross_entropy, optimizer = net.get_loss1()
-    cross_entropy, optimizer = net.get_loss2()
+    cross_entropy, optimizer = net.get_loss1()
+    # cross_entropy, optimizer = net.get_loss2()
     # cross_entropy, optimizer = net.get_loss3()
+    # cross_entropy, optimizer = net.get_loss4()
     accuracy = net.get_accuracy()
 
     with tf.Session() as sess:
