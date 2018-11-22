@@ -16,8 +16,8 @@ class network():
         self.y = tf.placeholder(tf.float32, [None, 10], name='y')
         self.w = tf.Variable(tf.random_uniform([784, 10],-1,1), name="weights")
         self.b = tf.Variable(tf.zeros([10]), name="bias")
-        self.full_connect_layer = tf.add(tf.matmul(x, w), b)
-        self.pred = tf.nn.softmax(full_connect_layer,name='y_pred')
+        self.full_connect_layer = tf.add(tf.matmul(self.x, self.w), self.b)
+        self.pred = tf.nn.softmax(self.full_connect_layer,name='y_pred')
 
     # 获得正确率
     def get_accuracy(self):
@@ -30,10 +30,10 @@ class network():
         tf.clip_by_value(self.pred, 1e-15, 1.0)
         cross_entropy = tf.reduce_mean(-tf.reduce_sum(self.y*tf.log(self.pred), reduction_indices=1)) 
 
-        W_grad =  - tf.matmul ( tf.transpose(self.x) , self.y - self.pred) 
+        w_grad =  - tf.matmul ( tf.transpose(self.x) , self.y - self.pred) 
         b_grad = - tf.reduce_mean( tf.matmul(tf.transpose(self.x), self.y - self.pred), reduction_indices=0)
 
-        new_W = self.W.assign(self.W - self.learning_rate * W_grad)
+        new_w = self.w.assign(self.w - self.learning_rate * w_grad)
         new_b = self.b.assign(self.b - self.learning_rate * b_grad)
         optimizer=[new_w, new_b]
         return cross_entropy, optimizer
@@ -44,9 +44,9 @@ class network():
         tf.clip_by_value(self.pred, 1e-15, 1.0)
         cross_entropy = tf.reduce_mean(-tf.reduce_sum(self.y*tf.log(self.pred), reduction_indices=1)) 
 
-        W_grad, b_grad=tf.gradients(cross_entropy,[self.W,self.b])
+        w_grad, b_grad=tf.gradients(cross_entropy,[self.w,self.b])
 
-        new_W = self.W.assign(self.W - self.learning_rate * W_grad)
+        new_w = self.w.assign(self.w - self.learning_rate * w_grad)
         new_b = self.b.assign(self.b - self.learning_rate * b_grad)
         optimizer=[new_w, new_b]
         return cross_entropy, optimizer
