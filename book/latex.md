@@ -40,7 +40,7 @@ latex 常见语法
 
 1. 集合
 
-    $$\in \ni \notin \forall \cup \cap \subset \supset \varnothing \empty $$
+    $$ \in \ni \notin \forall \cup \cap \subset \supset \varnothing \empty $$
 
     $$\to \land \lor \setminus$$
 
