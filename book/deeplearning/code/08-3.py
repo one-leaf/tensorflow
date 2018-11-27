@@ -36,7 +36,7 @@ class network():
             if width == layer_widths[-1]:
                 layer = self.add_layer(self.teacher_layers[-1], width, False, False, 'teacher', 'layer_%s'%i)
             else:
-                layer = self.add_layer(self.teacher_layers[-1], width, True, i > 3, 'teacher', 'layer_%s'%i)
+                layer = self.add_layer(self.teacher_layers[-1], width, i > 3, i > 3, 'teacher', 'layer_%s'%i)
             self.teacher_layers.append(layer)
         self.teacher_cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.teacher_layers[-1]))
         self.teacher_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.teacher_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
