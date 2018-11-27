@@ -55,7 +55,7 @@ class network():
         # 中间层学习
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[6])
 
-        self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy)
+        self.student_optimizer= tf.train.AdamOptimizer(0.000001).minimize(self.student_cross_entropy)
         
         self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
 
@@ -73,7 +73,7 @@ def main():
          
         # 先训练教师网络
         print("Start train teacher network ...")
-        for epoch in range(30):
+        for epoch in range(50):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
