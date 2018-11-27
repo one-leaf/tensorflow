@@ -42,7 +42,7 @@ class network():
 
         # 学生网络
         self.student_layers = [self.x]
-        layer_widths=[32,32,32,32,32,32,32,32,32,32,16,16,16,16,16,10]
+        layer_widths=[32,32,32,32,32,16,16,16,16,16,10]
         for i, width in enumerate(layer_widths):
             with tf.variable_scope('student_network'):
                 if width==layer_widths[-1]:
@@ -54,7 +54,7 @@ class network():
         self.student_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.student_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
 
         # 中间层损失
-        self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[10])
+        self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[5])
 
         student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
         self.student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.student_cross_entropy+self.teacher_student_loss, var_list=student_vars)
@@ -73,9 +73,7 @@ def main():
         sess.run(tf.global_variables_initializer())
         batch_size = 100
          
-        # 先训练教师网络
-        print("Start train teacher network ...")
-        for epoch in range(50):
+        for epoch in range(20):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
@@ -87,24 +85,6 @@ def main():
             acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t, 'student loss:', loss_s, 'student acc:', acc_s)
-
-        # # 再训练学生网络
-        # print("Start train student middle network ...")
-        # # for epoch in range(50):
-        # while True:
-        #     for step in range(total_batch):
-        #         loss_s,_= sess.run([net.teacher_student_loss, net.teacher_student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
-        #     print(epoch, 'loss:', loss_s, )
-        #     if loss_s<1: break
-
-        # print("Start train student end network ...")
-        # for epoch in range(50):
-        #     for step in range(total_batch):
-        #         loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
-        #     acc = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-        #     print(epoch, 'loss:', loss_s, 'acc:', acc)
-            # acc_dict["student"]= 
-            # print("accuracy", acc_dict["student"])       
 
     # plt.figure()
     # c = iter(cm.rainbow(np.linspace(0, 1, 2)))
