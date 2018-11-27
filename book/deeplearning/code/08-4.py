@@ -79,8 +79,10 @@ def main():
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
-
+                if epoch<10:
+                    loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
+                else:
+                    loss_t = '-'    
                 loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
             acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
