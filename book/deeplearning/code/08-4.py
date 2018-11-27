@@ -42,7 +42,7 @@ class network():
 
         # 学生网络
         self.student_layers = [self.x]
-        layer_widths=[32,32,32,32,32,32,16,16,16,16,10]
+        layer_widths=[32,32,32,32,16,16,16,16,10]
         for i, width in enumerate(layer_widths):
             if width==layer_widths[-1]:
                 layer = self.add_layer(self.student_layers[-1], width, False, False, 'student_layer_%s'%i)
@@ -53,7 +53,7 @@ class network():
         self.student_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.student_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
 
         # 中间层学习
-        self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[6])
+        self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[4])
 
         self.student_optimizer= tf.train.AdamOptimizer(0.000001).minimize(self.student_cross_entropy)
         
