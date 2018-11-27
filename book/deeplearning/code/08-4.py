@@ -73,7 +73,7 @@ def main():
          
         # 先训练教师网络
         print("Start train teacher network ...")
-        for epoch in range(50):
+        for epoch in range(100):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
