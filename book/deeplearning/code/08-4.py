@@ -72,7 +72,7 @@ def main():
         sess.run(tf.global_variables_initializer())
         batch_size = 100
          
-        for epoch in range(20):
+        for epoch in range(50):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
