@@ -74,13 +74,13 @@ def main():
 
         # 先训练教师网络和将学生的中层网络和教师的中层一致
         # 如果需要看效果，可以屏蔽此部分，直接训练学生网络 
-        for epoch in range(50):
-            total_batch = int(mnist.train.num_examples / batch_size)
-            for step in range(total_batch):
-                batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
-            acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t)
+        # for epoch in range(50):
+        #     total_batch = int(mnist.train.num_examples / batch_size)
+        #     for step in range(total_batch):
+        #         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+        #         loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
+        #     acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+        #     print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t)
 
         # 训练学生网络
         for epoch in range(50):
