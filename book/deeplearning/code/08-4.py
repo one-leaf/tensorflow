@@ -55,7 +55,7 @@ class network():
         # 中间层学习
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[5])
 
-        self.student_optimizer= tf.train.AdamOptimizer(0.000001).minimize(self.student_cross_entropy)
+        self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy+self.teacher_student_loss)
         
         self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
 
