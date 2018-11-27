@@ -21,7 +21,7 @@ class network():
         if bn:
             Wx_plus_b = tf.layers.batch_normalization(Wx_plus_b, training=True, name='%s_bn'%name)
         if active_fun:
-            return tf.nn.leaky_relu(Wx_plus_b)
+            return tf.nn.relu(Wx_plus_b)
         return Wx_plus_b
 
     def __init__(self):
