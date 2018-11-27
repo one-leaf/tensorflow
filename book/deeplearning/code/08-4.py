@@ -42,7 +42,7 @@ class network():
 
         # 学生网络
         self.student_layers = [self.x]
-        layer_widths=[32,32,32,32,32,32,32,32,16,16,16,1610]
+        layer_widths=[32,32,32,32,32,32,32,32,16,16,16,16,10]
         for i, width in enumerate(layer_widths):
             if width==layer_widths[-1]:
                 layer = self.add_layer(self.student_layers[-1], width, False, False, 'student_layer_%s'%i)
