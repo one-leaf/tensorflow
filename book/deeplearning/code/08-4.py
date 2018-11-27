@@ -53,7 +53,7 @@ class network():
         self.student_cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.student_layers[-1]))
         self.student_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.student_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
 
-        # 中间层学习
+        # 中间层损失
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[5])
 
         student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
@@ -80,6 +80,11 @@ def main():
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
                 loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
+
+                loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
+            acc = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+            print(epoch, 'loss:', loss_s, 'acc:', acc)
+
             acc = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             print(epoch,'loss:' ,loss_t, 'acc:', acc)
 
