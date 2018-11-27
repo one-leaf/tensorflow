@@ -83,10 +83,10 @@ def main():
 
                 loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
             acc = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch, 'loss:', loss_s, 'acc:', acc)
+            print(epoch, 'student loss:', loss_s, 'student acc:', acc)
 
             acc = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch,'loss:' ,loss_t, 'acc:', acc)
+            print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc)
 
         # # 再训练学生网络
         # print("Start train student middle network ...")
