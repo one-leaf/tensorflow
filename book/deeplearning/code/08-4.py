@@ -42,7 +42,7 @@ class network():
 
         # 学生网络
         self.student_layers = [self.x]
-        layer_widths=[32,32,32,32,32,16,10]
+        layer_widths=[32,32,32,32,32,16,16,10]
         for i, width in enumerate(layer_widths):
             with tf.variable_scope('student_network'):
                 if width==layer_widths[-1]:
@@ -76,10 +76,7 @@ def main():
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                if epoch<0:
-                    loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
-                else:
-                    loss_t = '-'    
+                loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
                 loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
             acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
