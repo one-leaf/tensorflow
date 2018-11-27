@@ -71,7 +71,9 @@ def main():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         batch_size = 100
-         
+
+        # 先训练教师网络和将学生的中层网络和教师的中层一致
+        # 如果需要看效果，可以屏蔽此部分，直接训练学生网络 
         for epoch in range(50):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
@@ -80,6 +82,7 @@ def main():
             acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t)
 
+        # 训练学生网络
         for epoch in range(20):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
@@ -87,16 +90,6 @@ def main():
                 loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
             acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             print(epoch, 'student loss:', loss_s, 'student acc:', acc_s)
-
-    # plt.figure()
-    # c = iter(cm.rainbow(np.linspace(0, 1, 2)))
-    # for normal in [True, False]:
-    #     color = next(c)
-    #     y = loss_dict[normal]
-    #     x = np.linspace(0, len(y), len(y))
-    #     plt.plot(x, y, label='BN: %s (acc: %s) loss'%(normal, acc_dict[normal]), color=color)
-    # plt.legend()
-    # plt.show()
 
 if __name__ == '__main__':
     main()
