@@ -57,9 +57,9 @@ class network():
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[5])
 
         student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
-        self.student_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.student_cross_entropy+self.teacher_student_loss, var_list=student_vars)
+        self.student_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.student_cross_entropy+10*self.teacher_student_loss, var_list=student_vars)
         
-        self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
+        self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+10*self.teacher_student_loss)
 
 def main():
     loss_dict={}
