@@ -42,7 +42,7 @@ class network():
 
         # 学生网络
         self.student_layers = [self.x]
-        layer_widths=[32,32,32,32,32,16,16,16,16,16,10]
+        layer_widths=[32,32,32,32,32,16,10]
         for i, width in enumerate(layer_widths):
             with tf.variable_scope('student_network'):
                 if width==layer_widths[-1]:
