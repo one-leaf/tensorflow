@@ -57,7 +57,7 @@ class network():
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[5])
 
         student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
-        self.student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.student_cross_entropy+self.teacher_student_loss, var_list=student_vars)
+        self.student_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.student_cross_entropy+self.teacher_student_loss, var_list=student_vars)
         
         self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
 
@@ -82,11 +82,9 @@ def main():
                 loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
 
                 loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
-            acc = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch, 'student loss:', loss_s, 'student acc:', acc)
-
-            acc = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc)
+            acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+            acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+            print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t, 'student loss:', loss_s, 'student acc:', acc_s)
 
         # # 再训练学生网络
         # print("Start train student middle network ...")
@@ -97,12 +95,12 @@ def main():
         #     print(epoch, 'loss:', loss_s, )
         #     if loss_s<1: break
 
-        print("Start train student end network ...")
-        for epoch in range(50):
-            for step in range(total_batch):
-                loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
-            acc = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch, 'loss:', loss_s, 'acc:', acc)
+        # print("Start train student end network ...")
+        # for epoch in range(50):
+        #     for step in range(total_batch):
+        #         loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
+        #     acc = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+        #     print(epoch, 'loss:', loss_s, 'acc:', acc)
             # acc_dict["student"]= 
             # print("accuracy", acc_dict["student"])       
 
