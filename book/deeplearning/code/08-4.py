@@ -55,10 +55,9 @@ class network():
         # 中间层学习
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[6])
 
-        # self.teacher_student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_student_loss, var_list=student_vars)
-        self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy)
+        self.student_optimizer= tf.train.GradientDescentOptimizer(0.0001).minimize(self.student_cross_entropy)
         
-        self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
+        self.teacher_optimizer= tf.train.GradientDescentOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
 
 def main():
     loss_dict={}
@@ -74,7 +73,7 @@ def main():
          
         # 先训练教师网络
         print("Start train teacher network ...")
-        for epoch in range(20):
+        for epoch in range(30):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
@@ -92,7 +91,7 @@ def main():
         #     if loss_s<1: break
 
         print("Start train student end network ...")
-        for epoch in range(10):
+        for epoch in range(20):
             for step in range(total_batch):
                 loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
             acc = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
