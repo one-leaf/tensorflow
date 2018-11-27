@@ -58,7 +58,7 @@ class network():
 
         self.teacher_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
         student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
-        self.student_optimizer= tf.train.GradientDescentOptimizer(0.0001).minimize(self.student_cross_entropy, var_list=student_vars)       
+        self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy, var_list=student_vars)       
 
 def main():
     loss_dict={}
@@ -72,13 +72,13 @@ def main():
         sess.run(tf.global_variables_initializer())
         batch_size = 100
          
-        for epoch in range(20):
-            total_batch = int(mnist.train.num_examples / batch_size)
-            for step in range(total_batch):
-                batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
-            acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t)
+        # for epoch in range(20):
+        #     total_batch = int(mnist.train.num_examples / batch_size)
+        #     for step in range(total_batch):
+        #         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+        #         loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
+        #     acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+        #     print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t)
 
         for epoch in range(20):
             total_batch = int(mnist.train.num_examples / batch_size)
