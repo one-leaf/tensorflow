@@ -44,18 +44,20 @@ class network():
         self.student_layers = [self.x]
         layer_widths=[32,32,32,32,32,16,16,16,16,10]
         for i, width in enumerate(layer_widths):
-            if width==layer_widths[-1]:
-                layer = self.add_layer(self.student_layers[-1], width, False, False, 'student_layer_%s'%i)
-            else:
-                layer = self.add_layer(self.student_layers[-1], width, True, False, 'student_layer_%s'%i)
-            self.student_layers.append(layer)
+            with tf.variable_scope('student_network'):
+                if width==layer_widths[-1]:
+                    layer = self.add_layer(self.student_layers[-1], width, False, False, 'student_layer_%s'%i)
+                else:
+                    layer = self.add_layer(self.student_layers[-1], width, True, False, 'student_layer_%s'%i)
+                self.student_layers.append(layer)
         self.student_cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.student_layers[-1]))
         self.student_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.student_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
 
         # 中间层学习
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[5])
 
-        self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy+self.teacher_student_loss)
+        student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
+        self.student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.student_cross_entropy+self.teacher_student_loss, var_list=student_vars)
         
         self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
 
@@ -73,7 +75,7 @@ def main():
          
         # 先训练教师网络
         print("Start train teacher network ...")
-        for epoch in range(100):
+        for epoch in range(50):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
