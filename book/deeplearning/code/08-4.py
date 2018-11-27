@@ -55,8 +55,9 @@ class network():
 
         # 中间层损失
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[8])
+        self.teacher_student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_student_loss)
 
-        self.teacher_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
+        self.teacher_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_cross_entropy)
         student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
         self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy, var_list=student_vars)       
 
@@ -74,13 +75,21 @@ def main():
 
         # 先训练教师网络和将学生的中层网络和教师的中层一致
         # 如果需要看效果，可以屏蔽此部分，直接训练学生网络 
-        for epoch in range(50):
+        for epoch in range(2):
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
                 loss_t,_= sess.run([net.teacher_cross_entropy, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
             acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t)
+
+        for epoch in range(50):
+            total_batch = int(mnist.train.num_examples / batch_size)
+            for step in range(total_batch):
+                batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+                loss_t,_= sess.run([net.teacher_student_loss, net.teacher_student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
+            acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+            print(epoch,'teacher_student loss:' ,loss_t, 'teacher acc:', acc_t)
 
         # 训练学生网络
         for epoch in range(50):
