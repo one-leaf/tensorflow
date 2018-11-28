@@ -104,7 +104,7 @@ def main():
                 for step in range(total_batch):
                     batch_xs, batch_ys = mnist.train.next_batch(batch_size)
                     loss_t,loss_ts,_= sess.run([net.teacher_cross_entropy, net.teacher_student_loss, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
-                acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+                acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels, net.training: False})
                 print(epoch,'teacher loss:' ,loss_t, 'teacher_student loss:' ,loss_ts, 'teacher acc:', acc_t)
                 if loss_ts<0.003 and acc_t>0.97: break
 
@@ -114,7 +114,7 @@ def main():
                 for step in range(total_batch):
                     batch_xs, batch_ys = mnist.train.next_batch(batch_size)
                     loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
-                acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+                acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels, net.training: False})
                 print(epoch, 'student loss:', loss_s, 'student acc:', acc_s)
 
    
