@@ -75,7 +75,9 @@ def main():
 
         # 先训练教师网络和将学生的中层网络和教师的中层一致
         # 如果需要看效果，可以屏蔽此部分，直接训练学生网络 
+        epoch=0
         while True:
+            epoch+=1
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
@@ -84,7 +86,9 @@ def main():
             print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t)
             if acc_t>0.9: break
 
+        epoch=0
         while True:
+            epoch+=1
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
