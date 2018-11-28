@@ -50,7 +50,7 @@ class network():
 
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32))
-        self.optimizer= tf.train.AdamOptimizer(0.01).minimize(self.cross_entropy)
+        self.optimizer= tf.train.AdamOptimizer(0.001).minimize(self.cross_entropy)
     
 def main():
     loss_list=[]
