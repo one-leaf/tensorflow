@@ -25,7 +25,7 @@ ax.spines['left'].set_position(('data',0))
 
 plt.grid(True)
 plt.plot(x, relu(x, 0.1), "r", label="Leaky ReLU")
-plt.plot(x, x*sigmoid(1*x), "g", label="Swish")
+plt.plot(x, x*sigmoid(x), "g", label="Swish")
 plt.plot(x, softplus(x), "y", label="softplus")
 plt.plot(x, relu(x, 0), "b", label="ReLU")
 plt.legend()

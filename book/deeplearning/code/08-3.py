@@ -11,7 +11,7 @@ mnist = input_data.read_data_sets(os.path.join(curr_path,"../data"), one_hot=Tru
 
 # 定义神经网络
 class network():
-        # 增加 batch_normalization
+    # 增加 batch_normalization
     def batch_norm(self, input, eps=1e-05):
         ema = tf.train.ExponentialMovingAverage(decay=0.5)  
         input_shape = input.get_shape().as_list() 
@@ -61,21 +61,19 @@ class network():
         self.student_layers = [self.x]
         layer_widths=[32,32,32,32,32,32,32,32,32,32,32,10]
         for width in layer_widths:
-            with tf.variable_scope('student_network'):
-                if width==layer_widths[-1]:
-                    layer = self.add_layer(self.student_layers[-1], width, False, False)
-                else:
-                    layer = self.add_layer(self.student_layers[-1], width, True, True)
-                self.student_layers.append(layer)
+            if width==layer_widths[-1]:
+                layer = self.add_layer(self.student_layers[-1], width, False, False)
+            else:
+                layer = self.add_layer(self.student_layers[-1], width, True, True)
+            self.student_layers.append(layer)
         self.student_cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.student_layers[-1]))
         self.student_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.student_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
-        student_vars = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope='student_network')
 
         # 中间层损失
         self.teacher_student_loss = tf.losses.mean_squared_error(self.teacher_layers[3], self.student_layers[6])
  
         self.teacher_optimizer= tf.train.AdamOptimizer(0.01).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
-        self.student_optimizer= tf.train.GradientDescentOptimizer(0.01).minimize(self.student_cross_entropy, var_list=student_vars)       
+        self.student_optimizer= tf.train.GradientDescentOptimizer(0.01).minimize(self.student_cross_entropy)       
 
 def main():
     acc_dict={}
