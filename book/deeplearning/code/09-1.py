@@ -36,9 +36,9 @@ class network():
 
         # 3层cnn单元
         x_image = tf.reshape(self.x, [-1,28,28,1])
-        layer1 = self.add_conv_layer(x_image, 5, 4, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-        layer2 = self.add_conv_layer(layer1, 3, 8, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-        layer3 = self.add_conv_layer(layer2, 3, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+        layer1 = self.add_conv_layer(x_image, 5, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+        layer2 = self.add_conv_layer(layer1, 3, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+        layer3 = self.add_conv_layer(layer2, 3, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
 
         # 扁平化，转全连接层做分类输出
         shape = layer3.get_shape().as_list()
@@ -69,9 +69,8 @@ def main():
                 else:
                     loss_totle=loss_totle*0.99+0.01*loss
                 loss_list.append(loss_totle)
-            print(epoch, "cross_entropy:", loss_list[-1])
-        acc = net.accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-        print("accuracy", acc)       
+            acc = net.accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+            print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
 
     plt.figure()
     x = np.linspace(0, len(loss_list), len(loss_list))
