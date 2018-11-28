@@ -35,7 +35,7 @@ class network():
             if width == layer_widths[-1]:
                 layer = self.add_layer(self.teacher_layers[-1], width, False, False, 'teacher_layer_%s'%i)
             else:
-                layer = self.add_layer(self.teacher_layers[-1], width, i!=2, True, 'teacher_layer_%s'%i)
+                layer = self.add_layer(self.teacher_layers[-1], width, True, True, 'teacher_layer_%s'%i)
             self.teacher_layers.append(layer)
         self.teacher_cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.teacher_layers[-1]))
         self.teacher_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.teacher_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
@@ -48,7 +48,7 @@ class network():
                 if width==layer_widths[-1]:
                     layer = self.add_layer(self.student_layers[-1], width, False, False, 'student_layer_%s'%i)
                 else:
-                    layer = self.add_layer(self.student_layers[-1], width, i!=5, False, 'student_layer_%s'%i)
+                    layer = self.add_layer(self.student_layers[-1], width, True, False, 'student_layer_%s'%i)
                 self.student_layers.append(layer)
         self.student_cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.student_layers[-1]))
         self.student_accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.student_layers[-1],1),tf.argmax(self.y,1)),tf.float32))
@@ -83,19 +83,19 @@ def main():
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
                 loss_t,loss_ts,_= sess.run([net.teacher_cross_entropy, net.teacher_student_loss, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
             acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch,'teacher loss:' ,loss_t, 'teacher acc:', acc_t, 'teacher_student loss:' ,loss_ts,)
-            if loss_ts<0.00001: break
+            print(epoch,'teacher loss:' ,loss_t, 'teacher_student loss:' ,loss_ts, 'teacher acc:', acc_t)
+            if loss_ts<0.001 and acc_t>0.97: break
 
-        epoch=0
-        while True:
-            epoch+=1
-            total_batch = int(mnist.train.num_examples / batch_size)
-            for step in range(total_batch):
-                batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                loss_t,_= sess.run([net.teacher_student_loss, net.teacher_student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
-            acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch,'teacher_student loss:' ,loss_t, 'teacher acc:', acc_t)
-            if loss_t<0.00001: break
+        # epoch=0
+        # while True:
+        #     epoch+=1
+        #     total_batch = int(mnist.train.num_examples / batch_size)
+        #     for step in range(total_batch):
+        #         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+        #         loss_t,_= sess.run([net.teacher_student_loss, net.teacher_student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
+        #     acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+        #     print(epoch,'teacher_student loss:' ,loss_t, 'teacher acc:', acc_t)
+        #     if loss_t<0.00001: break
 
         # 训练学生网络
         for epoch in range(50):
