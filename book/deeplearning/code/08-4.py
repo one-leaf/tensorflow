@@ -59,7 +59,7 @@ class network():
         self.teacher_student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_student_loss, var_list=student_vars)
 
         self.teacher_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
-        self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy, var_list=student_vars)       
+        self.student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.student_cross_entropy+self.teacher_student_loss, var_list=student_vars)       
 
 def main():
     loss_dict={}
@@ -102,9 +102,9 @@ def main():
             total_batch = int(mnist.train.num_examples / batch_size)
             for step in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                loss_s,_= sess.run([net.student_cross_entropy, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
+                loss_s,loss_ts,_= sess.run([net.student_cross_entropy, net.teacher_student_loss, net.student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})       
             acc_s = net.student_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch, 'student loss:', loss_s, 'student acc:', acc_s)
+            print(epoch, 'student loss:', loss_s, 'teacher_student loss:' ,loss_ts, 'student acc:', acc_s)
 
 if __name__ == '__main__':
     main()
