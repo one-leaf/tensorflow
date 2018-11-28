@@ -59,7 +59,7 @@ class network():
         self.teacher_student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_student_loss, var_list=student_vars)
 
         self.teacher_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.teacher_cross_entropy+self.teacher_student_loss)
-        self.student_optimizer= tf.train.AdamOptimizer(0.001).minimize(self.student_cross_entropy, var_list=student_vars)       
+        self.student_optimizer= tf.train.AdamOptimizer(0.0001).minimize(self.student_cross_entropy, var_list=student_vars)       
 
 def main():
     loss_dict={}
