@@ -81,7 +81,6 @@ def main():
                 epochs=[0,20]
 
             # 先训练教师网络和将学生的中层网络和教师的中层一致
-            # 如果需要看效果，可以屏蔽此部分，直接训练学生网络 
             for epoch in range(epochs[0]):
                 total_batch = int(mnist.train.num_examples / batch_size)
                 for step in range(total_batch):
