@@ -120,8 +120,8 @@ def main():
 
     plt.figure()
     x = np.linspace(0, epochs_count, epochs_count)
-    plt.plot(x, acc_dict["teacher-student"], label='T-S acc'), color='r')
-    plt.plot(x, acc_dict["student"], label='S acc'), color='b')
+    plt.plot(x, acc_dict["teacher-student"], label='T-S acc', color='r')
+    plt.plot(x, acc_dict["student"], label='S acc', color='b')
     plt.legend()
     plt.show()
 
