@@ -84,18 +84,7 @@ def main():
                 loss_t,loss_ts,_= sess.run([net.teacher_cross_entropy, net.teacher_student_loss, net.teacher_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
             acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
             print(epoch,'teacher loss:' ,loss_t, 'teacher_student loss:' ,loss_ts, 'teacher acc:', acc_t)
-            if loss_ts<0.005 and acc_t>0.97: break
-
-        # epoch=0
-        # while True:
-        #     epoch+=1
-        #     total_batch = int(mnist.train.num_examples / batch_size)
-        #     for step in range(total_batch):
-        #         batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-        #         loss_t,_= sess.run([net.teacher_student_loss, net.teacher_student_optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})   
-        #     acc_t = net.teacher_accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-        #     print(epoch,'teacher_student loss:' ,loss_t, 'teacher acc:', acc_t)
-        #     if loss_t<0.00001: break
+            if loss_ts<0.003 and acc_t>0.97: break
 
         # 训练学生网络
         for epoch in range(50):
