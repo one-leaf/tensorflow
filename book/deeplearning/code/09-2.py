@@ -56,7 +56,7 @@ def main():
     net = network("resnet50")
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        batch_size = 10
+        batch_size = 100
         loss_totle = 0 
         for epoch in range(10):
             total_batch = int(mnist.train.num_examples / batch_size)
