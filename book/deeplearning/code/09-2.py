@@ -43,12 +43,8 @@ class network():
         self.x = tf.placeholder(tf.float32, [None, 784], name='x')
         self.y = tf.placeholder(tf.float32, [None, 10], name='y')
 
-        w = tf.Variable(tf.random_normal([784, 784]))
-        b = tf.Variable(tf.zeros([784])+0.1)
-        self.hide_layer = tf.nn.relu(tf.add(tf.matmul(self.x, w), b))
-
         # 3层cnn单元
-        x_image = tf.reshape(self.hide_layer, [-1,28,28,1])
+        x_image = tf.reshape(self.x, [-1,28,28,1])
         layer1 = self.add_conv_layer(x_image, 5, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
         layer2 = self.add_conv_layer(layer1, 5, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
         layer3 = self.add_conv_layer(layer2, 3, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
@@ -57,7 +53,15 @@ class network():
         shape = layer3.get_shape().as_list()
         layer_size = shape[1]*shape[2]*shape[3]
         layer = tf.reshape(layer3, [-1,layer_size])
-        w = tf.Variable(tf.random_normal([layer_size, 10]))
+
+        w = tf.Variable(tf.random_normal([784, layer_size]))
+        b = tf.Variable(tf.zeros([layer_size])+0.1)
+        hide_layer = tf.nn.relu(tf.add(tf.matmul(self.x, w), b))
+
+        layer = tf.concat([layer,hide_layer],-1)
+        print(layer.shape)
+
+        w = tf.Variable(tf.random_normal([layer_size*2, 10]))
         b = tf.Variable(tf.zeros([10])+0.1)
         self.full_connect_layer = tf.add(tf.matmul(layer, w), b)
 
