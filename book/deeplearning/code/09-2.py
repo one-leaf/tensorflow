@@ -69,9 +69,9 @@ def main():
         loss_totle = 0 
         for epoch in range(10):
             total_batch = int(mnist.train.num_examples / batch_size)
-            for step in range(total_batch):
+            for _ in range(total_batch):
                 batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                loss,_= sess.run([net.cross_entropy,net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
+                loss,_,step= sess.run([net.cross_entropy,net.optimizer,net.global_step], feed_dict={net.x: batch_xs, net.y: batch_ys})
                 if loss_totle==0:
                     loss_totle=loss
                 else:
