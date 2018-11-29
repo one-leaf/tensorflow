@@ -34,13 +34,17 @@ class network():
         inputs = tf.reshape(self.x, [-1,28,28,1]) 
         inputs = tf.image.resize_images(inputs, (224, 224))     
         if network=="resnet50":
-            net, endpoints = nets.resnet_v2.resnet_v2_50(inputs, num_classes=1000, is_training=self.training)
+            with slim.arg_scope(nets.resnet_v2.resnet_arg_scope()):
+                net, endpoints = nets.resnet_v2.resnet_v2_50(inputs, num_classes=1000, is_training=self.training)
         elif network=="vgg19":
-            net, endpoints = nets.vgg.vgg_19(inputs, num_classes=1000, is_training=self.training)
+            with slim.arg_scope(nets.vgg.vgg_arg_scope()):
+                net, endpoints = nets.vgg.vgg_19(inputs, num_classes=1000, is_training=self.training)
         elif network=="inception":
-            net, endpoints = nets.inception.inception_v3(inputs, num_classes=1000, is_training=self.training)
+            with slim.arg_scope(nets.inception.inception_v3_arg_scope()):
+                net, endpoints = nets.inception.inception_v3(inputs, num_classes=1000, is_training=self.training)
         elif network=="alexnet":
-            net, endpoints = nets.alexnet.alexnet_v2(inputs, num_classes=1000, is_training=self.training)
+            with slim.arg_scope(nets.alexnet.alexnet_v2_arg_scope()):
+                net, endpoints = nets.alexnet.alexnet_v2(inputs, num_classes=1000, is_training=self.training)
         else:
             raise Exception("UNKOWN MODLE %s"%network)
         
@@ -49,8 +53,10 @@ class network():
         
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32))
-        self.optimizer= tf.train.AdamOptimizer(0.001).minimize(self.cross_entropy)
-    
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.optimizer= tf.train.AdamOptimizer(0.001).minimize(self.cross_entropy)
+
 def main():
     loss_list=[]
     net = network("resnet50")
