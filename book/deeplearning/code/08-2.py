@@ -5,10 +5,23 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import os
 
-# 导入手写体数据
-from tensorflow.examples.tutorials.mnist import input_data
-curr_path = os.path.dirname(os.path.realpath(__file__))
-mnist = input_data.read_data_sets(os.path.join(curr_path,"../data"), one_hot=True)
+class dateset():
+    def __init__(self,images,labels):
+        self.num_examples=len(images)                   # 样本数量
+        self.images=np.reshape(images/255.,[-1,28*28])  # 图片归一化加扁平化
+        self.labels=np.eye(10)[labels]                  # 标签 one-hot 化
+    def next_batch(self, batch_size):                   # 随机抓一批图片和标签
+        batch_index = np.random.choice(self.num_examples, batch_size)
+        return self.images[batch_index], self.labels[batch_index]
+class mnist():
+    def __init__(self):
+        # 导入mnist手写数据，x shape: (?,28,28); y shape: (?); x value: 0~255; y value: 0~9
+        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+        self.train=dateset(x_train, y_train)
+        self.test=dateset(x_test, y_test)
+
+# 导入手写数据集
+mnist = mnist()
 
 # 定义神经网络
 class network():
@@ -51,9 +64,9 @@ class network():
         for i in range(layer_count):
             layer = self.add_layer(layer,64,batch_normalization)
 
-        self.w = tf.Variable(tf.random_normal([64, 10]), name="weights")
-        self.b = tf.Variable(tf.zeros([10]), name="bias")
-        self.full_connect_layer = tf.add(tf.matmul(layer, self.w), self.b)
+        w = tf.Variable(tf.random_normal([64, 10]))
+        b = tf.Variable(tf.zeros([10]))
+        self.full_connect_layer = tf.add(tf.matmul(layer, w), b)
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32))
         self.optimizer= tf.train.AdamOptimizer(0.001).minimize(self.cross_entropy)

@@ -5,22 +5,35 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import os
 
-# 导入手写体数据
-from tensorflow.examples.tutorials.mnist import input_data
-curr_path = os.path.dirname(os.path.realpath(__file__))
-mnist = input_data.read_data_sets(os.path.join(curr_path,"../data"), one_hot=True)
+class dateset():
+    def __init__(self,images,labels):
+        self.num_examples=len(images)                   # 样本数量
+        self.images=np.reshape(images/255.,[-1,28*28])  # 图片归一化加扁平化
+        self.labels=np.eye(10)[labels]                  # 标签 one-hot 化
+    def next_batch(self, batch_size):                   # 随机抓一批图片和标签
+        batch_index = np.random.choice(self.num_examples, batch_size)
+        return self.images[batch_index], self.labels[batch_index]
+class mnist():
+    def __init__(self):
+        # 导入mnist手写数据，x shape: (?,28,28); y shape: (?); x value: 0~255; y value: 0~9
+        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+        self.train=dateset(x_train, y_train)
+        self.test=dateset(x_test, y_test)
+
+# 导入手写数据集
+mnist = mnist()
 
 # 定义神经网络
 class network():
     def __init__(self, loss_optimizer):
         self.x = tf.placeholder(tf.float32, [None, 784], name='x')
         self.y = tf.placeholder(tf.float32, [None, 10], name='y')
-        self.h_w = tf.Variable(tf.random_uniform([784, 784],-1,1), name="hide_weights")
-        self.h_b = tf.Variable(tf.zeros([784]), name="hide_bias")
-        self.hide_layer = tf.nn.relu(tf.add(tf.matmul(self.x, self.h_w), self.h_b))
-        self.w = tf.Variable(tf.random_uniform([784, 10],-1,1), name="weights")
-        self.b = tf.Variable(tf.zeros([10]), name="bias")
-        self.full_connect_layer = tf.add(tf.matmul(self.hide_layer, self.w), self.b)
+        h_w = tf.Variable(tf.random_uniform([784, 784],-1,1), name="hide_weights")
+        h_b = tf.Variable(tf.zeros([784]), name="hide_bias")
+        hide_layer = tf.nn.relu(tf.add(tf.matmul(self.x, h_w), h_b))
+        w = tf.Variable(tf.random_uniform([784, 10],-1,1), name="weights")
+        b = tf.Variable(tf.zeros([10]), name="bias")
+        self.full_connect_layer = tf.add(tf.matmul(hide_layer, w), b)
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32))
         self.optimizer= loss_optimizer.minimize(self.cross_entropy)

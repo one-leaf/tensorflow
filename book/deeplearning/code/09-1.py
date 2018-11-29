@@ -5,10 +5,23 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import os
 
-# 导入手写体数据
-from tensorflow.examples.tutorials.mnist import input_data
-curr_path = os.path.dirname(os.path.realpath(__file__))
-mnist = input_data.read_data_sets(os.path.join(curr_path,"../data"), one_hot=True)
+class dateset():
+    def __init__(self,images,labels):
+        self.num_examples=len(images)                   # 样本数量
+        self.images=np.reshape(images/255.,[-1,28*28])  # 图片归一化加扁平化
+        self.labels=np.eye(10)[labels]                  # 标签 one-hot 化
+    def next_batch(self, batch_size):                   # 随机抓一批图片和标签
+        batch_index = np.random.choice(self.num_examples, batch_size)
+        return self.images[batch_index], self.labels[batch_index]
+class mnist():
+    def __init__(self):
+        # 导入mnist手写数据，x shape: (?,28,28); y shape: (?); x value: 0~255; y value: 0~9
+        (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+        self.train=dateset(x_train, y_train)
+        self.test=dateset(x_test, y_test)
+
+# 导入手写数据集
+mnist = mnist()
 
 # 定义神经网络
 class network():
@@ -19,16 +32,12 @@ class network():
         Weights = tf.Variable(tf.truncated_normal([filter_size, filter_size, shape[-1], out_size], stddev=0.1))
         biases = tf.Variable(tf.zeros([out_size]) + 0.1)
         layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='VALID')
-        Wconvlayer_plus_b = layer + biases
-        if activation_function is None:
-            convlayer = Wconvlayer_plus_b
-        else:
-            convlayer = activation_function(Wconvlayer_plus_b)
-        if pool_function is None:
-            outputs = convlayer
-        else:
-            outputs = pool_function(convlayer, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
-        return outputs
+        output = layer + biases
+        if activation_function != None: 
+            output = activation_function(output)
+        if pool_function != None:
+            output = pool_function(output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
+        return output
 
     def __init__(self):
         self.x = tf.placeholder(tf.float32, [None, 784], name='x')
@@ -37,7 +46,7 @@ class network():
         # 3层cnn单元
         x_image = tf.reshape(self.x, [-1,28,28,1])
         layer1 = self.add_conv_layer(x_image, 5, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-        layer2 = self.add_conv_layer(layer1, 3, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
+        layer2 = self.add_conv_layer(layer1, 5, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
         layer3 = self.add_conv_layer(layer2, 3, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
 
         # 扁平化，转全连接层做分类输出
