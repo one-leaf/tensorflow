@@ -64,9 +64,9 @@ class network():
         for i in range(layer_count):
             layer = self.add_layer(layer,64,batch_normalization)
 
-        w = tf.Variable(tf.random_normal([64, 10]))
+        W = tf.Variable(tf.random_normal([64, 10]))
         b = tf.Variable(tf.zeros([10]))
-        self.full_connect_layer = tf.add(tf.matmul(layer, w), b)
+        self.full_connect_layer = tf.add(tf.matmul(layer, W), b)
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32))
         self.optimizer= tf.train.AdamOptimizer(0.001).minimize(self.cross_entropy)
