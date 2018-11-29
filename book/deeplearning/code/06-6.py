@@ -1,7 +1,6 @@
 # 反向传播1
 import numpy as np
 import tensorflow as tf
-import os
 
 class dateset():
     def __init__(self,images,labels):

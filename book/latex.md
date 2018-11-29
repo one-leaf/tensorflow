@@ -8,15 +8,9 @@ latex 常见语法
 
     $$\Alpha \Beta \Gamma \Delta \Epsilon \Zeta \Eta \Theta	\Iota \Kappa \Lambda \Mu \Nu \Xi \Omicron \Pi	\Rho \Sigma \Tau \Upsilon \Phi \Chi \Psi \Omega$$
 
-    $$\ $$
-
     $$\alpha \beta \gamma \delta \epsilon \zeta \eta \theta	\iota \kappa\varkappa \lambda \mu \nu \xi \omicron \pi \rho \sigma \tau \upsilon \phi \chi \psi \omega$$
 
-    $$\ $$
-
     $$\Epsilon \epsilon \varepsilon \Theta \theta \vartheta \Kappa \kappa \varkappa$$
-
-    $$\ $$
 
     $$\Pi \pi \varpi \Rho \rho \varrho \Sigma \sigma \varsigma \Phi \phi \varphi$$
 
@@ -28,13 +22,7 @@ latex 常见语法
 
     $$(\frac{1}{2}) \left( \frac{1}{2} \right)$$
 
-    $$\ $$
-
     $$|\frac{1}{2}| \left|\frac{1}{2}\right| \left\|\frac{1}{2}\right\|$$
-
-    $$\ $$
-
-    $$\{\frac{1}{2}\} \left\{ \frac{1}{2} \right\}$$
 
 1. 空格
 
@@ -48,21 +36,17 @@ latex 常见语法
 
     $$\lim _{i=0}x_i \frac {x+1}{x-1} \sqrt [n]{x^3+1} \pi$$
 
-    $$\ $$
-
     $$k'(x)=\lim_{\Delta x\to 0}\frac{k(x)-k(x-\Delta x)}{\Delta x}$$
 
 1. 集合
 
-    $$ \in \ni \notin \forall \cup \cap \subset \supset \varnothing \empty $$
+    $$\in \ni \notin \forall \cup \cap \subset \supset \varnothing \empty $$
 
     $$\to \land \lor \setminus$$
 
 1. 等于
 
     $$\sim \approx \simeq \cong \dot= \ggg \gg \ge \geqq \leq \leqq \ll \lll \equiv$$
-
-    $$\ $$
 
     $$\pm \mp \ne \neq \propto \not\equiv$$
 
@@ -74,20 +58,13 @@ latex 常见语法
 
     $$\leftarrow \rightarrow \gets \to \leftrightarrow \longleftarrow \longrightarrow \mapsto \longmapsto \hookleftarrow \hookrightarrow \nearrow \searrow \swarrow \nwarrow \uparrow \downarrow \updownarrow$$
 
-    $$\ $$
-
     $$\Leftarrow \Rightarrow \Leftrightarrow \Longleftarrow \Longrightarrow \Longleftrightarrow \Uparrow \Downarrow \Updownarrow$$
 
 1. 符号
 
     $$\eth \% \dots \ldots \vdots \smile \frown \wr$$
 
-    $$\ $$
-
     $$\oplus \bigoplus \otimes \bigotimes \times \div \circ \bullet \odot \bigodot \boxtimes \boxplus$$
-
-    $$\ $$
-
 
     $$\triangleleft \triangleright \infty \bot \top \vdash \Vdash \vDash \models \lVert \rVert $$
 
@@ -95,19 +72,9 @@ latex 常见语法
 
     $$\imath \hbar \ell \mho \Re \Im \wp \complement \Game \flat \natural \sharp \heartsuit \clubsuit \spadesuit \diamondsuit \because \therefore$$
 
-    $$\ $$
+    $$\sum _{i=1}^nk^2 \prod_{i=1}^n x_i \coprod_{i=1}^n \lim_{n\to\infty}x_n \int_1^1 \iint_d^w \iiint_x^y \oint_0^1 \bigcap_1^n \bigcup_1^k$$
 
-    $$\sum _{i=1}^nk^2 \prod_{i=1}^n x_i \coprod_{i=1}^n \lim_{n\to\infty}x_n \int _{i=0}^{\infty} f(x)dx \iint_d^w \iiint_x^y \oint_0^1 \bigcap_1^n \bigcup_1^k $$
-
-    $$\ $$
-
-    $$\tfrac 23  \frac 12 \frac {\partial f(x,y)} {\partial x \partial y} \dbinom nr \tbinom nr$$
-
-    $$\ $$
-
-    $$\cfrac 2{c+\cfrac 2{2}}$$
-
-    $$\ $$
+    $$\frac 12 \tfrac 23 \cfrac 2{c+\cfrac 2{2}} \frac 24 \dbinom nr \tbinom nr$$
 
     $$a^2 a_2 x_2^3 {}_1^2\!x_3^4 x' x^\prime x\prime$$
 
@@ -129,15 +96,12 @@ latex 常见语法
 
     $$\begin{array}{lcl} z & = & a \\ f(x,y,z) & = & x + y + z \end{array}$$
 
-    $$\ $$
-
     $$\begin{array}{lcr} z & = & a \\ f(x,y,z) & = & x + y + z \end{array}$$
 
-    $$\ $$
-
-    $$\begin{cases} x^2+2x=1 \\ y^3-1=0 \end{cases}$$
-
-    $$\ $$
+    $$\begin{cases}
+x^2+2x=1 \\
+y^3-1=0
+\end{cases}$$
 
     $$\begin{aligned}
 a&=x+1 \\

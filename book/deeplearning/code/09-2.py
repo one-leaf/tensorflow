@@ -1,8 +1,10 @@
-# 简单 CNN
+# 常用 CNN 模型，需要 GPU 支持
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from tensorflow.contrib.slim import nets
+slim = tf.contrib.slim
 
 class dateset():
     def __init__(self,images,labels):
@@ -24,48 +26,37 @@ mnist = mnist()
 
 # 定义神经网络
 class network():
-
-    # 增加卷积层
-    def add_conv_layer(self, inputs, filter_size, out_size, activation_function=None, pool_function=None):
-        shape = inputs.get_shape().as_list()
-        Weights = tf.Variable(tf.truncated_normal([filter_size, filter_size, shape[-1], out_size], stddev=0.1))
-        biases = tf.Variable(tf.zeros([out_size]) + 0.1)
-        layer = tf.nn.conv2d(inputs, Weights, strides=[1, 1, 1, 1], padding='VALID')
-        output = layer + biases
-        if activation_function != None: 
-            output = activation_function(output)
-        if pool_function != None:
-            output = pool_function(output, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='VALID')
-        return output
-
-    def __init__(self):
+    def __init__(self, network):
         self.x = tf.placeholder(tf.float32, [None, 784], name='x')
         self.y = tf.placeholder(tf.float32, [None, 10], name='y')
+        self.training = tf.placeholder_with_default(True, shape=(), name='training')
 
-        # 3层cnn单元
-        x_image = tf.reshape(self.x, [-1,28,28,1])
-        layer1 = self.add_conv_layer(x_image, 5, 16, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-        layer2 = self.add_conv_layer(layer1, 5, 32, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-        layer3 = self.add_conv_layer(layer2, 3, 64, activation_function=tf.nn.relu, pool_function=tf.nn.max_pool) 
-
-        # 扁平化，转全连接层做分类输出
-        shape = layer3.get_shape().as_list()
-        layer_size = shape[1]*shape[2]*shape[3]
-        layer = tf.reshape(layer3, [-1,layer_size])
-        w = tf.Variable(tf.random_normal([layer_size, 10]))
-        b = tf.Variable(tf.zeros([10]))
-        self.full_connect_layer = tf.add(tf.matmul(layer, w), b)
-
+        inputs = tf.reshape(self.x, [-1,28,28,1]) 
+        inputs = tf.image.resize_images(inputs, (224, 224))     
+        if network=="resnet50":
+            net, endpoints = nets.resnet_v2.resnet_v2_50(inputs, num_classes=1000, is_training=self.training)
+        elif network=="vgg19":
+            net, endpoints = nets.vgg.vgg_19(inputs, num_classes=1000, is_training=self.training)
+        elif network=="inception":
+            net, endpoints = nets.inception.inception_v3(inputs, num_classes=1000, is_training=self.training)
+        elif network=="alexnet":
+            net, endpoints = nets.alexnet.alexnet_v2(inputs, num_classes=1000, is_training=self.training)
+        else:
+            raise Exception("UNKOWN MODLE %s"%network)
+        
+        net=slim.flatten(net)
+        self.full_connect_layer= slim.fully_connected(net, num_outputs=10, activation_fn=None)
+        
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32))
         self.optimizer= tf.train.AdamOptimizer(0.001).minimize(self.cross_entropy)
     
 def main():
     loss_list=[]
-    net = network()
+    net = network("resnet50")
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        batch_size = 100
+        batch_size = 10
         loss_totle = 0 
         for epoch in range(10):
             total_batch = int(mnist.train.num_examples / batch_size)
