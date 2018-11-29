@@ -32,10 +32,10 @@ class network():
         self.training = tf.placeholder_with_default(True, shape=(), name='training')
 
         inputs = tf.reshape(self.x, [-1,28,28,1]) 
-        # 将图片直接用0填充到 [224,224] 大小
-        inputs = tf.image.pad_to_bounding_box(inputs, (224-28)//2, (224-28)//2, 224, 224)     
-        # 也可以直接将图片缩放到 [224,224] 大小
-        # inputs = tf.image.resize_images(inputs, [224, 224])     
+        # 直接将图片缩放到 [224,224] 大小
+        inputs = tf.image.resize_images(inputs, [224, 224])     
+        # 也可以将图片直接用0填充到 [224,224] 大小
+        # inputs = tf.image.pad_to_bounding_box(inputs, (224-28)//2, (224-28)//2, 224, 224)     
 
         if network=="resnet50":
             with slim.arg_scope(nets.resnet_v2.resnet_arg_scope()):
@@ -56,7 +56,8 @@ class network():
         self.full_connect_layer= slim.fully_connected(net, num_outputs=10, activation_fn=None)
         
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
-        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32))       
+        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32)) 
+        self.global_step = slim.create_global_step()      
         self.optimizer = slim.learning.create_train_op(self.cross_entropy, tf.train.AdamOptimizer(0.001))
 
 def main():
