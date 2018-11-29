@@ -69,7 +69,8 @@ def main():
                     loss_totle=loss_totle*0.99+0.01*loss
                 loss_list.append(loss_totle)
                 if step % 10 == 0:
-                    acc = net.accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+                    test_xs, test_ys =  mnist.test.next_batch(batch_size)
+                    acc = net.accuracy.eval({net.x: test_xs, net.y: test_ys})
                     print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
 
     plt.figure()
