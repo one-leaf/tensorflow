@@ -57,7 +57,7 @@ class network():
         
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(labels=self.y, logits=self.full_connect_layer))
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.full_connect_layer,1),tf.argmax(self.y,1)),tf.float32)) 
-        self.global_step = slim.create_global_step()      
+        self.global_step = tf.train.create_global_step()      
         self.optimizer = slim.learning.create_train_op(self.cross_entropy, tf.train.AdamOptimizer(0.001))
 
 def main():
@@ -78,7 +78,7 @@ def main():
                     loss_totle=loss_totle*0.99+0.01*loss
                 loss_list.append(loss_totle)
                 if step % 10 == 0:
-                    test_xs, test_ys =  mnist.test.next_batch(batch_size)
+                    test_xs, test_ys = mnist.test.next_batch(batch_size)
                     acc = net.accuracy.eval({net.x: test_xs, net.y: test_ys, net.training: False})
                     print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
 
