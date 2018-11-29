@@ -68,8 +68,9 @@ def main():
                 else:
                     loss_totle=loss_totle*0.99+0.01*loss
                 loss_list.append(loss_totle)
-            acc = net.accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
+                if step % 10 == 0:
+                    acc = net.accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
+                    print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
 
     plt.figure()
     x = np.linspace(0, len(loss_list), len(loss_list))
