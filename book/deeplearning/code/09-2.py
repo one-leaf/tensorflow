@@ -32,7 +32,7 @@ class network():
         self.training = tf.placeholder_with_default(True, shape=(), name='training')
 
         inputs = tf.reshape(self.x, [-1,28,28,1]) 
-        inputs = tf.image.resize_images(inputs, (224, 224))     
+        inputs = tf.image.pad_to_bounding_box(inputs, (224-28)//2, (224-28)//2, 224, 224)     
         if network=="resnet50":
             with slim.arg_scope(nets.resnet_v2.resnet_arg_scope()):
                 net, endpoints = nets.resnet_v2.resnet_v2_50(inputs, num_classes=1000, is_training=self.training)
