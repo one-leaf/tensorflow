@@ -32,7 +32,7 @@ class network():
         input_shape = input.get_shape().as_list() 
         axes = list(range(len(input_shape) - 1))
 
-        pop_mean, pop_var = tf.nn.moments(input, axes, name='moments')
+        pop_mean, pop_var = tf.nn.moments(input, axes)
         def mean_var_with_update():
             ema_apply_op = ema.apply([pop_mean, pop_var])
             with tf.control_dependencies([ema_apply_op]):
