@@ -26,7 +26,7 @@ mnist = mnist()
 
 # 定义神经网络
 class network():
-    def __init__(self, network):
+    def __init__(self, modle):
         self.x = tf.placeholder(tf.float32, [None, 784], name='x')
         self.y = tf.placeholder(tf.float32, [None, 10], name='y')
         self.training = tf.placeholder_with_default(True, shape=(), name='training')
@@ -37,20 +37,20 @@ class network():
         # 也可以将图片直接用0填充到 [224,224] 大小
         # inputs = tf.image.pad_to_bounding_box(inputs, (224-28)//2, (224-28)//2, 224, 224)     
 
-        if network=="resnet50":
+        if modle=="resnet50":
             with slim.arg_scope(nets.resnet_v2.resnet_arg_scope()):
                 net, endpoints = nets.resnet_v2.resnet_v2_50(inputs, num_classes=1000, is_training=self.training)
-        elif network=="vgg19":
+        elif modle=="vgg19":
             with slim.arg_scope(nets.vgg.vgg_arg_scope()):
                 net, endpoints = nets.vgg.vgg_19(inputs, num_classes=1000, is_training=self.training)
-        elif network=="inception":
+        elif modle=="inception":
             with slim.arg_scope(nets.inception.inception_v3_arg_scope()):
                 net, endpoints = nets.inception.inception_v3(inputs, num_classes=1000, is_training=self.training)
-        elif network=="alexnet":
+        elif modle=="alexnet":
             with slim.arg_scope(nets.alexnet.alexnet_v2_arg_scope()):
                 net, endpoints = nets.alexnet.alexnet_v2(inputs, num_classes=1000, is_training=self.training)
         else:
-            raise Exception("UNKOWN MODLE %s"%network)
+            raise Exception("UNKOWN MODLE %s"%modle)
         
         net=slim.flatten(net)
         self.full_connect_layer= slim.fully_connected(net, num_outputs=10, activation_fn=None)
