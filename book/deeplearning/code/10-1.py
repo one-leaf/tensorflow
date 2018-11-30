@@ -4,6 +4,7 @@
 import numpy as np
 import tensorflow as tf
 import random
+import matplotlib.pyplot as plt
 
 class dataset():
     def __init__(self):
