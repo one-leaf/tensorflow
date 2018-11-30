@@ -1,4 +1,4 @@
-# RNN模式1
+# RNN模式2
 # 输入字母序列，全部转小写：
 
 import numpy as np
@@ -30,8 +30,13 @@ class network():
         # 将 时间轴移到第一个，方便计算
         inputs = tf.transpose(inputs,[1,0,2])
 
+        y = tf.transpose(self.y,[1,0,2])
         def compute(i, cur_state, out):
-            output, cur_state = cell(inputs[i], cur_state)
+            output, _ = cell(inputs[i], cur_state)
+
+            # 直接将当前输出和标签做一次对数作为下一个输入的状态
+            output = -y[i]*tf.log(tf.maximum(output,1e-9))
+            cur_state = output
             return i+1, cur_state, out.write(i, output)
 
         time = tf.shape(inputs)[0]

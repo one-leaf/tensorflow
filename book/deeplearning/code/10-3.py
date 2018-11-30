@@ -1,9 +1,10 @@
-# RNN模式1
-# 输入字母序列，全部转小写：
+# RNN模式3
+# 输入字母序列，预测是大写字母多还是小写字母多：
 
 import numpy as np
 import tensorflow as tf
 import random
+import matplotlib.pyplot as plt
 
 class dataset():
     def __init__(self):
@@ -12,13 +13,18 @@ class dataset():
     
     def next_batch(self, batch_size, seq_len): 
         train_x = np.zeros([batch_size, seq_len, self.chars_length])
-        train_y = np.zeros([batch_size, seq_len, self.chars_length])
+        train_y = np.zeros([batch_size, 2])
         for i in range(batch_size):
+            chars_count=[0, 0]
             for j in range(seq_len):
                 c = random.choice(self.chars)
-                lower_c = str.lower(c)
-                train_x[i][j][self.chars.index(c)]=1
-                train_y[i][j][self.chars.index(lower_c)]=1
+                index = self.chars.index(c)
+                train_x[i][j][index]=1
+                if str.islower(c):
+                    chars_count[0]+=1
+                else:
+                    chars_count[1]+=1
+            train_y[i][chars_count.index(max(chars_count))]=1
         return train_x, train_y
 
 ds=dataset()
@@ -49,10 +55,10 @@ class network():
 
     def __init__(self):
         self.x = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='x')
-        self.y = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='y')
+        self.y = tf.placeholder(tf.float32, [None, 2], name='y')
         self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
 
-        self.pred, _ =  self.add_rnn_layer(self.x, self.batch_size, ds.chars_length)
+        _, self.pred =  self.add_rnn_layer(self.x, self.batch_size, 2)
 
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.pred, labels=self.y))
         self.optimizer = tf.train.GradientDescentOptimizer(0.1).minimize(self.cross_entropy)
