@@ -8,7 +8,7 @@ import random
 class dataset():
     def __init__(self):
         self.chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz '
-        self.chars_length=len(chars)
+        self.chars_length=len(self.chars)
     
     def next_batch(self, batch_size, seq_len): 
         train_x = np.zeros(batch_size, seq_len, self.chars_length)
@@ -23,7 +23,7 @@ class dataset():
 
 ds=dataset()
 class network():
-    def add_rnn_layer(self, inputs, batch_size, cell_num, seq_len):
+    def add_rnn_layer(self, inputs, batch_size, seq_len, cell_num ):
         cell = tf.nn.rnn_cell.BasicRNNCell(num_units=cell_num)
         state = cell.zero_state(batch_size, np.float32)
 
@@ -44,9 +44,11 @@ class network():
 
     def __init__(self):
         self.x = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='x')
-        self.y = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='y') self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
+        self.y = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='y')
+        self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
+        self.seq_len = tf.placeholder(tf.int32, [], name='seq_len')
 
-        self.pred, _ =  add_rnn_layer(self.x, self.batch_size, 8)
+        self.pred, _ =  self.add_rnn_layer(self.x, self.batch_size, self.seq_len, 8)
 
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.pred, labels=self.y))
         self.optimizer = tf.train.AdamOptimizer(0.001).minimize(self.cross_entropy)
@@ -60,20 +62,19 @@ def main():
         sess.run(tf.global_variables_initializer())
         batch_size = 50
         loss_totle = 0 
-        for epoch in range(10):
-            total_batch = 100
-            for _ in range(total_batch):
-                batch_xs, batch_ys = mnist.train.next_batch(batch_size)
-                loss,_,step= sess.run([net.cross_entropy,net.optimizer,net.global_step], feed_dict={net.x: batch_xs, net.y: batch_ys})
-                if loss_totle==0:
-                    loss_totle=loss
-                else:
-                    loss_totle=loss_totle*0.99+0.01*loss
-                loss_list.append(loss_totle)
-                if step % 10 == 0:
-                    test_xs, test_ys = mnist.test.next_batch(batch_size)
-                    acc = net.accuracy.eval({net.x: test_xs, net.y: test_ys, net.training: False})
-                    print(epoch, '/' ,step, "cross_entropy:", loss_list[-1],"acc:", acc)
+        for epoch in range(10000):
+            seq_len = random.randint(5,20)
+            batch_xs, batch_ys = ds.next_batch(batch_size, seq_len)
+            loss,_= sess.run([net.cross_entropy,net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size, net.seq_len: seq_len})
+            if loss_totle==0:
+                loss_totle=loss
+            else:
+                loss_totle=loss_totle*0.99+0.01*loss
+            loss_list.append(loss_totle)
+            if epoch % 10 == 0:
+                test_xs, test_ys = ds.next_batch(batch_size)
+                acc = net.accuracy.eval({net.x: test_xs, net.y: test_ys, net.batch_size: batch_size, net.seq_len: seq_len})
+                print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
 
     plt.figure()
     x = np.linspace(0, len(loss_list), len(loss_list))
