@@ -6,7 +6,7 @@ latex 常见语法
 
 1. 字符
 
-    $$\Alpha \Beta \Gamma \Delta \Epsilon \Zeta \Eta \Theta	\Iota \Kappa \Lambda \Mu \Nu \Xi \Omicron \Pi	\Rho \Sigma \Tau \Upsilon \Phi \Chi \Psi \Omega$$
+    $$\Alpha \Beta \Gamma \Delta \Epsilon \Zeta \Eta \Theta	\Iota \Kappa \Lambda \Mu \Nu \Xi \Omicron \Pi \Rho \Sigma \Tau \Upsilon \Phi \Chi \Psi \Omega$$
 
     $$\ $$
 
@@ -54,7 +54,7 @@ latex 常见语法
 
 1. 集合
 
-    $$ \in \ni \notin \forall \cup \cap \subset \supset \varnothing \empty $$
+    $$\in \ni \notin \forall \cup \cap \subset \supset \varnothing \empty$$
 
     $$\to \land \lor \setminus$$
 
