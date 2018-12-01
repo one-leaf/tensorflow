@@ -39,8 +39,8 @@ class network():
         inputs = tf.transpose(inputs,[1,0,2])
 
         def compute(i, cur_state, out):
-            output, cur_state = cell(inputs[i], cur_state)
-            return i+1, cur_state, out.write(i, output)
+            output, next_state = cell(inputs[i], cur_state)
+            return i+1, next_state, out.write(i, output)
 
         time = tf.shape(inputs)[0]
 

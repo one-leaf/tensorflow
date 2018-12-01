@@ -36,13 +36,13 @@ class network():
 
         y = tf.transpose(self.y,[1,0,2])
         def compute(i, cur_state, out):
-            output, _ = cell(inputs[i], cur_state)
+            output, next_state = cell(inputs[i], cur_state)
 
             # 直接将当前输出和标签做一次对数作为下一个输入的状态
             # 注意，这里并没有考虑预测时y的输入，实际预测时将output的输出作为下一次的输入状态
-            output = -y[i]*tf.log(tf.maximum(output,1e-9))
-            cur_state = output
-            return i+1, cur_state, out.write(i, output)
+            # 具体看 10-4.py 的完整演示
+            next_state = -y[i]*tf.log(tf.maximum(output,1e-9)) 
+            return i+1, next_state, out.write(i, output)
 
         time = tf.shape(inputs)[0]
 

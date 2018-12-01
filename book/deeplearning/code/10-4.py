@@ -36,12 +36,12 @@ class network():
 
         y = tf.transpose(self.y,[1,0,2])
         def compute(i, cur_state, out):
-            output, _ = cell(inputs[i], cur_state)
+            output, next_state = cell(inputs[i], cur_state)
 
             # 训练时直接将当前的样本标签作为下一个输入的状态
             # 预测时用本身的输出作为下一个输入的状态
-            cur_state = tf.cond(self.training, lambda: y[i], lambda: output) 
-            return i+1, cur_state, out.write(i, output)
+            next_state = tf.cond(self.training, lambda: y[i], lambda: output)
+            return i+1, next_state, out.write(i, output)
 
         time = tf.shape(inputs)[0]
 
@@ -75,10 +75,10 @@ def main():
         sess.run(tf.global_variables_initializer())
         batch_size = 500
         loss_totle = 0 
-        for epoch in range(2000):
+        for epoch in range(20000):
             seq_len = random.randint(5,10)
             batch_xs, batch_ys = ds.next_batch(batch_size, seq_len)
-            loss,_= sess.run([net.cross_entropy,net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
+            loss,_= sess.run([net.cross_entropy, net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
             if loss_totle==0:
                 loss_totle=loss
             else:
