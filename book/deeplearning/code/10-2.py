@@ -8,15 +8,18 @@ import matplotlib.pyplot as plt
 
 class dataset():
     def __init__(self):
-        self.chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        # 我们用错位的字符串序列表示有规律的序列样本
+        self.chars='AzBaCbDcEdFeGfHgIhJiKjLkMlNmOnPoQpRqSrTsUtVuWvXwYxZy'
         self.chars_length=len(self.chars)
     
     def next_batch(self, batch_size, seq_len): 
         train_x = np.zeros([batch_size, seq_len, self.chars_length])
         train_y = np.zeros([batch_size, seq_len, self.chars_length])
         for i in range(batch_size):
+            # 从 chars 中随机截取长度为 seq_len 的字符串
+            idx = random.randint(0,self.chars_length-1-seq_len)
             for j in range(seq_len):
-                c = random.choice(self.chars)
+                c = self.chars[idx+j]
                 lower_c = str.lower(c)
                 train_x[i][j][self.chars.index(c)]=1
                 train_y[i][j][self.chars.index(lower_c)]=1
@@ -36,6 +39,7 @@ class network():
             output, _ = cell(inputs[i], cur_state)
 
             # 直接将当前输出和标签做一次对数作为下一个输入的状态
+            # 注意，这里并没有考虑预测时y的输入，实际预测时将output的输出作为下一次的输入状态
             output = -y[i]*tf.log(tf.maximum(output,1e-9))
             cur_state = output
             return i+1, cur_state, out.write(i, output)
@@ -49,9 +53,9 @@ class network():
             (0, init_state, tf.TensorArray(tf.float32, time))
         )
 
-        output = tf.transpose(out.stack(),[1,0,2])
+        outputs = tf.transpose(out.stack(),[1,0,2])
 
-        return output, cur_state
+        return outputs, cur_state
 
     def __init__(self):
         self.x = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='x')

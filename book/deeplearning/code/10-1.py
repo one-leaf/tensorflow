@@ -8,15 +8,18 @@ import matplotlib.pyplot as plt
 
 class dataset():
     def __init__(self):
-        self.chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        # 我们用错位的字符串序列表示有规律的序列样本
+        self.chars='AzBaCbDcEdFeGfHgIhJiKjLkMlNmOnPoQpRqSrTsUtVuWvXwYxZy'
         self.chars_length=len(self.chars)
     
     def next_batch(self, batch_size, seq_len): 
         train_x = np.zeros([batch_size, seq_len, self.chars_length])
         train_y = np.zeros([batch_size, seq_len, self.chars_length])
         for i in range(batch_size):
+            # 从 chars 中随机截取长度为 seq_len 的字符串
+            idx = random.randint(0,self.chars_length-1-seq_len)
             for j in range(seq_len):
-                c = random.choice(self.chars)
+                c = self.chars[idx+j]
                 lower_c = str.lower(c)
                 train_x[i][j][self.chars.index(c)]=1
                 train_y[i][j][self.chars.index(lower_c)]=1
@@ -44,9 +47,9 @@ class network():
             (0, init_state, tf.TensorArray(tf.float32, time))
         )
 
-        output = tf.transpose(out.stack(),[1,0,2])
+        outputs = tf.transpose(out.stack(),[1,0,2])
 
-        return output, cur_state
+        return outputs, cur_state
 
     def __init__(self):
         self.x = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='x')
