@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 class dataset():
     def __init__(self):
-        # 我们用错位的字符串序列表示有规律的序列样本
+        # 用错位的字符串序列表示有规律的序列样本
         self.chars='AzBaCbDcEdFeGfHgIhJiKjLkMlNmOnPoQpRqSrTsUtVuWvXwYxZy'
         self.chars_length=len(self.chars)
     
@@ -21,7 +21,7 @@ class dataset():
             for j in range(seq_len):
                 c = self.chars[idx+j]
                 lower_c = str.lower(c)
-                train_x[i][j][self.chars.index(c)]=1
+                train_x[i][j][idx+j]=1
                 train_y[i][j][self.chars.index(lower_c)]=1
         return train_x, train_y
 
@@ -76,7 +76,7 @@ def main():
         batch_size = 500
         loss_totle = 0 
         for epoch in range(2000):
-            seq_len = random.randint(5,20)
+            seq_len = random.randint(5,10)
             batch_xs, batch_ys = ds.next_batch(batch_size, seq_len)
             loss,_= sess.run([net.cross_entropy,net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
             if loss_totle==0:

@@ -8,7 +8,8 @@ import matplotlib.pyplot as plt
 
 class dataset():
     def __init__(self):
-        self.chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        # 用错位的字符串序列表示有规律的序列样本
+        self.chars='AzBaCbDcEdFeGfHgIhJiKjLkMlNmOnPoQpRqSrTsUtVuWvXwYxZy'
         self.chars_length=len(self.chars)
     
     def next_batch(self, batch_size, seq_len): 
@@ -16,10 +17,11 @@ class dataset():
         train_y = np.zeros([batch_size, 2])
         for i in range(batch_size):
             chars_count=[0, 0]
+            # 从 chars 中随机截取长度为 seq_len 的字符串
+            idx = random.randint(0,self.chars_length-1-seq_len)
             for j in range(seq_len):
-                c = random.choice(self.chars)
-                index = self.chars.index(c)
-                train_x[i][j][index]=1
+                c = self.chars[idx+j]
+                train_x[i][j][idx+j]=1
                 if str.islower(c):
                     chars_count[0]+=1
                 else:
@@ -72,7 +74,7 @@ def main():
         batch_size = 500
         loss_totle = 0 
         for epoch in range(2000):
-            seq_len = random.randint(5,20)
+            seq_len = random.randint(5,10)
             batch_xs, batch_ys = ds.next_batch(batch_size, seq_len)
             loss,_= sess.run([net.cross_entropy,net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
             if loss_totle==0:
