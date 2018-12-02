@@ -64,7 +64,7 @@ class network():
 
         self.pred, _ =  self.add_rnn_layer(self.x, self.batch_size, ds.chars_length)
 
-        # 这里并没有使用 softmax，而是直接采用 sigmoid 计算所有的概率。
+        # 这里并没有使用 softmax，而是直接采用 sigmoid 计算所有的概率，这样有助于网络的稳定。
         self.cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.pred, labels=self.y))
         self.optimizer = tf.train.GradientDescentOptimizer(0.01).minimize(self.cross_entropy)
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.pred,1),tf.argmax(self.y,1)),tf.float32)) 
@@ -76,7 +76,7 @@ def main():
         sess.run(tf.global_variables_initializer())
         batch_size = 500
         loss_totle = 0 
-        for epoch in range(50000):
+        for epoch in range(10000):
             seq_len = random.randint(5,10)
             batch_xs, batch_ys = ds.next_batch(batch_size, seq_len)
             loss,_= sess.run([net.cross_entropy, net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
