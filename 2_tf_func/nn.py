@@ -90,6 +90,16 @@ def embedding_lookup(sess):
     # z: [[[[-0.94287395], [-0.88575172], [-0.35763741]], [[0.494174], [-0.1417582], [0.30758238]]]
     #     ...  ]]]]
 
+# 归一化
+def softmax(sess):
+    x = tf.range(24,dtype=tf.float32)
+    x = tf.reshape(x,[4,6])
+    y = tf.nn.softmax(x)
+    print(sess.run([x,y]))
+    x = tf.reshape(x,[2,3,4])
+    y = tf.nn.softmax(x)
+    print(sess.run([x,y]))
+
 if __name__ == '__main__':
     with tf.Session() as sess:
         # relu(sess)
@@ -100,4 +110,5 @@ if __name__ == '__main__':
         # tanh(sess)
         # conv2d(sess)
         # max_pool(sess)
-        embedding_lookup(sess)
+        # embedding_lookup(sess)
+        softmax(sess)

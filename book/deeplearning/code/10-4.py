@@ -28,7 +28,7 @@ class dataset():
 ds=dataset()
 class network():
     def add_rnn_layer(self, inputs, batch_size, cell_num ):
-        cell = tf.nn.rnn_cell.BasicRNNCell(num_units=cell_num, activation=tf.nn.tanh)
+        cell = tf.nn.rnn_cell.BasicRNNCell(num_units=cell_num, activation=tf.nn.relu)
         init_state = cell.zero_state(batch_size, np.float32)
 
         # 将 时间轴移到第一个，方便计算
@@ -64,7 +64,8 @@ class network():
 
         self.pred, _ =  self.add_rnn_layer(self.x, self.batch_size, ds.chars_length)
 
-        self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.pred, labels=self.y))
+        # 这里并没有使用 softmax，而是直接采用 sigmoid 计算所有的概率。
+        self.cross_entropy = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=self.pred, labels=self.y))
         self.optimizer = tf.train.GradientDescentOptimizer(0.01).minimize(self.cross_entropy)
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.pred,1),tf.argmax(self.y,1)),tf.float32)) 
 
@@ -75,7 +76,7 @@ def main():
         sess.run(tf.global_variables_initializer())
         batch_size = 500
         loss_totle = 0 
-        for epoch in range(20000):
+        for epoch in range(50000):
             seq_len = random.randint(5,10)
             batch_xs, batch_ys = ds.next_batch(batch_size, seq_len)
             loss,_= sess.run([net.cross_entropy, net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
