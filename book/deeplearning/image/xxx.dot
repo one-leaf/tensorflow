@@ -1,0 +1,7 @@
+digraph rnn {
+        rankdir=LR;
+        h [shape=circle]
+        x [shape=circle]
+        h -> h
+        x -> h[label="f"]       
+    }
