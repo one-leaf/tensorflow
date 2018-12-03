@@ -87,7 +87,6 @@ def main():
         batch_size = 500
         loss_totle = 0 
         for epoch in range(10000):
-            # seq_len = random.randint(20,25)
             batch_xs, batch_ys = ds.next_batch(batch_size, x_seq_len, y_seq_len)
             loss,_= sess.run([net.cross_entropy, net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
             if loss_totle==0:
