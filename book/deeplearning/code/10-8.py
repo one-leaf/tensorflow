@@ -4,107 +4,100 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-num_epochs = 100
-total_series_length = 50000
-truncated_backprop_length = 15
+seq_len = 15
 state_size = 4
 num_classes = 2
-echo_step = 3
 batch_size = 5
-num_batches = total_series_length//batch_size//truncated_backprop_length
+total_series_length = batch_size*seq_len*1000
 
-# x 从0和1中间
-def generateData():
+# x 从0和1中间 随机选择长度为 total_series_length
+# y 将x的数据往前移动 echo_step 位，x最后位会移到y前面
+def dateset(echo_step = 3):
     x = np.array(np.random.choice(2, total_series_length, p=[0.5, 0.5]))
     y = np.roll(x, echo_step)
-    y[0:echo_step] = 0
-    x = x.reshape((batch_size, -1))  # The first index changing slowest, subseries as rows
+    x = x.reshape((batch_size, -1)) 
     y = y.reshape((batch_size, -1))
-    print(x.shape)
-    print(y.shape)
-    return (x, y)
 
-batchX_placeholder = tf.placeholder(tf.float32, [batch_size, truncated_backprop_length])
-batchY_placeholder = tf.placeholder(tf.int32, [batch_size, truncated_backprop_length])
+    for i in range(total_series_length//batch_size//seq_len):
+        start_idx = i*seq_len 
+        end_idx = start_idx + seq_len
+        yield x[:,start_idx:end_idx],y[:,start_idx:end_idx] 
 
-init_state = tf.placeholder(tf.float32, [batch_size, state_size])
+class network():
+    def add_esn_layer(self, inputs, init_state):
+        W = tf.Variable(np.random.rand(state_size+1, state_size), dtype=tf.float32)
+        b = tf.Variable(np.zeros((1,state_size)), dtype=tf.float32)
+    
+        current_state = init_state
+        states = []
+        inputs = tf.unstack(inputs, axis=1)
+        for input in inputs:
+            input = tf.reshape(input, [batch_size, 1])
+            input_and_state_concatenated = tf.concat([input, current_state], 1)  
+            next_state = tf.tanh(tf.matmul(input_and_state_concatenated, W) + b) 
+            states.append(next_state)
+            current_state = next_state
 
-W = tf.Variable(np.random.rand(state_size+1, state_size), dtype=tf.float32)
-b = tf.Variable(np.zeros((1,state_size)), dtype=tf.float32)
+        return states
 
-W2 = tf.Variable(np.random.rand(state_size, num_classes),dtype=tf.float32)
-b2 = tf.Variable(np.zeros((1,num_classes)), dtype=tf.float32)# Unpack columns
-inputs_series = tf.unstack(batchX_placeholder, axis=1)
-labels_series = tf.unstack(batchY_placeholder, axis=1)# Forward pass
-current_state = init_state
-states_series = []
+    def __init__(self):
+        self.x = tf.placeholder(tf.float32, [batch_size, seq_len])
+        self.y = tf.placeholder(tf.float32, [batch_size, seq_len])
+        self.init_state = tf.placeholder(tf.float32, [batch_size, state_size])
 
-for current_input in inputs_series:
-    current_input = tf.reshape(current_input, [batch_size, 1])
-    input_and_state_concatenated = tf.concat([current_input, current_state], 1)  # Increasing number of columns
+        states = self.add_esn_layer(self.x, self.init_state)
+        self.current_state = states[-1]
+        
+        layer = tf.stack(states, 1) #[batch_size, seq_len, state_size]
+        W2 = tf.Variable(np.random.rand(batch_size, state_size, 1),dtype=tf.float32)
+        b2 = tf.Variable(np.random.rand(batch_size, seq_len, 1),dtype=tf.float32)
+        layer = tf.matmul(layer, W2) + b2 #[batch_size, seq_len, 1]
+        logits = tf.reshape(layer,[batch_size, seq_len])
+        self.pred = tf.nn.sigmoid(logits)
+ 
+        self.losses = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=self.y, logits=logits))
+        self.train_step = tf.train.GradientDescentOptimizer(0.1).minimize(self.losses)
+        self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.pred),tf.round(self.y)),tf.float32))
 
-    next_state = tf.tanh(tf.matmul(input_and_state_concatenated, W) + b)  # Broadcasted addition
-    states_series.append(next_state)
-    current_state = next_state
-
-logits_series = [tf.matmul(state, W2) + b2 for state in states_series] #Broadcasted addition
-
-predictions_series = [tf.nn.softmax(logits) for logits in logits_series]
-
-losses = [tf.nn.sparse_softmax_cross_entropy_with_logits(labels=labels, logits=logits) for logits, labels in zip(logits_series,labels_series)]
-total_loss = tf.reduce_mean(losses)
-
-train_step = tf.train.AdagradOptimizer(0.3).minimize(total_loss)
-
-def plot(loss_list, predictions_series, batchX, batchY):
+def plot(loss_list, pred, batchX, batchY):
     plt.subplot(2, 3, 1)
     plt.cla()
     plt.plot(loss_list)
-    for batch_series_idx in range(5):
-        one_hot_output_series = np.array(predictions_series)[:, batch_series_idx, :]
-        single_output_series = np.array([(1 if out[0] < 0.5 else 0) for out in one_hot_output_series])
-
+    for batch_series_idx in range(batch_size):
         plt.subplot(2, 3, batch_series_idx + 2)
         plt.cla()
-        plt.axis([0, truncated_backprop_length, 0, 2])
-        left_offset = range(truncated_backprop_length)
+        plt.axis([0, seq_len, 0, 1])
+        left_offset = range(seq_len)
         plt.bar(left_offset, batchX[batch_series_idx, :], width=1, color="blue")
-        plt.bar(left_offset, batchY[batch_series_idx, :] * 0.5, width=1, color="red")
-        plt.bar(left_offset, single_output_series * 0.3, width=1, color="green")
+        plt.bar(left_offset, batchY[batch_series_idx, :] * 0.8, width=1, color="red")
+        plt.bar(left_offset, pred[batch_series_idx, :] * 0.4, width=1, color="green")
     plt.draw()
     plt.pause(0.0001)
 
+net = network()
+
 with tf.Session() as sess:
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
     plt.ion()
     plt.figure()
     plt.show()
     loss_list = []    
     
-    for epoch_idx in range(num_epochs):
-        x,y = generateData()
+    for epoch_idx in range(10):      
         _current_state = np.zeros((batch_size, state_size))
-
-        print("New data, epoch", epoch_idx)        
-        for batch_idx in range(num_batches):
-            start_idx = batch_idx * truncated_backprop_length
-            end_idx = start_idx + truncated_backprop_length
-
-            batchX = x[:,start_idx:end_idx]
-            batchY = y[:,start_idx:end_idx]
-
-            _total_loss, _train_step, _current_state, _predictions_series = sess.run(
-                [total_loss, train_step, current_state, predictions_series],
+        ds = dateset()
+        for batch_idx, (batchX, batchY) in enumerate(ds):
+            _losses, _train_step, _current_state, _pred, _acc = sess.run(
+                [net.losses, net.train_step, net.current_state, net.pred, net.accuracy],
                 feed_dict={
-                    batchX_placeholder:batchX,
-                    batchY_placeholder:batchY,
-                    init_state:_current_state
+                    net.x:batchX,
+                    net.y:batchY,
+                    net.init_state: _current_state
                 })
-
-            loss_list.append(_total_loss)            
+            loss_list.append(_losses)            
             if batch_idx%100 == 0:
-                print("Step",batch_idx, "Loss", _total_loss)
-                plot(loss_list, _predictions_series, batchX, batchY)
+                print("Step",batch_idx, "Loss", _losses, "Acc", _acc)
+                plot(loss_list, _pred, batchX, batchY)
 
 plt.ioff()
 plt.show()
