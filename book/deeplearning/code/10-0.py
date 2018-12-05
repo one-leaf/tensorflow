@@ -1,4 +1,4 @@
-# RNN 回声网络
+# RNN 简单
 
 import numpy as np
 import tensorflow as tf
@@ -17,7 +17,6 @@ def dateset(echo_step = 3):
     y = np.roll(x, echo_step)
     x = x.reshape((batch_size, -1)) 
     y = y.reshape((batch_size, -1))
-
     for i in range(total_series_length//batch_size//seq_len):
         start_idx = i*seq_len 
         end_idx = start_idx + seq_len
@@ -59,18 +58,27 @@ class network():
         self.train_step = tf.train.GradientDescentOptimizer(0.1).minimize(self.losses)
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.pred),tf.round(self.y)),tf.float32))
 
-def plot(loss_list, pred, batchX, batchY):
-    plt.subplot(2, 3, 1)
+def plot(loss_list, acc_list, pred, batchX, batchY):
+    plt.subplot(2, 2, 1)
     plt.cla()
-    plt.plot(loss_list)
-    for batch_series_idx in range(batch_size):
-        plt.subplot(2, 3, batch_series_idx + 2)
+    plt.plot(loss_list, label="loss")
+    plt.legend()
+
+    plt.subplot(2, 2, 2)
+    plt.cla()
+    plt.plot(acc_list, label="acc")
+    plt.legend()
+
+    for batch_idx in range(2):
+        plt.subplot(2, 2, batch_idx + 3)
         plt.cla()
         plt.axis([0, seq_len, 0, 1])
         left_offset = range(seq_len)
-        plt.bar(left_offset, batchX[batch_series_idx, :], width=1, color="blue")
-        plt.bar(left_offset, batchY[batch_series_idx, :] * 0.8, width=1, color="red")
-        plt.bar(left_offset, pred[batch_series_idx, :] * 0.4, width=1, color="green")
+        plt.bar(left_offset, batchX[batch_idx, :], width=1, color="blue", label="x")
+        plt.bar(left_offset, batchY[batch_idx, :] * 0.8, width=1, color="red", label="y")
+        plt.bar(left_offset, pred[batch_idx, :] * 0.4, width=1, color="green", label="pred")
+        plt.legend(loc="upper right")
+
     plt.draw()
     plt.pause(0.0001)
 
@@ -82,7 +90,7 @@ with tf.Session() as sess:
     plt.figure()
     plt.show()
     loss_list = []    
-    
+    acc_list = []
     for epoch_idx in range(10):      
         _current_state = np.zeros((batch_size, state_size))
         ds = dateset()
@@ -94,10 +102,11 @@ with tf.Session() as sess:
                     net.y:batchY,
                     net.init_state: _current_state
                 })
-            loss_list.append(_losses)            
+            loss_list.append(_losses)  
+            acc_list.append(_acc)          
             if batch_idx%100 == 0:
                 print("Step",batch_idx, "Loss", _losses, "Acc", _acc)
-                plot(loss_list, _pred, batchX, batchY)
+                plot(loss_list, acc_list, _pred, batchX, batchY)
 
 plt.ioff()
 plt.show()
