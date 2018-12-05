@@ -31,12 +31,12 @@ class dataset():
 
 ds=dataset()
 class network():
-    def add_rnn_layer(self, inputs, batch_size, cell_num ):
+    def add_rnn_layer(self, inputs, cell_num ):
         cell = tf.nn.rnn_cell.BasicRNNCell(num_units=cell_num, activation=tf.nn.tanh)
-        init_state = cell.zero_state(batch_size, np.float32)
 
         # 将 时间轴移到第一个，方便计算
         inputs = tf.transpose(inputs,[1,0,2])
+        init_state = tf.zeros_like(self.y)
 
         def compute(i, cur_state, out):
             output, next_state = cell(inputs[i], cur_state)
@@ -58,9 +58,8 @@ class network():
     def __init__(self):
         self.x = tf.placeholder(tf.float32, [None, None, ds.chars_length], name='x')
         self.y = tf.placeholder(tf.float32, [None, 2], name='y')
-        self.batch_size = tf.placeholder(tf.int32, [], name='batch_size')
 
-        _, self.pred =  self.add_rnn_layer(self.x, self.batch_size, 2)
+        _, self.pred =  self.add_rnn_layer(self.x, 2)
 
         self.cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.pred, labels=self.y))
         self.optimizer = tf.train.GradientDescentOptimizer(0.1).minimize(self.cross_entropy)
@@ -76,7 +75,7 @@ def main():
         for epoch in range(2000):
             seq_len = random.randint(5,10)
             batch_xs, batch_ys = ds.next_batch(batch_size, seq_len)
-            loss,_= sess.run([net.cross_entropy,net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys, net.batch_size: batch_size})
+            loss,_= sess.run([net.cross_entropy,net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
             if loss_totle==0:
                 loss_totle=loss
             else:
@@ -84,7 +83,7 @@ def main():
             loss_list.append(loss_totle)
             if epoch % 100 == 0:
                 test_xs, test_ys = ds.next_batch(batch_size, seq_len)
-                acc = net.accuracy.eval({net.x: test_xs, net.y: test_ys, net.batch_size: batch_size})
+                acc = net.accuracy.eval({net.x: test_xs, net.y: test_ys})
                 print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
 
     plt.figure()
