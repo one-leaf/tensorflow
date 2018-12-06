@@ -6,11 +6,11 @@
 
 然后运行如下命令安装 numpy sympy tensorflow matplotlib 包：
 
-pip install numpy sympy tensorflow matplotlib
+pip install numpy sympy tensorflow matplotlib scipy
 
 或
 
-python -m pip install numpy sympy tensorflow matplotlib
+python -m pip install numpy sympy tensorflow matplotlib scipy
 
 一些资源：
 
