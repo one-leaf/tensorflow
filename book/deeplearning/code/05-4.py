@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.stats as ss
 import numpy as np
 
-params = [0.5, 1, 2, 3]
+params = [0.5, 1, 2, 10]
 x = np.linspace(0, 1, 100)
 f, ax = plt.subplots(len(params), len(params), sharex=True, sharey=True)
 for i in range(4):
@@ -14,10 +14,9 @@ for i in range(4):
         ax[i, j].plot(x, pdf)
         ax[i, j].plot(0, 0, label='alpha=%s\nbeta=%s'%(alpha, beta), alpha=0)
         plt.setp(ax[i, j], xticks=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0], yticks=[0,2,4,6,8,10])
-        ax[i, j].legend(fontsize=10)
-ax[3, 0].set_xlabel('theta', fontsize=16)
-ax[0, 0].set_ylabel('pdf(theta)', fontsize=16)
-plt.suptitle('Beta PDF', fontsize=16)
+        ax[i, j].legend()
+ax[3, 0].set_xlabel('theta')
+ax[0, 0].set_ylabel('pdf(theta)')
 plt.tight_layout()
 
 plt.figure()
