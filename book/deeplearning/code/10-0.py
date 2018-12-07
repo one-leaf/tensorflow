@@ -8,16 +8,16 @@ seq_len = 15
 state_size = 4
 num_classes = 2
 batch_size = 5
-total_series_length = batch_size*seq_len*1000
 
-# x 从0和1中间 随机选择长度为 total_series_length
+# x 从0和1中间 随机选择长度为 total_length
 # y 将x的数据往前移动 echo_step 位，x最后位会移到y前面
-def dateset(echo_step = 3):
-    x = np.array(np.random.choice(2, total_series_length, p=[0.5, 0.5]))
+def dateset(batch_size = 5, seq_len = 15, total_length =100000, echo_step = 3):
+    total_length = batch_size*seq_len*1000
+    x = np.array(np.random.choice(2, total_length, p=[0.5, 0.5]))
     y = np.roll(x, echo_step)
     x = x.reshape((batch_size, -1)) 
     y = y.reshape((batch_size, -1))
-    for i in range(total_series_length//batch_size//seq_len):
+    for i in range(total_length//batch_size//seq_len):
         start_idx = i*seq_len 
         end_idx = start_idx + seq_len
         yield x[:,start_idx:end_idx],y[:,start_idx:end_idx] 
