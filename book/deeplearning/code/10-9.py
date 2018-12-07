@@ -53,15 +53,15 @@ class network():
         x_image = tf.reshape(self.x, [-1, 28, 28])
         # 返回的是最后一个输出即： [batch_size, num_units]
         if lstm:
-            layer = self.add_lstm_layer(x_image, 32)
+            layer = self.add_lstm_layer(x_image, 16)
         else: 
-            layer = self.add_bi_gru_layer(x_image, 32)
-        # 由于需要预测10个数字，接一个全连接层，输入10
+            layer = self.add_bi_gru_layer(x_image, 16)
+        # 由于需要预测10个数字，接一个全连接层，输出10个分类
         self.fc_layer = tf.layers.dense(layer, 10)
 
         self.loss = tf.losses.softmax_cross_entropy(self.y, self.fc_layer)
         self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.argmax(self.fc_layer,1), tf.argmax(self.y,1)), tf.float32))
-        self.optimizer= tf.train.AdamOptimizer(0.001).minimize(self.loss)
+        self.optimizer= tf.train.GradientDescentOptimizer(0.1).minimize(self.loss)
     
 def main():
     loss_list=[]
@@ -85,7 +85,7 @@ def main():
                     loss_totle=loss_totle*0.99+0.01*loss
                 loss_list.append(loss_totle)
             acc = net.accuracy.eval({net.x: mnist.test.images, net.y: mnist.test.labels})
-            print(epoch, "cross_entropy:", loss_list[-1],"acc:", acc)
+            print(epoch, "loss:", loss_list[-1],"acc:", acc)
 
     plt.figure()
     x = np.linspace(0, len(loss_list), len(loss_list))
