@@ -11,7 +11,7 @@ def getData(size=100):
     y[y > 0.5] = 1
     y[y < 1]   = 0
     y = np.eye(2)[y.astype(np.int32)]
-    return x+0.1*np.random.normal(size=(size,2)), y
+    return x+0.05*np.random.normal(size=(size,2)), y
 
 class network():
     def __init__(self, lstm=True):
@@ -45,17 +45,57 @@ def calc(y, pred):
     f=2*p*r/(p+r)
     return tp,fp,fn,tn,p,r,f
 
+def clac_roc(y_true, pos_prob):
+    pos = y_true[y_true==1]
+    neg = y_true[y_true==0]
+    threshold = np.sort(pos_prob)[::-1]        # 按概率大小逆序排列
+    y = y_true[pos_prob.argsort()[::-1]]
+    tpr_all = [0] ; fpr_all = [0]
+    tpr = 0 ; fpr = 0
+    x_step = 1/float(len(neg))
+    y_step = 1/float(len(pos))
+    y_sum = 0                                  # 用于计算AUC
+    for i in range(len(threshold)):
+        if y[i] == 1:
+            tpr += y_step
+            tpr_all.append(tpr)
+            fpr_all.append(fpr)
+        else:
+            fpr += x_step
+            fpr_all.append(fpr)
+            tpr_all.append(tpr)
+            y_sum += tpr
+    return tpr_all,fpr_all,y_sum*x_step 
+
+def calc_pr(y_true, pos_prob):
+    pos = y_true[y_true==1]
+    threshold = np.sort(pos_prob)[::-1]
+    y = y_true[pos_prob.argsort()[::-1]]
+    recall = [] ; precision = []
+    tp = 0 ; fp = 0
+    auc = 0
+    for i in range(len(threshold)):
+        if y[i] == 1:
+            tp += 1
+            recall.append(tp/len(pos))
+            precision.append(tp/(tp+fp))
+            auc += (recall[i]-recall[i-1])*precision[i]
+        else:
+            fp += 1
+            recall.append(tp/len(pos))
+            precision.append(tp/(tp+fp))
+    return precision,recall,auc
+
 def main():
     net = network(True)
 
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        batch_size = 50
+        batch_size = 100
         p_list=[]
         r_list=[]
         f_list=[]
         acc_list=[]
-        tpr_list=[]
         fpr_list=[]
         for epoch in range(200):
             batch_xs, batch_ys = getData(batch_size)
@@ -71,28 +111,39 @@ def main():
             p_list.append(p)
             r_list.append(r)
             f_list.append(f)
-            tpr_list.append(tp/(tp+fn))
             fpr_list.append(fp/(fp+tn))
 
         plt.figure()
         x_data, y_data = getData(10000)
         y = np.argmax(y_data, 1)
-        pred = np.argmax(sess.run(net.pred, feed_dict={net.x: x_data}),1)
+        y_pred = sess.run(net.pred, feed_dict={net.x: x_data})
+        pred = np.argmax(y_pred, 1)
         pred[pred!=y]=2
         plt.scatter(x_data[:, 0], x_data[:, 1], marker='o', c=pred, s=3)
 
         plt.figure()
         x = np.linspace(1, 200, 200)
-        plt.plot(x, acc_list, label='Accuracy')
-        plt.plot(x, p_list, label='Precision')
-        plt.plot(x, r_list, label='Recall')
+        plt.plot(x, acc_list, label='Accuracy Rate')
+        plt.plot(x, p_list, label='True Precision Rate')
+        plt.plot(x, r_list, label='Recall Rate')
         plt.plot(x, f_list, label='F-Measure')
+        plt.plot(x, fpr_list, label='False Positive Rate')
+        plt.legend()
+
+        pred = y_pred[:,1]
+        plt.figure()
+        p,r,auc =calc_pr(y, pred)
+        plt.plot(r, p, label='P-R (auc: %s)'%auc)
+        plt.xlabel('Recall Rate')
+        plt.ylabel('Precision Rate')
         plt.legend()
 
         plt.figure()
-        plt.plot(tpr_list, fpr_list, label='roc')
+        tpr,fpr,auc =clac_roc(y, pred)
+        plt.plot(fpr, tpr, label='ROC (auc: %s)'%auc)
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
         plt.legend()
-
         plt.show()
 
 if __name__ == '__main__':
