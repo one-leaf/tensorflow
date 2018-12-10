@@ -47,7 +47,7 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 # 开始训练
-for step in range(50000):
+for step in range(20000):
     _, tmp_loss = sess.run([train, loss], feed_dict={x:x_train, y:y_train})
     if step % 1000 == 0:
         print(step, tmp_loss) 
