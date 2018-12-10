@@ -11,7 +11,7 @@ def getData(size=100):
     y[y > 0.5] = 1
     y[y < 1]   = 0
     y = np.eye(2)[y.astype(np.int32)]
-    return x, y
+    return x+0.1*np.random.normal(size=(size,2)), y
 
 class network():
     def __init__(self, lstm=True):
@@ -55,6 +55,8 @@ def main():
         r_list=[]
         f_list=[]
         acc_list=[]
+        tpr_list=[]
+        fpr_list=[]
         for epoch in range(200):
             batch_xs, batch_ys = getData(batch_size)
             loss, acc, pred, _= sess.run([net.loss,net.acc,net.pred, net.optimizer], feed_dict={net.x: batch_xs, net.y: batch_ys})
@@ -69,6 +71,8 @@ def main():
             p_list.append(p)
             r_list.append(r)
             f_list.append(f)
+            tpr_list.append(tp/(tp+fn))
+            fpr_list.append(fp/(fp+tn))
 
         plt.figure()
         x_data, y_data = getData(10000)
@@ -84,6 +88,11 @@ def main():
         plt.plot(x, r_list, label='Recall')
         plt.plot(x, f_list, label='F-Measure')
         plt.legend()
+
+        plt.figure()
+        plt.plot(tpr_list, fpr_list, label='roc')
+        plt.legend()
+
         plt.show()
 
 if __name__ == '__main__':
