@@ -4,13 +4,13 @@
 
 注意不要安装 python 3.7 , 写这个指南时 tensorflow 还不支持 3.7。
 
-然后运行如下命令安装 numpy sympy tensorflow matplotlib 包：
+然后运行如下命令安装 numpy sympy tensorflow matplotlib jieba 包：
 
-pip install numpy sympy tensorflow matplotlib scipy
+pip install numpy sympy tensorflow matplotlib scipy jieba
 
 或
 
-python -m pip install numpy sympy tensorflow matplotlib scipy
+python -m pip install numpy sympy tensorflow matplotlib scipy jieba
 
 一些资源：
 
