@@ -165,6 +165,11 @@ def main():
 
         # 可视化词语之间的关系
         final_embeddings = net.normalized_embeddings.eval()
+
+        vec1 = final_embeddings[]
+        dist = numpy.linalg.norm(vec1 - vec2)
+
+
         plot_only = 200
         # 降维
         tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000, method='exact')
