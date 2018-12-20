@@ -167,7 +167,7 @@ def main():
         final_embeddings = net.normalized_embeddings.eval()
 
         # 计算两个词的相似度
-        similarity_words = [("神经网络","单元"),("神经网络","循环"),("单元","循环")]
+        similarity_words = [("神经网络","语言"),("神经网络","循环"),("语言","循环")]
         for word1,word2 in similarity_words:
             vec1 = final_embeddings[words[word1]]
             vec2 = final_embeddings[words[word2]]
