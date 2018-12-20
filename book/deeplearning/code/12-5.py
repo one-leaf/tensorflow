@@ -19,7 +19,7 @@ embedding_size = 16
 
 curr_path = os.path.dirname(os.path.realpath(__file__))
 txt_file = os.path.join(curr_path,'../12-应用.md')
-sentences = open(txt_file).readlines()
+sentences = open(txt_file, encoding="UTF-8").readlines()
 
 def split(sentence):
     s = sentence.strip()
@@ -135,7 +135,7 @@ def main():
     print(reversed_words)
 
     # 每批大小
-    batch_size = 64
+    batch_size = 32
     # 反例大小
     num_sampled = batch_size//2
     # 检查大小
@@ -146,8 +146,8 @@ def main():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         avg_loss = 0
-        for epoch in range(1000):
-            for batch, labels in generate_batch(words, 64, 2, 2):
+        for epoch in range(200):
+            for batch, labels in generate_batch(words, batch_size, 2, 3):
                 loss,_= sess.run([net.loss, net.optimizer], feed_dict={net.x: batch, net.y: labels})
 
                 if avg_loss==0:
@@ -163,19 +163,24 @@ def main():
                 nearest_words = [reversed_words[idx] for idx in nearest]
                 print(epoch,"loss：", avg_loss, "valid：", " ".join(nearest_words))
 
-        # 可视化词语之间的关系
+        # 最终归一化输出词向量矩阵
         final_embeddings = net.normalized_embeddings.eval()
 
-        vec1 = final_embeddings[]
-        dist = numpy.linalg.norm(vec1 - vec2)
+        # 计算两个词的相似度
+        similarity_words = [("神经网络","单元"),("神经网络","循环"),("单元","循环")]
+        for word1,word2 in similarity_words:
+            vec1 = final_embeddings[words[word1]]
+            vec2 = final_embeddings[words[word2]]
+            print(word1, word2, '欧式距离:', np.linalg.norm(vec1 - vec2))
 
-
+        # 可视化词语之间的关系
         plot_only = 200
         # 降维
         tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000, method='exact')
         low_dim_embs = tsne.fit_transform(final_embeddings[:plot_only,:])
         labels = [reversed_words[i] for i in range(plot_only)]
-        plt.rcParams['font.sans-serif']=['SimSun']
+        plt.rcParams['font.sans-serif']=['SimHei','SimSun'] #用来正常显示中文标签
+        plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
         plt.figure()  
         for i, label in enumerate(labels):
             x, y = low_dim_embs[i, :]

@@ -30,7 +30,7 @@ def main():
     txt_file = os.path.join(curr_path,'../12-应用.md')
 
     ngrams = {}
-    sentences = open(txt_file).readlines()
+    sentences = open(txt_file, encoding="UTF-8").readlines()
     for s in sentences:
         s = s.strip()
         if s.startswith('$'): continue 
