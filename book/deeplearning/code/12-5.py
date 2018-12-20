@@ -135,7 +135,7 @@ def main():
     print(reversed_words)
 
     # 每批大小
-    batch_size = 32
+    batch_size = 64
     # 反例大小
     num_sampled = batch_size//2
     # 检查大小
@@ -146,7 +146,7 @@ def main():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         avg_loss = 0
-        for epoch in range(200):
+        for epoch in range(500):
             for batch, labels in generate_batch(words, batch_size, 2, 3):
                 loss,_= sess.run([net.loss, net.optimizer], feed_dict={net.x: batch, net.y: labels})
 
