@@ -7,7 +7,12 @@ import tensorflow as tf
 import numpy as np
 import math
 import random
+# 这样绘制3D会快一点
+import matplotlib
+matplotlib.use('TkAgg')
+
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 from sklearn.manifold import TSNE
 
 
@@ -15,7 +20,7 @@ from sklearn.manifold import TSNE
 vocabulary_size = 800
 
 # 词向量维度
-embedding_size = 16
+embedding_size = 32
 
 curr_path = os.path.dirname(os.path.realpath(__file__))
 txt_file = os.path.join(curr_path,'../12-应用.md')
@@ -127,6 +132,33 @@ class network():
         self.similarity = tf.matmul(valid_embeddings, self.normalized_embeddings, transpose_b=True)
 
 
+# 2D 可视化
+def plot_tsne_2D(word_vectors, words_list):
+    tsne = TSNE(n_components=2, init='pca', n_iter=10000, method='exact')
+    np.set_printoptions(suppress=True)
+    T = tsne.fit_transform(word_vectors)
+    labels = words_list
+    plt.figure(figsize=(8, 6))
+    plt.scatter(T[:,0], T[:,1], c='b')
+    for label, x, y in zip(labels, T[:,0], T[:,1]):
+        plt.annotate(label, xy=(x+1, y+1), xytext=(0,0), textcoords='offset points')
+
+# 3D 可视化
+def plot_tsne_3D(word_vectors, words_list):
+    tsne = TSNE(n_components=3, init='pca', n_iter=10000, method='exact')
+    np.set_printoptions(suppress=True)
+    T = tsne.fit_transform(word_vectors)
+    labels = words_list
+    fig = plt.figure(figsize=(10, 6))
+    ax = Axes3D(fig)
+    for i in range(len(T)):
+        x = T[i,0]
+        y = T[i,1]
+        z = T[i,2]
+        label = labels[i]
+        ax.scatter(x, y, z, color='b')
+        ax.text(x, y, z, '%s' % (label), size=9, zorder=1, color='k')
+
 def main():
     words = getWords(vocabulary_size)
     print(words)
@@ -146,8 +178,8 @@ def main():
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         avg_loss = 0
-        for epoch in range(500):
-            for batch, labels in generate_batch(words, batch_size, 2, 3):
+        for epoch in range(1000):
+            for batch, labels in generate_batch(words, batch_size, 1, 2):
                 loss,_= sess.run([net.loss, net.optimizer], feed_dict={net.x: batch, net.y: labels})
 
                 if avg_loss==0:
@@ -175,23 +207,13 @@ def main():
 
         # 可视化词语之间的关系
         plot_only = 200
-        # 降维
-        tsne = TSNE(perplexity=30, n_components=2, init='pca', n_iter=5000, method='exact')
-        low_dim_embs = tsne.fit_transform(final_embeddings[:plot_only,:])
-        labels = [reversed_words[i] for i in range(plot_only)]
+
+        word_vectors = final_embeddings[:plot_only,:]
+        word_lables = [reversed_words[i] for i in range(plot_only)]
         plt.rcParams['font.sans-serif']=['SimHei','SimSun'] #用来正常显示中文标签
         plt.rcParams['axes.unicode_minus']=False #用来正常显示负号
-        plt.figure()  
-        for i, label in enumerate(labels):
-            x, y = low_dim_embs[i, :]
-            plt.scatter(x, y)
-            plt.annotate(
-                label,
-                xy=(x, y),
-                xytext=(5, 2),
-                textcoords='offset points',
-                ha='right',
-                va='bottom')
+        plot_tsne_2D(word_vectors, word_lables)
+        plot_tsne_3D(word_vectors, word_lables)
         plt.show()
 
 if __name__ == "__main__":
