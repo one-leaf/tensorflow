@@ -30,7 +30,7 @@ dataset_files = {"train": { "source": "training-parallel-nc-v13.tgz",
 UNK = "<UNK>"   # 未知单词
 BLK = "<BLK>"   # 句子空白
 STR = "<STR>"   # 翻译开始
-EOF = "<EOF"    # 翻译结束
+EOF = "<EOF>"    # 翻译结束
 
 # 获取 训练和测试数据
 def downloadData():
