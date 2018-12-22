@@ -48,11 +48,12 @@ def downloadData():
                 tar.extract(extract_file, path=data_path)
                 tar.close()
 
+# 词向量网络
 class word2vec_network():
     def __init__(self, embedding_size, batch_size, words, sentences_file):
         vocabulary_size = len(words)
-        self.x = tf.placeholder(tf.int32, [None], name='x')
-        self.y = tf.placeholder(tf.int32, [None, 1], name='y')
+        self.x = tf.placeholder(tf.int32, [None], name='x')         # 中心词
+        self.y = tf.placeholder(tf.int32, [None, 1], name='y')      # 相关词
         self.embeddings = tf.Variable(tf.random_uniform([vocabulary_size, embedding_size], -1.0, 1.0))
         self.nce_weights = tf.Variable(tf.truncated_normal([vocabulary_size, embedding_size], stddev=1.0 / math.sqrt(embedding_size)))
         self.nce_biases = tf.Variable(tf.zeros([vocabulary_size]))
@@ -141,26 +142,50 @@ def word2vec(sentences_file, words_filename, words_embedding_filename, word_atta
         final_embeddings = net.train(epoch_number)
         np.save(save_words_embedding_filename, final_embeddings)
 
+# 翻译seq2seq网络
 class translate_network():
-    def __init__(self, en_words, zh_words, embedding_size, batch_size):
-        en_vocabulary_size = len(en_words)
-        zh_vocabulary_size = len(zh_words)
-        self.en = tf.placeholder(tf.int32, [None, None])
-        self.en_seq_len = tf.placeholder(tf.int32, [None])
-        self.zh = tf.placeholder(tf.int32, [None, None])
-        self.zh_seq_len = tf.placeholder(tf.int32, [None])
-        self.en_embedding = tf.Variable(tf.zeros([en_vocabulary_size, embedding_size]), dtype=tf.float32)
-        self.zh_embedding = tf.Variable(tf.zeros([zh_vocabulary_size, embedding_size]), dtype=tf.float32)
-        self.en_vec = tf.nn.embedding_lookup(self.en_embedding, self.en)
-        self.zh_vec = tf.nn.embedding_lookup(self.zh_embedding, self.zh)
+    def __init__(self, en_words, zh_words, embedding_size, rnn_size=128, batch_size=64):
+        en_vocabulary_size = len(en_words)                                      # 英语词汇表长度
+        zh_vocabulary_size = len(zh_words)                                      # 中文词汇表长度
+        self.en = tf.placeholder(tf.int32, [None, None])                        # 英文句子 [batch_size, sentence]
+        self.en_seq_len = tf.placeholder(tf.int32, [None])                      # 英文句子的长度 [batch_size]
+        self.zh = tf.placeholder(tf.int32, [None, None])                        # 中文句子 [batch_size, sentence]
+        self.zh_seq_len = tf.placeholder(tf.int32, [None])                      # 中文句子的长度 [batch_size]
+        self.en_embedding = tf.Variable(tf.zeros([en_vocabulary_size, embedding_size]), dtype=tf.float32)       # 英文词嵌入向量表
+        self.zh_embedding = tf.Variable(tf.zeros([zh_vocabulary_size, embedding_size]), dtype=tf.float32)       # 中文词嵌入向量表
+        self.en_vec = tf.nn.embedding_lookup(self.en_embedding, self.en)        # 英文句子向量  [batch_size, sentence, embedding_size]
+        self.zh_vec = tf.nn.embedding_lookup(self.zh_embedding, self.zh)        # 中文句子向量  [batch_size, sentence, embedding_size]
     
-        # encode
-        num_hidden = 128
-        with tf.variable_scope('ENCODE_EN_RNN'):
-            cell_fw = tf.contrib.rnn.GRUCell(num_hidden//2)
-            cell_bw = tf.contrib.rnn.GRUCell(num_hidden//2)
-            outputs, _ = tf.nn.bidirectional_dynamic_rnn(cell_fw, cell_bw, self.en_vec, seq_len, dtype=tf.float32)
-            en_layer = tf.concat(outputs, axis=-1)
+        # encoder
+        with tf.variable_scope('encoder'):
+            encoder_cell = tf.contrib.rnn.GRUCell(rnn_size)
+            encoder_outputs, encoder_state = tf.nn.dynamic_rnn(encoder_cell, self.en_vec, self.en_seq_len, dtype=tf.float32)
+
+        # attention
+        attention_mechanism = tf.contrib.seq2seq.LuongAttention(num_units=rnn_size, memory=encoder_outputs)
+        decoder_cell = tf.contrib.rnn.GRUCell(rnn_size)
+        decoder_cell = tf.contrib.seq2seq.AttentionWrapper(decoder_cell, attention_mechanism, attention_layer_size=rnn_size)
+
+        # define helper for decoder
+        helper = tf.contrib.seq2seq.TrainingHelper(self.zh_vec, self.zh_seq_len)
+        
+        # decoder
+        with tf.variable_scope('decoder'):
+            projection_layer = tf.layers.Dense(zh_vocabulary_size)
+            decoder = tf.contrib.seq2seq.BasicDecoder(decoder_cell, helper, encoder_state, projection_layer)
+
+        logits, final_state, final_sequence_lengths = tf.contrib.seq2seq.dynamic_decode(decoder)
+
+        targets = tf.reshape(self.zh, [-1])
+        logits_flat = tf.reshape(logits.rnn_output, [-1, zh_vocabulary_size])
+        self.cost = tf.losses.sparse_softmax_cross_entropy(targets, logits_flat)
+        tvars = tf.trainable_variables()
+        grads, _ = tf.clip_by_global_norm(tf.gradients(self.cost, tvars), grad_clip)
+        optimizer = tf.train.AdamOptimizer(1e-3)
+        self.train_op = optimizer.apply_gradients(zip(grads, tvars))
+
+def translate():
+    pass
 
 def main():
     # 下载文件
@@ -184,7 +209,8 @@ def main():
     word2vec(zh_sentences_file, zh_words_filename, zh_words_embedding_filename, word_attach=[BLK, UNK, STR, EOF],
              words_number=zh_words_number, embedding_size=embedding_size, epoch_number=10)
 
-    # 
+    # 训练SEQ-SEQ网络
+    translate()
 
 if __name__ == "__main__":
     main()
