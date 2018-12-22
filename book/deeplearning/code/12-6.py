@@ -120,7 +120,7 @@ def word2vec(sentences_file, words_filename, words_embedding_filename, word_atta
         text = open(sentences_file, encoding="UTF8").read()
         text = text.lower()
         text = text.replace("\n"," ")
-        words=jieba.analyse.extract_tags(text, topK=words_number-1)
+        words=jieba.analyse.extract_tags(text, topK=words_number-len(word_attach))
         words_dict={}
         for i, word in enumerate(word_attach):
             words_dict[word] = i
