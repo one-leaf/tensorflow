@@ -26,7 +26,7 @@ dataset_files = {"train": { "source": "training-parallel-nc-v13.tgz",
                             }
                 }
 
-# 定义常量 PAD : 补全， SOS 翻译开始， EOS 翻译结束， UNK 未知单词
+# 定义常量 PAD : 补全， SOS (start of sentence) 翻译开始， EOS (end of sentence) 翻译结束， UNK (unknown) 未知单词
 KEY_WORDS = {"<PAD>":0, "<SOS>":1, "<EOS>":2, "<UNK>":3}
 
 # 获取 训练和测试数据
