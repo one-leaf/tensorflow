@@ -55,9 +55,10 @@ def load_word_dict(sentences_file, words_filename, words_number=5000):
         for text in open(sentences_file, encoding="UTF8").readlines():
             text = text.lower()
             text = text.replace("\n","")
-            words += jieba.lcut(text)
-        # 移除空格
-        for _ in range(words.count(' ')): words.remove(' ') 
+            _words = jieba.lcut(text)
+            for _ in range(_words.count(' ')): _words.remove(' ')
+            words += _words
+             
         words = collections.Counter(words)
         print("Get words",len(words))
         words = words.most_common(words_number-len(KEY_WORDS))
