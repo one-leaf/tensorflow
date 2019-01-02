@@ -57,7 +57,7 @@ def load_word_dict(sentences_file, words_filename, words_number=5000):
         words = jieba.lcut(text)
         # 移除空格
         for _ in xrange(words.count(' ')): words.remove(' ') 
-        words = collections.Counter(words).most_common(words_number)
+        words = collections.Counter(words).most_common(words_number-len(KEY_WORDS))
         words_dict={}
         for word in KEY_WORDS:
             words_dict[word] = KEY_WORDS[word]
