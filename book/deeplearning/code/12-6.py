@@ -6,6 +6,7 @@ import jieba.analyse
 import tensorflow as tf
 import numpy as np
 import math, random
+import collections
 
 curr_path = os.path.dirname(os.path.realpath(__file__))
 data_path = os.path.join(curr_path,"../data")
@@ -53,18 +54,46 @@ def load_word_dict(sentences_file, words_filename, words_number=5000):
         text = open(sentences_file, encoding="UTF8").read()
         text = text.lower()
         text = text.replace("\n"," ")
-        words=jieba.analyse.extract_tags(text, topK=words_number-len(KEY_WORDS))
+        words = jieba.lcut(text)
+        # 移除空格
+        for _ in xrange(words.count(' ')): words.remove(' ') 
+        words = collections.Counter(words).most_common(words_number)
         words_dict={}
         for word in KEY_WORDS:
             words_dict[word] = KEY_WORDS[word]
         n = len(KEY_WORDS)
-        for i, word in enumerate(words):
+        for i, (word, _) in enumerate(words):
             words_dict[word] = i + n
         save_words_dict_file = open(save_words_dict_file,"w",encoding="UTF8")
         json.dump(words_dict, save_words_dict_file, ensure_ascii=False)
     else:
         save_words_dict_file = open(save_words_dict_file,"r",encoding="UTF8")
         words_dict=json.load(save_words_dict_file)
+    return words_dict
+
+# 输出句子
+def load_sentences(sentences_file, words_dict, sentences_vec_file):
+    save_sentences_vec_file = os.path.join(logs_path, sentences_vec_file)
+    sentences_vec=[]
+    if not os.path.exists(save_sentences_vec_file):
+        print("Create", sentences_vec_file, "...")
+        for line in open(sentences_file, encoding="UTF8").readlines():
+            text = line.lower()
+            text = text.replace("\n","")
+            words=jieba.lcut(text)
+            # 移除空格
+            for _ in xrange(words.count(' ')): words.remove(' ') 
+            s_vec = []
+            for w in words:
+                if w in words_dict:
+                    s_vec.append(words_dict[w])
+                else:
+                    s_vec.append(KEY_WORDS["<UNK>"])
+            sentences_vec.append(s_vec)
+        json.dump(sentences_vec, open(save_sentences_vec_file,"w",encoding="UTF8"))
+    else:
+        sentences_vec = json.load(open(save_sentences_vec_file,"r",encoding="UTF8"))
+    return sentences_vec
 
 
 # 翻译seq2seq网络
@@ -132,16 +161,19 @@ def main():
     downloadData()
 
     embedding_size=32*32
-    en_words_number=8000
-    zh_words_number=5000
+    en_words_number=80000
+    zh_words_number=50000
 
     # 训练并产生 embedding 文件
     # 源语言
     en_sentences_file = os.path.join(data_path, dataset_files["train"]["files"]["en"])
-    load_word_dict(en_sentences_file, "en_words.json", words_number=en_words_number)
+    en_words_dict = load_word_dict(en_sentences_file, "en_words.json", words_number=en_words_number)
+    en_sentences_vec = load_sentences(en_sentences_file, en_words_dict, "en_sentences_vec.json")
     # 目标语言
     zh_sentences_file = os.path.join(data_path, dataset_files["train"]["files"]["zh"])
-    load_word_dict(zh_sentences_file, "zh_words.json", words_number=zh_words_number)
+    zh_words_dict = load_word_dict(zh_sentences_file, "zh_words.json", words_number=zh_words_number)
+    zh_sentences_vec = load_sentences(zh_sentences_file, zh_words_dict, "zh_sentences_vec.json")
+
 
     # 训练SEQ-SEQ网络
     translate()
