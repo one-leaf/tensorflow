@@ -56,8 +56,10 @@ def load_word_dict(sentences_file, words_filename, words_number=5000):
         text = text.replace("\n"," ")
         words = jieba.lcut(text)
         # 移除空格
-        for _ in xrange(words.count(' ')): words.remove(' ') 
-        words = collections.Counter(words).most_common(words_number-len(KEY_WORDS))
+        for _ in range(words.count(' ')): words.remove(' ') 
+        words = collections.Counter(words)
+        print("Get words",len(words))
+        words = words.most_common(words_number-len(KEY_WORDS))
         words_dict={}
         for word in KEY_WORDS:
             words_dict[word] = KEY_WORDS[word]
@@ -82,7 +84,7 @@ def load_sentences(sentences_file, words_dict, sentences_vec_file):
             text = text.replace("\n","")
             words=jieba.lcut(text)
             # 移除空格
-            for _ in xrange(words.count(' ')): words.remove(' ') 
+            for _ in range(words.count(' ')): words.remove(' ') 
             s_vec = []
             for w in words:
                 if w in words_dict:
@@ -161,8 +163,8 @@ def main():
     downloadData()
 
     embedding_size=32*32
-    en_words_number=80000
-    zh_words_number=50000
+    en_words_number=20000
+    zh_words_number=30000
 
     # 训练并产生 embedding 文件
     # 源语言
