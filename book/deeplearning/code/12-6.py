@@ -51,10 +51,11 @@ def load_word_dict(sentences_file, words_filename, words_number=5000):
     save_words_dict_file = os.path.join(logs_path, words_filename)
     if not os.path.exists(save_words_dict_file):
         print("Create", words_filename, "...")
-        text = open(sentences_file, encoding="UTF8").read()
-        text = text.lower()
-        text = text.replace("\n"," ")
-        words = jieba.lcut(text)
+        words =[]
+        for text in open(sentences_file, encoding="UTF8").readlines():
+            text = text.lower()
+            text = text.replace("\n","")
+            words += jieba.lcut(text)
         # 移除空格
         for _ in range(words.count(' ')): words.remove(' ') 
         words = collections.Counter(words)
