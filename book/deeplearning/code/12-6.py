@@ -196,8 +196,8 @@ class nmt_network():
             # decoder 解码器
             projection_layer = tf.layers.Dense(zh_vocab_size, use_bias=False, kernel_initializer=tf.contrib.layers.xavier_initializer())
             print('projection_layer', projection_layer)
-            # 定义最长翻译输出为输入的20倍
-            maximum_iterations = tf.round(tf.reduce_max(self.en_seq_len) * 20)
+            # 定义最长翻译输出为输入长度的2倍
+            maximum_iterations = tf.round(tf.reduce_max(self.en_seq_len) * 2)
 
             # 定义 训练 helper , 如何根据预测结果得到下一时刻的输入。
             # TrainingHelper 直接用上一时刻的真实值作为下一时刻的输入
