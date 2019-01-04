@@ -197,7 +197,7 @@ class nmt_network():
             projection_layer = tf.layers.Dense(zh_vocab_size, use_bias=False, kernel_initializer=tf.contrib.layers.xavier_initializer())
             print('projection_layer', projection_layer)
             # 定义最长翻译输出为输入长度的2倍
-            maximum_iterations = tf.round(tf.reduce_max(self.en_seq_len) * 2)
+            maximum_iterations = tf.round(tf.reduce_max(self.en_seq_len) * 3)
 
             # 定义 训练 helper , 如何根据预测结果得到下一时刻的输入。
             # TrainingHelper 直接用上一时刻的真实值作为下一时刻的输入
@@ -310,9 +310,9 @@ def main():
     # 下载文件
     downloadData()
 
-    embedding_size=32*32
-    en_words_number=50000   # 共 53839 个单词
-    zh_words_number=90000   # 共 91436 个单词
+    embedding_size  = 512       # 词向量维度
+    en_words_number = 50000     # 共 53839 个单词
+    zh_words_number = 90000     # 共 91436 个单词
 
     # 训练并产生 embedding 文件
     # 源语言
@@ -324,7 +324,7 @@ def main():
     zh_words_dict = load_word_dict(zh_sentences_file, "zh_words.json", words_number=zh_words_number)
     zh_sentences_vec = load_sentences(zh_sentences_file, zh_words_dict, "zh_sentences_vec.json")
 
-    net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, beam_search=True)
+    net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, rnn_size=512, beam_search=True)
 
     # 训练SEQ2SEQ网络   
     train(en_sentences_vec, zh_sentences_vec, net, batch_size=64, epochs=20)
