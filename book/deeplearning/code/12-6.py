@@ -243,7 +243,7 @@ class nmt_network():
         tvars = tf.trainable_variables()
         grads, _ = tf.clip_by_global_norm(tf.gradients(self.cost, tvars), 5.0)
         optimizer = tf.train.AdamOptimizer(1e-3)
-        self.train_op = optimizer.apply_gradients(zip(grads, tvars))
+        self.train_op = optimizer.apply_gradients(zip(grads, tvars), global_step=tf.train.create_global_step())
 
 def get_Data(en_sentences_vec, zh_sentences_vec, batch_size):
     en_len = len(en_sentences_vec)
@@ -278,15 +278,15 @@ def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30, epochs=10):
         sess.run(tf.global_variables_initializer())
         saver, checkpoint_prefix = get_saver(sess)
         for e in range(epochs):
-            for step in range(len(en_sentences_vec)//batch_size): 
+            for _ in range(len(en_sentences_vec)//batch_size): 
                 # 获得训练数据
                 en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, batch_size)
                 # 训练
-                _, loss = sess.run( [net.train_op, net.cost],
+                _, loss, step = sess.run( [net.train_op, net.cost, tf.train.get_global_step()],
                     {net.en: en_batch, net.en_seq_len: en_batch_lens, 
                     net.zh: zh_batch, net.zh_seq_len: zh_batch_lens, 
                     net.is_training: True})  
-                print(e, step, loss)  
+                print('step', step, 'epoch', e, 'loss', loss)  
 
                 if step % 100 == 0:
                     saver.save(sess, checkpoint_prefix)
