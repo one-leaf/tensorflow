@@ -324,6 +324,7 @@ def main():
     zh_words_dict = load_word_dict(zh_sentences_file, "zh_words.json", words_number=zh_words_number)
     zh_sentences_vec = load_sentences(zh_sentences_file, zh_words_dict, "zh_sentences_vec.json")
 
+    # 由于词向量没有预先进行聚类提取特征，所以，rnn_size 需要足够大，因此直接采用词向量的特征大小
     net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, rnn_size=embedding_size, beam_search=True)
 
     # 训练SEQ2SEQ网络   
