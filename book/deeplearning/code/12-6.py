@@ -297,8 +297,8 @@ def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30):
 
 def get_saver():
     saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
-    checkpoint_prefix = os.path.join(log_dir, "model.ckpt")
-    ckpt = tf.train.get_checkpoint_state(log_dir)
+    checkpoint_prefix = os.path.join(logs_path, "model.ckpt")
+    ckpt = tf.train.get_checkpoint_state(logs_path)
     if ckpt and ckpt.model_checkpoint_path:
         print("restore checkpoint and continue train.")
         saver.restore(sess, ckpt.model_checkpoint_path)
