@@ -328,7 +328,7 @@ def main():
     net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, rnn_size=embedding_size, beam_search=True)
 
     # 训练SEQ2SEQ网络   
-    train(en_sentences_vec, zh_sentences_vec, net, batch_size=32, epochs=20)
+    train(en_sentences_vec, zh_sentences_vec, net, batch_size=16, epochs=20)
 
 if __name__ == "__main__":
     main()
