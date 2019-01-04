@@ -50,7 +50,7 @@ def downloadData():
 def load_word_dict(sentences_file, words_filename, words_number=5000):
     save_words_dict_file = os.path.join(logs_path, words_filename)
     if not os.path.exists(save_words_dict_file):
-        print("Create", words_filename, "...")
+        print("create", words_filename, "...")
         words =[]
         for text in open(sentences_file, encoding="UTF8").readlines():
             text = text.lower()
@@ -60,7 +60,7 @@ def load_word_dict(sentences_file, words_filename, words_number=5000):
             words += _words
              
         words = collections.Counter(words)
-        print("Get words",len(words))
+        print(words_filename, len(words))
         words = words.most_common(words_number-len(KEY_WORDS))
         words_dict={}
         for word in KEY_WORDS:
