@@ -272,28 +272,29 @@ def get_Data(en_sentences_vec, zh_sentences_vec, batch_size):
     zh_sentences_vec_batch_lens = [sentence_len-1 for sentence_len in zh_sentences_vec_batch_lens]
     return en_sentences_vec_batch_pad, en_sentences_vec_batch_lens, zh_sentences_vec_batch_pad, zh_sentences_vec_batch_lens
 
-def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30):
+def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30, epochs=10):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver, checkpoint_prefix = get_saver(sess)
-        for step in range(len(en_sentences_vec)//batch_size): 
-            # 获得训练数据
-            en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, batch_size)
-            # 训练
-            _, loss = sess.run( [net.train_op, net.cost],
-                {net.en: en_batch, net.en_seq_len: en_batch_lens, 
-                 net.zh: zh_batch, net.zh_seq_len: zh_batch_lens, 
-                 net.is_training: True})  
-            print(step, loss)  
-
-            if step % 100 == 0:
-                saver.save(sess, checkpoint_prefix)
-                en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, 2)
-                ids = sess.run( net.translations,
+        for e in range(epochs):
+            for step in range(len(en_sentences_vec)//batch_size): 
+                # 获得训练数据
+                en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, batch_size)
+                # 训练
+                _, loss = sess.run( [net.train_op, net.cost],
                     {net.en: en_batch, net.en_seq_len: en_batch_lens, 
-                    net.is_training: False}) 
-                print("infer", ids[:, :, 0])
-                print("zh", zh_batch)
+                    net.zh: zh_batch, net.zh_seq_len: zh_batch_lens, 
+                    net.is_training: True})  
+                print(e, step, loss)  
+
+                if step % 100 == 0:
+                    saver.save(sess, checkpoint_prefix)
+                    en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, 2)
+                    ids = sess.run( net.translations,
+                        {net.en: en_batch, net.en_seq_len: en_batch_lens, 
+                        net.is_training: False}) 
+                    print("infer", ids[:, :, 0])
+                    print("zh", zh_batch)
 
 def get_saver(sess):
     saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
@@ -324,8 +325,8 @@ def main():
 
     net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, beam_search=True)
 
-    # 训练SEQ2SEQ网络
-    train(en_sentences_vec, zh_sentences_vec, net, batch_size=64)
+    # 训练SEQ2SEQ网络   
+    train(en_sentences_vec, zh_sentences_vec, net, batch_size=64, epochs=20)
 
 if __name__ == "__main__":
     main()
