@@ -275,7 +275,7 @@ def get_Data(en_sentences_vec, zh_sentences_vec, batch_size):
 def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
-        saver, checkpoint_prefix = get_saver()
+        saver, checkpoint_prefix = get_saver(sess)
         for step in range(len(en_sentences_vec)//batch_size): 
             # 获得训练数据
             en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, batch_size)
@@ -295,7 +295,7 @@ def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30):
                 print("infer", ids[:, :, 0])
                 print("zh", zh_batch)
 
-def get_saver():
+def get_saver(sess):
     saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
     checkpoint_prefix = os.path.join(logs_path, "12_6_model.ckpt")
     ckpt = tf.train.get_checkpoint_state(logs_path)
