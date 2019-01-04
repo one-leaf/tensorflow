@@ -73,6 +73,7 @@ def load_word_dict(sentences_file, words_filename, words_number=5000):
     else:
         save_words_dict_file = open(save_words_dict_file,"r",encoding="UTF8")
         words_dict=json.load(save_words_dict_file)
+    print(words_filename, len(words_dict))
     return words_dict
 
 # 输出句子
@@ -94,7 +95,7 @@ def load_sentences(sentences_file, words_dict, sentences_vec_file):
         json.dump(sentences_vec, open(save_sentences_vec_file,"w",encoding="UTF8"))
     else:
         sentences_vec = json.load(open(save_sentences_vec_file,"r",encoding="UTF8"))
-    print("Sentences length", len(sentences_vec))
+    print(sentences_vec_file, len(sentences_vec))
     return sentences_vec
 
 
