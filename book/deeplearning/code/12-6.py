@@ -324,10 +324,10 @@ def main():
     zh_words_dict = load_word_dict(zh_sentences_file, "zh_words.json", words_number=zh_words_number)
     zh_sentences_vec = load_sentences(zh_sentences_file, zh_words_dict, "zh_sentences_vec.json")
 
-    net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, rnn_size=128, beam_search=True)
+    net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, rnn_size=512, beam_search=True)
 
     # 训练SEQ2SEQ网络   
-    train(en_sentences_vec, zh_sentences_vec, net, batch_size=64, epochs=20)
+    train(en_sentences_vec, zh_sentences_vec, net, batch_size=16, epochs=20)
 
 if __name__ == "__main__":
     main()
