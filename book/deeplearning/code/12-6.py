@@ -289,8 +289,8 @@ def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30):
             ids = sess.run( net.translations,
                 {net.en: en_batch, net.en_seq_len: en_batch_lens, 
                  net.is_training: False}) 
-            ids = np.transpose(ids, (1, 2, 0))  # [batch_size, beam_size, zh_seq_len]
-            print("infer", ids[:, 0, :])
+            # ids = np.transpose(ids, (1, 2, 0))  # [batch_size, beam_size, zh_seq_len]
+            print("infer", ids[:, :, 0])
             print("zh", zh_batch)
 
 def main():
