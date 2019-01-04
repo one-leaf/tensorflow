@@ -284,7 +284,7 @@ def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30):
                 {net.en: en_batch, net.en_seq_len: en_batch_lens, 
                  net.zh: zh_batch, net.zh_seq_len: zh_batch_lens, 
                  net.is_training: True})  
-            print(loss)  
+            print(step, loss)  
 
             if step % 100 == 0:
                 saver.save(sess, checkpoint_prefix)
