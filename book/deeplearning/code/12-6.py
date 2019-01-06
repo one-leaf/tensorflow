@@ -232,12 +232,7 @@ class nmt_network():
 
 
         # 定义训练损失函数
-        # targets = tf.reshape(self.zh, [-1])
-        # logits_flat = tf.reshape(self.logits, [-1, zh_vocab_size])
-        # self.cost = tf.losses.sparse_softmax_cross_entropy(targets, logits_flat)
-
         mask = tf.sequence_mask(self.zh_seq_len, tf.reduce_max(self.zh_seq_len), dtype=tf.float32)
-        # logits_train = tf.argmax(self.logits, axis=-1)
         self.cost = tf.contrib.seq2seq.sequence_loss(logits=self.logits, targets=self.zh_output, weights=mask)
 
         tvars = tf.trainable_variables()
@@ -273,7 +268,7 @@ def get_Data(en_sentences_vec, zh_sentences_vec, batch_size):
     zh_sentences_vec_batch_lens = [sentence_len-1 for sentence_len in zh_sentences_vec_batch_lens]
     return en_sentences_vec_batch_pad, en_sentences_vec_batch_lens, zh_sentences_vec_batch_pad, zh_sentences_vec_batch_lens
 
-def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30, epochs=10):
+def train(en_sentences_vec, zh_sentences_vec, reversed_zh_words_dict, net, batch_size=30, epochs=10):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver, checkpoint_prefix = get_saver(sess)
@@ -289,13 +284,15 @@ def train(en_sentences_vec, zh_sentences_vec, net, batch_size=30, epochs=10):
                 print('step', step, 'epoch', e, 'loss', loss)  
 
                 if step % 100 == 0:
+                    _batch_size = 2
                     saver.save(sess, checkpoint_prefix)
-                    en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, 2)
+                    en_batch, en_batch_lens, zh_batch, zh_batch_lens = get_Data(en_sentences_vec, zh_sentences_vec, _batch_size)
                     ids = sess.run( net.translations,
                         {net.en: en_batch, net.en_seq_len: en_batch_lens, 
                         net.is_training: False}) 
-                    print("infer", ids[:, :, 0])
-                    print("zh", zh_batch)
+                    for i in range(_batch_size)
+                        print("zh", "".join([reversed_zh_words_dict[id] for id in zh_batch[i]])
+                        print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 0][i]])
 
 def get_saver(sess):
     saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
@@ -327,8 +324,10 @@ def main():
     # 由于词向量没有预先进行聚类提取特征，所以，rnn_size 需要足够大，因此直接采用词向量的特征大小
     net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, rnn_size=embedding_size, beam_search=True)
 
+    reversed_zh_words_dict = dict(zip(zh_words_dict.values(), zh_words_dict.keys()))
+
     # 训练SEQ2SEQ网络   
-    train(en_sentences_vec, zh_sentences_vec, net, batch_size=8, epochs=20)
+    train(en_sentences_vec, zh_sentences_vec, reversed_zh_words_dict, net, batch_size=8, epochs=20)
 
 if __name__ == "__main__":
     main()
