@@ -290,7 +290,7 @@ def train(en_sentences_vec, zh_sentences_vec, reversed_zh_words_dict, net, batch
                     ids = sess.run( net.translations,
                         {net.en: en_batch, net.en_seq_len: en_batch_lens, 
                         net.is_training: False}) 
-                    for i in range(_batch_size)
+                    for i in range(_batch_size):
                         print("zh", "".join([reversed_zh_words_dict[id] for id in zh_batch[i]])
                         print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 0][i]])
 
