@@ -268,7 +268,7 @@ def get_Data(en_sentences_vec, zh_sentences_vec, batch_size):
     zh_sentences_vec_batch_lens = [sentence_len-1 for sentence_len in zh_sentences_vec_batch_lens]
     return en_sentences_vec_batch_pad, en_sentences_vec_batch_lens, zh_sentences_vec_batch_pad, zh_sentences_vec_batch_lens
 
-def train(en_sentences_vec, zh_sentences_vec, reversed_zh_words_dict, net, batch_size=30, epochs=10):
+def train(en_sentences_vec, zh_sentences_vec, reversed_en_words_dict, reversed_zh_words_dict, net, batch_size=30, epochs=10):
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
         saver, checkpoint_prefix = get_saver(sess)
@@ -291,6 +291,7 @@ def train(en_sentences_vec, zh_sentences_vec, reversed_zh_words_dict, net, batch
                         {net.en: en_batch, net.en_seq_len: en_batch_lens, 
                         net.is_training: False}) 
                     for i in range(_batch_size):
+                        print("en", "".join([reversed_en_words_dict[id] for id in en_batch[i] ]))
                         print("zh", "".join([reversed_zh_words_dict[id] for id in zh_batch[i] if id>3 ]))
                         print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 0][i] if id>3 ]))
 
@@ -324,10 +325,11 @@ def main():
     # 由于词向量没有预先进行聚类提取特征，所以，rnn_size 需要足够大，因此直接采用词向量的特征大小
     net =  nmt_network(en_words_dict, zh_words_dict, embedding_size, rnn_size=embedding_size, beam_search=True)
 
+    reversed_en_words_dict = dict(zip(en_words_dict.values(), en_words_dict.keys()))
     reversed_zh_words_dict = dict(zip(zh_words_dict.values(), zh_words_dict.keys()))
 
     # 训练SEQ2SEQ网络   
-    train(en_sentences_vec, zh_sentences_vec, reversed_zh_words_dict, net, batch_size=8, epochs=20)
+    train(en_sentences_vec, zh_sentences_vec, reversed_en_words_dict, reversed_zh_words_dict, net, batch_size=8, epochs=20)
 
 if __name__ == "__main__":
     main()
