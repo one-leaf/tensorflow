@@ -292,11 +292,13 @@ def train(en_sentences_vec, zh_sentences_vec, reversed_en_words_dict, reversed_z
                         net.is_training: False}) 
                     for i in range(_batch_size):
                         print("-"*100)
-                        print("en", " ".join([reversed_en_words_dict[id] for id in en_batch[i] if id>3 ]))
-                        print("zh", "".join([reversed_zh_words_dict[id] for id in zh_batch[i] if id>3 ]))
-                        print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 0][i] if id>3 ]))
-                        print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 1][i] if id>3 ]))
-                        print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 2][i] if id>3 ]))
+                        print("en：", " ".join([reversed_en_words_dict[id] for id in en_batch[i] if id>3 ]))
+                        print("zh：", "".join([reversed_zh_words_dict[id] for id in zh_batch[i] if id>3 ]))
+                        print("infer1：", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 0][i] if id>3 ]))
+                        print("infer2：", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 1][i] if id>3 ]))
+                        print("infer3：", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 2][i] if id>3 ]))
+                        print("infer4：", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 1][i] if id>3 ]))
+                        print("infer5：", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 2][i] if id>3 ]))
                         print("-"*100)
 
 def get_saver(sess):
