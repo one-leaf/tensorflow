@@ -20,6 +20,10 @@ latex 常见语法
 
     $$\Pi \pi \varpi \Rho \rho \varrho \Sigma \sigma \varsigma \Phi \phi \varphi$$
 
+    $$\ $$
+
+    $$\mathcal {A B C D E F G H I J K L M N O P Q R S T U V W X Y Z}$$
+
 1. 大写
 
     $$\boldsymbol E \mathbb E \mathbf E \mathit E \mathrm E \mathfrak E \mathcal E $$
