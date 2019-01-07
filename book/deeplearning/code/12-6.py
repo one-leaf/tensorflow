@@ -144,6 +144,7 @@ class nmt_network():
         print("-"*100,"encoder")
         # encoder 编码器
         with tf.variable_scope('encoder'):
+            # 如果采用普通的 dynamic_rnn，这里可以直接返回 output 和 state
             fw_cell = self.get_rnn_cell(rnn_size, rnn_layers_num)
             bw_cell = self.get_rnn_cell(rnn_size, rnn_layers_num)
             bi_outputs, bi_state = tf.nn.bidirectional_dynamic_rnn(fw_cell, bw_cell, self.en_embedded, self.en_seq_len, dtype=tf.float32)
@@ -318,7 +319,6 @@ def main():
     en_words_number = 50000     # 共 53839 个单词
     zh_words_number = 90000     # 共 91436 个单词
 
-    # 训练并产生 embedding 文件
     # 源语言
     en_sentences_file = os.path.join(data_path, dataset_files["train"]["files"]["en"])
     en_words_dict = load_word_dict(en_sentences_file, "en_words.json", words_number=en_words_number)
