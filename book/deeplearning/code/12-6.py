@@ -291,8 +291,8 @@ def train(en_sentences_vec, zh_sentences_vec, reversed_zh_words_dict, net, batch
                         {net.en: en_batch, net.en_seq_len: en_batch_lens, 
                         net.is_training: False}) 
                     for i in range(_batch_size):
-                        print("zh", "".join([reversed_zh_words_dict[id] for id in zh_batch[i]]))
-                        print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 0][i]]))
+                        print("zh", "".join([reversed_zh_words_dict[id] for id in zh_batch[i] if id>3 ]))
+                        print("infer", "".join([reversed_zh_words_dict[id] for id in ids[:, :, 0][i] if id>3 ]))
 
 def get_saver(sess):
     saver = tf.train.Saver(max_to_keep=5, keep_checkpoint_every_n_hours=1)
