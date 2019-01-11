@@ -45,8 +45,14 @@ def stack2():
     print(np.stack((x,y,z),axis=2).shape)   # (2, 2, 3)
     print(np.stack((x,y,z),axis=2))     # [[[ 1  2  3]  [ 4  5  6]] [[ 7  8  9]  [10 11 12]]]
 
+def matmul(sess):
+    a = tf.constant([1., 2., 3., 4., 5., 6.], shape=[2, 3]) 
+    b = tf.constant([0.1,0.2], shape=[2, 1])
+    z = a*b
+    print(sess.run(z))
     
 if __name__ == '__main__':
     with tf.Session() as sess:
         # stack(sess)
-        stack2()
+        # stack2()
+        matmul(sess)
