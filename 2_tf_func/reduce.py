@@ -25,7 +25,7 @@ def reduce_prod(sess):
 
 # min(x)
 def reduce_min(sess):
-    x = tf.constant([[1, 2, 3],[1, 2, 3],[0,0,0]])
+    x = tf.constant([[1, 2, 3],[1, 2, 3], [0,0,0], [-2,1,-1]])
     y = tf.reduce_min(x, axis=0)
     print('x',sess.run(x),'y',sess.run(y))
     # x [[1 2 3] [1 2 3]] y 1
