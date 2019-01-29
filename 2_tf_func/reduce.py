@@ -25,15 +25,15 @@ def reduce_prod(sess):
 
 # min(x)
 def reduce_min(sess):
-    x = tf.constant([[1, 2, 3],[1, 2, 3]])
-    y = tf.reduce_min(x)
+    x = tf.constant([[1, 2, 3],[1, 2, 3],[0,0,0]])
+    y = tf.reduce_min(x, axis=0)
     print('x',sess.run(x),'y',sess.run(y))
     # x [[1 2 3] [1 2 3]] y 1
 
 # max(x)
 def reduce_max(sess):
-    x = tf.constant([[1, 2, 3],[1, 2, 3]])
-    y = tf.reduce_max(x)
+    x = tf.constant([[1, 2, 3],[1, 2, 3],[0,0,0]])
+    y = tf.reduce_max(x, axis=-1)
     print('x',sess.run(x),'y',sess.run(y))    
     # x [[1 2 3] [1 2 3]] y 3
 
@@ -81,10 +81,10 @@ def accumulate_n(sess):
 
 if __name__ == '__main__':
     with tf.Session() as sess:    
-        reduce_sum(sess)
+        #reduce_sum(sess)
         # reduce_prod(sess)
-        # reduce_min(sess)
-        # reduce_max(sess)
+        reduce_min(sess)
+        reduce_max(sess)
         # reduce_mean(sess)
         # reduce_all(sess)
         # reduce_any(sess)
