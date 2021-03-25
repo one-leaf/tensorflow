@@ -5,4 +5,4 @@ numpy==1.11.1
 opencv_python==3.4.0.12
 Cython==0.27.3
 Pillow==5.0.0
-PyYAML==4.2b1
+PyYAML==5.4
