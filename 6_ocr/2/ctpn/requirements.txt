@@ -1,5 +1,5 @@
 easydict==1.7
-tensorflow_gpu==2.6.4
+tensorflow_gpu==2.7.2
 scipy==0.18.1
 numpy==1.21.0
 opencv_python==4.2.0.32
